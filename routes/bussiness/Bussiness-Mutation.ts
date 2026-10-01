@@ -1,7 +1,9 @@
 import { useRouter } from "next/navigation";
 import { AnalyzeCompanyApi, OnboardingApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AnswerQuestionApi, CompleteIntakeApi } from "../company-details/companyDetails.routes";
+import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse, OnboardingRequestProps, OnboardingResponseProps } from "@/types/bussiness/onboarding-type";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
@@ -54,6 +56,47 @@ export function AnalyzeCompanyMutation() {
         },
         onError: (error: unknown) => {
             toast.error(getApiErrorMessage(error, "Failed to analyze company"));
+        },
+    });
+}
+
+export function CompleteIntakeMutation() {
+    const router = useRouter();
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: () => CompleteIntakeApi(),
+        onSuccess: (response: IntakeResponseProps) => {
+            queryClient.setQueryData(['intake'], response);
+            toast.success("Company overview saved successfully");
+            router.push(PAGE_ROUTES.DASHBOARD);
+        },
+        onError: (error) => {
+            toast.error(getApiErrorMessage(error, "Failed to save company overview"));
+        },
+    });
+}
+
+export function AnswerQuestionMutation() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: AnswerQuestionRequestProps) => AnswerQuestionApi(data),
+        onSuccess: (updated: IntakeQuestion) => {
+            // Swap the saved question into the cached intake so every screen shows it.
+            queryClient.setQueryData<IntakeResponseProps>(['intake'], (intake) =>
+                intake && {
+                    ...intake,
+                    sections: intake.sections.map((section) => ({
+                        ...section,
+                        questions: section.questions.map((question) =>
+                            question.question_id === updated.question_id ? updated : question
+                        ),
+                    })),
+                }
+            );
+            toast.success("Answer saved");
+        },
+        onError: (error) => {
+            toast.error(getApiErrorMessage(error, "Failed to save answer"));
         },
     });
 }
