@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, OnboardingApi, RetryDnaApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, CompetitorAnalysisAsyncApi, OnboardingApi, RetryDnaApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionApi, CompleteIntakeApi } from "../company-details/companyDetails.routes";
@@ -9,6 +9,7 @@ import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { setCompanyUserIdProvider, setOnboardingCompletedProvider } from "@/provider/auth-provider";
+import { CompetitorAnalysisAsyncResponse, CompetitorAnalysisRequest } from "@/types/bussiness/competitoranalysis-type";
 
 export function WaitlistMutation() {
     return useMutation({
@@ -64,14 +65,10 @@ export function AnalyzeCompanyMutation() {
                 toast.error("Company ID missing from analysis response");
                 return;
             }
-
-            // Persist POST meta.company_id for the results GET on dashboard
             setCompanyUserIdProvider(companyId);
             setOnboardingCompletedProvider(true);
-
             const resultsKey = ["analyze-company-results", companyId] as const;
             queryClient.setQueryData(resultsKey, response);
-
             try {
                 const results = await AnalyzeCompanyResultsApi(companyId);
                 queryClient.setQueryData(resultsKey, results);
@@ -157,6 +154,27 @@ export function RetryDnaMutation() {
         },
         onError: (error) => {
             toast.error(getApiErrorMessage(error, "Failed to rebuild company DNA"));
+        },
+    });
+}
+
+
+export function CompetitorAnalysisAsyncMutation() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: CompetitorAnalysisRequest) => CompetitorAnalysisAsyncApi(data),
+        onSuccess: (response: CompetitorAnalysisAsyncResponse, variables) => {
+            if (response?.success === false) {
+                toast.error(response.error || response.message || "Failed to analyze competitors");
+                return;
+            }
+            queryClient.invalidateQueries({
+                queryKey: ["competitor-analysis-competitor", variables.company_id],
+            });
+            toast.success(response?.message || "Competitor analysis started successfully");
+        },
+        onError: (error) => {
+            toast.error(getApiErrorMessage(error, "Failed to analyze competitor"));
         },
     });
 }
