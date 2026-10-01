@@ -40,7 +40,7 @@ export default function Login() {
 
   const onSubmit = (data: LoginFormValidator) => {
     SignInMutation.mutate(data, {
-      onSuccess: () => router.push(PAGE_ROUTES.DASHBOARD),
+      onSuccess: () => router.push(PAGE_ROUTES.ONBOARDING),
     });
   };
 
