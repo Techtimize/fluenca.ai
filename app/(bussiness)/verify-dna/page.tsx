@@ -21,14 +21,26 @@ import { FOCUS_RING } from '@/utils/ui-classes';
 import useAuthStore from '@/store/AuthsStore';
 import { toast } from 'sonner';
 
-export default function VerifyDna() {
-    const { data: dna, isLoading } = DnaQuery();
-    const { mutate: retryDna, isPending: isRetrying } = RetryDnaMutation();
-    const { mutate: analyzeCompany } = AnalyzeCompanyMutation();
-    const companyUserId = useAuthStore((state) => state.company_user_id);
+const SECTION_ICONS: Record<string, LucideIcon> = {
+  overview: Dna,
+  positioning: Crosshair,
+  audience: Users,
+  services: Wrench,
+  market: Layers3,
+  differentiators: Sparkles,
+  company: Building2,
+};
 
-    const isReady = dna?.status === 'ready';
-    const isFailed = dna?.status === 'failed';
+function getSectionIcon(key: string, title: string): LucideIcon {
+  const normalized = `${key} ${title}`.toLowerCase();
+  if (normalized.includes('position')) return Crosshair;
+  if (normalized.includes('audience') || normalized.includes('customer')) return Users;
+  if (normalized.includes('service') || normalized.includes('tech')) return Wrench;
+  if (normalized.includes('market') || normalized.includes('pain')) return Layers3;
+  if (normalized.includes('different') || normalized.includes('unique')) return Sparkles;
+  if (normalized.includes('company') || normalized.includes('business')) return Building2;
+  return SECTION_ICONS[key] ?? Dna;
+}
 
 export default function VerifyDna() {
   const { company_user_id } = useAuthStore();
@@ -248,7 +260,6 @@ export default function VerifyDna() {
                         </h2>
                       </div>
                     </div>
-                )}
 
                     <div className="w-full space-y-4 pl-0 sm:pl-[52px]">
                       {section.text
@@ -291,19 +302,7 @@ export default function VerifyDna() {
             </div>
           </div>
         )}
-
-                        <div className="mt-8 flex justify-center">
-                            <Link
-                                href={PAGE_ROUTES.DASHBOARD}
-                                onClick={() => analyzeCompany({ company_id: companyUserId, company_data: JSON.stringify(dna) })}
-                                className="flex h-11 items-center rounded-full bg-[#5B5BD6] px-8 text-sm font-semibold text-white shadow-lg hover:bg-[#4a4ac5]"
-                            >
-                                Looks good, continue
-                            </Link>
-                        </div>
-                    </>
-                )}
-            </main>
-        </div>
-    );
+      </div>
+    </div>
+  );
 }
