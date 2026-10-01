@@ -15,7 +15,7 @@ import {
   Users,
   Wrench,
 } from "lucide-react";
-import SidebarRail from "@/components/dashboard/sidebarRail";
+import SidebarRail, { DASHBOARD_CONTENT_OFFSET } from "@/components/dashboard/sidebarRail";
 import TopBar from "@/components/dashboard/topBar";
 import Card from "@/components/shared/card";
 import { PAGE_ROUTES } from "@/constant/page-routes";
@@ -112,7 +112,7 @@ export default function DnaPage() {
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,#E9ECFF_0%,#FFFFFF_45%)]">
       <SidebarRail />
 
-      <div className="px-4 pb-10 pt-4 sm:px-6 md:pl-24 lg:pr-8">
+      <div className={DASHBOARD_CONTENT_OFFSET}>
         <main className="min-w-0">
           <TopBar user={MOCK_DASHBOARD.user} placeholder="Search company DNA..." />
 

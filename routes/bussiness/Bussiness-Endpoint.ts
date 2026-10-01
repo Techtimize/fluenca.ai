@@ -12,12 +12,22 @@ export const BUSSINESSENDPOINT = {
     ANALYZE_COMPANY: '/analyzeCompany/analyzeCompany',
     ANALYZE_COMPANY_RESULTS:(company_id: string) => `/analyzeCompany/results/${company_id}`,
     GROWTH: '/social-growth',
+
     COMPETITOR_ANALYSIS: '/competitorAnalysis',
+    COMPETITOR_ANALYSIS_ASYNC: '/competitorAnalysis/async',
+    COMPETITOR_ANALYSIS_JOB: (job_id: string) => `/competitorAnalysis/jobs/${job_id}`,  
+    COMPETITOR_ANALYSIS_COMPETITOR: (company_id: string) => `/competitorAnalysis/results/${company_id}`,
 
     TRENDS:{
     GOOGLE_TRENDS_NOW: '/google-trends/now',
     GOOGLE_TRENDS_TRENDING: '/google-trends/trending',
     GOOGLE_TRENDS_EXPLORE: '/google-trends/explore',
     GOOGLE_TRENDS_FILTERS: '/google-trends/filters',
+    },
+
+
+    RECOMMENDATION:{
+        CONTENT_RECOMMENDATION: '/contentRecommendation/recommend',
+        RECOMMENDATION_RESULT:(company_id: string) => `/contentRecommendation/results/${company_id}`,
     }
 }
