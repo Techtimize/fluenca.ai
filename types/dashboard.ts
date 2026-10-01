@@ -1,4 +1,4 @@
-export type Tone = "green" | "orange" | "purple" | "teal";
+export type Tone = "green" | "orange" | "purple" | "teal" | "sky" | "rose";
 export type VitalStatus = "good" | "needs" | "poor";
 export type Device = "mobile" | "desktop";
 

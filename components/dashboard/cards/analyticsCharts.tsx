@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import type { AnalyticsCharts } from "@/types/dashboard";
 
-// Validated pair (CVD-safe); bars always carry a value label because orange is light on white.
-const STRENGTH = "#0FA3A0";
-const WEAKNESS = "#E08A0B";
-const SINGLE = "#5B57E6";
+// Light, bright fills; every bar carries a value label, so the light tones stay readable.
+const STRENGTH = "#818CF8";
+const WEAKNESS = "#FB7185";
+const SINGLE = "#818CF8";
 
 const LEVELS = ["High", "Medium", "Low"];
 
@@ -113,8 +113,7 @@ function ImpactEffortMatrix({ data }: { data: AnalyticsCharts["actions"] }) {
                     <span
                       key={item.title}
                       title={`${item.title} — impact ${item.impact}, effort ${item.effort}`}
-                      className="grid size-6 place-items-center rounded-full text-[11px] font-semibold text-white ring-2 ring-white"
-                      style={{ backgroundColor: SINGLE }}
+                      className="grid size-6 place-items-center rounded-full bg-[#818CF8] text-[11px] font-semibold text-white ring-2 ring-white"
                     >
                       {item.priority ?? index + 1}
                     </span>

@@ -19,7 +19,7 @@ function ScoreGauge({ score }: { score: number }) {
               y1={(cy - r1 * Math.sin(a)).toFixed(2)}
               x2={(cx + r2 * Math.cos(a)).toFixed(2)}
               y2={(cy - r2 * Math.sin(a)).toFixed(2)}
-              stroke={filled ? "#4F46E5" : "#E6E8F5"}
+              stroke={filled ? "#818CF8" : "#EEF0F8"}
               strokeWidth="11"
               strokeLinecap="round"
             />

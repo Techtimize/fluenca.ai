@@ -110,7 +110,7 @@ export default function DashboardPage() {
                 onDeviceChange={setDevice}
                 onConnectIntegration={(id) => console.log("TODO: start connect flow for", id)}
               />
-              {analyzeResults ? <AnalyzeCompanyInsights data={analyzeResults} /> : null}
+              {/* {analyzeResults ? <AnalyzeCompanyInsights data={analyzeResults} /> : null} */}
             </>
           ) : null}
         </main>
