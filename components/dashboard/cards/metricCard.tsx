@@ -21,9 +21,9 @@ export default function MetricCard({ metric }: { metric: Metric }) {
     <li className="rounded-2xl border border-[#E6E8F5] bg-white p-4">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          {/* <span className={`grid size-10 place-items-center rounded-xl ${t.iconBg} ${t.text}`}>
+          <span className={`grid size-10 place-items-center rounded-xl ${t.iconBg} ${t.text}`}>
             <Icon className="size-5" aria-hidden="true" />
-          </span> */}
+          </span>
           <div>
             <p className="text-[13px] font-medium text-neutral-900">{metric.label}</p>
             <p className={`flex items-center gap-0.5 text-[11px] ${t.text}`}>

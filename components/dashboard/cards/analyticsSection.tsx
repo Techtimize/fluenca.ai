@@ -79,14 +79,14 @@ export default function AnalyticsSection({
         ))}
       </ul>
 
-      {/* Overall + integrations: when compact, the last card spans full width if the count is odd */}
+      {/* Overall + integrations: 3-up like the dashboard mock */}
       <div
         className={`mt-4 grid gap-4 ${
           compact
             ? "sm:grid-cols-2 sm:[&>*:last-child:nth-child(odd)]:col-span-2"
             : data.charts
-              ? "md:grid-cols-2 xl:grid-cols-4"
-              : "lg:grid-cols-[300px_repeat(2,minmax(0,1fr))]"
+              ? "md:grid-cols-2 xl:grid-cols-3"
+              : "lg:grid-cols-[minmax(260px,1.1fr)_repeat(2,minmax(0,1fr))]"
         }`}
       >
         <OverallPerformanceCard data={data.overall} />

@@ -10,12 +10,18 @@ export function LoginMutation() {
   return useMutation({
     mutationFn: (data: LoginRequestProps) => LoginApi(data),
     onSuccess: (response: LoginResponseProps) => {
+      const onboardingCompleted =
+        response.user.onboarded_complete === true ||
+        response.user.onboarding_completed === true;
+
       setAuthTokenProvider(
         response.access_token,
         response.user.role,
         response.user.user_id,
         response.user.status,
         response.user.company_name ?? undefined,
+        onboardingCompleted,
+        response.user.company_id ?? undefined,
       );
       toast.success(response.message || "Logged in successfully");
     },
