@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans_Arabic, Plus_Jakarta_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale } from "next-intl/server";
+import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 import QueryProvider from "@/provider/query-provider";
 import ErrorBoundary from "@/errors/ErrorBoundary";
@@ -18,7 +18,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-
+const notoSansArabic = Noto_Sans_Arabic({
+  variable: "--font-noto-arabic",
+  subsets: ["arabic"],
+  weight: ["400", "500", "600", "700"],
+});
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
@@ -82,17 +86,21 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
+  const messages = await getMessages();
+  const isArabic = locale === "ar";
 
   return (
     <html
       lang={locale}
-      dir={locale === "ar" ? "rtl" : "ltr"}
-      className={`${geistSans.variable} ${geistMono.variable} ${googleSansCode.variable} ${plusJakartaSans.variable} h-full antialiased`}
+      dir={isArabic ? "rtl" : "ltr"}
+      className={`${geistSans.variable} ${geistMono.variable} ${googleSansCode.variable} ${plusJakartaSans.variable} ${notoSansArabic.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <NextIntlClientProvider>
+      <body
+        className={`flex min-h-full flex-col ${isArabic ? "font-[family-name:var(--font-noto-arabic)]" : ""}`}
+      >
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <QueryProvider>
-            <Toaster position="bottom-right" />
+            <Toaster position={isArabic ? "bottom-left" : "bottom-right"} />
             <ErrorBoundary>{children}</ErrorBoundary>
           </QueryProvider>
         </NextIntlClientProvider>

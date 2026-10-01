@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AtSign, Link2, Loader2, Plus, Sparkles, Trash2, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import CompetitorResults from "@/components/dashboard/competitors/CompetitorResults";
 import TopBar from "@/components/dashboard/topBar";
@@ -32,6 +33,8 @@ function isLikelyLinkedIn(value: string) {
 }
 
 export default function CompetitorAnalysisPage() {
+  const t = useTranslations("competitors");
+  const tTop = useTranslations("topBar");
   const companyId = useAuthStore((s) => s.company_user_id);
   const companyName = useAuthStore((s) => s.company_name);
   const [mode, setMode] = useState<AnalysisMode>("ai");
@@ -120,14 +123,14 @@ export default function CompetitorAnalysisPage() {
     <main className="min-w-0 space-y-4">
           <TopBar
             user={{ name: companyName || "User" }}
-            placeholder="Search competitors..."
+            placeholder={tTop("searchCompetitors")}
           />
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h1 className="text-xl font-semibold text-neutral-900">Competitor Analysis</h1>
+              <h1 className="text-xl font-semibold text-neutral-900">{t("title")}</h1>
               <p className="mt-1 text-sm text-neutral-500">
-                Discover competitors with AI, or add Instagram usernames and LinkedIn URLs manually.
+                {t("subtitle")}
               </p>
             </div>
 
@@ -136,20 +139,20 @@ export default function CompetitorAnalysisPage() {
               onValueChange={(value) => setMode(value as AnalysisMode)}
               className="w-full sm:w-auto"
             >
-              <TabsList className="ml-auto h-10 w-full rounded-full bg-[#ECEBFF]/p-1 sm:w-auto">
+              <TabsList className="ms-auto h-10 w-full rounded-full bg-[#ECEBFF]/p-1 sm:w-auto">
                 <TabsTrigger
                   value="ai"
                   className="h-8 flex-1 gap-1.5 rounded-full px-4 data-active:bg-white data-active:text-[#5B57E6] data-active:shadow-sm sm:flex-none"
                 >
                   <Sparkles className="size-3.5" />
-                  AI mode
+                  {t("ai")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="manual"
                   className="h-8 flex-1 gap-1.5 rounded-full px-4 data-active:bg-white data-active:text-[#5B57E6] data-active:shadow-sm sm:flex-none"
                 >
                   <Users className="size-3.5" />
-                  Manual mode
+                  {t("manual")}
                 </TabsTrigger>
               </TabsList>
             </Tabs>

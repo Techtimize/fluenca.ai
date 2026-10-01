@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, LogOut, Menu, X } from "lucide-react";
 import AssetImage from "@/components/shared/assetImage";
+import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import type { NavItem } from "@/types/dashboard";
 import { getIcon } from "@/utils/icon-utils";
 import { FOCUS_RING } from "@/utils/ui-classes";
@@ -48,12 +50,16 @@ function setContentPad(collapsed: boolean) {
 }
 
 export const DASHBOARD_CONTENT_OFFSET =
-  "px-4 pb-10 pt-16 sm:px-6 md:pt-4 md:pl-[var(--sidebar-content-pad,5.5rem)] lg:pr-8 transition-[padding] duration-200";
+  "px-4 pb-10 pt-16 sm:px-6 md:pt-4 md:ps-[var(--sidebar-content-pad,5.5rem)] lg:pe-8 transition-[padding] duration-200";
 
 export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Logo.svg" }: Props) {
   const pathname = usePathname();
+  const locale = useLocale();
+  const t = useTranslations("common");
+  const tNav = useTranslations("nav");
   const [collapsed, setCollapsed] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isRtl = locale === "ar";
 
   useEffect(() => {
     try {
@@ -86,17 +92,21 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
 
   const toggleCollapsed = () => setCollapsed((prev) => !prev);
 
+  const resolveLabel = (item: NavItem) =>
+    tNav.has(item.id) ? tNav(item.id as "home") : item.label;
+
   const renderLinks = (opts: { showLabels: boolean; onNavigate?: () => void }) =>
     items.map((item) => {
       const Icon = getIcon(item.icon);
       const active = isActivePath(pathname, item.href);
+      const label = resolveLabel(item);
       return (
         <li key={item.id}>
           <Link
             href={item.href}
-            aria-label={item.label}
+            aria-label={label}
             aria-current={active ? "page" : undefined}
-            title={item.label}
+            title={label}
             onClick={opts.onNavigate}
             className={`${FOCUS_RING} ${
               opts.showLabels
@@ -109,19 +119,22 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
             }`}
           >
             <Icon className="size-[18px] shrink-0" />
-            {opts.showLabels ? <span className="truncate">{item.label}</span> : null}
+            {opts.showLabels ? <span className="truncate">{label}</span> : null}
           </Link>
         </li>
       );
     });
 
+  const ExpandIcon = isRtl ? ChevronLeft : ChevronRight;
+  const CollapseIcon = isRtl ? ChevronRight : ChevronLeft;
+
   return (
     <>
       <button
         type="button"
-        aria-label="Open navigation"
+        aria-label={t("openNav")}
         onClick={() => setMobileOpen(true)}
-        className={`fixed left-4 top-4 z-30 grid size-10 place-items-center rounded-full border border-[#E6E8F5] bg-white text-neutral-700 shadow-sm md:hidden ${FOCUS_RING}`}
+        className={`fixed start-4 top-4 z-30 grid size-10 place-items-center rounded-full border border-[#E6E8F5] bg-white text-neutral-700 shadow-sm md:hidden ${FOCUS_RING}`}
       >
         <Menu className="size-4" />
       </button>
@@ -130,22 +143,22 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
         <div className="fixed inset-0 z-40 md:hidden">
           <button
             type="button"
-            aria-label="Close navigation"
+            aria-label={t("closeNav")}
             className="absolute inset-0 bg-neutral-950/30"
             onClick={() => setMobileOpen(false)}
           />
           <nav
             aria-label="Main"
-            className="absolute bottom-4 left-4 top-4 flex w-[min(18rem,calc(100vw-2rem))] flex-col rounded-3xl border border-[#E6E8F5] bg-white p-4 shadow-xl"
+            className="absolute bottom-4 start-4 top-4 flex w-[min(18rem,calc(100vw-2rem))] flex-col rounded-3xl border border-[#E6E8F5] bg-white p-4 shadow-xl"
           >
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <AssetImage src={logoSrc} alt="Influ" width={28} height={28} />
-                <span className="text-sm font-semibold text-neutral-900">Fluenca</span>
+                <AssetImage src={logoSrc} alt={t("brand")} width={28} height={28} />
+                <span className="text-sm font-semibold text-neutral-900">{t("brand")}</span>
               </div>
               <button
                 type="button"
-                aria-label="Close navigation"
+                aria-label={t("closeNav")}
                 onClick={() => setMobileOpen(false)}
                 className={`grid size-8 place-items-center rounded-full text-neutral-600 hover:bg-neutral-100 ${FOCUS_RING}`}
               >
@@ -155,13 +168,16 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
             <ul className="flex-1 space-y-1.5 overflow-y-auto">
               {renderLinks({ showLabels: true, onNavigate: () => setMobileOpen(false) })}
             </ul>
+            <div className="mt-3">
+              <LanguageSwitcher variant="muted" className="w-full justify-center" />
+            </div>
             <button
               type="button"
               onClick={handleLogout}
-              className={`mt-4 flex w-full items-center gap-3 rounded-2xl bg-[#5B57E6] px-3 py-2.5 text-sm font-medium text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
+              className={`mt-3 flex w-full items-center gap-3 rounded-2xl bg-[#5B57E6] px-3 py-2.5 text-sm font-medium text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
             >
               <LogOut className="size-[18px]" />
-              Log out
+              {t("logout")}
             </button>
           </nav>
         </div>
@@ -169,14 +185,14 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
 
       <nav
         aria-label="Main"
-        className={`fixed bottom-4 left-4 top-4 z-20 hidden flex-col border border-[#E6E8F5] bg-white py-4 transition-[width,border-radius,padding] duration-200 md:flex ${
+        className={`fixed bottom-4 start-4 top-4 z-20 hidden flex-col border border-[#E6E8F5] bg-white py-4 transition-[width,border-radius,padding] duration-200 md:flex ${
           collapsed ? "w-14 items-center rounded-full px-0" : "w-56 rounded-3xl px-3"
         }`}
       >
         <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3 px-1"}`}>
-          <AssetImage src={logoSrc} alt="Influ" width={28} height={28} />
+          <AssetImage src={logoSrc} alt={t("brand")} width={28} height={28} />
           {!collapsed ? (
-            <span className="truncate text-sm font-semibold text-neutral-900">Fluenca</span>
+            <span className="truncate text-sm font-semibold text-neutral-900">{t("brand")}</span>
           ) : null}
         </div>
 
@@ -185,9 +201,12 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
         </ul>
 
         <div className={`mt-auto flex gap-2 ${collapsed ? "flex-col items-center" : "w-full flex-col"}`}>
+          {!collapsed ? <LanguageSwitcher variant="muted" className="w-full justify-center" /> : null}
+          {collapsed ? <LanguageSwitcher variant="muted" compact /> : null}
+
           <button
             type="button"
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
             onClick={toggleCollapsed}
             className={`${FOCUS_RING} ${
               collapsed
@@ -195,14 +214,14 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
                 : "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100"
             }`}
           >
-            {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-[18px]" />}
-            {!collapsed ? <span>Collapse</span> : null}
+            {collapsed ? <ExpandIcon className="size-4" /> : <CollapseIcon className="size-[18px]" />}
+            {!collapsed ? <span>{t("collapse")}</span> : null}
           </button>
 
           <button
             type="button"
             onClick={handleLogout}
-            aria-label="Log out"
+            aria-label={t("logout")}
             className={`${FOCUS_RING} ${
               collapsed
                 ? "grid size-10 cursor-pointer place-items-center rounded-full bg-[#5B57E6] text-white hover:bg-[#4A46D0]"
@@ -210,7 +229,7 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
             }`}
           >
             <LogOut className="size-[18px]" />
-            {!collapsed ? <span>Log out</span> : null}
+            {!collapsed ? <span>{t("logout")}</span> : null}
           </button>
         </div>
       </nav>

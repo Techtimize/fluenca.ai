@@ -48,6 +48,17 @@ function toDisplayLabel(value: unknown): string {
   }
   if (typeof value === "object") {
     const record = value as Record<string, unknown>;
+    // API sometimes returns numeric ranges as { min, max }
+    if ("min" in record || "max" in record) {
+      const min = record.min;
+      const max = record.max;
+      if (typeof min === "number" && typeof max === "number") return `${min}–${max}`;
+      if (typeof min === "number") return `${min}+`;
+      if (typeof max === "number") return `≤${max}`;
+      if (min != null || max != null) {
+        return [min, max].filter((v) => v != null).map(String).join("–");
+      }
+    }
     const primary =
       record.technology ??
       record.service ??
@@ -543,7 +554,7 @@ function GapCard({ item, index }: { item: CompetitorQuantifiedGapItem; index: nu
         ) : null}
         {item.gap_score != null || item.score != null ? (
           <span className="rounded-full border border-[#E6E8F5] bg-white px-2.5 py-1">
-            Gap score · {item.gap_score ?? item.score}
+            Gap score · {toDisplayLabel(item.gap_score ?? item.score)}
           </span>
         ) : null}
         {item.market_coverage_pct != null ? (
@@ -553,13 +564,13 @@ function GapCard({ item, index }: { item: CompetitorQuantifiedGapItem; index: nu
         ) : null}
         {item.competitor || item.competitor_name ? (
           <span className="rounded-full border border-[#E6E8F5] bg-white px-2.5 py-1">
-            vs {item.competitor || item.competitor_name}
+            vs {toDisplayLabel(item.competitor || item.competitor_name)}
           </span>
         ) : null}
         {item.impact ? (
           <span className="inline-flex items-center gap-1 rounded-full border border-[#E6E8F5] bg-white px-2.5 py-1">
             <Gauge className="size-3 text-[#5B57E6]" />
-            {item.impact}
+            {toDisplayLabel(item.impact)}
           </span>
         ) : null}
       </div>

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Loader2, Search, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 import TopBar from "@/components/dashboard/topBar";
 import Card from "@/components/shared/card";
 import {
@@ -32,6 +33,7 @@ function formatDate(value?: string | null) {
 }
 
 function StatusPill({ status }: { status?: string | null }) {
+  const t = useTranslations("common");
   const normalized = (status ?? "").toLowerCase();
   const tone =
     normalized === "active" || normalized === "verified"
@@ -44,7 +46,7 @@ function StatusPill({ status }: { status?: string | null }) {
 
   return (
     <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-medium capitalize ${tone}`}>
-      {status || "unknown"}
+      {status || t("unknown")}
     </span>
   );
 }
@@ -75,6 +77,9 @@ function matchesQuery(user: AdminUser, query: string) {
 }
 
 export default function SuperAdminUsersPage() {
+  const t = useTranslations("superadmin");
+  const tCommon = useTranslations("common");
+  const tTop = useTranslations("topBar");
   const [query, setQuery] = useState("");
   const companyName = useAuthStore((s) => s.company_name);
   const role = useAuthStore((s) => s.role);
@@ -91,13 +96,13 @@ export default function SuperAdminUsersPage() {
   if (role && !isSuperAdmin) {
     return (
       <main className="min-w-0 space-y-4">
-        <TopBar user={{ name: companyName || "Admin" }} placeholder="Search users..." />
+        <TopBar user={{ name: companyName || "Admin" }} placeholder={tTop("searchUsers")} />
         <Card className="p-6">
-          <h1 className="text-lg font-semibold text-neutral-900">Access restricted</h1>
+          <h1 className="text-lg font-semibold text-neutral-900">{t("accessRestricted")}</h1>
           <p className="mt-2 text-sm text-neutral-600">
-            This area is only available to super admins.{" "}
+            {t("accessBody")}{" "}
             <a href={PAGE_ROUTES.DASHBOARD} className="font-medium text-[#5B57E6] hover:underline">
-              Back to dashboard
+              {t("backToDashboard")}
             </a>
           </p>
         </Card>
@@ -109,27 +114,27 @@ export default function SuperAdminUsersPage() {
     <main className="min-w-0 space-y-4">
       <TopBar
         user={{ name: companyName || "Admin" }}
-        placeholder="Search users..."
+        placeholder={tTop("searchUsers")}
         onSearch={setQuery}
       />
 
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-neutral-900">Users</h1>
+          <h1 className="text-xl font-semibold text-neutral-900">{t("usersTitle")}</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            All registered Fluenca accounts
-            {typeof data?.length === "number" ? ` · ${data.length} total` : ""}
+            {t("usersSubtitle")}
+            {typeof data?.length === "number" ? ` · ${t("total", { count: data.length })}` : ""}
           </p>
         </div>
 
         <label className="relative w-full max-w-xs">
-          <span className="sr-only">Filter users</span>
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
+          <span className="sr-only">{t("filterPlaceholder")}</span>
+          <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Filter by name, email, company…"
-            className="h-10 w-full rounded-full border border-[#E6E8F5] bg-white pl-9 pr-4 text-sm outline-none placeholder:text-neutral-400 focus:ring-2 focus:ring-[#5B57E6]/30"
+            placeholder={t("filterPlaceholder")}
+            className="h-10 w-full rounded-full border border-[#E6E8F5] bg-white pe-4 ps-9 text-sm outline-none placeholder:text-neutral-400 focus:ring-2 focus:ring-[#5B57E6]/30"
           />
         </label>
       </div>
@@ -138,13 +143,13 @@ export default function SuperAdminUsersPage() {
         {isLoading ? (
           <div className="flex items-center justify-center gap-2 px-5 py-16 text-sm text-neutral-600">
             <Loader2 className="size-4 animate-spin" />
-            Loading users…
+            {t("loading")}
           </div>
         ) : null}
 
         {isError ? (
           <div className="px-5 py-10 text-sm text-rose-700">
-            {getApiErrorMessage(error, "Failed to load users.")}
+            {getApiErrorMessage(error, tCommon("errorGeneric"))}
           </div>
         ) : null}
 
@@ -153,9 +158,9 @@ export default function SuperAdminUsersPage() {
             <span className="grid size-11 place-items-center rounded-full bg-[#ECEBFF] text-[#5B57E6]">
               <Users className="size-5" />
             </span>
-            <p className="text-sm font-medium text-neutral-900">No users found</p>
+            <p className="text-sm font-medium text-neutral-900">{t("emptyTitle")}</p>
             <p className="text-sm text-neutral-500">
-              {query ? "Try a different search." : "There are no users to display yet."}
+              {query ? t("emptySearch") : t("emptyDefault")}
             </p>
           </div>
         ) : null}
@@ -164,13 +169,16 @@ export default function SuperAdminUsersPage() {
           <div className="px-2 py-2 sm:px-4">
             <div className="mb-2 flex items-center justify-between px-2 pt-2 text-[12px] text-neutral-500">
               <span>
-                Showing {users.length}
-                {query ? " matching" : ""} user{users.length === 1 ? "" : "s"}
+                {t("showing", {
+                  count: users.length,
+                  matching: query ? t("matching") : "",
+                  plural: users.length === 1 ? "" : "s",
+                })}
               </span>
               {isFetching ? (
                 <span className="inline-flex items-center gap-1.5">
                   <Loader2 className="size-3 animate-spin" />
-                  Refreshing
+                  {t("refreshing")}
                 </span>
               ) : null}
             </div>
@@ -178,11 +186,11 @@ export default function SuperAdminUsersPage() {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead>User</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Joined</TableHead>
+                  <TableHead>{t("colUser")}</TableHead>
+                  <TableHead>{t("colCompany")}</TableHead>
+                  <TableHead>{t("colRole")}</TableHead>
+                  <TableHead>{t("colStatus")}</TableHead>
+                  <TableHead>{t("colJoined")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

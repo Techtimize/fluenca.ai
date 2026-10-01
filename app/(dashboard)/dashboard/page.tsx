@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import AnalyticsSection from "@/components/dashboard/cards/analyticsSection";
 import AnalyzeCompanyInsights from "@/components/dashboard/analyzeCompanyInsights";
 import ChatInput from "@/components/dashboard/chat/chatInput";
@@ -18,6 +19,7 @@ import type { AnalyzeCompanyResultsResponse } from "@/types/bussiness/analyzecom
 import { stripMarkdown } from "@/utils/text-utils";
 
 export default function DashboardPage() {
+  const t = useTranslations("dashboard");
   const companyId = useAuthStore((s) => s.company_user_id);
   const company_name = useAuthStore((s) => s.company_name);
 
@@ -75,7 +77,7 @@ export default function DashboardPage() {
 
           {!hasCompanyId ? (
             <div className="mb-4 rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
-              No company analysis ID found. Complete analyze company first.
+              {t("noCompanyId")}
             </div>
           ) : null}
 

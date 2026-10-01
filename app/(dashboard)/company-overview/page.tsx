@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Bell, Check, Pencil } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { IntakeQuery } from "@/routes/company-details/CompanyDetails-Query";
 import { AnswerQuestionMutation, CompleteIntakeMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { IntakeSection } from "@/types/company-details-type";
 
-/* ---------- Types ---------- */
 type CompanyField = {
   id: string;
   label: string;
@@ -278,6 +278,7 @@ function TopBar() {
 
 /* ---------- Page ---------- */
 export default function CompanyOverviewPage() {
+  const t = useTranslations("overview");
   const { data: intake, isLoading } = IntakeQuery();
   const { mutate: completeIntake, isPending: isSaving } = CompleteIntakeMutation();
   const [activeId, setActiveId] = useState("");
@@ -321,10 +322,9 @@ export default function CompanyOverviewPage() {
 
       <div className="grid w-full gap-4 lg:grid-cols-[340px_1fr]">
         <aside className="rounded-3xl border border-[#E6E8F5] bg-white/80 p-5 backdrop-blur lg:sticky lg:top-6 lg:self-start">
-          <h1 className="text-base font-semibold text-neutral-900">Company Overview</h1>
+          <h1 className="text-base font-semibold text-neutral-900">{t("title")}</h1>
           <p className="mb-4 mt-1 text-xs leading-5 text-neutral-500">
-            Everything was researched and filled automatically. Review and edit before
-            building your workspace.
+            {t("subtitle")}
           </p>
 
           <ProgressRing value={answered} total={total} />
@@ -365,7 +365,7 @@ export default function CompanyOverviewPage() {
         </aside>
 
         <div className="min-w-0 rounded-3xl border border-[#E6E8F5] bg-white/80 p-5 backdrop-blur sm:p-8">
-          {isLoading && <p className="text-sm text-neutral-500">Loading company overview...</p>}
+          {isLoading && <p className="text-sm text-neutral-500">{t("loading")}</p>}
           {sections
             .filter((s) => s.fields.length > 0)
             .map((s) => (
@@ -392,7 +392,7 @@ export default function CompanyOverviewPage() {
                 disabled={isSaving}
                 className="h-9 rounded-full bg-[#5B57E6] px-6 text-sm font-semibold text-white hover:bg-[#4a46d4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B57E6]/40 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSaving ? "Completing..." : "Complete"}
+                {isSaving ? t("completing") : t("complete")}
               </button>
             </div>
           )}

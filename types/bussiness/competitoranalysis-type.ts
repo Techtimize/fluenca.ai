@@ -69,13 +69,18 @@ export interface CompetitorJobOpening {
   linkedin_url?: string | null;
 }
 
+export type CompetitorSizeRange = {
+  min?: number | string | null;
+  max?: number | string | null;
+};
+
 export interface CompetitorLinkedInAnalysis {
   signals?: string[];
   is_hiring?: boolean | null;
   open_roles?: number | null;
   post_count?: number | null;
   b2b_signals?: string[];
-  company_size?: string | null;
+  company_size?: string | CompetitorSizeRange | null;
   sample_posts?: Array<{
     text?: string;
     source?: string;
@@ -119,7 +124,7 @@ export interface CompetitorListItem {
   linkedin_username?: string | null;
   threat_level?: string | null;
   is_hiring?: boolean | null;
-  company_size?: string | null;
+  company_size?: string | CompetitorSizeRange | null;
   employee_count?: number | null;
   employees?: CompetitorLinkedInEmployee[];
   job_openings?: CompetitorJobOpening[];
@@ -139,8 +144,8 @@ export interface CompetitorListItem {
   social_warnings?: string[];
   linkedin_analysis?: CompetitorLinkedInAnalysis;
   instagram_analysis?: Record<string, unknown>;
-  linkedin_company_size?: string | null;
-  linkedin_employee_range?: string | null;
+  linkedin_company_size?: string | CompetitorSizeRange | null;
+  linkedin_employee_range?: string | CompetitorSizeRange | null;
   linkedin_total_employees?: number | null;
   linkedin_profiles_sampled?: number | null;
 }

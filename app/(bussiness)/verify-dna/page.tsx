@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   Bell,
   Building2,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
+import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { AnalyzeCompanyMutation, RetryDnaMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { DnaQuery, OnboardingDetailsQuery } from "@/routes/bussiness/Bussiness-Query";
@@ -42,6 +44,8 @@ function getSectionIcon(key: string, title: string): LucideIcon {
 }
 
 export default function VerifyDna() {
+  const t = useTranslations("verifyDna");
+  const tCommon = useTranslations("common");
   const company_user_id = useAuthStore((state) => state.company_user_id);
   const { data: dna, isLoading } = DnaQuery();
   const { data: onboarding } = OnboardingDetailsQuery();
@@ -105,11 +109,11 @@ export default function VerifyDna() {
 
   const handleContinue = () => {
     if (!companyId) {
-      toast.error("Company ID is missing. Please complete onboarding again.");
+      toast.error(t("toastMissingCompanyId"));
       return;
     }
     if (!companyData) {
-      toast.error("Company DNA data is missing. Please wait for DNA to finish.");
+      toast.error(t("toastMissingDna"));
       return;
     }
 
@@ -136,9 +140,10 @@ export default function VerifyDna() {
         </Link>
 
         <div className="flex items-center gap-3">
+          <LanguageSwitcher variant="light" />
           <button
             type="button"
-            aria-label="Notifications"
+            aria-label={tCommon("notifications")}
             className={`grid size-10 place-items-center rounded-full border border-[#E6E8F5] bg-white text-neutral-700 hover:bg-neutral-50 ${FOCUS_RING}`}
           >
             <Bell className="size-4" />
@@ -152,23 +157,22 @@ export default function VerifyDna() {
       <main className="w-full px-4 pb-16 pt-2 sm:px-6 lg:px-10">
         <div className="mx-auto mb-8 max-w-3xl text-center">
           <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[#5B57E6]">
-            Company DNA
+            {t("eyebrow")}
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-neutral-900 sm:text-4xl">
-            Verify what we learned
+            {t("title")}
           </h1>
           <p className="mt-3 text-sm leading-6 text-neutral-500 sm:text-[15px]">
-            Everything our AI agents gathered about your company, laid out by section. Review each
-            part before we build your workspace.
+            {t("subtitle")}
           </p>
         </div>
 
         {isBuilding ? (
           <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 text-sm text-neutral-500">
             <Loader2 className="size-7 animate-spin text-[#5B57E6]" />
-            <p className="font-medium text-neutral-700">Building your company DNA...</p>
+            <p className="font-medium text-neutral-700">{t("building")}</p>
             <p className="max-w-sm text-center text-xs text-neutral-500">
-              Reading positioning, audience, and offer signals from your public presence.
+              {t("buildingHint")}
             </p>
           </div>
         ) : null}
@@ -176,10 +180,10 @@ export default function VerifyDna() {
         {isFailed ? (
           <div className="flex min-h-[40vh] flex-col items-start justify-center gap-4">
             <h2 className="text-xl font-semibold text-neutral-900">
-              We couldn&apos;t finish your DNA
+              {t("failedTitle")}
             </h2>
             <p className="max-w-lg text-sm leading-6 text-[#B42318]">
-              {dna?.error || "Something went wrong while generating your company DNA."}
+              {dna?.error || t("failedFallback")}
             </p>
             <button
               type="button"
@@ -187,7 +191,7 @@ export default function VerifyDna() {
               disabled={isRetrying}
               className={`h-11 rounded-full bg-[#5B57E6] px-6 text-sm font-semibold text-white hover:bg-[#4A46D0] disabled:opacity-60 ${FOCUS_RING}`}
             >
-              {isRetrying ? "Retrying..." : "Try again"}
+              {isRetrying ? tCommon("retrying") : tCommon("tryAgain")}
             </button>
           </div>
         ) : null}
@@ -196,7 +200,7 @@ export default function VerifyDna() {
           <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-14">
             <aside className="lg:sticky lg:top-6 lg:self-start">
               <p className="mb-3 text-[12px] font-medium uppercase tracking-[0.12em] text-neutral-400">
-                Sections
+                {t("sections")}
               </p>
               <nav aria-label="DNA sections">
                 <ul className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:gap-1 lg:overflow-visible lg:pb-0">
@@ -270,7 +274,7 @@ export default function VerifyDna() {
 
               <div className="flex flex-col gap-3 border-t border-[#E6E8F5] pt-8 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-neutral-500">
-                  If this looks right, continue to your workspace setup.
+                  {t("continueHint")}
                 </p>
                 <button
                   type="button"
@@ -281,10 +285,10 @@ export default function VerifyDna() {
                   {isAnalyzing ? (
                     <>
                       <Loader2 className="size-4 animate-spin" />
-                      Analyzing company...
+                      {t("analyzing")}
                     </>
                   ) : (
-                    "Looks good, continue"
+                    t("continue")
                   )}
                 </button>
               </div>
@@ -294,14 +298,14 @@ export default function VerifyDna() {
 
         {isReady && !isBuilding && !isFailed && sections.length === 0 ? (
           <div className="flex min-h-[30vh] flex-col items-center justify-center gap-3 text-center">
-            <p className="text-sm font-medium text-neutral-700">No DNA sections available yet.</p>
+            <p className="text-sm font-medium text-neutral-700">{t("empty")}</p>
             <button
               type="button"
               onClick={() => retryDna()}
               disabled={isRetrying}
               className={`h-11 rounded-full bg-[#5B57E6] px-6 text-sm font-semibold text-white hover:bg-[#4A46D0] disabled:opacity-60 ${FOCUS_RING}`}
             >
-              {isRetrying ? "Retrying..." : "Generate again"}
+              {isRetrying ? tCommon("retrying") : t("generateAgain")}
             </button>
           </div>
         ) : null}

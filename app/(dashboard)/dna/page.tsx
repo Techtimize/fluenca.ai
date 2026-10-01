@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import {
   Building2,
   CircleCheck,
@@ -543,23 +544,25 @@ function AnalyzeCompanyInsights({ data }: { data: AnalyzeCompanyResponse }) {
 
 /* ---------- Page ---------- */
 export default function DnaPage() {
+  const t = useTranslations("dna");
+  const tTop = useTranslations("topBar");
   const companyUserId = useAuthStore((state) => state.company_user_id);
   const { data: analyzeCompanyResults, isLoading, isError } = AnalyzeCompanyResultsQuery(companyUserId);
   const analysis = (analyzeCompanyResults as AnalyzeCompanyResultsResponse | undefined)?.result;
 
   return (
     <main className="min-w-0">
-      <TopBar user={MOCK_DASHBOARD.user} placeholder="Search company DNA..." />
+      <TopBar user={MOCK_DASHBOARD.user} placeholder={tTop("searchDna")} />
 
       {isLoading ? (
         <div className="rounded-3xl border border-[#E6E8F5] bg-white/90 px-5 py-8 text-sm text-neutral-600">
-          Loading company analysis…
+          {t("loading")}
         </div>
       ) : null}
 
       {isError ? (
         <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
-          Failed to load company analysis.
+          {t("error")}
         </div>
       ) : null}
 

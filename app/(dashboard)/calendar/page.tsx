@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { CalendarDays, Loader2, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 import CompetitorNinetyDayCalendar from "@/components/dashboard/competitors/CompetitorNinetyDayCalendar";
 import TopBar from "@/components/dashboard/topBar";
 import Card from "@/components/shared/card";
@@ -10,6 +11,10 @@ import { CompetitorAnalysisCompetitorQuery } from "@/routes/bussiness/Bussiness-
 import useAuthStore from "@/store/AuthsStore";
 
 export default function CalendarPage() {
+  const t = useTranslations("calendar");
+  const tComp = useTranslations("competitors");
+  const tCommon = useTranslations("common");
+  const tTop = useTranslations("topBar");
   const companyId = useAuthStore((s) => s.company_user_id);
   const companyName = useAuthStore((s) => s.company_name);
 
@@ -30,35 +35,25 @@ export default function CalendarPage() {
     <main className="min-w-0 space-y-4">
       <TopBar
         user={{ name: companyName || "User" }}
-        placeholder="Search calendar..."
+        placeholder={tTop("searchCalendar")}
       />
 
       <div>
-        <h1 className="text-xl font-semibold text-neutral-900">90-day plan calendar</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Scheduled initiatives from your latest competitor analysis.
-        </p>
+        <h1 className="text-xl font-semibold text-neutral-900">{t("title")}</h1>
+        <p className="mt-1 text-sm text-neutral-500">{t("subtitle")}</p>
       </div>
-
-      {!companyId ? (
-        <Card className="border-amber-200 bg-amber-50/80 p-5">
-          <p className="text-sm text-amber-800">
-            Company ID is missing. Complete company analysis first, then return here.
-          </p>
-        </Card>
-      ) : null}
 
       {companyId && (isLoading || isFetching) && !data ? (
         <Card className="flex items-center justify-center gap-3 p-12 text-neutral-500">
           <Loader2 className="size-5 animate-spin text-[#5B57E6]" />
-          <span className="text-sm">Loading your action plan…</span>
+          <span className="text-sm">{tCommon("loading")}</span>
         </Card>
       ) : null}
 
       {companyId && isError ? (
         <Card className="border-rose-200 bg-rose-50/80 p-5">
           <p className="text-sm text-rose-800">
-            {getApiErrorMessage(error, "Failed to load calendar plan")}
+            {getApiErrorMessage(error, tCommon("errorGeneric"))}
           </p>
         </Card>
       ) : null}
@@ -77,18 +72,14 @@ export default function CalendarPage() {
             <span className="grid size-14 place-items-center rounded-3xl bg-[#ECEBFF] text-[#5B57E6] shadow-[0_8px_24px_rgba(91,87,230,0.18)]">
               <CalendarDays className="size-6" aria-hidden="true" />
             </span>
-            <h2 className="mt-5 text-lg font-semibold text-neutral-900">No plan available</h2>
-            <p className="mt-2 text-[14px] leading-6 text-neutral-500">
-              You haven&apos;t run competitor analysis yet, or this run didn&apos;t return a
-              90-day action plan. Run the agent to generate a calendar of platform-specific
-              moves.
-            </p>
+            <h2 className="mt-5 text-lg font-semibold text-neutral-900">{t("empty")}</h2>
+            <p className="mt-2 text-[14px] leading-6 text-neutral-500">{tComp("emptyBody")}</p>
             <Link
               href="/competitor-analysis"
               className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-[#5B57E6] px-5 text-sm font-medium text-white hover:bg-[#4A46D0]"
             >
               <Sparkles className="size-4" />
-              Run competitor analysis
+              {tComp("runAnalysis")}
             </Link>
           </div>
         </Card>
