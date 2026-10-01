@@ -1,4 +1,4 @@
-import type { CompanyDna } from "@/types/bussiness/onboarding-type";
+import type { AnalyzeCompanyDna } from "@/types/bussiness/analyzecompany-type";
 
 export type CompanyDnaPageData = {
   company: {
@@ -10,7 +10,7 @@ export type CompanyDnaPageData = {
     logoSrc: string;
   };
   summary: string;
-  dna: CompanyDna;
+  dna: AnalyzeCompanyDna;
   snapshot: {
     companyType: string;
     marketPosition: string;
@@ -19,7 +19,7 @@ export type CompanyDnaPageData = {
   };
 };
 
-// Temporary mock. Replace with AnalyzeCompanyResponse.company_analysis.company_dna.
+
 export const MOCK_COMPANY_DNA: CompanyDnaPageData = {
   company: {
     name: "Techtimize",

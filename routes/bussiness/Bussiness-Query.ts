@@ -71,6 +71,7 @@ export const AnalyzeCompanyResultsQuery = (company_user_id: string) => {
   return useQuery({
     queryKey: ["analyze-company-results", company_user_id],
     queryFn: () => AnalyzeCompanyResultsApi(company_user_id),
+    enabled: Boolean(company_user_id),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

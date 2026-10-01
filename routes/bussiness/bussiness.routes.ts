@@ -1,8 +1,9 @@
 import { BUSSINESSENDPOINT } from "./Bussiness-Endpoint";
 import api from "../apiClient";
-import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/onboarding-type";
+import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
-import { CompetitorAnalysisRequest, CompetitorAnalysisResponse } from "@/types/bussiness/competitoranalysis-type";import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/onboarding-type";
+import { CompetitorAnalysisRequest, CompetitorAnalysisResponse } from "@/types/bussiness/competitoranalysis-type";
+import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/onboarding-type";
 import { DnaResponseProps } from "@/types/bussiness/dna-type";
 import type {
   GoogleTrendExploreResponse,
@@ -60,7 +61,7 @@ export const RetryDnaApi = async (): Promise<DnaResponseProps> => {
     return response.data;
 }
 export const AnalyzeCompanyResultsApi = async (company_id: string) => {
-    const response = await api.get(
+    const response = await api.get<AnalyzeCompanyResponse>(
       BUSSINESSENDPOINT.ANALYZE_COMPANY_RESULTS(company_id),
     );
     return response.data;

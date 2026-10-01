@@ -15,9 +15,11 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { PAGE_ROUTES } from '@/constant/page-routes';
-import { DnaQuery } from '@/routes/bussiness/Bussiness-Query';
-import { RetryDnaMutation } from '@/routes/bussiness/Bussiness-Mutation';
+import { DnaQuery, OnboardingDetailsQuery } from '@/routes/bussiness/Bussiness-Query';
+import { AnalyzeCompanyMutation, RetryDnaMutation } from '@/routes/bussiness/Bussiness-Mutation';
 import { FOCUS_RING } from '@/utils/ui-classes';
+import useAuthStore from '@/store/AuthsStore';
+import { toast } from 'sonner';
 
 const SECTION_ICONS: Record<string, LucideIcon> = {
   overview: Dna,
@@ -41,14 +43,41 @@ function getSectionIcon(key: string, title: string): LucideIcon {
 }
 
 export default function VerifyDna() {
+  const { company_user_id } = useAuthStore();
   const { data: dna, isLoading } = DnaQuery();
+  const { data: onboarding } = OnboardingDetailsQuery();
   const { mutate: retryDna, isPending: isRetrying } = RetryDnaMutation();
+  const { mutate: analyzeCompany, isPending: isAnalyzing } = AnalyzeCompanyMutation();
+
   const [activeId, setActiveId] = useState('');
 
   const isReady = dna?.status === 'ready';
   const isFailed = dna?.status === 'failed';
   const isBuilding =
     isLoading || dna?.status === 'generating' || dna?.status === 'not_started';
+
+  const companyId = onboarding?.company_id || company_user_id;
+  const companyData =
+    dna?.document?.trim() ||
+    (dna?.sections ?? [])
+      .map((section) => `## ${section.title}\n${section.text}`)
+      .join('\n\n');
+
+  const handleContinue = () => {
+    if (!companyId) {
+      toast.error('Company ID is missing. Please complete onboarding again.');
+      return;
+    }
+    if (!companyData) {
+      toast.error('Company DNA data is missing. Please wait for DNA to finish.');
+      return;
+    }
+
+    analyzeCompany({
+      company_id: companyId,
+      company_data: companyData,
+    });
+  };
 
   const HIDDEN_SECTION_TITLES = new Set([
     'voice & tone',
@@ -254,12 +283,21 @@ export default function VerifyDna() {
                 <p className="text-sm text-neutral-500">
                   If this looks right, continue to your workspace setup.
                 </p>
-                <Link
-                  href={PAGE_ROUTES.COMPANY_OVERVIEW}
-                  className={`inline-flex h-11 items-center justify-center rounded-full bg-gradient-to-r from-[#2E2A9E] to-[#5B57E6] hover:from-[#4A46D0] hover:to-[#6B67E6] px-8 text-sm font-semibold text-white ${FOCUS_RING}`}
+                <button
+                  type="button"
+                  onClick={handleContinue}
+                  disabled={isAnalyzing || !companyId || !companyData}
+                  className={`inline-flex h-11 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2E2A9E] to-[#5B57E6] px-8 text-sm font-semibold text-white hover:from-[#4A46D0] hover:to-[#6B67E6] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
                 >
-                  Looks good to continue
-                </Link>
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      Analyzing company...
+                    </>
+                  ) : (
+                    'Looks good, continue'
+                  )}
+                </button>
               </div>
             </div>
           </div>
