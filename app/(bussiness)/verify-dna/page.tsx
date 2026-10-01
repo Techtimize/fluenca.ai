@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -81,7 +80,6 @@ export default function VerifyDna() {
   useEffect(() => {
     if (!sections.length) return;
     setActiveId((current) => current || sections[0].id);
-
     const observer = new IntersectionObserver(
       (entries) => {
         const hit = entries.find((entry) => entry.isIntersecting);
@@ -258,9 +256,9 @@ export default function VerifyDna() {
                 </p>
                 <Link
                   href={PAGE_ROUTES.COMPANY_OVERVIEW}
-                  className={`inline-flex h-11 items-center justify-center rounded-full bg-gradient-to-r from-[#2E2A9E] to-[#5B57E6] px-8 text-sm font-semibold text-white ${FOCUS_RING}`}
+                  className={`inline-flex h-11 items-center justify-center rounded-full bg-gradient-to-r from-[#2E2A9E] to-[#5B57E6] hover:from-[#4A46D0] hover:to-[#6B67E6] px-8 text-sm font-semibold text-white ${FOCUS_RING}`}
                 >
-                  Looks good, continue
+                  Looks good to continue
                 </Link>
               </div>
             </div>
