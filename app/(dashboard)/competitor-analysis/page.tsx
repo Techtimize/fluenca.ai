@@ -250,7 +250,7 @@ export default function CompetitorAnalysisPage() {
                           addCompetitor(linkedinInput, "linkedin");
                         }
                       }}
-                      placeholder="https://www.linkedin.com/company/systems-limited/"
+                      placeholder="https://www.linkedin.com/company"
                       className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
                     />
                     <Button

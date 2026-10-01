@@ -21,6 +21,8 @@ import Card from "@/components/shared/card";
 import type {
   CompetitorListItem,
   CompetitorsListResponse,
+  CompetitorLinkedInEmployee,
+  CompetitorJobOpening,
 } from "@/types/bussiness/competitoranalysis-type";
 
 function formatNumber(value?: number | null) {
@@ -178,6 +180,187 @@ function KvGrid({
   );
 }
 
+function formatLevel(level?: string | null) {
+  if (!level) return null;
+  return level.replace(/_/g, " ");
+}
+
+function employeeTitle(employee: CompetitorLinkedInEmployee) {
+  const title = employee.designation || employee.title || "";
+  if (!title) return "LinkedIn profile";
+  return title.length > 90 ? `${title.slice(0, 90)}…` : title;
+}
+
+function hiringSignalList(signals?: string[] | string | null) {
+  if (!signals) return [];
+  if (Array.isArray(signals)) return signals.filter(Boolean);
+  return [signals];
+}
+
+function LinkedInEmployeeBlock({ item }: { item: CompetitorListItem }) {
+  const analysis = item.linkedin_analysis;
+  const employees = item.employees ?? [];
+  const openings = item.job_openings ?? [];
+  const signals = hiringSignalList(item.hiring_signals);
+  const employeeCount =
+    item.linkedin_total_employees ??
+    analysis?.employee_count ??
+    item.employee_count ??
+    employees.length;
+  const profilesSampled = item.linkedin_profiles_sampled ?? employees.length;
+  const openRoles = analysis?.open_roles ?? analysis?.job_openings_count ?? openings.length;
+  const isHiring = item.is_hiring ?? analysis?.is_hiring ?? analysis?.active_hiring;
+  const companySize =
+    item.linkedin_employee_range ||
+    item.linkedin_company_size ||
+    item.company_size ||
+    analysis?.company_size;
+
+  const hasData =
+    employees.length > 0 ||
+    openings.length > 0 ||
+    signals.length > 0 ||
+    employeeCount != null ||
+    profilesSampled != null ||
+    openRoles != null ||
+    isHiring != null ||
+    companySize ||
+    analysis?.thought_leadership_score != null ||
+    analysis?.post_count != null;
+
+  if (!hasData) return null;
+
+  return (
+    <div className="mt-4 rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] p-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[12px] font-semibold text-neutral-800">LinkedIn talent</p>
+        <div className="flex flex-wrap gap-1.5">
+          {isHiring ? (
+            <span className="rounded-full bg-[#E6F7F4] px-2 py-0.5 text-[10px] font-medium text-[#0F766E]">
+              Hiring
+            </span>
+          ) : null}
+          {companySize ? (
+            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] text-neutral-600 ring-1 ring-[#E6E8F5]">
+              {companySize}
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <dl className="mt-3 grid grid-cols-3 gap-2">
+        <div className="rounded-xl bg-white p-2.5 ring-1 ring-[#E6E8F5]">
+          <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">Employees</dt>
+          <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+            {formatNumber(employeeCount)}
+          </dd>
+        </div>
+        <div className="rounded-xl bg-white p-2.5 ring-1 ring-[#E6E8F5]">
+          <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">Profiles</dt>
+          <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+            {formatNumber(profilesSampled)}
+          </dd>
+        </div>
+        <div className="rounded-xl bg-white p-2.5 ring-1 ring-[#E6E8F5]">
+          <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">Open roles</dt>
+          <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+            {formatNumber(openRoles)}
+          </dd>
+        </div>
+      </dl>
+
+      {(analysis?.post_count != null || analysis?.thought_leadership_score != null) && (
+        <p className="mt-2 text-[11px] text-neutral-500">
+          {[
+            analysis?.post_count != null ? `${analysis.post_count} LinkedIn posts` : null,
+            analysis?.thought_leadership_score != null
+              ? `Thought leadership ${analysis.thought_leadership_score}`
+              : null,
+            analysis?.is_thought_leader ? "Thought leader" : null,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+      )}
+
+      {employees.length ? (
+        <ul className="mt-3 space-y-2">
+          {employees.slice(0, 4).map((employee, index) => {
+            const personName = employee.name || `Employee ${index + 1}`;
+            const level = formatLevel(employee.level);
+            return (
+              <li
+                key={`${personName}-${employee.linkedin_url || index}`}
+                className="rounded-xl border border-[#E6E8F5] bg-white p-2.5"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <p className="text-[12px] font-semibold text-neutral-900">{personName}</p>
+                      {level ? (
+                        <span className="rounded-full bg-[#ECEBFF] px-2 py-0.5 text-[10px] font-medium capitalize text-[#5B57E6]">
+                          {level}
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-neutral-500">
+                      {employeeTitle(employee)}
+                    </p>
+                  </div>
+                  {employee.linkedin_url ? (
+                    <a
+                      href={employee.linkedin_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="shrink-0 text-[11px] font-medium text-[#5B57E6] hover:underline"
+                    >
+                      Profile
+                    </a>
+                  ) : null}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+
+      {openings.length ? (
+        <div className="mt-3">
+          <p className="mb-1.5 text-[11px] font-medium text-neutral-500">Open roles</p>
+          <ul className="space-y-1.5">
+            {openings.slice(0, 3).map((job: CompetitorJobOpening, index) => (
+              <li key={`${job.job_title || index}`} className="text-[12px] text-neutral-700">
+                {job.linkedin_url ? (
+                  <a
+                    href={job.linkedin_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-[#5B57E6] hover:underline"
+                  >
+                    {job.job_title || "Open role"}
+                  </a>
+                ) : (
+                  <span className="font-medium">{job.job_title || "Open role"}</span>
+                )}
+                {job.location ? (
+                  <span className="text-neutral-400"> · {job.location}</span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {signals.length ? (
+        <div className="mt-3">
+          <p className="mb-1.5 text-[11px] font-medium text-neutral-500">Hiring signals</p>
+          <ChipList items={signals.slice(0, 4)} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function CompetitorCards({ competitors }: { competitors: CompetitorListItem[] }) {
   return (
     <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -269,25 +452,7 @@ function CompetitorCards({ competitors }: { competitors: CompetitorListItem[] })
                 </div>
               ) : null}
 
-              {item.is_hiring != null || item.company_size || item.linkedin_employee_range ? (
-                <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
-                  {item.is_hiring ? (
-                    <span className="rounded-full bg-[#E6F7F4] px-2.5 py-1 font-medium text-[#0F766E]">
-                      Hiring
-                    </span>
-                  ) : null}
-                  {item.company_size || item.linkedin_employee_range ? (
-                    <span className="rounded-full border border-[#E6E8F5] bg-[#F8F9FF] px-2.5 py-1 text-neutral-600">
-                      {item.linkedin_employee_range || item.company_size}
-                    </span>
-                  ) : null}
-                  {item.linkedin_total_employees != null ? (
-                    <span className="rounded-full border border-[#E6E8F5] bg-[#F8F9FF] px-2.5 py-1 text-neutral-600">
-                      {formatNumber(item.linkedin_total_employees)} employees
-                    </span>
-                  ) : null}
-                </div>
-              ) : null}
+              <LinkedInEmployeeBlock item={item} />
 
               {item.services?.length ? (
                 <div className="mt-3">

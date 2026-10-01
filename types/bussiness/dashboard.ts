@@ -226,3 +226,19 @@ export interface DashboardData {
   discoveryWarnings: string[];
   analysisSuccess: boolean;
 }
+
+export interface CompetitorsPageData {
+  company: {
+    name: string;
+    subtitle: string;
+    logoInitials?: string;
+  };
+  lastUpdated: string;
+  stats: StatMetric[];
+  topCompetitors: CompetitorRow[];
+  contentTypes: ChartSegment[];
+  contentThemes: ChartSegment[];
+  hashtags: HashtagItem[];
+  trendingTopics: string[];
+  aiInsights: string[];
+}
