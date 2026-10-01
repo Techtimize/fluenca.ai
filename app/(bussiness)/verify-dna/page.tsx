@@ -51,13 +51,30 @@ export default function VerifyDna() {
   const isBuilding =
     isLoading || dna?.status === 'generating' || dna?.status === 'not_started';
 
+  const HIDDEN_SECTION_TITLES = new Set([
+    'voice & tone',
+    'voice and tone',
+    'things to avoid',
+    'company & team',
+    'company and team',
+  ]);
+
   const sections = useMemo(
     () =>
-      (dna?.sections ?? []).map((section) => ({
-        ...section,
-        id: section.key || section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        Icon: getSectionIcon(section.key, section.title),
-      })),
+      (dna?.sections ?? [])
+        .filter((section) => {
+          const title = section.title
+            .replace(/^#+\s*/, '')
+            .trim()
+            .toLowerCase();
+          const key = section.key.trim().toLowerCase().replace(/[_-]+/g, ' ');
+          return !HIDDEN_SECTION_TITLES.has(title) && !HIDDEN_SECTION_TITLES.has(key);
+        })
+        .map((section) => ({
+          ...section,
+          id: section.key || section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          Icon: getSectionIcon(section.key, section.title),
+        })),
     [dna?.sections],
   );
 
@@ -234,20 +251,6 @@ export default function VerifyDna() {
                   </section>
                 );
               })}
-
-              {dna?.document ? (
-                <section className="scroll-mt-8 border-t border-[#E6E8F5] py-10">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#5B57E6]">
-                    Full document
-                  </p>
-                  <h2 className="mt-1 text-xl font-semibold text-neutral-900 sm:text-2xl">
-                    Complete DNA brief
-                  </h2>
-                  <p className="mt-5 w-full whitespace-pre-line text-[15px] leading-7 text-neutral-700 sm:text-base sm:leading-8">
-                    {dna.document}
-                  </p>
-                </section>
-              ) : null}
 
               <div className="flex flex-col gap-3 border-t border-[#E6E8F5] pt-8 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-neutral-500">
