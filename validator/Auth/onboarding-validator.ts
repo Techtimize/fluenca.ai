@@ -10,6 +10,8 @@ export const OnboardingFormSchema = z
         language: z.string().min(2, { message: 'Please select a language.' }),
         website_url: z.string().min(1, { message: 'Please enter your website link.' }),
         target_country: z.string().min(2, { message: 'Please select a target country.' }),
+        instagram_username: z.string().min(2, { message: 'Please enter your Instagram username.' }),
+        linkedin_url: z.url({message: 'Please enter your LinkedIn URL.'}),
     });
 
 

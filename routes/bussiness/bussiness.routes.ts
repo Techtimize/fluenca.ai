@@ -23,7 +23,7 @@ function toQueryParams(params?: GoogleTrendQueryParams) {
 }
 
 export const WaitlistApi = async (email: string) => {
-    const response = await api.post(BUSSINESSENDPOINT.WAITLIST, { email: email });
+    const response = await api.post(`${process.env.NEXT_PUBLIC_WAITLIST_URL}`, { email: email });
     return response.data;
 }
 

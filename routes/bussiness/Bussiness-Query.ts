@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { DnaApi, OnboardingDetailsApi } from "./bussiness.routes";
 import {
+    AnalyzeCompanyResultsApi,
   GoogleTrendExploreApi,
   GoogleTrendFiltersApi,
   GoogleTrendNowApi,
@@ -71,6 +72,15 @@ export const GoogleTrendFiltersQuery = () => {
   return useQuery({
     queryKey: ["google-trend-filters"],
     queryFn: () => GoogleTrendFiltersApi(),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const AnalyzeCompanyResultsQuery = (company_user_id: string) => {
+  return useQuery({
+    queryKey: ["analyze-company-results", company_user_id],
+    queryFn: () => AnalyzeCompanyResultsApi(company_user_id),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

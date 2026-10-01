@@ -14,6 +14,7 @@ const DEFAULT_NAV: NavItem[] = [
   { id: "dashboard", label: "Dashboard", icon: "dashboard", href: "#" },
   { id: "trends", label: "Trends", icon: "trending", href: PAGE_ROUTES.TRENDS },
   { id: "overview", label: "Company overview", icon: "clipboard", href: PAGE_ROUTES.COMPANY_OVERVIEW },
+  { id: "dna", label: "Company DNA", icon: "dna", href: PAGE_ROUTES.DNA },
   { id: "billing", label: "Billing", icon: "billing", href: "#" },
 ];
 

@@ -22,10 +22,12 @@ import {
   LoginFormSchema,
   LoginFormValidator,
 } from '@/validator/Auth/login-validator';
+import useAuthStore from '@/store/AuthsStore';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const { onboarding_completed }: { onboarding_completed: boolean } = useAuthStore();
   const form = useForm<LoginFormValidator>({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {

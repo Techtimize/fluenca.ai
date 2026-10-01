@@ -6,6 +6,8 @@ export interface OnboardingRequestProps {
   website_url: string;
   target_country: string;
   target_city?: string | null;
+  instagram_username?: string | null;
+  linkedin_url?: string | null;
 }
 export interface OnboardingResponseProps {
   company_id: string;

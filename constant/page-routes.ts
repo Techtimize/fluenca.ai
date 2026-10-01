@@ -17,6 +17,7 @@ export const PAGE_ROUTES = {
     QUESTIONS: '/questions',
     ANALYZING: '/analyzing',
     VERIFY_DNA: '/verify-dna',
+    DNA: '/dna',
 
     // Dashboard
     DASHBOARD: '/dashboard',
