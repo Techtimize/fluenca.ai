@@ -51,6 +51,52 @@ export interface CompetitorListContentStrategy {
   primary_content_category?: string;
 }
 
+export interface CompetitorLinkedInEmployee {
+  name?: string;
+  level?: string;
+  title?: string;
+  designation?: string;
+  source?: string;
+  evidence?: string;
+  linkedin_url?: string | null;
+}
+
+export interface CompetitorJobOpening {
+  source?: string;
+  snippet?: string;
+  location?: string | null;
+  job_title?: string;
+  linkedin_url?: string | null;
+}
+
+export type CompetitorSizeRange = {
+  min?: number | string | null;
+  max?: number | string | null;
+};
+
+export interface CompetitorLinkedInAnalysis {
+  signals?: string[];
+  is_hiring?: boolean | null;
+  open_roles?: number | null;
+  post_count?: number | null;
+  b2b_signals?: string[];
+  company_size?: string | CompetitorSizeRange | null;
+  sample_posts?: Array<{
+    text?: string;
+    source?: string;
+    linkedin_url?: string | null;
+  }>;
+  active_hiring?: boolean | null;
+  content_themes?: string[];
+  employee_count?: number | null;
+  avg_post_length?: number | null;
+  is_thought_leader?: boolean | null;
+  positioning_focus?: string | null;
+  job_openings_count?: number | null;
+  thought_leadership_posts?: number | null;
+  thought_leadership_score?: number | null;
+}
+
 export interface CompetitorListItem {
   analysis_id?: string;
   prompt_id?: string;
@@ -78,11 +124,11 @@ export interface CompetitorListItem {
   linkedin_username?: string | null;
   threat_level?: string | null;
   is_hiring?: boolean | null;
-  company_size?: string | null;
+  company_size?: string | CompetitorSizeRange | null;
   employee_count?: number | null;
-  employees?: Array<Record<string, unknown>>;
-  job_openings?: string[];
-  hiring_signals?: unknown;
+  employees?: CompetitorLinkedInEmployee[];
+  job_openings?: CompetitorJobOpening[];
+  hiring_signals?: string[] | string | null;
   authenticity?: number | null;
   similarity?: number | null;
   niche_match?: number | null;
@@ -96,10 +142,10 @@ export interface CompetitorListItem {
     marketing?: number;
   };
   social_warnings?: string[];
-  linkedin_analysis?: Record<string, unknown>;
+  linkedin_analysis?: CompetitorLinkedInAnalysis;
   instagram_analysis?: Record<string, unknown>;
-  linkedin_company_size?: string | null;
-  linkedin_employee_range?: string | null;
+  linkedin_company_size?: string | CompetitorSizeRange | null;
+  linkedin_employee_range?: string | CompetitorSizeRange | null;
   linkedin_total_employees?: number | null;
   linkedin_profiles_sampled?: number | null;
 }

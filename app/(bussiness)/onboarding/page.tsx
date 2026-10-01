@@ -2,6 +2,7 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslations } from 'next-intl';
 import { OnboardingFormSchema, OnboardingFormValidator } from '@/validator/Auth/onboarding-validator';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -10,6 +11,7 @@ import { OnboardingMutation } from '@/routes/bussiness/Bussiness-Mutation';
 import { Button } from '@/components/ui/button';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
 import OnboardingSide from '@/components/onboardingside';
 import {
   SelectContent,
@@ -34,6 +36,7 @@ const selectTriggerClass =
   `${fieldControlClass} data-[size=default]:h-11 md:data-[size=default]:h-10 lg:data-[size=default]:h-10`;
 
 export default function Onboarding() {
+  const t = useTranslations('onboarding');
   const { mutate: onboardingMutation, isPending } = OnboardingMutation();
   const form = useForm<OnboardingFormValidator>({
     resolver: zodResolver(OnboardingFormSchema),
@@ -53,7 +56,10 @@ export default function Onboarding() {
 
   return (
     <div className="grid min-h-dvh w-full grid-cols-1 bg-white lg:h-dvh lg:grid-cols-2 lg:overflow-hidden">
-      <div className="flex w-full justify-center overflow-y-auto overscroll-contain px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-8 md:px-10 md:py-10 lg:h-full lg:items-center lg:overflow-y-auto lg:px-10 lg:py-6 xl:px-14">
+      <div className="relative flex w-full justify-center overflow-y-auto overscroll-contain px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-8 md:px-10 md:py-10 lg:h-full lg:items-center lg:overflow-y-auto lg:px-10 lg:py-6 xl:px-14">
+        <div className="absolute end-4 top-4 z-10 sm:end-6 sm:top-6">
+          <LanguageSwitcher variant="muted" />
+        </div>
         <div className="w-full max-w-md space-y-4 sm:space-y-5 md:max-w-xl md:space-y-5 lg:max-w-md lg:space-y-3 xl:max-w-lg">
           <Link href={PAGE_ROUTES.HOME} className="flex justify-center">
             <Image
@@ -68,10 +74,10 @@ export default function Onboarding() {
 
           <div className="space-y-1.5 text-center sm:space-y-2 lg:space-y-1">
             <h1 className="text-2xl font-semibold tracking-[0.04em] text-neutral-950 sm:text-[1.65rem] md:text-3xl lg:text-xl xl:text-2xl">
-              Tell us about your company
+              {t('title')}
             </h1>
             <p className="mx-auto max-w-sm px-1 text-sm font-light tracking-[0.04em] text-gray-500 sm:max-w-md sm:text-[0.95rem] md:max-w-lg md:text-base lg:max-w-sm lg:text-xs xl:text-sm">
-              Add a few details and let AI analyze your market opportunities.
+              {t('subtitle')}
             </p>
           </div>
 
@@ -86,9 +92,9 @@ export default function Onboarding() {
                 name="company_name"
                 render={({ field }) => (
                   <FormItem className="gap-1.5 lg:gap-1">
-                    <FormLabel className={labelClass}>Company Name</FormLabel>
+                    <FormLabel className={labelClass}>{t('companyName')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Company name" {...field} className={fieldControlClass} />
+                      <Input placeholder={t('companyNamePlaceholder')} {...field} className={fieldControlClass} />
                     </FormControl>
                     <FormMessage className={messageClass} />
                   </FormItem>
@@ -100,11 +106,11 @@ export default function Onboarding() {
                 name="primary_product_or_service"
                 render={({ field }) => (
                   <FormItem className="gap-1.5 lg:gap-1">
-                    <FormLabel className={labelClass}>Services</FormLabel>
+                    <FormLabel className={labelClass}>{t('services')}</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
-                        placeholder="Services"
+                        placeholder={t('servicesPlaceholder')}
                         {...field}
                         className={fieldControlClass}
                       />
@@ -121,11 +127,11 @@ export default function Onboarding() {
                   name="industry"
                   render={({ field }) => (
                     <FormItem className="min-w-0 gap-1.5 lg:gap-1">
-                      <FormLabel className={labelClass}>Industry</FormLabel>
+                      <FormLabel className={labelClass}>{t('industry')}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue placeholder="Select Industry" />
+                            <SelectValue placeholder={t('industryPlaceholder')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -148,11 +154,11 @@ export default function Onboarding() {
                   name="language"
                   render={({ field }) => (
                     <FormItem className="min-w-0 gap-1.5 lg:gap-1">
-                      <FormLabel className={labelClass}>Preferred Language</FormLabel>
+                      <FormLabel className={labelClass}>{t('language')}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue placeholder="Select Language" />
+                            <SelectValue placeholder={t('languagePlaceholder')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -178,11 +184,11 @@ export default function Onboarding() {
                   name="target_country"
                   render={({ field }) => (
                     <FormItem className="min-w-0 gap-1.5 lg:gap-1">
-                      <FormLabel className={labelClass}>Target Country</FormLabel>
+                      <FormLabel className={labelClass}>{t('country')}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue placeholder="Select Country" />
+                            <SelectValue placeholder={t('countryPlaceholder')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -205,13 +211,13 @@ export default function Onboarding() {
                   name="website_url"
                   render={({ field }) => (
                     <FormItem className="min-w-0 gap-1.5 lg:gap-1">
-                      <FormLabel className={labelClass}>Website Link</FormLabel>
+                      <FormLabel className={labelClass}>{t('website')}</FormLabel>
                       <FormControl>
                         <Input
                           type="url"
                           inputMode="url"
                           autoComplete="url"
-                          placeholder="Enter your website link"
+                          placeholder={t('websitePlaceholder')}
                           {...field}
                           className={fieldControlClass}
                         />
@@ -229,12 +235,12 @@ export default function Onboarding() {
                   name="instagram_username"
                   render={({ field }) => (
                     <FormItem className="min-w-0 gap-1.5 lg:gap-1">
-                      <FormLabel className={labelClass}>Instagram Username</FormLabel>
+                      <FormLabel className={labelClass}>{t('instagram')}</FormLabel>
                       <FormControl>
                         <Input
                           type="text"
                           autoComplete="username"
-                          placeholder="Instagram username"
+                          placeholder={t('instagramPlaceholder')}
                           {...field}
                           className={fieldControlClass}
                         />
@@ -249,12 +255,12 @@ export default function Onboarding() {
                   name="linkedin_url"
                   render={({ field }) => (
                     <FormItem className="min-w-0 gap-1.5 lg:gap-1">
-                      <FormLabel className={labelClass}>LinkedIn URL</FormLabel>
+                      <FormLabel className={labelClass}>{t('linkedin')}</FormLabel>
                       <FormControl>
                         <Input
                           type="url"
                           inputMode="url"
-                          placeholder="LinkedIn URL"
+                          placeholder={t('linkedinPlaceholder')}
                           {...field}
                           className={fieldControlClass}
                         />
@@ -273,7 +279,7 @@ export default function Onboarding() {
                 {isPending ? (
                   <Loader2 className="animate-spin text-white" />
                 ) : (
-                  'Generate Report'
+                  t('submit')
                 )}
               </Button>
             </form>

@@ -19,6 +19,7 @@ import {
   Megaphone,
   Search,
   TrendingUp,
+  Users,
   Zap,
 } from "lucide-react";
 
@@ -45,6 +46,7 @@ const ICONS: Record<string, LucideIcon> = {
   zap: Zap,
   dna: Dna,
   calendar: CalendarDays,
+  users: Users,
 };
 
 export function getIcon(name?: string): LucideIcon {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import SidebarRail, { DASHBOARD_CONTENT_OFFSET } from "@/components/dashboard/sidebarRail";
+import { useTranslations } from "next-intl";
 import TopBar from "@/components/dashboard/topBar";
 import TrendsExploreCard from "@/components/dashboard/trends/TrendsExploreCard";
 import TrendsFiltersBar from "@/components/dashboard/trends/TrendsFiltersBar";
@@ -24,6 +24,8 @@ import {
 } from "@/routes/bussiness/Bussiness-Query";
 
 export default function TrendsPage() {
+  const t = useTranslations("trends");
+  const tTop = useTranslations("topBar");
   const [geo, setGeo] = useState("US");
   const [category, setCategory] = useState("0");
   const [time, setTime] = useState("now 1-d");
@@ -89,14 +91,10 @@ export default function TrendsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,#E4E8FF_0%,#FFFFFF_50%)]">
-      <SidebarRail />
-
-      <div className={DASHBOARD_CONTENT_OFFSET}>
-        <main className="min-w-0">
+    <main className="min-w-0">
           <TopBar
             user={MOCK_DASHBOARD.user}
-            placeholder="Search trends..."
+            placeholder={tTop("searchTrends")}
             onSearch={(query) => {
               if (!query.trim()) return;
               setExploreInput(query);
@@ -106,10 +104,10 @@ export default function TrendsPage() {
 
           <div className="mb-4">
             <h1 className="text-2xl font-semibold text-neutral-900">
-              Google Trends
+              {t("title")}
             </h1>
             <p className="mt-1 text-sm text-neutral-500">
-              Track rising topics, traffic, and related queries in real time.
+              {t("subtitle")}
               {nowData.meta.geoLabel
                 ? ` Showing ${nowData.meta.geoLabel}${
                     nowData.meta.dateLabel
@@ -136,8 +134,7 @@ export default function TrendsPage() {
 
           {queryError ? (
             <Card className="mb-4 border-[#F5D0D0] bg-[#FFF7F7] p-4 text-sm text-[#B42318]">
-              Couldn&apos;t load some trend data. Check your connection and try
-              again.
+              {t("error")}
             </Card>
           ) : null}
 
@@ -150,15 +147,15 @@ export default function TrendsPage() {
 
           <div className="mt-4 grid gap-4 xl:grid-cols-2">
             <TrendsListCard
-              title="Trending now"
-              subtitle="Live breakout topics from Google Trends Now"
+              title={t("trendingNow")}
+              subtitle={t("trendingNowSub")}
               items={nowItems.slice(0, 8)}
               isLoading={nowQuery.isLoading}
               onSelect={handleSelectTrend}
             />
             <TrendsListCard
-              title="Rising queries"
-              subtitle="Fastest-growing related searches"
+              title={t("risingQueries")}
+              subtitle={t("risingQueriesSub")}
               items={risingItems.slice(0, 8)}
               isLoading={nowQuery.isLoading || trendingQuery.isLoading}
               showRising
@@ -169,8 +166,8 @@ export default function TrendsPage() {
           {nowData.topQueries.length > 0 ? (
             <div className="mt-4">
               <TrendsListCard
-                title="Top queries"
-                subtitle="Highest relative interest for this filter set"
+                title={t("topQueries")}
+                subtitle={t("topQueriesSub")}
                 items={nowData.topQueries.slice(0, 8)}
                 isLoading={nowQuery.isLoading}
                 onSelect={handleSelectTrend}
@@ -190,7 +187,5 @@ export default function TrendsPage() {
             />
           </div> */}
         </main>
-      </div>
-    </div>
   );
 }

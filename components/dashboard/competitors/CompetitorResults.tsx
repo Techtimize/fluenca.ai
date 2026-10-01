@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import {
   AlertTriangle,
   BarChart3,
@@ -21,6 +22,8 @@ import Card from "@/components/shared/card";
 import type {
   CompetitorListItem,
   CompetitorsListResponse,
+  CompetitorLinkedInEmployee,
+  CompetitorJobOpening,
 } from "@/types/bussiness/competitoranalysis-type";
 
 function formatNumber(value?: number | null) {
@@ -58,6 +61,17 @@ function toDisplayLabel(value: unknown): string {
   }
   if (typeof value === "object") {
     const record = value as Record<string, unknown>;
+    // API sometimes returns numeric ranges as { min, max }
+    if ("min" in record || "max" in record) {
+      const min = record.min;
+      const max = record.max;
+      if (typeof min === "number" && typeof max === "number") return `${min}–${max}`;
+      if (typeof min === "number") return `${min}+`;
+      if (typeof max === "number") return `≤${max}`;
+      if (min != null || max != null) {
+        return [min, max].filter((v) => v != null).map(String).join("–");
+      }
+    }
     const primary =
       record.technology ??
       record.service ??
@@ -178,6 +192,188 @@ function KvGrid({
   );
 }
 
+function formatLevel(level?: string | null) {
+  if (!level) return null;
+  return level.replace(/_/g, " ");
+}
+
+function employeeTitle(employee: CompetitorLinkedInEmployee) {
+  const title = employee.designation || employee.title || "";
+  if (!title) return "LinkedIn profile";
+  return title.length > 90 ? `${title.slice(0, 90)}…` : title;
+}
+
+function hiringSignalList(signals?: string[] | string | null) {
+  if (!signals) return [];
+  if (Array.isArray(signals)) return signals.filter(Boolean);
+  return [signals];
+}
+
+function LinkedInEmployeeBlock({ item }: { item: CompetitorListItem }) {
+  const analysis = item.linkedin_analysis;
+  const employees = item.employees ?? [];
+  const openings = item.job_openings ?? [];
+  const signals = hiringSignalList(item.hiring_signals);
+  const employeeCount =
+    item.linkedin_total_employees ??
+    analysis?.employee_count ??
+    item.employee_count ??
+    employees.length;
+  const profilesSampled = item.linkedin_profiles_sampled ?? employees.length;
+  const openRoles = analysis?.open_roles ?? analysis?.job_openings_count ?? openings.length;
+  const isHiring = item.is_hiring ?? analysis?.is_hiring ?? analysis?.active_hiring;
+  const companySizeLabel = toDisplayLabel(
+    item.linkedin_employee_range ||
+      item.linkedin_company_size ||
+      item.company_size ||
+      analysis?.company_size,
+  );
+
+  const hasData =
+    employees.length > 0 ||
+    openings.length > 0 ||
+    signals.length > 0 ||
+    employeeCount != null ||
+    profilesSampled != null ||
+    openRoles != null ||
+    isHiring != null ||
+    Boolean(companySizeLabel) ||
+    analysis?.thought_leadership_score != null ||
+    analysis?.post_count != null;
+
+  if (!hasData) return null;
+
+  return (
+    <div className="mt-4 rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] p-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[12px] font-semibold text-neutral-800">LinkedIn talent</p>
+        <div className="flex flex-wrap gap-1.5">
+          {isHiring ? (
+            <span className="rounded-full bg-[#E6F7F4] px-2 py-0.5 text-[10px] font-medium text-[#0F766E]">
+              Hiring
+            </span>
+          ) : null}
+          {companySizeLabel ? (
+            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] text-neutral-600 ring-1 ring-[#E6E8F5]">
+              {companySizeLabel}
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <dl className="mt-3 grid grid-cols-3 gap-2">
+        <div className="rounded-xl bg-white p-2.5 ring-1 ring-[#E6E8F5]">
+          <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">Employees</dt>
+          <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+            {formatNumber(employeeCount)}
+          </dd>
+        </div>
+        <div className="rounded-xl bg-white p-2.5 ring-1 ring-[#E6E8F5]">
+          <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">Profiles</dt>
+          <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+            {formatNumber(profilesSampled)}
+          </dd>
+        </div>
+        <div className="rounded-xl bg-white p-2.5 ring-1 ring-[#E6E8F5]">
+          <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">Open roles</dt>
+          <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+            {formatNumber(openRoles)}
+          </dd>
+        </div>
+      </dl>
+
+      {(analysis?.post_count != null || analysis?.thought_leadership_score != null) && (
+        <p className="mt-2 text-[11px] text-neutral-500">
+          {[
+            analysis?.post_count != null ? `${analysis.post_count} LinkedIn posts` : null,
+            analysis?.thought_leadership_score != null
+              ? `Thought leadership ${analysis.thought_leadership_score}`
+              : null,
+            analysis?.is_thought_leader ? "Thought leader" : null,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+      )}
+
+      {employees.length ? (
+        <ul className="mt-3 space-y-2">
+          {employees.slice(0, 4).map((employee, index) => {
+            const personName = employee.name || `Employee ${index + 1}`;
+            const level = formatLevel(employee.level);
+            return (
+              <li
+                key={`${personName}-${employee.linkedin_url || index}`}
+                className="rounded-xl border border-[#E6E8F5] bg-white p-2.5"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <p className="text-[12px] font-semibold text-neutral-900">{personName}</p>
+                      {level ? (
+                        <span className="rounded-full bg-[#ECEBFF] px-2 py-0.5 text-[10px] font-medium capitalize text-[#5B57E6]">
+                          {level}
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-neutral-500">
+                      {employeeTitle(employee)}
+                    </p>
+                  </div>
+                  {employee.linkedin_url ? (
+                    <a
+                      href={employee.linkedin_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="shrink-0 text-[11px] font-medium text-[#5B57E6] hover:underline"
+                    >
+                      Profile
+                    </a>
+                  ) : null}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+
+      {openings.length ? (
+        <div className="mt-3">
+          <p className="mb-1.5 text-[11px] font-medium text-neutral-500">Open roles</p>
+          <ul className="space-y-1.5">
+            {openings.slice(0, 3).map((job: CompetitorJobOpening, index) => (
+              <li key={`${job.job_title || index}`} className="text-[12px] text-neutral-700">
+                {job.linkedin_url ? (
+                  <a
+                    href={job.linkedin_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-[#5B57E6] hover:underline"
+                  >
+                    {job.job_title || "Open role"}
+                  </a>
+                ) : (
+                  <span className="font-medium">{job.job_title || "Open role"}</span>
+                )}
+                {job.location ? (
+                  <span className="text-neutral-400"> · {job.location}</span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {signals.length ? (
+        <div className="mt-3">
+          <p className="mb-1.5 text-[11px] font-medium text-neutral-500">Hiring signals</p>
+          <ChipList items={signals.slice(0, 4)} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function CompetitorCards({ competitors }: { competitors: CompetitorListItem[] }) {
   return (
     <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -269,25 +465,7 @@ function CompetitorCards({ competitors }: { competitors: CompetitorListItem[] })
                 </div>
               ) : null}
 
-              {item.is_hiring != null || item.company_size || item.linkedin_employee_range ? (
-                <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
-                  {item.is_hiring ? (
-                    <span className="rounded-full bg-[#E6F7F4] px-2.5 py-1 font-medium text-[#0F766E]">
-                      Hiring
-                    </span>
-                  ) : null}
-                  {item.company_size || item.linkedin_employee_range ? (
-                    <span className="rounded-full border border-[#E6E8F5] bg-[#F8F9FF] px-2.5 py-1 text-neutral-600">
-                      {item.linkedin_employee_range || item.company_size}
-                    </span>
-                  ) : null}
-                  {item.linkedin_total_employees != null ? (
-                    <span className="rounded-full border border-[#E6E8F5] bg-[#F8F9FF] px-2.5 py-1 text-neutral-600">
-                      {formatNumber(item.linkedin_total_employees)} employees
-                    </span>
-                  ) : null}
-                </div>
-              ) : null}
+              <LinkedInEmployeeBlock item={item} />
 
               {item.services?.length ? (
                 <div className="mt-3">
@@ -337,6 +515,7 @@ export default function CompetitorResults({
   errorMessage,
   onRunAnalysis,
 }: Props) {
+  const t = useTranslations("competitors");
   const result = data?.result;
   const competitors =
     result?.competitors?.length
@@ -357,8 +536,8 @@ export default function CompetitorResults({
             <Search className="size-4 animate-pulse" aria-hidden="true" />
           </span>
           <div>
-            <p className="text-sm font-medium text-neutral-900">Loading competitor results…</p>
-            <p className="mt-0.5 text-[13px] text-neutral-500">Fetching your latest analysis.</p>
+            <p className="text-sm font-medium text-neutral-900">{t("loading")}</p>
+            <p className="mt-0.5 text-[13px] text-neutral-500">{t("emptyBody")}</p>
           </div>
         </div>
       </Card>
@@ -368,7 +547,7 @@ export default function CompetitorResults({
   if (isError) {
     return (
       <Card className="border-rose-200 bg-rose-50/80 p-5 sm:p-6">
-        <p className="text-sm text-rose-700">{errorMessage || "Failed to load competitors."}</p>
+        <p className="text-sm text-rose-700">{errorMessage || t("error")}</p>
       </Card>
     );
   }
@@ -386,11 +565,10 @@ export default function CompetitorResults({
               <BarChart3 className="size-6" aria-hidden="true" />
             </span>
             <h2 className="mt-5 text-lg font-semibold text-neutral-900">
-              No competitor analysis yet
+              {t("emptyTitle")}
             </h2>
             <p className="mt-2 text-[14px] leading-6 text-neutral-500">
-              You don&apos;t have any competitor results. Run an AI discovery or add Instagram
-              usernames and LinkedIn URLs in manual mode to get started.
+              {t("emptyBody")}
             </p>
             {onRunAnalysis ? (
               <Button
@@ -399,7 +577,7 @@ export default function CompetitorResults({
                 className="mt-6 h-11 gap-2 rounded-full bg-[#5B57E6] px-5 text-white hover:bg-[#4A46D0]"
               >
                 <Sparkles className="size-4" />
-                Run competitor analysis
+                {t("runAnalysis")}
               </Button>
             ) : null}
           </div>
@@ -462,104 +640,6 @@ export default function CompetitorResults({
           </div>
         ) : null}
       </Card>
-
-      <Section title="Overview" description={overview?.market_position} icon={Building2}>
-        <KvGrid
-          items={[
-            { label: "Company type", value: overview?.company_type },
-            { label: "Region", value: overview?.region },
-            { label: "Market position", value: overview?.market_position },
-            {
-              label: "Digital presence",
-              value: overview?.digital_presence?.label || formatPercent(overview?.digital_presence?.score),
-            },
-            { label: "Competitors analyzed", value: overview?.competitors_analyzed },
-            { label: "Posts analyzed", value: overview?.posts_analyzed },
-            { label: "Executive score", value: exec?.score },
-          ]}
-        />
-        {(exec?.strengths?.length || exec?.weaknesses?.length) ? (
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <div>
-              <p className="mb-2 text-[12px] font-medium text-emerald-700">Strengths</p>
-              <BulletList items={exec?.strengths} />
-            </div>
-            <div>
-              <p className="mb-2 text-[12px] font-medium text-rose-700">Weaknesses</p>
-              <BulletList items={exec?.weaknesses} />
-            </div>
-          </div>
-        ) : null}
-      </Section>
-
-      <Section title="Company profile" icon={Users}>
-        <KvGrid
-          items={[
-            { label: "Name", value: company?.name },
-            { label: "Website", value: company?.website },
-            { label: "Instagram", value: company?.instagram_username },
-            { label: "LinkedIn", value: company?.linkedin_url },
-            { label: "Positioning", value: dna?.positioning },
-            { label: "Business model", value: dna?.business_model },
-          ]}
-        />
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <div>
-            <p className="mb-2 text-[12px] font-medium text-neutral-600">Services</p>
-            <ChipList items={company?.services || dna?.services} />
-          </div>
-          <div>
-            <p className="mb-2 text-[12px] font-medium text-neutral-600">Keywords</p>
-            <ChipList items={dna?.keywords || company?.extracted_signals?.keywords} />
-          </div>
-          <div>
-            <p className="mb-2 text-[12px] font-medium text-neutral-600">Technologies</p>
-            <ChipList items={dna?.technologies || company?.extracted_signals?.technologies} />
-          </div>
-          <div>
-            <p className="mb-2 text-[12px] font-medium text-neutral-600">Target audience</p>
-            <ChipList items={dna?.target_audience} />
-          </div>
-          <div>
-            <p className="mb-2 text-[12px] font-medium text-neutral-600">Pain points</p>
-            <BulletList items={dna?.pain_points} />
-          </div>
-          <div>
-            <p className="mb-2 text-[12px] font-medium text-neutral-600">Industries</p>
-            <ChipList items={dna?.industries} />
-          </div>
-        </div>
-      </Section>
-
-      <Section title="Digital presence" icon={BarChart3}>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {(["website", "instagram", "linkedin"] as const).map((channel) => {
-            const item = overview?.digital_presence?.channels?.[channel];
-            return (
-              <div key={channel} className="rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] p-4">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[13px] font-semibold capitalize text-neutral-900">{channel}</p>
-                  <span className="text-[12px] font-medium text-[#5B57E6]">
-                    {typeof item?.score === "number" ? formatPercent(item.score) : item?.status || "—"}
-                  </span>
-                </div>
-                {item?.strengths?.length ? (
-                  <div className="mt-3">
-                    <p className="mb-1 text-[11px] font-medium text-emerald-700">Strengths</p>
-                    <BulletList items={item.strengths} />
-                  </div>
-                ) : null}
-                {item?.weaknesses?.length ? (
-                  <div className="mt-3">
-                    <p className="mb-1 text-[11px] font-medium text-rose-700">Weaknesses</p>
-                    <BulletList items={item.weaknesses} />
-                  </div>
-                ) : null}
-              </div>
-            );
-          })}
-        </div>
-      </Section>
 
       <Section
         title="Market position"

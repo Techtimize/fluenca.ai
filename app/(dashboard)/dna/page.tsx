@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import {
   Building2,
   CircleCheck,
@@ -18,7 +19,6 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import SidebarRail from "@/components/dashboard/sidebarRail";
 import { InstagramIcon, LinkedInIcon } from "@/components/shared/brandIcons";
 import TopBar from "@/components/dashboard/topBar";
 import { MOCK_DASHBOARD } from "@/lib/mock/dashboard";
@@ -27,10 +27,7 @@ import { AnalyzeCompanyResultsQuery } from "@/routes/bussiness/Bussiness-Query";
 import type { AnalyzeCompanyResponse, AnalyzeCompanyResultsResponse } from "@/types/bussiness/analyzecompany-type";
 
 const PAIN_POINTS_PREVIEW = 8;
-
-/* ---------- Helpers ---------- */
 const hasValue = (value: unknown) => value !== null && value !== undefined && value !== "";
-
 const hostLabel = (url?: string | null) =>
   url ? url.replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/$/, "") : "";
 
@@ -43,8 +40,6 @@ const initials = (name?: string | null) =>
     .join("") || "—";
 
 const asNumber = (value: unknown) => (typeof value === "number" ? value : null);
-
-/* ---------- Building blocks ---------- */
 function Panel({ title, icon: Icon, action, children }: { title: string; icon: LucideIcon; action?: ReactNode; children: ReactNode }) {
   return (
     <section className="rounded-3xl border border-[#E6E8F5] bg-white p-5 shadow-[0_4px_20px_rgba(17,24,39,0.04)]">
@@ -153,7 +148,6 @@ function Empty() {
   return <p className="text-[13px] text-neutral-400">No data yet</p>;
 }
 
-/* ---------- Company header (shown in place of the dashboard CompanyCard) ---------- */
 function AnalyzeCompanyHeader({ data }: { data: AnalyzeCompanyResponse }) {
   const company = data.company;
   const brief = data.company_summary?.brief;
@@ -208,7 +202,6 @@ function AnalyzeCompanyHeader({ data }: { data: AnalyzeCompanyResponse }) {
   );
 }
 
-/* ---------- Main ---------- */
 function AnalyzeCompanyInsights({ data }: { data: AnalyzeCompanyResponse }) {
   const [showAllPains, setShowAllPains] = useState(false);
 
@@ -551,39 +544,34 @@ function AnalyzeCompanyInsights({ data }: { data: AnalyzeCompanyResponse }) {
 
 /* ---------- Page ---------- */
 export default function DnaPage() {
+  const t = useTranslations("dna");
+  const tTop = useTranslations("topBar");
   const companyUserId = useAuthStore((state) => state.company_user_id);
   const { data: analyzeCompanyResults, isLoading, isError } = AnalyzeCompanyResultsQuery(companyUserId);
-  // The results API returns the analysis wrapped in `result`.
   const analysis = (analyzeCompanyResults as AnalyzeCompanyResultsResponse | undefined)?.result;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,#E9ECFF_0%,#FFFFFF_45%)]">
-      <SidebarRail />
+    <main className="min-w-0">
+      <TopBar user={MOCK_DASHBOARD.user} placeholder={tTop("searchDna")} />
 
-      <div className="px-4 pb-10 pt-4 sm:px-6 md:pl-24 lg:pr-8">
-        <main className="min-w-0">
-          <TopBar user={MOCK_DASHBOARD.user} placeholder="Search company DNA..." />
+      {isLoading ? (
+        <div className="rounded-3xl border border-[#E6E8F5] bg-white/90 px-5 py-8 text-sm text-neutral-600">
+          {t("loading")}
+        </div>
+      ) : null}
 
-          {isLoading ? (
-            <div className="rounded-3xl border border-[#E6E8F5] bg-white/90 px-5 py-8 text-sm text-neutral-600">
-              Loading company analysis…
-            </div>
-          ) : null}
+      {isError ? (
+        <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+          {t("error")}
+        </div>
+      ) : null}
 
-          {isError ? (
-            <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
-              Failed to load company analysis.
-            </div>
-          ) : null}
-
-          {analysis ? (
-            <>
-              <AnalyzeCompanyHeader data={analysis} />
-              <AnalyzeCompanyInsights data={analysis} />
-            </>
-          ) : null}
-        </main>
-      </div>
-    </div>
+      {analysis ? (
+        <>
+          <AnalyzeCompanyHeader data={analysis} />
+          <AnalyzeCompanyInsights data={analysis} />
+        </>
+      ) : null}
+    </main>
   );
 }

@@ -1,13 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import AnalyticsSection from "@/components/dashboard/cards/analyticsSection";
 import AnalyzeCompanyInsights from "@/components/dashboard/analyzeCompanyInsights";
 import ChatInput from "@/components/dashboard/chat/chatInput";
 import ChatPanel from "@/components/dashboard/chat/chatPanel";
 import CompanyCard from "@/components/dashboard/cards/companyCard";
 import DocumentationCard from "@/components/dashboard/documentationCard";
-import SidebarRail, { DASHBOARD_CONTENT_OFFSET } from "@/components/dashboard/sidebarRail";
 import TopBar from "@/components/dashboard/topBar";
 import { mapAnalyzeCompanyToDashboard } from "@/lib/dashboard/map-analyze-company";
 import { MOCK_DASHBOARD } from "@/lib/mock/dashboard";
@@ -19,6 +19,7 @@ import type { AnalyzeCompanyResultsResponse } from "@/types/bussiness/analyzecom
 import { stripMarkdown } from "@/utils/text-utils";
 
 export default function DashboardPage() {
+  const t = useTranslations("dashboard");
   const companyId = useAuthStore((s) => s.company_user_id);
   const company_name = useAuthStore((s) => s.company_name);
 
@@ -63,20 +64,20 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,#E4E8FF_0%,#FFFFFF_50%)]">
-      <SidebarRail />
-
+    <>
       <div
-        className={`${DASHBOARD_CONTENT_OFFSET} ${
-          chatOpen ? "pb-4 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-4" : "pb-32"
-        }`}
+        className={
+          chatOpen
+            ? "pb-4 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-4"
+            : "pb-32"
+        }
       >
         <main className="min-w-0">
           <TopBar user={user} />
 
           {!hasCompanyId ? (
             <div className="mb-4 rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
-              No company analysis ID found. Complete analyze company first.
+              {t("noCompanyId")}
             </div>
           ) : null}
 
@@ -126,6 +127,6 @@ export default function DashboardPage() {
       </div>
 
       {!chatOpen && <ChatInput onOpen={() => setChatOpen(true)} onSend={handleSend} />}
-    </div>
+    </>
   );
 }

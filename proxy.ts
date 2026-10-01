@@ -4,6 +4,7 @@ export function proxy(request: NextRequest) {
     const accessToken = request.cookies.get('access_token')?.value;
     const onboardingCompleted =
         request.cookies.get('onboarding_completed')?.value === 'true';
+    const role = request.cookies.get('role')?.value?.toLowerCase() ?? '';
     const path = request.nextUrl.pathname;
     if (
         path.startsWith('/verify-dna') ||
@@ -17,7 +18,13 @@ export function proxy(request: NextRequest) {
 
     if (accessToken) {
         if (path.startsWith('/login') || path.startsWith('/signup')) {
-            const destination = onboardingCompleted ? '/dashboard' : '/onboarding';
+            const isSuperAdmin =
+                role === 'super_admin' || role === 'superadmin' || role === 'admin';
+            const destination = isSuperAdmin
+                ? '/superadmin'
+                : onboardingCompleted
+                  ? '/dashboard'
+                  : '/onboarding';
             return NextResponse.redirect(new URL(destination, request.url));
         }
     } else {
@@ -25,7 +32,8 @@ export function proxy(request: NextRequest) {
             path.startsWith('/dashboard') ||
             path.startsWith('/dna') ||
             path.startsWith('/trends') ||
-            path.startsWith('/company-overview')
+            path.startsWith('/company-overview') ||
+            path.startsWith('/superadmin')
         ) {
             return NextResponse.redirect(new URL('/login', request.url));
         }
@@ -47,5 +55,6 @@ export const config = {
         '/dna/:path*',
         '/trends/:path*',
         '/company-overview/:path*',
+        '/superadmin/:path*',
     ],
 };
