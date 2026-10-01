@@ -1,112 +1,578 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { useState, type ReactNode } from "react";
 import {
-  ArrowUpRight,
   Building2,
-  Crosshair,
-  Dna,
-  Globe2,
-  Layers3,
-  Sparkles,
+  CircleCheck,
+  CircleHelp,
+  Compass,
+  ExternalLink,
+  Gem,
+  MapPin,
+  Rocket,
+  Star,
   Target,
+  ThumbsUp,
+  TrendingUp,
+  TriangleAlert,
   Users,
-  Wrench,
+  type LucideIcon,
 } from "lucide-react";
 import SidebarRail from "@/components/dashboard/sidebarRail";
 import TopBar from "@/components/dashboard/topBar";
-import Card from "@/components/shared/card";
-import { PAGE_ROUTES } from "@/constant/page-routes";
-import { MOCK_COMPANY_DNA } from "@/lib/mock/company-dna";
 import { MOCK_DASHBOARD } from "@/lib/mock/dashboard";
-import { FOCUS_RING } from "@/utils/ui-classes";
-import { AnalyzeCompanyResultsApi } from "@/routes/bussiness/bussiness.routes";
 import useAuthStore from "@/store/AuthsStore";
 import { AnalyzeCompanyResultsQuery } from "@/routes/bussiness/Bussiness-Query";
+import type { AnalyzeCompanyResponse, AnalyzeCompanyResultsResponse } from "@/types/bussiness/analyzecompany-type";
 
-type DnaSection = {
-  id: string;
-  title: string;
-  icon: typeof Dna;
-};
+const PAIN_POINTS_PREVIEW = 8;
 
-const SECTIONS: DnaSection[] = [
-  { id: "overview", title: "DNA overview", icon: Dna },
-  { id: "positioning", title: "Positioning", icon: Crosshair },
-  { id: "audience", title: "Audience", icon: Users },
-  { id: "services", title: "Services & tech", icon: Wrench },
-  { id: "market", title: "Market signals", icon: Layers3 },
-  { id: "differentiators", title: "Differentiators", icon: Sparkles },
-];
+/* ---------- Helpers ---------- */
+const hasValue = (value: unknown) => value !== null && value !== undefined && value !== "";
 
-function Chip({ children }: { children: string }) {
+const hostLabel = (url?: string | null) =>
+  url ? url.replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/$/, "") : "";
+
+const initials = (name?: string | null) =>
+  (name ?? "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase())
+    .join("") || "—";
+
+const asNumber = (value: unknown) => (typeof value === "number" ? value : null);
+
+/* ---------- Brand icons (lucide has no brand icons) ---------- */
+function LinkedInIcon({ className = "size-4" }: { className?: string }) {
   return (
-    <span className="rounded-full border border-[#E6E8F5] bg-[#F6F7FD] px-3 py-1 text-[12px] text-neutral-700">
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm7 0h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.5c0-1.31-.02-3-1.83-3-1.83 0-2.11 1.43-2.11 2.9V21h-4V9Z" />
+    </svg>
+  );
+}
+
+function InstagramIcon({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className} aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+/* ---------- Building blocks ---------- */
+function Panel({ title, icon: Icon, action, children }: { title: string; icon: LucideIcon; action?: ReactNode; children: ReactNode }) {
+  return (
+    <section className="rounded-3xl border border-[#E6E8F5] bg-white p-5 shadow-[0_4px_20px_rgba(17,24,39,0.04)]">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="grid size-9 place-items-center rounded-full bg-neutral-100 text-neutral-700">
+            <Icon className="size-4" aria-hidden="true" />
+          </span>
+          <h3 className="text-[15px] font-semibold text-neutral-900">{title}</h3>
+        </div>
+        {action}
+      </div>
       {children}
+    </section>
+  );
+}
+
+function StatTile({ label, value, icon, progress }: { label: string; value: string; icon: ReactNode; progress?: number | null }) {
+  return (
+    <div className="rounded-2xl border border-[#E6E8F5] bg-white p-4 shadow-[0_4px_20px_rgba(17,24,39,0.04)]">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-neutral-500">{label}</p>
+        <span className="text-neutral-500">{icon}</span>
+      </div>
+      <p className="mt-3 text-2xl font-semibold text-neutral-900">{value}</p>
+      {typeof progress === "number" ? <ProgressBar value={progress} className="mt-3" /> : null}
+    </div>
+  );
+}
+
+function ProgressBar({ value, tone = "green", className = "" }: { value: number; tone?: "green" | "orange"; className?: string }) {
+  return (
+    <div className={`h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 ${className}`}>
+      <div
+        className={`h-full rounded-full ${tone === "green" ? "bg-emerald-500" : "bg-amber-500"}`}
+        style={{ width: `${Math.min(Math.max(value, 0), 100)}%` }}
+      />
+    </div>
+  );
+}
+
+function KvRows({ items }: { items: Array<{ label: string; value: ReactNode }> }) {
+  const visible = items.filter((item) => hasValue(item.value));
+  if (!visible.length) return <Empty />;
+  return (
+    <dl className="divide-y divide-neutral-100">
+      {visible.map((item) => (
+        <div key={item.label} className="flex items-start justify-between gap-4 py-3 text-[13px]">
+          <dt className="shrink-0 text-neutral-500">{item.label}</dt>
+          <dd className="text-right font-medium text-neutral-800">{item.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function ItemList({ items, icon: Icon, iconClass }: { items?: string[] | null; icon: LucideIcon; iconClass: string }) {
+  if (!items?.length) return <Empty />;
+  return (
+    <ul className="divide-y divide-neutral-100 rounded-2xl border border-[#E6E8F5] px-4">
+      {items.map((item) => (
+        <li key={item} className="flex items-start gap-2.5 py-2.5 text-[13px] text-neutral-800">
+          <Icon className={`mt-0.5 size-4 shrink-0 ${iconClass}`} aria-hidden="true" />
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ListHeading({ label, count, icon: Icon, className }: { label: string; count: number; icon: LucideIcon; className: string }) {
+  return (
+    <p className={`mb-2 flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.06em] ${className}`}>
+      <Icon className="size-4" aria-hidden="true" />
+      {label}
+      <span className="font-normal text-neutral-400">({count})</span>
+    </p>
+  );
+}
+
+function ExternalValue({ href, label }: { href?: string | null; label: string }) {
+  if (!href) return null;
+  return (
+    <a href={href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:underline">
+      {label}
+      <ExternalLink className="size-3.5" aria-hidden="true" />
+    </a>
+  );
+}
+
+function PriorityPill({ value }: { value?: string | null }) {
+  if (!value) return null;
+  const high = value.toUpperCase() === "HIGH";
+  return (
+    <span
+      className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+        high ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" : "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
+      }`}
+    >
+      {value.toUpperCase()}
     </span>
   );
 }
 
-function SectionCard({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description?: string;
-  children: ReactNode;
-}) {
+function Empty() {
+  return <p className="text-[13px] text-neutral-400">No data yet</p>;
+}
+
+/* ---------- Company header (shown in place of the dashboard CompanyCard) ---------- */
+function AnalyzeCompanyHeader({ data }: { data: AnalyzeCompanyResponse }) {
+  const company = data.company;
+  const brief = data.company_summary?.brief;
+
   return (
-    <Card className="p-5 sm:p-6">
-      <h3 className="text-[15px] font-semibold text-neutral-900">{title}</h3>
-      {description ? (
-        <p className="mt-1 text-[13px] leading-5 text-neutral-500">{description}</p>
-      ) : null}
-      <div className="mt-4">{children}</div>
-    </Card>
+    <section className="rounded-3xl border border-[#E6E8F5] bg-white p-5 shadow-[0_4px_20px_rgba(17,24,39,0.04)] sm:p-6">
+      <div className="flex items-start gap-4">
+        <span className="grid size-14 shrink-0 place-items-center rounded-full bg-neutral-100 text-lg font-semibold text-neutral-700">
+          {initials(company?.name)}
+        </span>
+        <div className="min-w-0 space-y-2">
+          <h2 className="flex items-center gap-2 text-xl font-semibold text-neutral-900">
+            {company?.name || "Your company"}
+            {company?.website ? (
+              <a href={company.website} target="_blank" rel="noreferrer" aria-label="Open website" className="text-neutral-500 hover:text-neutral-800">
+                <ExternalLink className="size-4" />
+              </a>
+            ) : null}
+          </h2>
+          {brief?.website_signals?.summary ? (
+            <p className="flex gap-1.5 text-[13px] leading-5 text-neutral-600">
+              <MapPin className="mt-0.5 size-3.5 shrink-0 text-rose-400" aria-hidden="true" />
+              {brief.website_signals.summary}
+            </p>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-2 text-[12px]">
+            {company?.industry ? <span className="rounded-full border border-[#E6E8F5] px-3 py-1 font-medium text-neutral-800">{company.industry}</span> : null}
+            {company?.website ? (
+              <span className="text-neutral-600">
+                <ExternalValue href={company.website} label={hostLabel(company.website)} />
+              </span>
+            ) : null}
+            {company?.business_model ? <span className="rounded-full border border-[#E6E8F5] px-3 py-1 font-medium text-neutral-800">{company.business_model}</span> : null}
+          </div>
+          {company?.positioning ? <p className="text-[13px] text-neutral-600">{company.positioning}</p> : null}
+          <div className="flex items-center gap-2 pt-1">
+            {company?.linkedin_url ? (
+              <a href={company.linkedin_url} target="_blank" rel="noreferrer" aria-label="LinkedIn" className="grid size-9 place-items-center rounded-full border border-[#E6E8F5] text-[#0A66C2] hover:bg-neutral-50">
+                <LinkedInIcon />
+              </a>
+            ) : null}
+            {company?.instagram_url ? (
+              <a href={company.instagram_url} target="_blank" rel="noreferrer" aria-label="Instagram" className="grid size-9 place-items-center rounded-full border border-[#E6E8F5] text-[#E1306C] hover:bg-neutral-50">
+                <InstagramIcon />
+              </a>
+            ) : null}
+            {company?.instagram_username ? <span className="text-[12px] text-neutral-500">@{company.instagram_username.replace(/^@/, "")}</span> : null}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
-export default function DnaPage() {
-  const data = MOCK_COMPANY_DNA;
-  const [activeId, setActiveId] = useState(SECTIONS[0].id);
+/* ---------- Main ---------- */
+function AnalyzeCompanyInsights({ data }: { data: AnalyzeCompanyResponse }) {
+  const [showAllPains, setShowAllPains] = useState(false);
 
-  const tagCount = useMemo(
-    () =>
-      data.dna.services.length +
-      data.dna.keywords.length +
-      data.dna.technologies.length +
-      data.dna.target_audience.length +
-      data.dna.differentiators.length,
-    [data.dna],
+  const company = data.company;
+  const snap = data.executive_snapshot;
+  const presence = data.digital_presence;
+  const market = data.market_position;
+  const positioning = data.positioning_analysis;
+  const strengths = data.strengths_and_weaknesses;
+  const instagram = (data.company_analysis?.instagram ?? {}) as Record<string, unknown>;
+
+  const painPoints = company?.pain_points ?? [];
+  const visiblePains = showAllPains ? painPoints : painPoints.slice(0, PAIN_POINTS_PREVIEW);
+  const audience = snap?.primary_customers?.length ? snap.primary_customers : company?.target_audience ?? [];
+  const growth = (data.growth_opportunities ?? []).filter((item) => item.area || item.finding);
+  const actions = (data.recommended_actions ?? []).filter((item) => item.title || item.action);
+
+  const instagramScore = asNumber(presence?.instagram?.score);
+  const linkedinScore = asNumber(presence?.linkedin?.score);
+  const differentiation = asNumber(market?.differentiation_strength);
+  const clarity = asNumber(market?.positioning_clarity);
+
+  const igFollowers = presence?.instagram?.followers ?? asNumber(instagram.followers);
+  const igEngagement = presence?.instagram?.engagement_rate ?? asNumber(instagram.engagement_rate);
+  const igHashtags = Array.isArray(instagram.top_hashtags) ? (instagram.top_hashtags as Array<{ tag?: string; count?: number }>) : [];
+  const showInstagram = hasValue(igFollowers) || hasValue(igEngagement) || igHashtags.length > 0;
+
+  return (
+    <div className="mt-4 space-y-4">
+      {/* Score tiles */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <StatTile
+          label="Differentiation score"
+          value={differentiation !== null ? `${differentiation} / 100` : "—"}
+          icon={<Star className="size-4" />}
+          progress={differentiation}
+        />
+        <StatTile label="Market focus" value={market?.geographic_focus || "—"} icon={<Target className="size-4" />} />
+        <StatTile label="Website score" value={hasValue(presence?.website?.score) ? String(presence?.website?.score) : "—"} icon={<Compass className="size-4" />} />
+        <StatTile
+          label="Instagram score"
+          value={instagramScore !== null ? String(instagramScore) : presence?.instagram?.status || "—"}
+          icon={<InstagramIcon />}
+        />
+        <StatTile
+          label="LinkedIn score"
+          value={linkedinScore !== null ? String(linkedinScore) : presence?.linkedin?.status || "—"}
+          icon={<LinkedInIcon />}
+        />
+      </div>
+
+      {/* Overview row */}
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Panel title="Enterprise Overview" icon={Target}>
+          <KvRows
+            items={[
+              { label: "Industry", value: company?.industry },
+              { label: "Business maturity", value: snap?.business_maturity },
+              { label: "Business Model", value: snap?.business_model },
+              { label: "Company type", value: snap?.company_type },
+              { label: "Primary market", value: snap?.primary_market },
+              { label: "Core offering", value: snap?.core_offering },
+              { label: "Website", value: company?.website ? <ExternalValue href={company.website} label={hostLabel(company.website)} /> : null },
+              { label: "LinkedIn", value: company?.linkedin_url ? <ExternalValue href={company.linkedin_url} label="Open" /> : null },
+              {
+                label: "Instagram",
+                value: company?.instagram_username ? (
+                  <ExternalValue href={company.instagram_url} label={`@${company.instagram_username.replace(/^@/, "")}`} />
+                ) : null,
+              },
+            ]}
+          />
+        </Panel>
+
+        <Panel
+          title={`Pain Points (${painPoints.length})`}
+          icon={TriangleAlert}
+          action={
+            painPoints.length > PAIN_POINTS_PREVIEW ? (
+              <button type="button" onClick={() => setShowAllPains((value) => !value)} className="text-[12px] text-neutral-500 hover:text-neutral-800">
+                {showAllPains ? "Show less" : "View all"}
+              </button>
+            ) : null
+          }
+        >
+          {painPoints.length ? (
+            <>
+              <ul className="space-y-2.5">
+                {visiblePains.map((item) => (
+                  <li key={item} className="flex gap-2 text-[13px] leading-5 text-neutral-800">
+                    <TriangleAlert className="mt-0.5 size-4 shrink-0 text-amber-500" aria-hidden="true" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              {!showAllPains && painPoints.length > PAIN_POINTS_PREVIEW ? (
+                <button type="button" onClick={() => setShowAllPains(true)} className="mt-3 text-[12px] text-neutral-500 hover:text-neutral-800">
+                  + {painPoints.length - PAIN_POINTS_PREVIEW} more
+                </button>
+              ) : null}
+            </>
+          ) : (
+            <Empty />
+          )}
+        </Panel>
+
+        <Panel title="Target Audience" icon={Users}>
+          {audience.length ? (
+            <ul className="space-y-2.5">
+              {audience.map((item) => (
+                <li key={item} className="flex items-center gap-2.5 rounded-2xl border border-[#E6E8F5] px-4 py-3 text-[13px] font-medium text-neutral-800">
+                  <Users className="size-4 shrink-0 text-neutral-500" aria-hidden="true" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <Empty />
+          )}
+        </Panel>
+
+        <Panel title="Positioning" icon={Compass}>
+          <div className="space-y-4 text-[13px] leading-6">
+            {company?.positioning ? <p className="text-neutral-600">{company.positioning}</p> : null}
+            {positioning?.recommended_positioning ? <p className="font-medium text-emerald-600">{positioning.recommended_positioning}</p> : null}
+            {company?.value_proposition ? (
+              <div>
+                <p className="mb-2 flex items-center gap-2 font-semibold text-neutral-800">
+                  <Gem className="size-4" aria-hidden="true" />
+                  Value Proposition:
+                </p>
+                <p className="text-neutral-600">{company.value_proposition}</p>
+              </div>
+            ) : null}
+            {!company?.positioning && !company?.value_proposition ? <Empty /> : null}
+          </div>
+        </Panel>
+      </div>
+
+      {/* Analysis row */}
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Panel title="Market Position" icon={Target}>
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-[#E6E8F5] bg-neutral-50 p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-500">Market position</p>
+              <p className="mt-1 text-lg font-semibold text-neutral-900">{market?.position || "—"}</p>
+              {market?.category ? <p className="mt-1 text-[13px] text-neutral-500">{market.category}</p> : null}
+            </div>
+            {market?.assessment ? <p className="border-l-2 border-neutral-300 pl-3 text-[13px] text-neutral-600">{market.assessment}</p> : null}
+            <div className="rounded-2xl border border-[#E6E8F5] px-4">
+              <KvRows
+                items={[
+                  { label: "Category", value: market?.category },
+                  { label: "Position in market", value: market?.position },
+                  { label: "Geographic focus", value: market?.geographic_focus },
+                  { label: "Enterprise focus", value: market?.enterprise_focus },
+                  { label: "Specialization", value: market?.specialization },
+                  { label: "Service breadth", value: market?.service_breadth },
+                ]}
+              />
+            </div>
+            {differentiation !== null || clarity !== null ? (
+              <div className="space-y-4 rounded-2xl border border-[#E6E8F5] p-4 text-[13px]">
+                {differentiation !== null ? (
+                  <div>
+                    <div className="mb-2 flex justify-between text-neutral-600">
+                      Differentiation strength <span className="font-medium text-neutral-900">{differentiation} / 100</span>
+                    </div>
+                    <ProgressBar value={differentiation} />
+                  </div>
+                ) : null}
+                {clarity !== null ? (
+                  <div>
+                    <div className="mb-2 flex justify-between text-neutral-600">
+                      Positioning clarity <span className="font-medium text-neutral-900">{clarity} / 100</span>
+                    </div>
+                    <ProgressBar value={clarity} tone="orange" />
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        </Panel>
+
+        <Panel title="Positioning Analysis" icon={Rocket}>
+          <div className="space-y-4">
+            {positioning?.recommended_positioning ? (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-emerald-700">Recommended positioning</p>
+                <p className="mt-1 text-[14px] font-semibold leading-6 text-neutral-900">{positioning.recommended_positioning}</p>
+              </div>
+            ) : null}
+            <div>
+              <ListHeading label="Known for" count={positioning?.what_you_are_known_for?.length ?? 0} icon={Gem} className="text-sky-700" />
+              <ItemList items={positioning?.what_you_are_known_for} icon={Gem} iconClass="text-sky-500" />
+            </div>
+            <div>
+              <ListHeading label="What's unclear" count={positioning?.what_is_unclear?.length ?? 0} icon={CircleHelp} className="text-violet-700" />
+              <ItemList items={positioning?.what_is_unclear} icon={CircleHelp} iconClass="text-violet-500" />
+            </div>
+          </div>
+        </Panel>
+
+        <Panel title="Company Strengths & Weaknesses" icon={ThumbsUp}>
+          <div className="space-y-4">
+            <div>
+              <ListHeading label="Strengths" count={strengths?.strengths?.length ?? 0} icon={CircleCheck} className="text-emerald-700" />
+              <ItemList items={strengths?.strengths} icon={CircleCheck} iconClass="text-emerald-500" />
+            </div>
+            <div>
+              <ListHeading label="Weaknesses" count={strengths?.weaknesses?.length ?? 0} icon={TriangleAlert} className="text-amber-700" />
+              <ItemList items={strengths?.weaknesses} icon={TriangleAlert} iconClass="text-amber-500" />
+            </div>
+          </div>
+        </Panel>
+
+        <Panel title="Website Strengths & Weaknesses" icon={Compass}>
+          <div className="space-y-4">
+            <div>
+              <ListHeading label="Strengths" count={presence?.website?.strengths?.length ?? 0} icon={CircleCheck} className="text-emerald-700" />
+              <ItemList items={presence?.website?.strengths} icon={CircleCheck} iconClass="text-emerald-500" />
+            </div>
+            <div>
+              <ListHeading label="Weaknesses" count={presence?.website?.weaknesses?.length ?? 0} icon={TriangleAlert} className="text-amber-700" />
+              <ItemList items={presence?.website?.weaknesses} icon={TriangleAlert} iconClass="text-amber-500" />
+            </div>
+          </div>
+        </Panel>
+      </div>
+
+      {/* Growth + actions */}
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Panel title="Growth Opportunities" icon={TrendingUp}>
+          {growth.length ? (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-140 text-left text-[13px]">
+                <thead className="text-[12px] text-neutral-500">
+                  <tr className="border-b border-neutral-100">
+                    <th className="py-2 pr-3 font-medium">Priority</th>
+                    <th className="py-2 pr-3 font-medium">Area</th>
+                    <th className="py-2 pr-3 font-medium">Finding &amp; action</th>
+                    <th className="py-2 font-medium">Impact</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100 align-top">
+                  {growth.map((item) => (
+                    <tr key={`${item.area}-${item.finding}`}>
+                      <td className="py-3 pr-3"><PriorityPill value={item.priority} /></td>
+                      <td className="py-3 pr-3 font-semibold text-neutral-900">{item.area}</td>
+                      <td className="py-3 pr-3">
+                        <p className="text-neutral-600">{item.finding}</p>
+                        {item.action ? <p className="mt-1.5 text-emerald-600">{item.action}</p> : null}
+                      </td>
+                      <td className="py-3 text-neutral-600">{item.impact}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <Empty />
+          )}
+        </Panel>
+
+        <Panel title="Recommended Actions" icon={Star}>
+          {actions.length ? (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-140 text-left text-[13px]">
+                <thead className="text-[12px] text-neutral-500">
+                  <tr className="border-b border-neutral-100">
+                    <th className="py-2 pr-3 font-medium">#</th>
+                    <th className="py-2 pr-3 font-medium">Title</th>
+                    <th className="py-2 pr-3 font-medium">Action</th>
+                    <th className="py-2 font-medium">Impact / effort</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100 align-top">
+                  {actions.map((item, index) => (
+                    <tr key={`${item.priority}-${item.title}`}>
+                      <td className="py-3 pr-3">
+                        <span className="grid size-6 place-items-center rounded-full bg-neutral-100 text-[11px] font-semibold text-neutral-700">
+                          {item.priority ?? index + 1}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-3">
+                        <p className="font-semibold text-neutral-900">{item.title}</p>
+                        {item.category ? (
+                          <span className="mt-2 inline-block rounded-full border border-[#E6E8F5] px-3 py-1 text-[12px] text-neutral-700">{item.category}</span>
+                        ) : null}
+                      </td>
+                      <td className="py-3 pr-3 text-neutral-600">{item.action}</td>
+                      <td className="py-3">
+                        <p className="text-neutral-800">{item.impact}</p>
+                        {item.effort ? <p className="text-[12px] text-neutral-500">Effort: {item.effort}</p> : null}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <Empty />
+          )}
+        </Panel>
+      </div>
+
+      {/* Instagram insights (only when the analysis includes Instagram data) */}
+      {showInstagram ? (
+        <Panel title="Instagram Insights" icon={Building2}>
+          <div className="grid gap-x-6 sm:grid-cols-2">
+            <KvRows
+              items={[
+                { label: "Followers", value: igFollowers },
+                { label: "Primary format", value: instagram.primary_format as string | undefined },
+                { label: "Posts / week", value: instagram.posts_per_week as number | undefined },
+              ]}
+            />
+            <KvRows
+              items={[
+                { label: "Engagement", value: hasValue(igEngagement) ? `${igEngagement}%` : null },
+                { label: "Top category", value: instagram.top_category as string | undefined },
+              ]}
+            />
+          </div>
+          {igHashtags.length ? (
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {igHashtags.map((tag) => (
+                <li key={tag.tag} className="rounded-full border border-[#E6E8F5] px-3 py-1.5 text-[12px] text-neutral-800">
+                  #{tag.tag?.replace(/^#/, "")}
+                  {typeof tag.count === "number" ? ` · ${tag.count}` : ""}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </Panel>
+      ) : null}
+    </div>
   );
+}
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const hit = entries.find((entry) => entry.isIntersecting);
-        if (hit) setActiveId(hit.target.id);
-      },
-      { rootMargin: "-15% 0px -70% 0px" },
-    );
-
-    SECTIONS.forEach((section) => {
-      const el = document.getElementById(section.id);
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  const scrollTo = (id: string) => {
-    setActiveId(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const { company_user_id }: { company_user_id: string } = useAuthStore();
-  const { data: analyzeCompanyResults } = AnalyzeCompanyResultsQuery(company_user_id);
+/* ---------- Page ---------- */
+export default function DnaPage() {
+  const companyUserId = useAuthStore((state) => state.company_user_id);
+  const { data: analyzeCompanyResults, isLoading, isError } = AnalyzeCompanyResultsQuery(companyUserId);
+  // The results API returns the analysis wrapped in `result`.
+  const analysis = (analyzeCompanyResults as AnalyzeCompanyResultsResponse | undefined)?.result;
 
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,#E9ECFF_0%,#FFFFFF_45%)]">
@@ -116,264 +582,24 @@ export default function DnaPage() {
         <main className="min-w-0">
           <TopBar user={MOCK_DASHBOARD.user} placeholder="Search company DNA..." />
 
-          <div className="grid w-full gap-4 lg:grid-cols-[320px_1fr]">
-            <aside className="rounded-3xl border border-[#E6E8F5] bg-white/80 p-5 backdrop-blur lg:sticky lg:top-6 lg:self-start">
-              <div className="flex items-start gap-3">
-                <span className="grid size-11 place-items-center rounded-2xl bg-[#ECEBFF] text-[#5B57E6]">
-                  <Dna className="size-5" aria-hidden="true" />
-                </span>
-                <div>
-                  <h1 className="text-base font-semibold text-neutral-900">Company DNA</h1>
-                  <p className="mt-1 text-xs leading-5 text-neutral-500">
-                    Distilled positioning, audience, and offer signals from your analysis.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-5 rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] p-4">
-                <div className="flex items-center gap-3">
-                  <Image
-                    src={data.company.logoSrc}
-                    alt={`${data.company.name} logo`}
-                    width={120}
-                    height={36}
-                    className="h-9 w-auto object-contain"
-                  />
-                </div>
-                <p className="mt-3 text-[13px] font-semibold text-neutral-900">
-                  {data.company.name}
-                </p>
-                <p className="mt-0.5 text-[11px] uppercase tracking-[0.08em] text-[#5B57E6]">
-                  {data.company.tagline}
-                </p>
-                <ul className="mt-3 flex flex-col gap-1.5 text-[12px] text-neutral-600">
-                  <li className="flex items-center gap-2">
-                    <Building2 className="size-3.5 text-neutral-400" aria-hidden="true" />
-                    {data.company.industry}
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Globe2 className="size-3.5 text-neutral-400" aria-hidden="true" />
-                    {data.company.region}
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Target className="size-3.5 text-neutral-400" aria-hidden="true" />
-                    {tagCount} DNA signals
-                  </li>
-                </ul>
-              </div>
-
-              <nav aria-label="DNA sections" className="mt-4">
-                <ul className="flex flex-col gap-1">
-                  {SECTIONS.map((section) => {
-                    const active = section.id === activeId;
-                    const Icon = section.icon;
-                    return (
-                      <li key={section.id}>
-                        <button
-                          type="button"
-                          onClick={() => scrollTo(section.id)}
-                          aria-current={active ? "true" : undefined}
-                          className={`flex w-full items-center gap-2.5 border-l-2 px-2.5 py-2.5 text-left text-[13px] transition-colors ${FOCUS_RING} ${
-                            active
-                              ? "border-[#5B57E6] font-medium text-[#5B57E6]"
-                              : "border-transparent text-neutral-700 hover:text-neutral-950"
-                          }`}
-                        >
-                          <Icon className="size-3.5 shrink-0" aria-hidden="true" />
-                          <span>{section.title}</span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </nav>
-
-              <Link
-                href={PAGE_ROUTES.COMPANY_OVERVIEW}
-                className={`mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#E6E8F5] bg-white text-sm font-medium text-neutral-800 hover:bg-[#F6F7FD] ${FOCUS_RING}`}
-              >
-                Open company overview
-                <ArrowUpRight className="size-4" aria-hidden="true" />
-              </Link>
-            </aside>
-
-            <div className="flex min-w-0 flex-col gap-4">
-              <section id="overview" className="scroll-mt-8">
-                <Card className="overflow-hidden p-0">
-                  <div className="bg-gradient-to-r from-[#2E2A9E] to-[#5B57E6] px-5 py-6 text-white sm:px-6">
-                    <p className="text-[12px] uppercase tracking-[0.12em] text-white/70">
-                      Value proposition
-                    </p>
-                    <h2 className="mt-2 max-w-3xl text-xl font-semibold leading-snug sm:text-2xl">
-                      {data.dna.value_proposition}
-                    </h2>
-                    <p className="mt-3 max-w-2xl text-[13px] leading-6 text-white/80">
-                      {data.summary}
-                    </p>
-                  </div>
-                  <ul className="grid gap-3 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
-                    {[
-                      { label: "Company type", value: data.snapshot.companyType },
-                      { label: "Market position", value: data.snapshot.marketPosition },
-                      { label: "Maturity", value: data.snapshot.businessMaturity },
-                      {
-                        label: "Digital presence",
-                        value: `${data.snapshot.digitalPresenceScore}/100`,
-                      },
-                    ].map((item) => (
-                      <li
-                        key={item.label}
-                        className="rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] px-4 py-3"
-                      >
-                        <p className="text-[11px] text-neutral-500">{item.label}</p>
-                        <p className="mt-1 text-[13px] font-semibold text-neutral-900">
-                          {item.value}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
-              </section>
-
-              <section id="positioning" className="scroll-mt-8">
-                <div className="grid gap-4 lg:grid-cols-2">
-                  <SectionCard
-                    title="Positioning"
-                    description="How the brand should show up in market conversations."
-                  >
-                    <p className="text-[13px] leading-6 text-neutral-700">
-                      {data.dna.positioning}
-                    </p>
-                    <p className="mt-4 text-[12px] font-medium text-neutral-500">
-                      Business model
-                    </p>
-                    <p className="mt-1 text-[13px] leading-6 text-neutral-800">
-                      {data.dna.business_model}
-                    </p>
-                  </SectionCard>
-
-                  <SectionCard
-                    title="Pricing signals"
-                    description="Commercial patterns detected from public materials."
-                  >
-                    <ul className="flex flex-wrap gap-2">
-                      {data.dna.pricing.map((item) => (
-                        <li key={item}>
-                          <Chip>{item}</Chip>
-                        </li>
-                      ))}
-                    </ul>
-                  </SectionCard>
-                </div>
-              </section>
-
-              <section id="audience" className="scroll-mt-8">
-                <div className="grid gap-4 lg:grid-cols-2">
-                  <SectionCard
-                    title="Target audience"
-                    description="Who the company is optimized to win."
-                  >
-                    <ul className="flex flex-col gap-2">
-                      {data.dna.target_audience.map((item) => (
-                        <li
-                          key={item}
-                          className="rounded-2xl border border-[#E6E8F5] bg-white px-4 py-3 text-[13px] text-neutral-800"
-                        >
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </SectionCard>
-
-                  <SectionCard
-                    title="Industries served"
-                    description="Vertical focus inferred from services and case signals."
-                  >
-                    <ul className="flex flex-wrap gap-2">
-                      {data.dna.industries.map((item) => (
-                        <li key={item}>
-                          <Chip>{item}</Chip>
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="mt-5 text-[12px] font-medium text-neutral-500">
-                      Keywords
-                    </p>
-                    <ul className="mt-2 flex flex-wrap gap-2">
-                      {data.dna.keywords.map((item) => (
-                        <li key={item}>
-                          <Chip>{item}</Chip>
-                        </li>
-                      ))}
-                    </ul>
-                  </SectionCard>
-                </div>
-              </section>
-
-              <section id="services" className="scroll-mt-8">
-                <div className="grid gap-4 lg:grid-cols-2">
-                  <SectionCard title="Core services">
-                    <ul className="flex flex-wrap gap-2">
-                      {data.dna.services.map((item) => (
-                        <li key={item}>
-                          <Chip>{item}</Chip>
-                        </li>
-                      ))}
-                    </ul>
-                  </SectionCard>
-
-                  <SectionCard title="Technologies">
-                    <ul className="flex flex-wrap gap-2">
-                      {data.dna.technologies.map((item) => (
-                        <li key={item}>
-                          <Chip>{item}</Chip>
-                        </li>
-                      ))}
-                    </ul>
-                  </SectionCard>
-                </div>
-              </section>
-
-              <section id="market" className="scroll-mt-8">
-                <SectionCard
-                  title="Customer pain points"
-                  description="Problems this company is positioned to solve."
-                >
-                  <ul className="grid gap-2 sm:grid-cols-2">
-                    {data.dna.pain_points.map((item) => (
-                      <li
-                        key={item}
-                        className="rounded-2xl border border-[#E6E8F5] bg-[#FFF8F5] px-4 py-3 text-[13px] text-neutral-800"
-                      >
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </SectionCard>
-              </section>
-
-              <section id="differentiators" className="scroll-mt-8">
-                <SectionCard
-                  title="What makes them different"
-                  description="Proof points that should carry into messaging and content."
-                >
-                  <ul className="grid gap-3 sm:grid-cols-2">
-                    {data.dna.differentiators.map((item, index) => (
-                      <li
-                        key={item}
-                        className="flex gap-3 rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] px-4 py-4"
-                      >
-                        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#ECEBFF] text-[12px] font-semibold text-[#5B57E6]">
-                          {index + 1}
-                        </span>
-                        <p className="text-[13px] leading-5 text-neutral-800">{item}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </SectionCard>
-              </section>
+          {isLoading ? (
+            <div className="rounded-3xl border border-[#E6E8F5] bg-white/90 px-5 py-8 text-sm text-neutral-600">
+              Loading company analysis…
             </div>
-          </div>
+          ) : null}
+
+          {isError ? (
+            <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+              Failed to load company analysis.
+            </div>
+          ) : null}
+
+          {analysis ? (
+            <>
+              <AnalyzeCompanyHeader data={analysis} />
+              <AnalyzeCompanyInsights data={analysis} />
+            </>
+          ) : null}
         </main>
       </div>
     </div>

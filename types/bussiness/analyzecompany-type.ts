@@ -204,3 +204,14 @@ export type AnalyzeCompanyResponse = {
   warnings: string[];
   meta: AnalyzeCompanyMeta;
 };
+
+export interface AnalyzeCompanyResultsResponse {
+  success: boolean;
+  analysis_id: string;
+  prompt_id: string | null;
+  company_id: string;
+  created_at: string;
+  status: string;
+  summary: string;
+  result: AnalyzeCompanyResponse;
+}

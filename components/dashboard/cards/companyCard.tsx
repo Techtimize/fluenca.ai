@@ -37,7 +37,7 @@ export default function CompanyCard({ company, onEdit }: Props) {
         </ul>
       )}
 
-      <p className="mt-4 text-[13px] leading-6 text-neutral-700">{company.description}</p>
+      <p className="mt-4 line-clamp-6 text-[13px] leading-6 text-neutral-700">{company.description}</p>
 
       {company.links.length > 0 && (
         <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-neutral-700">
