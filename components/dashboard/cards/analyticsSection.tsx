@@ -79,21 +79,23 @@ export default function AnalyticsSection({
         ))}
       </ul>
 
-      {/* Overall + integrations: 3-up like the dashboard mock */}
+      {/* Overall + analysis charts: 4 across in one row */}
       <div
         className={`mt-4 grid gap-4 ${
           compact
             ? "sm:grid-cols-2 sm:[&>*:last-child:nth-child(odd)]:col-span-2"
             : data.charts
-              ? "md:grid-cols-2 xl:grid-cols-3"
+              ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"
               : "lg:grid-cols-[minmax(260px,1.1fr)_repeat(2,minmax(0,1fr))]"
         }`}
       >
         <OverallPerformanceCard data={data.overall} />
         {data.charts ? <AnalyticsChartsRow charts={data.charts} /> : null}
-        {data.integrations.map((i) => (
-          <IntegrationCard key={i.id} integration={i} onConnect={onConnectIntegration} />
-        ))}
+        {!data.charts
+          ? data.integrations.map((i) => (
+              <IntegrationCard key={i.id} integration={i} onConnect={onConnectIntegration} />
+            ))
+          : null}
       </div>
 
       {/* Vitals: side by side normally, stacked when compact */}
