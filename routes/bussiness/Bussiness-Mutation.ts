@@ -83,18 +83,36 @@ export function AnswerQuestionMutation() {
     return useMutation({
         mutationFn: (data: AnswerQuestionRequestProps) => AnswerQuestionApi(data),
         onSuccess: (updated: IntakeQuestion) => {
-            // Swap the saved question into the cached intake so every screen shows it.
-            queryClient.setQueryData<IntakeResponseProps>(['intake'], (intake) =>
-                intake && {
+            queryClient.setQueryData<IntakeResponseProps>(['intake'], (intake) => {
+                if (!intake) return intake;
+
+                const sections = intake.sections.map((section) => ({
+                    ...section,
+                    questions: section.questions.map((question) =>
+                        question.question_id === updated.question_id ? updated : question,
+                    ),
+                }));
+
+                const questions = sections.flatMap((section) => section.questions);
+                const confirmed = questions.filter((q) => q.status === 'confirmed').length;
+                const drafted_by_ai = questions.filter((q) => q.status === 'drafted_by_ai').length;
+                const needs_input = questions.filter((q) => q.status === 'needs_input').length;
+                const required_unanswered = questions.filter(
+                    (q) => q.required && !(q.answer && q.answer.trim()),
+                ).length;
+
+                return {
                     ...intake,
-                    sections: intake.sections.map((section) => ({
-                        ...section,
-                        questions: section.questions.map((question) =>
-                            question.question_id === updated.question_id ? updated : question
-                        ),
-                    })),
-                }
-            );
+                    sections,
+                    summary: {
+                        total: questions.length,
+                        confirmed,
+                        drafted_by_ai,
+                        needs_input,
+                        required_unanswered,
+                    },
+                };
+            });
             toast.success("Answer saved");
         },
         onError: (error) => {
