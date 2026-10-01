@@ -1,8 +1,7 @@
-import { getAuthTokenProvider } from "@/provider/auth-provider";
-import useAuthStore from "@/store/AuthsStore";
+import { clearAuthTokenProvider, getAuthTokenProvider } from "@/provider/auth-provider";
 import { AUTHENDPOINT } from "./auth/Auth-Endpoint";
 import { toast } from "sonner";
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 
 const api = axios.create({
@@ -33,7 +32,7 @@ api.interceptors.response.use(
       originalRequest?.method === 'post';
 
     if (error.response && error.response.status === 401 && !isLoginRequest) {
-      useAuthStore.getState().clearAuth();
+      clearAuthTokenProvider();
 
       toast('Unauthorized access', {
         description: 'You are not authorized to access this resource',
