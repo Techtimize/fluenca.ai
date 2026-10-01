@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarDays, Loader2, Sparkles } from "lucide-react";
+import { CalendarDays, Lightbulb, Loader2, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import CompetitorNinetyDayCalendar from "@/components/dashboard/competitors/CompetitorNinetyDayCalendar";
 import SidebarRail, { DASHBOARD_CONTENT_OFFSET } from "@/components/dashboard/sidebarRail";
 import TopBar from "@/components/dashboard/topBar";
@@ -9,13 +10,25 @@ import Card from "@/components/shared/card";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { CompetitorAnalysisCompetitorQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
+import { getCompanyIdProvider } from "@/provider/auth-provider";
+import { ContentRecommendationMutation } from "@/routes/bussiness/content-recommendation/ContentRecommendation-Mutation";
 
 export default function CalendarPage() {
-  const companyId = useAuthStore((s) => s.company_user_id);
+  const companyId = useAuthStore((s) => s.company_id);
   const companyName = useAuthStore((s) => s.company_name);
 
   const { data, isLoading, isError, error, isFetching } =
     CompetitorAnalysisCompetitorQuery(companyId);
+  const { mutate: recommend, isPending: isRecommending } = ContentRecommendationMutation();
+
+  const handleRecommend = () => {
+    const company_id = getCompanyIdProvider();
+    if (!company_id) {
+      toast.error("Company ID is missing. Please log in again.");
+      return;
+    }
+    recommend({ company_id });
+  };
 
   const plan = data?.result?.report?.["90_day_action_plan"];
   const hasPlan = Boolean(
@@ -38,11 +51,22 @@ export default function CalendarPage() {
             placeholder="Search calendar..."
           />
 
-          <div>
-            <h1 className="text-xl font-semibold text-neutral-900">90-day plan calendar</h1>
-            <p className="mt-1 text-sm text-neutral-500">
-              Scheduled initiatives from your latest competitor analysis.
-            </p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h1 className="text-xl font-semibold text-neutral-900">90-day plan calendar</h1>
+              <p className="mt-1 text-sm text-neutral-500">
+                Scheduled initiatives from your latest competitor analysis.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleRecommend}
+              disabled={isRecommending}
+              className="inline-flex h-9 items-center gap-2 rounded-full bg-[#5B57E6] px-4 text-sm font-medium text-white hover:bg-[#4A46D0] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isRecommending ? <Loader2 className="size-4 animate-spin" /> : <Lightbulb className="size-4" />}
+              {isRecommending ? "Recommending..." : "Recommend"}
+            </button>
           </div>
 
           {!companyId ? (

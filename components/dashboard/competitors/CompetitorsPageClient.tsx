@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback } from "react";
 import CompetitorResults from "@/components/dashboard/competitors/CompetitorResults";
 import { CompetitorsDetailTable } from "@/components/dashboard/competitors/CompetitorsDetailTable";
 import { getApiErrorMessage } from "@/errors/error-utils";
@@ -8,7 +7,7 @@ import { CompetitorAnalysisCompetitorQuery } from "@/routes/bussiness/Bussiness-
 import useAuthStore from "@/store/AuthsStore";
 
 export function CompetitorsPageClient() {
-  const companyId = useAuthStore((s) => s.company_user_id);
+  const companyId = useAuthStore((s) => s.company_id);
   const {
     data,
     isLoading,
@@ -18,9 +17,9 @@ export function CompetitorsPageClient() {
     isFetching,
   } = CompetitorAnalysisCompetitorQuery(companyId);
 
-  const loadCompetitors = useCallback(() => {
+  const loadCompetitors = () => {
     void refetch();
-  }, [refetch]);
+  };
 
   const competitors =
     data?.result?.competitors ??

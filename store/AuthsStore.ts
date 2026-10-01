@@ -7,6 +7,7 @@ interface AuthStore {
   user_id: string;
   company_name: string;
   company_user_id: string;
+  company_id: string;
   role: string;
   status: string;
   onboarding_completed: boolean;
@@ -18,6 +19,7 @@ interface AuthStore {
     status?: string;
     company_name?: string;
     company_user_id?: string;
+    company_id?: string;
   }) => void;
   setUserId: (user_id: string) => void;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
@@ -38,6 +40,7 @@ const initialAuthState = {
   user_id: '',
   company_name: '',
   company_user_id: '',
+  company_id: '',
   role: '',
   status: '',
   onboarding_completed: false,
@@ -56,6 +59,7 @@ const useAuthStore = create<AuthStore>()(
           status = '',
           company_name = '',
           company_user_id = '',
+          company_id = '',
         }) =>
           set({
             isAuthenticated: Boolean(access_token),
@@ -65,6 +69,7 @@ const useAuthStore = create<AuthStore>()(
             status,
             company_name,
             company_user_id: company_user_id || user_id,
+            company_id,
           }),
         setUserId: (user_id: string) => set({ user_id }),
         setIsAuthenticated: (isAuthenticated: boolean) => set({ isAuthenticated }),

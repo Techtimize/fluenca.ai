@@ -28,6 +28,12 @@ const DEFAULT_NAV: NavItem[] = [
     href: PAGE_ROUTES.COMPETITOR_ANALYSIS,
   },
   { id: "calendar", label: "Calendar", icon: "calendar", href: PAGE_ROUTES.CALENDAR },
+  {
+    id: "content-recommendation",
+    label: "Content recommendation",
+    icon: "lightbulb",
+    href: PAGE_ROUTES.CONTENT_RECOMMENDATION,
+  },
   { id: "billing", label: "Billing", icon: "billing", href: "#" },
 ];
 

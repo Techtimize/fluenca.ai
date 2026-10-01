@@ -33,7 +33,7 @@ function isLikelyLinkedIn(value: string) {
 }
 
 export default function CompetitorAnalysisPage() {
-  const companyId = useAuthStore((s) => s.company_user_id);
+  const companyId = useAuthStore((s) => s.company_id);
   const companyName = useAuthStore((s) => s.company_name);
   const [mode, setMode] = useState<AnalysisMode>("ai");
   const [instagramInput, setInstagramInput] = useState("");

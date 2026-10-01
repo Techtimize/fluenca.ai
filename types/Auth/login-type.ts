@@ -1,5 +1,6 @@
 export interface User {
     user_id: string;
+    company_id: string;
     email: string;
     contact_person: string | null;
     phone: string | null;

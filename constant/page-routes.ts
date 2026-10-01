@@ -25,4 +25,5 @@ export const PAGE_ROUTES = {
     TRENDS: '/trends',
     COMPETITOR_ANALYSIS: '/competitor-analysis',
     CALENDAR: '/calendar',
+    CONTENT_RECOMMENDATION: '/content-recommendation',
 } as const;

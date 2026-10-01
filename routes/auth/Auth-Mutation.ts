@@ -16,6 +16,7 @@ export function LoginMutation() {
         response.user.user_id,
         response.user.status,
         response.user.company_name ?? undefined,
+        response.user.company_id,
       );
       toast.success(response.message || "Logged in successfully");
     },
