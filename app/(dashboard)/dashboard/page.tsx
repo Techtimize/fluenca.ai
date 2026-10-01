@@ -39,7 +39,8 @@ export default function DashboardPage() {
   const showLoading = hasCompanyId && (isLoading || isFetching) && !mapped;
   const company = mapped?.company ?? (hasCompanyId ? null : MOCK_DASHBOARD.company);
   // summary_text sits inside the results API's `result` wrapper.
-  const summaryText = (analyzeResults as AnalyzeCompanyResultsResponse | undefined)?.result?.company_summary?.summary_text;
+  const result = (analyzeResults as AnalyzeCompanyResultsResponse | undefined)?.result;
+  const summaryText = result?.company_summary?.summary_text;
   const docs = mapped?.docs ?? (hasCompanyId ? [] : MOCK_DASHBOARD.docs);
   const analytics = mapped?.analytics ?? MOCK_DASHBOARD.analytics;
   const user = {
@@ -88,7 +89,7 @@ export default function DashboardPage() {
 
           {company ? (
             <div className={`grid gap-4 ${chatOpen ? "" : "lg:grid-cols-[minmax(0,1fr)_360px]"}`}>
-              <CompanyCard company={summaryText ? { ...company, description: stripMarkdown(summaryText) } : company} />
+              <CompanyCard company={summaryText ? { ...company, description: stripMarkdown(summaryText) } : company} profile={result?.company} />
               <DocumentationCard items={docs} />
             </div>
           ) : null}
