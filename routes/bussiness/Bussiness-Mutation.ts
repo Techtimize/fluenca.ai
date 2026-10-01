@@ -1,13 +1,14 @@
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, OnboardingApi, RetryDnaApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, OnboardingApi, RetryDnaApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionApi, CompleteIntakeApi } from "../company-details/companyDetails.routes";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
-import { AnalyzeCompanyRequest, AnalyzeCompanyResponse, OnboardingRequestProps, OnboardingResponseProps } from "@/types/bussiness/onboarding-type";
+import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/bussiness/onboarding-type";
+import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
-import { setOnboardingCompletedProvider } from "@/provider/auth-provider";
+import { setCompanyUserIdProvider, setOnboardingCompletedProvider } from "@/provider/auth-provider";
 
 export function WaitlistMutation() {
     return useMutation({
@@ -47,13 +48,39 @@ export function OnboardingMutation() {
 
 
 export function AnalyzeCompanyMutation() {
+    const router = useRouter();
+    const queryClient = useQueryClient();
+
     return useMutation({
-        mutationFn: async (data: AnalyzeCompanyRequest) => {
-            const response = await AnalyzeCompanyApi(data);
-            return response;
-        },
-        onSuccess: (response: AnalyzeCompanyResponse) => {
-            toast.success(response.success ? "Company analyzed successfully" : "Failed to analyze company");
+        mutationFn: (data: AnalyzeCompanyRequest) => AnalyzeCompanyApi(data),
+        onSuccess: async (response: AnalyzeCompanyResponse) => {
+            if (response.success === false) {
+                toast.error(response.error || "Failed to analyze company");
+                return;
+            }
+
+            const companyId = response.meta?.company_id;
+            if (!companyId) {
+                toast.error("Company ID missing from analysis response");
+                return;
+            }
+
+            // Persist POST meta.company_id for the results GET on dashboard
+            setCompanyUserIdProvider(companyId);
+            setOnboardingCompletedProvider(true);
+
+            const resultsKey = ["analyze-company-results", companyId] as const;
+            queryClient.setQueryData(resultsKey, response);
+
+            try {
+                const results = await AnalyzeCompanyResultsApi(companyId);
+                queryClient.setQueryData(resultsKey, results);
+            } catch {
+                toast.error("Failed to get company analysis results");
+            }
+
+            toast.success("Company analyzed successfully");
+            router.push(PAGE_ROUTES.DASHBOARD);
         },
         onError: (error: unknown) => {
             toast.error(getApiErrorMessage(error, "Failed to analyze company"));

@@ -6,7 +6,7 @@ import React from 'react'
 
 const OverviewPage = () => {
     const { Id } = useParams();
-    const { mutate: analyzeCompany } = AnalyzeCompanyMutation();
+    // const { mutate: analyzeCompany } = AnalyzeCompanyMutation();
     // const { data: analyzeCompanyResults } = ();
   return (
     <div>Overview</div>

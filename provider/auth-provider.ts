@@ -85,6 +85,12 @@ export const setOnboardingCompletedProvider = (completed: boolean) => {
   setCookie('onboarding_completed', completed ? 'true' : 'false');
 };
 
+export const setCompanyUserIdProvider = (company_user_id: string) => {
+  if (!company_user_id) return;
+  useAuthStore.getState().setCompanyUserId(company_user_id);
+  setCookie('company_user_id', company_user_id);
+};
+
 export const getAuthTokenProvider = (): string => {
   return useAuthStore.getState().access_token || '';
 };
