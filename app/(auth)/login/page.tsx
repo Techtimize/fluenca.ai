@@ -42,7 +42,12 @@ export default function Login() {
 
   const onSubmit = (data: LoginFormValidator) => {
     SignInMutation.mutate(data, {
-      onSuccess: () => router.push(PAGE_ROUTES.ONBOARDING),
+      onSuccess: (response) => {
+        const nextRole = response.user.role?.toLowerCase() ?? '';
+        const isSuperAdmin =
+          nextRole === 'super_admin' || nextRole === 'superadmin' || nextRole === 'admin';
+        router.push(isSuperAdmin ? PAGE_ROUTES.SUPERADMIN : PAGE_ROUTES.ONBOARDING);
+      },
     });
   };
 

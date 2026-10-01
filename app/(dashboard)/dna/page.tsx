@@ -18,7 +18,6 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import SidebarRail from "@/components/dashboard/sidebarRail";
 import { InstagramIcon, LinkedInIcon } from "@/components/shared/brandIcons";
 import TopBar from "@/components/dashboard/topBar";
 import { MOCK_DASHBOARD } from "@/lib/mock/dashboard";
@@ -526,8 +525,18 @@ function AnalyzeCompanyInsights({ data }: { data: AnalyzeCompanyResponse }) {
               ]}
             />
           </div>
-        </main>
-      </div>
+          {igHashtags.length ? (
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {igHashtags.map((tag) => (
+                <li key={tag.tag} className="rounded-full border border-[#E6E8F5] px-3 py-1.5 text-[12px] text-neutral-800">
+                  #{tag.tag?.replace(/^#/, "")}
+                  {typeof tag.count === "number" ? ` · ${tag.count}` : ""}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </Panel>
+      ) : null}
     </div>
   );
 }
@@ -536,35 +545,30 @@ function AnalyzeCompanyInsights({ data }: { data: AnalyzeCompanyResponse }) {
 export default function DnaPage() {
   const companyUserId = useAuthStore((state) => state.company_user_id);
   const { data: analyzeCompanyResults, isLoading, isError } = AnalyzeCompanyResultsQuery(companyUserId);
-  // The results API returns the analysis wrapped in `result`.
   const analysis = (analyzeCompanyResults as AnalyzeCompanyResultsResponse | undefined)?.result;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,#E9ECFF_0%,#FFFFFF_45%)]">
-      <SidebarRail />
+    <main className="min-w-0">
+      <TopBar user={MOCK_DASHBOARD.user} placeholder="Search company DNA..." />
 
-      <div className="px-4 pb-10 pt-4 sm:px-6 md:pl-24 lg:pr-8">
-        <main className="min-w-0">
-          <TopBar user={MOCK_DASHBOARD.user} placeholder="Search company DNA..." />
+      {isLoading ? (
+        <div className="rounded-3xl border border-[#E6E8F5] bg-white/90 px-5 py-8 text-sm text-neutral-600">
+          Loading company analysis…
+        </div>
+      ) : null}
 
-          {isLoading ? (
-            <div className="rounded-3xl border border-[#E6E8F5] bg-white/90 px-5 py-8 text-sm text-neutral-600">
-              Loading company analysis…
-            </div>
-          ) : null}
+      {isError ? (
+        <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+          Failed to load company analysis.
+        </div>
+      ) : null}
 
-          {isError ? (
-            <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
-              Failed to load company analysis.
-            </div>
-          ) : null}
-
-          {analysis ? (
-            <>
-              <AnalyzeCompanyHeader data={analysis} />
-              <AnalyzeCompanyInsights data={analysis} />
-            </>
-          ) : null}
-        </main>
+      {analysis ? (
+        <>
+          <AnalyzeCompanyHeader data={analysis} />
+          <AnalyzeCompanyInsights data={analysis} />
+        </>
+      ) : null}
+    </main>
   );
 }

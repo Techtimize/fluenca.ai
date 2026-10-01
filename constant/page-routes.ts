@@ -25,4 +25,8 @@ export const PAGE_ROUTES = {
     COMPETITOR_ANALYSIS: '/competitor-analysis',
     COMPETITORS: '/competitors',
     CALENDAR: '/calendar',
+
+    // Super admin
+    SUPERADMIN: '/superadmin',
+    SUPERADMIN_USERS: '/superadmin',
 } as const;
