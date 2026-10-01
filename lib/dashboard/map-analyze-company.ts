@@ -228,13 +228,26 @@ export function mapAnalyzeCompanyToDashboard(
   ];
 
   const presence = data.digital_presence;
+  const channelScores = [presence?.website?.score, presence?.instagram?.score, presence?.linkedin?.score];
+  const analyzedChannels = channelScores.filter((score) => typeof score === "number").length;
+  const channelStatus = (channel?: { score: number | null; status?: string }) =>
+    typeof channel?.score === "number" ? `${Math.round(channel.score)}/100` : channel?.status || "Not analyzed";
+  const priorities = ["HIGH", "MEDIUM", "LOW"];
+
   const analytics: AnalyticsData = {
     sources: ["Website", "Instagram", "LinkedIn"],
     metrics: [
-      scoreMetric("overall", "Overall", presence?.overall_score, "purple", "performance"),
       scoreMetric("website", "Website", presence?.website?.score, "green", "accessibility"),
-      scoreMetric("instagram", "Instagram", presence?.instagram?.score, "orange", "seo"),
-      scoreMetric("linkedin", "LinkedIn", presence?.linkedin?.score, "teal", "best-practices"),
+      scoreMetric("differentiation", "Differentiation", data.market_position?.differentiation_strength, "purple", "performance"),
+      scoreMetric("clarity", "Positioning clarity", data.market_position?.positioning_clarity, "orange", "seo"),
+      {
+        id: "channels",
+        label: "Channels analyzed",
+        score: Math.round((analyzedChannels / channelScores.length) * 100),
+        change: `${analyzedChannels} of ${channelScores.length} channels`,
+        icon: "best-practices",
+        tone: "teal",
+      },
     ],
     overall: {
       summary:
@@ -243,9 +256,41 @@ export function mapAnalyzeCompanyToDashboard(
       score: presence?.overall_score ?? 0,
       mobile: presence?.website?.score ?? 0,
       desktop: presence?.linkedin?.score ?? presence?.instagram?.score ?? 0,
+      stats: [
+        { label: "Instagram", value: channelStatus(presence?.instagram) },
+        { label: "LinkedIn", value: channelStatus(presence?.linkedin) },
+      ],
     },
     integrations: [],
     vitals: [],
+    charts: {
+      strengthsWeaknesses: [
+        {
+          group: "Company",
+          strengths: data.strengths_and_weaknesses?.strengths?.length ?? 0,
+          weaknesses: data.strengths_and_weaknesses?.weaknesses?.length ?? 0,
+        },
+        {
+          group: "Website",
+          strengths: presence?.website?.strengths?.length ?? 0,
+          weaknesses: presence?.website?.weaknesses?.length ?? 0,
+        },
+      ],
+      opportunitiesByPriority: priorities.map((priority) => ({
+        priority,
+        count: (data.growth_opportunities ?? []).filter(
+          (item) => item.priority?.toUpperCase() === priority,
+        ).length,
+      })),
+      actions: (data.recommended_actions ?? [])
+        .filter((item) => item.title)
+        .map((item) => ({
+          title: item.title,
+          impact: item.impact,
+          effort: item.effort,
+          priority: item.priority ?? null,
+        })),
+    },
   };
 
   return {

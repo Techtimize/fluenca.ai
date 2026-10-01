@@ -42,7 +42,12 @@ export default function DashboardPage() {
   const result = (analyzeResults as AnalyzeCompanyResultsResponse | undefined)?.result;
   const summaryText = result?.company_summary?.summary_text;
   const docs = mapped?.docs ?? (hasCompanyId ? [] : MOCK_DASHBOARD.docs);
-  const analytics = mapped?.analytics ?? MOCK_DASHBOARD.analytics;
+  // Analytics graphs are built from the unwrapped analysis.
+  const resultAnalytics = useMemo(
+    () => (result ? mapAnalyzeCompanyToDashboard(result).analytics : null),
+    [result],
+  );
+  const analytics = resultAnalytics ?? mapped?.analytics ?? MOCK_DASHBOARD.analytics;
   const user = {
     name: company_name || mapped?.company.name || MOCK_DASHBOARD.user.name,
   };

@@ -40,6 +40,16 @@ export default function OverallPerformanceCard({ data }: { data: OverallPerforma
       <h3 className="text-[13px] font-semibold text-neutral-900">Overall Performance</h3>
       <p className="mb-6 mt-1 text-xs text-neutral-500">{data.summary}</p>
       <ScoreGauge score={data.score} />
+      {data.stats?.length ? (
+        <dl className="mt-auto grid grid-cols-2 gap-3 pt-5">
+          {data.stats.map((stat) => (
+            <div key={stat.label} className="rounded-xl bg-[#F1F4FF] px-3 py-2.5">
+              <dt className="text-xs text-neutral-600">{stat.label}</dt>
+              <dd className="mt-1 text-sm font-semibold text-neutral-900">{stat.value}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : (
       <dl className="mt-auto grid grid-cols-2 gap-3 pt-5">
         <div className="rounded-xl bg-[#F1F4FF] px-3 py-2.5">
           <dt className="flex items-center gap-1.5 text-xs text-neutral-600">
@@ -54,6 +64,7 @@ export default function OverallPerformanceCard({ data }: { data: OverallPerforma
           <dd className="mt-1 text-sm font-semibold text-neutral-900">{data.desktop} %</dd>
         </div>
       </dl>
+      )}
     </section>
   );
 }
