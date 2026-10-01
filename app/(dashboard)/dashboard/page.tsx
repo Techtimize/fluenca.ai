@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import AnalyticsSection from "@/components/dashboard/analyticsSection";
-import ChatInput from "@/components/dashboard/chatInput";
-import ChatPanel from "@/components/dashboard/chatPanel";
-import CompanyCard from "@/components/dashboard/companyCard";
+import AnalyticsSection from "@/components/dashboard/cards/analyticsSection";
+import ChatInput from "@/components/dashboard/chat/chatInput";
+import ChatPanel from "@/components/dashboard/chat/chatPanel";
+import CompanyCard from "@/components/dashboard/cards/companyCard";
 import DocumentationCard from "@/components/dashboard/documentationCard";
 import SidebarRail from "@/components/dashboard/sidebarRail";
 import TopBar from "@/components/dashboard/topBar";

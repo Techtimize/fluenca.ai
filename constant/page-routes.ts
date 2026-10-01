@@ -20,4 +20,5 @@ export const PAGE_ROUTES = {
     // Dashboard
     DASHBOARD: '/dashboard',
     COMPANY_OVERVIEW: '/company-overview',
+    TRENDS: '/trends',
 } as const;
