@@ -26,9 +26,9 @@ export interface OnboardingResponseProps {
 export type AnalyzeCompanyRequest = {
   website_url?: string;
   company_data: string;
-  region: string;
+  region?: string;
   company_id: string;
-  instagram_username: string;
+  instagram_username?: string;
   linkedin_url?: string;
 };
 

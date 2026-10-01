@@ -17,34 +17,32 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import { PAGE_ROUTES } from '@/constant/page-routes';
 import { DnaQuery } from '@/routes/bussiness/Bussiness-Query';
-import { RetryDnaMutation } from '@/routes/bussiness/Bussiness-Mutation';
-import { FOCUS_RING } from '@/utils/ui-classes';
-
-const SECTION_ICONS: Record<string, LucideIcon> = {
-  overview: Dna,
-  positioning: Crosshair,
-  audience: Users,
-  services: Wrench,
-  market: Layers3,
-  differentiators: Sparkles,
-  company: Building2,
-};
-
-function getSectionIcon(key: string, title: string): LucideIcon {
-  const normalized = `${key} ${title}`.toLowerCase();
-  if (normalized.includes('position')) return Crosshair;
-  if (normalized.includes('audience') || normalized.includes('customer')) return Users;
-  if (normalized.includes('service') || normalized.includes('tech')) return Wrench;
-  if (normalized.includes('market') || normalized.includes('pain')) return Layers3;
-  if (normalized.includes('different') || normalized.includes('unique')) return Sparkles;
-  if (normalized.includes('company') || normalized.includes('business')) return Building2;
-  return SECTION_ICONS[key] ?? Dna;
-}
+import { AnalyzeCompanyMutation, RetryDnaMutation } from '@/routes/bussiness/Bussiness-Mutation';
+import useAuthStore from '@/store/AuthsStore';
 
 export default function VerifyDna() {
-  const { data: dna, isLoading } = DnaQuery();
-  const { mutate: retryDna, isPending: isRetrying } = RetryDnaMutation();
-  const [activeId, setActiveId] = useState('');
+    const { data: dna, isLoading } = DnaQuery();
+    const { mutate: retryDna, isPending: isRetrying } = RetryDnaMutation();
+    const { mutate: analyzeCompany } = AnalyzeCompanyMutation();
+    const companyUserId = useAuthStore((state) => state.company_user_id);
+
+    const isReady = dna?.status === 'ready';
+    const isFailed = dna?.status === 'failed';
+
+    return (
+        <div className="relative min-h-screen w-full overflow-hidden bg-white">
+            {/* Soft background glow */}
+            <div className="pointer-events-none absolute -left-40 -top-40 h-130 w-180 rounded-full bg-[#DCE1FB] opacity-70 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-40 -right-40 h-105 w-155 rounded-full bg-[#E6E9FB] opacity-70 blur-3xl" />
+
+            {/* Header */}
+            <header className="relative z-10 flex items-center justify-between px-6 py-5 sm:px-10">
+                <Link href={PAGE_ROUTES.HOME} className="flex items-center gap-2">
+                    <Image src="/assets/Logo.svg" alt="Fluenca.ai" width={24} height={24} className="h-6 w-6" />
+                    <span className="text-base font-semibold text-[#2B2F8F]">
+                        fluenca<span className="text-[#5B5BD6]">.ai</span>
+                    </span>
+                </Link>
 
   const isReady = dna?.status === 'ready';
   const isFailed = dna?.status === 'failed';
@@ -233,49 +231,35 @@ export default function VerifyDna() {
                         </h2>
                       </div>
                     </div>
+                )}
 
-                    <div className="w-full space-y-4 pl-0 sm:pl-[52px]">
-                      {section.text
-                        .split(/\n{2,}/)
-                        .map((paragraph) => paragraph.trim())
-                        .filter(Boolean)
-                        .map((paragraph) => (
-                          <p
-                            key={paragraph.slice(0, 48)}
-                            className="whitespace-pre-line text-[15px] leading-7 text-neutral-700 sm:text-base sm:leading-8"
-                          >
-                            {paragraph}
-                          </p>
-                        ))}
-                    </div>
-                  </section>
-                );
-              })}
+                {/* Sections */}
+                {isReady && (
+                    <>
+                        <div className="mt-8 grid gap-4 md:grid-cols-2">
+                            {dna.sections.map((section) => (
+                                <section
+                                    key={section.key}
+                                    className="overflow-hidden rounded-2xl border border-[#E6E8F5] bg-white shadow-[0_8px_30px_rgba(91,91,214,0.06)]"
+                                >
+                                    <h2 className="bg-[#F1F4FF] px-4 py-3 text-sm font-semibold text-gray-900">{section.title}</h2>
+                                    <p className="whitespace-pre-line px-4 py-3.5 text-xs leading-5 text-gray-600">{section.text}</p>
+                                </section>
+                            ))}
+                        </div>
 
-              <div className="flex flex-col gap-3 border-t border-[#E6E8F5] pt-8 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-neutral-500">
-                  If this looks right, continue to your workspace setup.
-                </p>
-                <Link
-                  href={PAGE_ROUTES.COMPANY_OVERVIEW}
-                  className={`inline-flex h-11 items-center justify-center rounded-full bg-gradient-to-r from-[#2E2A9E] to-[#5B57E6] px-8 text-sm font-semibold text-white ${FOCUS_RING}`}
-                >
-                  Looks good, continue
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isReady && sections.length === 0 && (
-          <div className="py-16">
-            <h2 className="text-xl font-semibold text-neutral-900">No DNA sections yet</h2>
-            <p className="mt-2 text-sm text-neutral-500">
-              Your DNA is marked ready, but no sections were returned.
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+                        <div className="mt-8 flex justify-center">
+                            <Link
+                                href={PAGE_ROUTES.DASHBOARD}
+                                onClick={() => analyzeCompany({ company_id: companyUserId, company_data: JSON.stringify(dna) })}
+                                className="flex h-11 items-center rounded-full bg-[#5B5BD6] px-8 text-sm font-semibold text-white shadow-lg hover:bg-[#4a4ac5]"
+                            >
+                                Looks good, continue
+                            </Link>
+                        </div>
+                    </>
+                )}
+            </main>
+        </div>
+    );
 }
