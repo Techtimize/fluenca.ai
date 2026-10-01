@@ -4,11 +4,12 @@ import Link from 'next/link';
 import { Bell, Dna, Loader2 } from 'lucide-react';
 import { PAGE_ROUTES } from '@/constant/page-routes';
 import { DnaQuery } from '@/routes/bussiness/Bussiness-Query';
-import { RetryDnaMutation } from '@/routes/bussiness/Bussiness-Mutation';
+import { AnalyzeCompanyMutation, RetryDnaMutation } from '@/routes/bussiness/Bussiness-Mutation';
 
 export default function VerifyDna() {
     const { data: dna, isLoading } = DnaQuery();
     const { mutate: retryDna, isPending: isRetrying } = RetryDnaMutation();
+    const { mutate: analyzeCompany } = AnalyzeCompanyMutation();
 
     const isReady = dna?.status === 'ready';
     const isFailed = dna?.status === 'failed';

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
 import AssetImage from "@/components/shared/assetImage";
 import type { NavItem } from "@/types/dashboard";
@@ -26,11 +26,10 @@ type Props = {
 
 export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Logo.svg" }: Props) {
   const pathname = usePathname();
-  const router = useRouter();
 
   const handleLogout = () => {
     clearAuthTokenProvider();
-    router.replace(PAGE_ROUTES.LOGIN);
+    window.location.replace(PAGE_ROUTES.LOGIN);
   };
 
   return (
