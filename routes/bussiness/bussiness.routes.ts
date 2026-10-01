@@ -2,6 +2,8 @@ import { BUSSINESSENDPOINT } from "./Bussiness-Endpoint";
 import api from "../apiClient";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/onboarding-type";
 import { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
+import { CompetitorAnalysisRequest, CompetitorAnalysisResponse } from "@/types/bussiness/competitoranalysis-type";import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/onboarding-type";
+import { DnaResponseProps } from "@/types/bussiness/dna-type";
 import { CompetitorAnalysisRequest, CompetitorAnalysisResponse } from "@/types/bussiness/competitoranalysis-type";
 import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/onboarding-type";
 import type {
@@ -50,6 +52,15 @@ export const CompetitorAnalysisApi = async (data: CompetitorAnalysisRequest) => 
     return response.data;
 }
 
+export const DnaApi = async (): Promise<DnaResponseProps> => {
+    const response = await api.get(BUSSINESSENDPOINT.DNA);
+    return response.data;
+}
+
+export const RetryDnaApi = async (): Promise<DnaResponseProps> => {
+    const response = await api.post(BUSSINESSENDPOINT.DNA_RETRY);
+    return response.data;
+}
 export const AnalyzeCompanyResultsApi = async (company_id: string) => {
     const response = await api.get(
       BUSSINESSENDPOINT.ANALYZE_COMPANY_RESULTS(company_id),

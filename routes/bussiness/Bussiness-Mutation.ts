@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, OnboardingApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, OnboardingApi, RetryDnaApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionApi, CompleteIntakeApi } from "../company-details/companyDetails.routes";
@@ -68,7 +68,7 @@ export function CompleteIntakeMutation() {
         onSuccess: (response: IntakeResponseProps) => {
             queryClient.setQueryData(['intake'], response);
             toast.success("Company overview saved successfully");
-            router.push(PAGE_ROUTES.DASHBOARD);
+            router.push(PAGE_ROUTES.VERIFY_DNA);
         },
         onError: (error) => {
             toast.error(getApiErrorMessage(error, "Failed to save company overview"));
@@ -97,6 +97,19 @@ export function AnswerQuestionMutation() {
         },
         onError: (error) => {
             toast.error(getApiErrorMessage(error, "Failed to save answer"));
+        },
+    });
+}
+
+export function RetryDnaMutation() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: () => RetryDnaApi(),
+        onSuccess: (response) => {
+            queryClient.setQueryData(['dna'], response);
+        },
+        onError: (error) => {
+            toast.error(getApiErrorMessage(error, "Failed to rebuild company DNA"));
         },
     });
 }

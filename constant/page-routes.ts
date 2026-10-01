@@ -16,6 +16,7 @@ export const PAGE_ROUTES = {
     COMPANY_DETAIL: '/company-detail',
     QUESTIONS: '/questions',
     ANALYZING: '/analyzing',
+    VERIFY_DNA: '/verify-dna',
     DNA: '/dna',
 
     // Dashboard
