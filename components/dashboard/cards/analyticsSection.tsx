@@ -72,8 +72,8 @@ export default function AnalyticsSection({
         </div>
       </div>
 
-      {/* Metrics: 4 across normally, 2x2 when compact */}
-      <ul className={`mt-4 grid gap-4 sm:grid-cols-2 ${compact ? "" : "xl:grid-cols-4"}`}>
+      {/* Metrics: 4 across in one row from md up */}
+      <ul className={`mt-4 grid gap-4 ${compact ? "sm:grid-cols-2" : "grid-cols-2 md:grid-cols-4"}`}>
         {data.metrics.map((m) => (
           <MetricCard key={m.id} metric={m} />
         ))}
