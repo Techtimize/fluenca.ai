@@ -172,7 +172,7 @@ export default function Login() {
               <div className="flex-1 border-t border-gray-200" />
             </div>
 
-            <div className="mt-1 grid w-full grid-cols-1 gap-2">
+            {/* <div className="mt-1 grid w-full grid-cols-1 gap-2">
               <button
                 type="button"
                 className="flex h-12 w-full min-w-0 items-center justify-center gap-2 overflow-hidden rounded-full bg-[#EEF0FB] text-sm font-medium whitespace-nowrap hover:bg-[#E3E6F8]"
@@ -197,7 +197,7 @@ export default function Login() {
                 </svg>
                 Continue With Google
               </button>
-            </div>
+            </div> */}
 
             <p className="pt-1 text-center text-sm text-gray-500">
               Don&apos;t have an account?{' '}
@@ -212,21 +212,25 @@ export default function Login() {
         </section>
 
         {/* Right Side - Image Panel */}
-        <section className="relative m-4 hidden h-screen items-center justify-center overflow-hidden rounded-3xl bg-[#4F52D9] p-6 lg:flex lg:w-1/2">
+        <section className="relative m-4 hidden h-[calc(100vh-2rem)] items-center justify-center overflow-hidden rounded-3xl bg-[#4F52D9] lg:flex lg:w-1/2">
           <Image
             src="/assets/signup-bg.png"
             alt=""
-            width={100}
-            height={100}
-            className="absolute inset-0 h-full w-full object-cover"
+            fill
+            priority
+            className="object-cover object-center"
+            sizes="50vw"
           />
-          <Image
-            src="/assets/signup-preview.png"
-            alt="Dashboard preview"
-            width={100}
-            height={100}
-            className="relative z-10 h-full w-full object-contain"
-          />
+          <div className="relative z-10 flex h-full w-full items-center justify-end pl-10 pr-0">
+            <Image
+              src="/assets/signup-preview.svg"
+              alt="Dashboard preview"
+              width={900}
+              height={1100}
+              priority
+              className="h-[92%] w-auto max-w-none translate-x-6 object-contain object-right drop-shadow-xl sm:translate-x-8 lg:translate-x-10"
+            />
+          </div>
         </section>
       </div>
     </div>

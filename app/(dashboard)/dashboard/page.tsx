@@ -7,7 +7,7 @@ import ChatInput from "@/components/dashboard/chat/chatInput";
 import ChatPanel from "@/components/dashboard/chat/chatPanel";
 import CompanyCard from "@/components/dashboard/cards/companyCard";
 import DocumentationCard from "@/components/dashboard/documentationCard";
-import SidebarRail from "@/components/dashboard/sidebarRail";
+import SidebarRail, { DASHBOARD_CONTENT_OFFSET } from "@/components/dashboard/sidebarRail";
 import TopBar from "@/components/dashboard/topBar";
 import { mapAnalyzeCompanyToDashboard } from "@/lib/dashboard/map-analyze-company";
 import { MOCK_DASHBOARD } from "@/lib/mock/dashboard";
@@ -57,7 +57,7 @@ export default function DashboardPage() {
       <SidebarRail />
 
       <div
-        className={`px-4 pt-4 sm:px-6 md:pl-24 lg:pr-8 ${
+        className={`${DASHBOARD_CONTENT_OFFSET} ${
           chatOpen ? "pb-4 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-4" : "pb-32"
         }`}
       >
