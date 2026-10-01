@@ -5,8 +5,10 @@ import { getIcon } from "@/utils/icon-utils";
 const TONES: Record<Tone, { iconBg: string; text: string; bar: string }> = {
   green: { iconBg: "bg-[#EAF7E4]", text: "text-[#3BA61F]", bar: "bg-[#3BA61F]" },
   orange: { iconBg: "bg-[#FFF3E2]", text: "text-[#E08A0B]", bar: "bg-[#E08A0B]" },
-  purple: { iconBg: "bg-[#ECEBFF]", text: "text-[#5B57E6]", bar: "bg-[#5B57E6]" },
-  teal: { iconBg: "bg-[#DDF6F4]", text: "text-[#0FA3A0]", bar: "bg-[#0FA3A0]" },
+  purple: { iconBg: "bg-[#ECEBFF]", text: "text-[#6366F1]", bar: "bg-[#818CF8]" },
+  teal: { iconBg: "bg-[#DDF6F4]", text: "text-[#0D9488]", bar: "bg-[#2DD4BF]" },
+  sky: { iconBg: "bg-[#E0F2FE]", text: "text-[#0284C7]", bar: "bg-[#38BDF8]" },
+  rose: { iconBg: "bg-[#FDE8EE]", text: "text-[#E11D48]", bar: "bg-[#FB7185]" },
 };
 
 // Renders an <li>, so use it inside a <ul>.

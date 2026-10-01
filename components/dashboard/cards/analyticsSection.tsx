@@ -2,6 +2,7 @@ import { Monitor, MoreVertical, Smartphone } from "lucide-react";
 import Card from "@/components/shared/card";
 import type { AnalyticsData, Device } from "@/types/dashboard";
 import { FOCUS_RING } from "@/utils/ui-classes";
+import AnalyticsChartsRow from "./analyticsCharts";
 import IntegrationCard from "./integrationCard";
 import MetricCard from "./metricCard";
 import OverallPerformanceCard from "../overallPerformanceCard";
@@ -83,10 +84,13 @@ export default function AnalyticsSection({
         className={`mt-4 grid gap-4 ${
           compact
             ? "sm:grid-cols-2 sm:[&>*:last-child:nth-child(odd)]:col-span-2"
-            : "lg:grid-cols-[300px_repeat(2,minmax(0,1fr))]"
+            : data.charts
+              ? "md:grid-cols-2 xl:grid-cols-4"
+              : "lg:grid-cols-[300px_repeat(2,minmax(0,1fr))]"
         }`}
       >
         <OverallPerformanceCard data={data.overall} />
+        {data.charts ? <AnalyticsChartsRow charts={data.charts} /> : null}
         {data.integrations.map((i) => (
           <IntegrationCard key={i.id} integration={i} onConnect={onConnectIntegration} />
         ))}
