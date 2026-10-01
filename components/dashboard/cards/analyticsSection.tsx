@@ -4,7 +4,7 @@ import type { AnalyticsData, Device } from "@/types/dashboard";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import IntegrationCard from "./integrationCard";
 import MetricCard from "./metricCard";
-import OverallPerformanceCard from "./overallPerformanceCard";
+import OverallPerformanceCard from "../overallPerformanceCard";
 import VitalsCard from "./vitalsCard";
 
 type Props = {

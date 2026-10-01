@@ -10,6 +10,14 @@ export const BUSSINESSENDPOINT = {
     DNA_RETRY: '/dna/retry',
 
     ANALYZE_COMPANY: '/analyzeCompany/analyzeCompany',
+    ANALYZE_COMPANY_RESULTS:(company_id: string) => `/analyzeCompany/results/${company_id}`,
     GROWTH: '/social-growth',
     COMPETITOR_ANALYSIS: '/competitorAnalysis',
+
+    TRENDS:{
+    GOOGLE_TRENDS_NOW: '/google-trends/now',
+    GOOGLE_TRENDS_TRENDING: '/google-trends/trending',
+    GOOGLE_TRENDS_EXPLORE: '/google-trends/explore',
+    GOOGLE_TRENDS_FILTERS: '/google-trends/filters',
+    }
 }

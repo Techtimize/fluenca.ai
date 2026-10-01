@@ -26,8 +26,6 @@ type Props = {
   children?: ReactNode;
 };
 
-// locked: true  -> blurred preview with a lock button (real data is never shown).
-// locked: false -> clear view. Pass the real chart as children when it is ready.
 export default function IntegrationCard({ integration, onConnect, children }: Props) {
   const { id, title, subtitle, logoSrc, previewColor, locked = false } = integration;
 

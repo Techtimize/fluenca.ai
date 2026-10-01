@@ -4,7 +4,23 @@ import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness
 import { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
 import { CompetitorAnalysisRequest, CompetitorAnalysisResponse } from "@/types/bussiness/competitoranalysis-type";import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/onboarding-type";
 import { DnaResponseProps } from "@/types/bussiness/dna-type";
+import { CompetitorAnalysisRequest, CompetitorAnalysisResponse } from "@/types/bussiness/competitoranalysis-type";
+import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/onboarding-type";
+import type {
+  GoogleTrendExploreResponse,
+  GoogleTrendFiltersResponse,
+  GoogleTrendNowResponse,
+  GoogleTrendQueryParams,
+  GoogleTrendTrendingResponse,
+} from "@/types/bussiness/google-trends-type";
 
+function toQueryParams(params?: GoogleTrendQueryParams) {
+  if (!params) return undefined;
+  const entries = Object.entries(params).filter(
+    ([, value]) => value !== undefined && value !== null && value !== "",
+  );
+  return entries.length ? Object.fromEntries(entries) : undefined;
+}
 
 export const WaitlistApi = async (email: string) => {
     const response = await api.post(BUSSINESSENDPOINT.WAITLIST, { email: email });
@@ -45,3 +61,41 @@ export const RetryDnaApi = async (): Promise<DnaResponseProps> => {
     const response = await api.post(BUSSINESSENDPOINT.DNA_RETRY);
     return response.data;
 }
+export const AnalyzeCompanyResultsApi = async (company_id: string) => {
+    const response = await api.get(
+      BUSSINESSENDPOINT.ANALYZE_COMPANY_RESULTS(company_id),
+    );
+    return response.data;
+}
+
+export const GoogleTrendNowApi = async (params?: GoogleTrendQueryParams) => {
+    const response = await api.get<GoogleTrendNowResponse>(
+      BUSSINESSENDPOINT.TRENDS.GOOGLE_TRENDS_NOW,
+      { params: toQueryParams(params) },
+    );
+    return response.data;
+}
+
+export const GoogleTrendTrendingApi = async (params?: GoogleTrendQueryParams) => {
+    const response = await api.get<GoogleTrendTrendingResponse>(
+      BUSSINESSENDPOINT.TRENDS.GOOGLE_TRENDS_TRENDING,
+      { params: toQueryParams(params) },
+    );
+    return response.data;
+}
+
+export const GoogleTrendExploreApi = async (params?: GoogleTrendQueryParams) => {
+    const response = await api.get<GoogleTrendExploreResponse>(
+      BUSSINESSENDPOINT.TRENDS.GOOGLE_TRENDS_EXPLORE,
+      { params: toQueryParams(params) },
+    );
+    return response.data;
+}
+
+export const GoogleTrendFiltersApi = async () => {
+    const response = await api.get<GoogleTrendFiltersResponse>(
+      BUSSINESSENDPOINT.TRENDS.GOOGLE_TRENDS_FILTERS,
+    );
+    return response.data;
+}
+
