@@ -1,12 +1,14 @@
 import useAuthStore from '@/store/AuthsStore';
 
 
-export const setAuthTokenProvider = (token: string, role: string) => {
+export const setAuthTokenProvider = (token: string, role: string, company_user_id: string,status: string) => {
     if (typeof window !== 'undefined') {
         const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
         const cookieFlags = `path=/; max-age=${60 * 60 * 24}; samesite=strict${isHttps ? '; secure' : ''}`;
         document.cookie = `access_token=${token}; ${cookieFlags}`;
         document.cookie = `role=${role}; ${cookieFlags}`;
+        document.cookie = `company_user_id=${company_user_id}; ${cookieFlags}`;
+        document.cookie = `status=${status}; ${cookieFlags}`;
     }
     useAuthStore.getState().setField('isAuthenticated', true);
 };

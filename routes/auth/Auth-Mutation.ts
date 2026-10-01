@@ -11,7 +11,7 @@ export function LoginMutation() {
   return useMutation({
     mutationFn: (data: LoginRequestProps) => LoginApi(data),
     onSuccess: (response: LoginResponseProps) => {
-      setAuthTokenProvider(response.access_token, response.user.role);
+      setAuthTokenProvider(response.access_token, response.user.role, response.user.user_id,response.user.status);
       useAuthStore.getState().setUserId(response.user.user_id);
       toast.success(response.message || "Logged in successfully");
     },

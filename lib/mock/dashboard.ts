@@ -25,6 +25,7 @@ export const MOCK_DASHBOARD: DashboardData = {
   },
   docs: [
     { id: "company", title: "Company Information", subtitle: "Detail our ai agents collected", icon: "file", href: PAGE_ROUTES.COMPANY_OVERVIEW },
+    { id: "dna", title: "Company DNA", subtitle: "Positioning, audience, and offer signals.", icon: "dna", href: PAGE_ROUTES.DNA },
     { id: "marketing", title: "Marketing Position", subtitle: "Strong technical expertise, broad focus.", icon: "megaphone", href: "#" },
     { id: "pain", title: "Pain Points", subtitle: "Growth and development gaps.", icon: "layers", href: "#" },
     { id: "competitors", title: "Competitors Analytics", subtitle: "Growth and development gaps.", icon: "chart", href: "#" },

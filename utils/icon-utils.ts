@@ -9,6 +9,7 @@ import {
   BarChart4,
   ClipboardList,
   CreditCard,
+  Dna,
   FileText,
   Gauge,
   Home,
@@ -41,6 +42,7 @@ const ICONS: Record<string, LucideIcon> = {
   trending: TrendingUp,
   activity: Activity,
   zap: Zap,
+  dna: Dna,
 };
 
 export function getIcon(name?: string): LucideIcon {
