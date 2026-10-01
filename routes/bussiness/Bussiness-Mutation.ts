@@ -7,6 +7,7 @@ import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from 
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse, OnboardingRequestProps, OnboardingResponseProps } from "@/types/bussiness/onboarding-type";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
+import { setOnboardingCompletedProvider } from "@/provider/auth-provider";
 
 export function WaitlistMutation() {
     return useMutation({
@@ -67,6 +68,7 @@ export function CompleteIntakeMutation() {
         mutationFn: () => CompleteIntakeApi(),
         onSuccess: (response: IntakeResponseProps) => {
             queryClient.setQueryData(['intake'], response);
+            setOnboardingCompletedProvider(true);
             toast.success("Company overview saved successfully");
             router.push(PAGE_ROUTES.VERIFY_DNA);
         },

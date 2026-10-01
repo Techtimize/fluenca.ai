@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import AssetImage from "@/components/shared/assetImage";
 import type { NavItem } from "@/types/dashboard";
 import { getIcon } from "@/utils/icon-utils";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import { PAGE_ROUTES } from "@/constant/page-routes";
+import { clearAuthTokenProvider } from "@/provider/auth-provider";
 
 const DEFAULT_NAV: NavItem[] = [
   { id: "home", label: "Home", icon: "home", href: PAGE_ROUTES.DASHBOARD },
@@ -21,11 +22,16 @@ const DEFAULT_NAV: NavItem[] = [
 type Props = {
   items?: NavItem[];
   logoSrc?: string;
-  onLogout?: () => void;
 };
 
-export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Logo.svg", onLogout }: Props) {
+export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Logo.svg" }: Props) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    clearAuthTokenProvider();
+    router.replace(PAGE_ROUTES.LOGIN);
+  };
 
   return (
     <nav
@@ -55,9 +61,9 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
       </ul>
       <button
         type="button"
-        onClick={onLogout}
+        onClick={handleLogout}
         aria-label="Log out"
-        className={`mt-auto grid size-10 place-items-center rounded-full bg-[#5B57E6] text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
+        className={`mt-auto grid size-10 cursor-pointer place-items-center rounded-full bg-[#5B57E6] text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
       >
         <LogOut className="size-[18px]" />
       </button>
