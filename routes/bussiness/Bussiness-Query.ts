@@ -6,7 +6,6 @@ import {
   GoogleTrendFiltersApi,
   GoogleTrendNowApi,
   GoogleTrendTrendingApi,
-  OnboardingDetailsApi,
 } from "./bussiness.routes";
 import type { GoogleTrendQueryParams } from "@/types/bussiness/google-trends-type";
 
@@ -28,16 +27,7 @@ export const GoogleTrendNowQuery = (params?: GoogleTrendQueryParams) => {
   });
 };
 
-export const OnboardingDetailsQuery = () => {
-    return useQuery({
-        queryKey: ['onboarding-details'],
-        queryFn: () => OnboardingDetailsApi(),
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-    });
-}
 
-// Polls every 3s while the DNA is being built; stops once it is ready or has failed.
 export const DnaQuery = () => {
     return useQuery({
         queryKey: ['dna'],

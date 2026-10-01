@@ -4,8 +4,6 @@ import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness
 import { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
 import { CompetitorAnalysisRequest, CompetitorAnalysisResponse } from "@/types/bussiness/competitoranalysis-type";import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/onboarding-type";
 import { DnaResponseProps } from "@/types/bussiness/dna-type";
-import { CompetitorAnalysisRequest, CompetitorAnalysisResponse } from "@/types/bussiness/competitoranalysis-type";
-import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/onboarding-type";
 import type {
   GoogleTrendExploreResponse,
   GoogleTrendFiltersResponse,
