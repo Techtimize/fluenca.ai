@@ -12,49 +12,130 @@ type CompanyField = {
   label: string;
   value: string;
   reviewed: boolean;
+  required: boolean;
+  filled: boolean;
 };
 
 type CompanySection = {
   id: string;
   title: string;
   fields: CompanyField[];
+  answered: number;
+  total: number;
 };
 
 /* ---------- API → UI mapping ---------- */
 const toCompanySections = (sections: IntakeSection[]): CompanySection[] =>
-  sections.map((section) => ({
-    id: section.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-    title: section.name,
-    fields: section.questions.map((question) => ({
-      id: question.question_id,
-      label: question.question,
-      value: question.answer ?? "",
-      reviewed: question.status === "confirmed",
-    })),
-  }));
+  sections.map((section) => {
+    const fields = section.questions.map((question) => {
+      const value = question.answer?.trim() ?? "";
+      return {
+        id: question.question_id,
+        label: question.question,
+        value,
+        reviewed: question.status === "confirmed",
+        required: question.required,
+        filled: Boolean(value),
+      };
+    });
+
+    return {
+      id: section.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      title: section.name,
+      fields,
+      answered: fields.filter((field) => field.filled).length,
+      total: fields.length,
+    };
+  });
 
 /* ---------- Progress ring ---------- */
 function ProgressRing({ value, total }: { value: number; total: number }) {
   const r = 20;
   const c = 2 * Math.PI * r;
-  const pct = total === 0 ? 0 : value / total;
+  const pct = total === 0 ? 0 : Math.min(value / total, 1);
 
   return (
     <div className="flex items-center gap-4 rounded-2xl bg-[#F3F3F5] px-4 py-3">
-      <svg width="52" height="52" viewBox="0 0 52 52" role="img" aria-label={`${value} of ${total} fields reviewed`}>
+      <svg
+        width="52"
+        height="52"
+        viewBox="0 0 52 52"
+        role="img"
+        aria-label={`${value} of ${total} questions answered`}
+      >
         <circle cx="26" cy="26" r={r} fill="none" stroke="#DCDDF5" strokeWidth="6" />
         <circle
-          cx="26" cy="26" r={r} fill="none" stroke="#5B57E6" strokeWidth="6" strokeLinecap="round"
-          strokeDasharray={c} strokeDashoffset={c * (1 - pct)}
+          cx="26"
+          cy="26"
+          r={r}
+          fill="none"
+          stroke="#5B57E6"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - pct)}
           transform="rotate(-90 26 26)"
           className="transition-[stroke-dashoffset] duration-500"
         />
       </svg>
       <div>
-        <p className="text-sm font-semibold text-neutral-900">{value}/{total}</p>
-        <p className="text-xs text-neutral-600">Fields reviewed</p>
+        <p className="text-sm font-semibold text-neutral-900">
+          {value}/{total}
+        </p>
+        <p className="text-xs text-neutral-600">Questions answered</p>
       </div>
     </div>
+  );
+}
+
+/* ---------- Tiny section progress circle ---------- */
+function SectionProgressCircle({
+  value,
+  total,
+  active,
+}: {
+  value: number;
+  total: number;
+  active?: boolean;
+}) {
+  const size = 28;
+  const r = 10;
+  const c = 2 * Math.PI * r;
+  const pct = total === 0 ? 0 : Math.min(value / total, 1);
+
+  return (
+    <span className="relative grid size-7 place-items-center" aria-hidden="true">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke={active ? "#D7D5FF" : "#E6E8F5"}
+          strokeWidth="3"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke="#5B57E6"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - pct)}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          className="transition-[stroke-dashoffset] duration-500"
+        />
+      </svg>
+      <span
+        className={`relative text-[10px] font-semibold ${
+          active ? "text-[#5B57E6]" : "text-neutral-600"
+        }`}
+      >
+        {value}
+      </span>
+    </span>
   );
 }
 
@@ -68,13 +149,31 @@ function FieldCard({ field }: { field: CompanyField }) {
     saveAnswer({ question_id: field.id, answer }, { onSuccess: () => setEditing(false) });
 
   return (
-    <div className="overflow-hidden rounded-xl border border-[#E6E8F5] bg-white">
-      <div className="flex items-center justify-between gap-3 bg-[#F1F4FF] px-4 py-3">
-        <h3 className="text-[13px] font-semibold text-neutral-900">{field.label}</h3>
+    <div
+      className={`overflow-hidden rounded-xl border bg-white ${
+        field.filled ? "border-[#E6E8F5]" : "border-[#F5C2C2]"
+      }`}
+    >
+      <div
+        className={`flex items-center justify-between gap-3 px-4 py-3 ${
+          field.filled ? "bg-[#F1F4FF]" : "bg-[#FFF5F5]"
+        }`}
+      >
+        <h3 className="text-[13px] font-semibold text-neutral-900">
+          {field.label}
+          {!field.filled ? (
+            <span className="ml-1 text-[#E11D48]" aria-label="Required or unanswered">
+              *
+            </span>
+          ) : null}
+        </h3>
         <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
-            onClick={() => { setDraft(field.value); setEditing(true); }}
+            onClick={() => {
+              setDraft(field.value);
+              setEditing(true);
+            }}
             aria-label={`Edit ${field.label}`}
             className="rounded-md p-1 text-neutral-500 hover:bg-white hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B57E6]/40"
           >
@@ -87,7 +186,9 @@ function FieldCard({ field }: { field: CompanyField }) {
             aria-pressed={field.reviewed}
             aria-label={field.reviewed ? "Reviewed" : "Confirm answer"}
             className={`rounded-full p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B57E6]/40 disabled:cursor-default ${
-              field.reviewed ? "bg-[#5B57E6] text-white" : "bg-white text-neutral-400 hover:text-neutral-700"
+              field.reviewed
+                ? "bg-[#5B57E6] text-white"
+                : "bg-white text-neutral-400 hover:text-neutral-700"
             }`}
           >
             <Check className="size-3.5" />
@@ -127,7 +228,11 @@ function FieldCard({ field }: { field: CompanyField }) {
         ) : field.value ? (
           <p className="text-xs leading-5 text-neutral-600">{field.value}</p>
         ) : (
-          <p className="text-xs leading-5 text-neutral-400">Nothing found. Add this yourself.</p>
+          <p className="text-xs leading-5 text-[#E11D48]">
+            {field.required
+              ? "Nothing found. Add this yourself (required)."
+              : "Nothing found. Add this yourself."}
+          </p>
         )}
       </div>
     </div>
@@ -136,7 +241,6 @@ function FieldCard({ field }: { field: CompanyField }) {
 
 /* ---------- Top bar ---------- */
 function TopBar() {
-  // TODO: replace with the logged-in user from your auth provider.
   const user = { name: "User", avatarUrl: "" };
 
   return (
@@ -178,21 +282,26 @@ export default function CompanyOverviewPage() {
   const { mutate: completeIntake, isPending: isSaving } = CompleteIntakeMutation();
   const [activeId, setActiveId] = useState("");
 
-  const sections = useMemo(() => toCompanySections(intake?.sections ?? []), [intake]);
+  const sections = useMemo(
+    () => toCompanySections(intake?.sections ?? []),
+    [intake],
+  );
 
-  const { total, reviewed } = useMemo(() => {
+  const { total, answered } = useMemo(() => {
     const all = sections.flatMap((s) => s.fields);
-    return { total: all.length, reviewed: all.filter((f) => f.reviewed).length };
+    return {
+      total: all.length,
+      answered: all.filter((f) => f.filled).length,
+    };
   }, [sections]);
 
-  // Highlight the sidebar item for the section currently in view.
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         const hit = entries.find((e) => e.isIntersecting);
         if (hit) setActiveId(hit.target.id);
       },
-      { rootMargin: "-15% 0px -70% 0px" }
+      { rootMargin: "-15% 0px -70% 0px" },
     );
     sections.forEach((s) => {
       const el = document.getElementById(s.id);
@@ -200,7 +309,6 @@ export default function CompanyOverviewPage() {
     });
     return () => observer.disconnect();
   }, [sections]);
-
 
   const scrollTo = (id: string) => {
     setActiveId(id);
@@ -212,14 +320,14 @@ export default function CompanyOverviewPage() {
       <TopBar />
 
       <div className="grid w-full gap-4 px-4 pb-10 pt-2 sm:px-6 lg:grid-cols-[340px_1fr] lg:px-10">
-        {/* Left: progress + section navigation */}
         <aside className="rounded-3xl border border-[#E6E8F5] bg-white/80 p-5 backdrop-blur lg:sticky lg:top-6 lg:self-start">
           <h1 className="text-base font-semibold text-neutral-900">Company Overview</h1>
           <p className="mb-4 mt-1 text-xs leading-5 text-neutral-500">
-            Everything was researched and filled automatically. Review and edit before building your workspace.
+            Everything was researched and filled automatically. Review and edit before
+            building your workspace.
           </p>
 
-          <ProgressRing value={reviewed} total={total} />
+          <ProgressRing value={answered} total={total} />
 
           <nav aria-label="Overview sections" className="mt-4">
             <ul className="space-y-1">
@@ -231,14 +339,23 @@ export default function CompanyOverviewPage() {
                       type="button"
                       onClick={() => scrollTo(s.id)}
                       aria-current={active ? "true" : undefined}
-                      className={`flex w-full items-center justify-between border-l-2 px-2.5 py-2.5 text-left text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B57E6]/40 ${
+                      className={`flex w-full items-center justify-between gap-2 border-l-2 px-2.5 py-2.5 text-left text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B57E6]/40 ${
                         active
                           ? "border-[#5B57E6] font-medium text-[#5B57E6]"
                           : "border-transparent text-neutral-700 hover:text-neutral-950"
                       }`}
                     >
-                      <span>{s.title}</span>
-                      <span className="text-xs text-neutral-500">{String(s.fields.length).padStart(2, "0")}</span>
+                      <span className="min-w-0 truncate">{s.title}</span>
+                      <span className="flex shrink-0 items-center gap-2">
+                        <SectionProgressCircle
+                          value={s.answered}
+                          total={s.total}
+                          active={active}
+                        />
+                        <span className="text-xs text-neutral-500">
+                          {s.answered}/{s.total}
+                        </span>
+                      </span>
                     </button>
                   </li>
                 );
@@ -247,14 +364,18 @@ export default function CompanyOverviewPage() {
           </nav>
         </aside>
 
-        {/* Right: sections and fields */}
         <div className="min-w-0 rounded-3xl border border-[#E6E8F5] bg-white/80 p-5 backdrop-blur sm:p-8">
           {isLoading && <p className="text-sm text-neutral-500">Loading company overview...</p>}
           {sections
             .filter((s) => s.fields.length > 0)
             .map((s) => (
               <section key={s.id} id={s.id} className="scroll-mt-8 pb-8 last:pb-0">
-                <h2 className="mb-3 text-sm text-neutral-800">{s.title}</h2>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h2 className="text-sm text-neutral-800">{s.title}</h2>
+                  <p className="text-xs text-neutral-500">
+                    {s.answered}/{s.total} answered
+                  </p>
+                </div>
                 <div className="space-y-3">
                   {s.fields.map((f) => (
                     <FieldCard key={f.id} field={f} />
@@ -269,9 +390,9 @@ export default function CompanyOverviewPage() {
                 type="button"
                 onClick={() => completeIntake()}
                 disabled={isSaving}
-                className="h-9 rounded-full bg-[#5B57E6] px-6 text-sm font-semibold text-white hover:bg-[#4a46d4] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B57E6]/40"
+                className="h-9 rounded-full bg-[#5B57E6] px-6 text-sm font-semibold text-white hover:bg-[#4a46d4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B57E6]/40 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSaving ? "Completing..." : "complete"}
+                {isSaving ? "Completing..." : "Complete"}
               </button>
             </div>
           )}
