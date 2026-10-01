@@ -22,10 +22,12 @@ import {
   LoginFormSchema,
   LoginFormValidator,
 } from '@/validator/Auth/login-validator';
+import useAuthStore from '@/store/AuthsStore';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const { onboarding_completed }: { onboarding_completed: boolean } = useAuthStore();
   const form = useForm<LoginFormValidator>({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {
@@ -40,7 +42,13 @@ export default function Login() {
 
   const onSubmit = (data: LoginFormValidator) => {
     SignInMutation.mutate(data, {
-      onSuccess: () => router.push(PAGE_ROUTES.DASHBOARD),
+      onSuccess: () =>{
+        if(onboarding_completed){
+          router.push(PAGE_ROUTES.DASHBOARD);
+        }else{
+          router.push(PAGE_ROUTES.ONBOARDING);
+        }
+      }
     });
   };
 
