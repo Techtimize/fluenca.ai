@@ -38,12 +38,10 @@ export default function SignUpPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     validateEmail(email);
     if (confirmPassword) {
-      validatePasswordMatch(confirmPassword);
+ validatePasswordMatch(confirmPassword);
     }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setEmailError('Please enter a valid email address');
@@ -75,8 +73,10 @@ export default function SignUpPage() {
             {/* Logo */}
             <div className="flex justify-center">
               <Image
-                src="/assets/logo.svg"
+                src="/assets/Logo.svg"
                 alt="Influ.ai Logo"
+                width={100}
+                height={100}
                 className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
               />
             </div>
@@ -229,12 +229,16 @@ export default function SignUpPage() {
           <Image
             src="/assets/signup-bg.png"
             alt=""
+            width={100}
+            height={100}
             className="absolute inset-0 w-full h-full object-cover"
           />
           {/* Dashboard preview image */}
           <Image
             src="/assets/signup-preview.png"
             alt="Dashboard preview"
+            width={100}
+            height={100}
             className="relative z-10 w-full h-full object-contain"
           />
         </section>
