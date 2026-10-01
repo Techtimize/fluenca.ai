@@ -27,10 +27,7 @@ import { AnalyzeCompanyResultsQuery } from "@/routes/bussiness/Bussiness-Query";
 import type { AnalyzeCompanyResponse, AnalyzeCompanyResultsResponse } from "@/types/bussiness/analyzecompany-type";
 
 const PAIN_POINTS_PREVIEW = 8;
-
-/* ---------- Helpers ---------- */
 const hasValue = (value: unknown) => value !== null && value !== undefined && value !== "";
-
 const hostLabel = (url?: string | null) =>
   url ? url.replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/$/, "") : "";
 
@@ -43,8 +40,6 @@ const initials = (name?: string | null) =>
     .join("") || "—";
 
 const asNumber = (value: unknown) => (typeof value === "number" ? value : null);
-
-/* ---------- Building blocks ---------- */
 function Panel({ title, icon: Icon, action, children }: { title: string; icon: LucideIcon; action?: ReactNode; children: ReactNode }) {
   return (
     <section className="rounded-3xl border border-[#E6E8F5] bg-white p-5 shadow-[0_4px_20px_rgba(17,24,39,0.04)]">
@@ -153,7 +148,6 @@ function Empty() {
   return <p className="text-[13px] text-neutral-400">No data yet</p>;
 }
 
-/* ---------- Company header (shown in place of the dashboard CompanyCard) ---------- */
 function AnalyzeCompanyHeader({ data }: { data: AnalyzeCompanyResponse }) {
   const company = data.company;
   const brief = data.company_summary?.brief;
@@ -208,7 +202,6 @@ function AnalyzeCompanyHeader({ data }: { data: AnalyzeCompanyResponse }) {
   );
 }
 
-/* ---------- Main ---------- */
 function AnalyzeCompanyInsights({ data }: { data: AnalyzeCompanyResponse }) {
   const [showAllPains, setShowAllPains] = useState(false);
 
