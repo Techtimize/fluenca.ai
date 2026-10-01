@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { DnaApi, OnboardingDetailsApi } from "./bussiness.routes";
+import { CompetitorAnalysisCompetitorApi, DnaApi, OnboardingDetailsApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   GoogleTrendExploreApi,
@@ -72,6 +72,16 @@ export const AnalyzeCompanyResultsQuery = (company_user_id: string) => {
     queryKey: ["analyze-company-results", company_user_id],
     queryFn: () => AnalyzeCompanyResultsApi(company_user_id),
     enabled: Boolean(company_user_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const CompetitorAnalysisCompetitorQuery = (company_id: string) => {
+  return useQuery({
+    queryKey: ["competitor-analysis-competitor", company_id],
+    queryFn: () => CompetitorAnalysisCompetitorApi(company_id),
+    enabled: Boolean(company_id),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

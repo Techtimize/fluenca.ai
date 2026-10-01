@@ -7,6 +7,7 @@ import {
   BarChart2,
   BarChart3,
   BarChart4,
+  CalendarDays,
   ClipboardList,
   CreditCard,
   Dna,
@@ -43,6 +44,7 @@ const ICONS: Record<string, LucideIcon> = {
   activity: Activity,
   zap: Zap,
   dna: Dna,
+  calendar: CalendarDays,
 };
 
 export function getIcon(name?: string): LucideIcon {

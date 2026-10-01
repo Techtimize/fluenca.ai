@@ -2,7 +2,7 @@ import { BUSSINESSENDPOINT } from "./Bussiness-Endpoint";
 import api from "../apiClient";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
-import { CompetitorAnalysisRequest, CompetitorAnalysisResponse } from "@/types/bussiness/competitoranalysis-type";
+import { CompetitorAnalysisRequest, CompetitorAnalysisResponse, CompetitorsListResponse } from "@/types/bussiness/competitoranalysis-type";
 import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/onboarding-type";
 import { DnaResponseProps } from "@/types/bussiness/dna-type";
 import type {
@@ -46,8 +46,18 @@ export const SocialGrowthApi = async (prompt: string) => {
     return response.data;
 }
 
-export const CompetitorAnalysisApi = async (data: CompetitorAnalysisRequest) => {
-    const response = await api.post<CompetitorAnalysisResponse>(BUSSINESSENDPOINT.COMPETITOR_ANALYSIS, data);
+export const CompetitorAnalysisAsyncApi = async (data: CompetitorAnalysisRequest) => {
+    const response = await api.post(
+      BUSSINESSENDPOINT.COMPETITOR_ANALYSIS,
+      data,
+    );
+    return response.data;
+}
+
+export const CompetitorAnalysisCompetitorApi = async (company_id: string) => {
+    const response = await api.get<CompetitorsListResponse>(
+      BUSSINESSENDPOINT.COMPETITOR_ANALYSIS_COMPETITOR(company_id),
+    );
     return response.data;
 }
 
