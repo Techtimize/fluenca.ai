@@ -1,0 +1,79 @@
+"use client";
+
+import { useMemo, useRef, useState } from "react";
+import { ChatHistoryQuery } from "@/routes/chatbot/Chatbot-Query";
+import { SendMessageMutation } from "@/routes/chatbot/Chatbot-Mutation";
+import { mapChatHistory } from "@/lib/chat/map-chat-messages";
+import type { ChatMessage } from "@/types/chat";
+
+const PENDING_USER_ID = "pending-user";
+const STREAMING_ASSISTANT_ID = "streaming-assistant";
+
+export const useChatbot = (enabled = true) => {
+  const { data, isLoading, isError } = ChatHistoryQuery(enabled);
+  const sendMessage = SendMessageMutation();
+
+  const [pendingUserText, setPendingUserText] = useState<string | null>(null);
+  const [streamingText, setStreamingText] = useState("");
+  const streamedRef = useRef("");
+
+  const history = useMemo(() => mapChatHistory(data?.messages), [data?.messages]);
+
+  const messages = useMemo(() => {
+    const live: ChatMessage[] = [...history];
+
+    if (pendingUserText !== null) {
+      live.push({ id: PENDING_USER_ID, role: "user", content: pendingUserText });
+    }
+    if (streamingText) {
+      live.push({
+        id: STREAMING_ASSISTANT_ID,
+        role: "assistant",
+        content: streamingText,
+        status: "running",
+      });
+    }
+
+    return live;
+  }, [history, pendingUserText, streamingText]);
+
+  const send = (text: string) => {
+    if (sendMessage.isPending) return;
+
+    streamedRef.current = "";
+    setPendingUserText(text);
+    setStreamingText("");
+
+    sendMessage.mutate(
+      {
+        message: text,
+        onChunk: (chunk) => {
+          streamedRef.current += chunk;
+          setStreamingText(streamedRef.current);
+        },
+        onDone: () => {
+          streamedRef.current = "";
+        },
+      },
+      {
+        onSettled: () => {
+          setPendingUserText(null);
+          setStreamingText("");
+        },
+      },
+    );
+  };
+
+  const isAwaitingReply = sendMessage.isPending && !streamingText;
+  const isToolRunning = history[history.length - 1]?.status === "running";
+
+  return {
+    messages,
+    send,
+    isLoading,
+    isError,
+    isSending: sendMessage.isPending,
+    isAwaitingReply,
+    isToolRunning,
+  };
+};

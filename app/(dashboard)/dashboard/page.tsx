@@ -9,10 +9,10 @@ import CompanyCard from "@/components/dashboard/cards/companyCard";
 import DocumentationCard from "@/components/dashboard/documentationCard";
 import TopBar from "@/components/dashboard/topBar";
 import { mapAnalyzeCompanyToDashboard } from "@/lib/dashboard/map-analyze-company";
+import { useChatbot } from "@/lib/chat/use-chatbot";
 import { MOCK_DASHBOARD } from "@/lib/mock/dashboard";
 import { AnalyzeCompanyResultsQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
-import type { ChatMessage } from "@/types/chat";
 import type { Device } from "@/types/dashboard";
 import type { AnalyzeCompanyResultsResponse } from "@/types/bussiness/analyzecompany-type";
 import { stripMarkdown } from "@/utils/text-utils";
@@ -68,7 +68,7 @@ export default function DashboardPage() {
   const [source, setSource] = useState(analytics.sources[0] ?? "Website");
   const [device, setDevice] = useState<Device>("mobile");
   const [chatOpen, setChatOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { messages, send, isSending, isAwaitingReply, isToolRunning } = useChatbot();
 
   useEffect(() => {
     if (!analytics.sources.includes(source)) {
@@ -77,7 +77,7 @@ export default function DashboardPage() {
   }, [analytics.sources, source]);
 
   const handleSend = (text: string) => {
-    setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "user", content: text }]);
+    send(text);
     setChatOpen(true);
   };
 
@@ -133,7 +133,9 @@ export default function DashboardPage() {
             messages={messages}
             onSend={handleSend}
             onClose={() => setChatOpen(false)}
-            onReset={() => setMessages([])}
+            isSending={isSending}
+            isAwaitingReply={isAwaitingReply}
+            isToolRunning={isToolRunning}
           />
         ) : null}
       </div>

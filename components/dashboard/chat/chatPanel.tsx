@@ -12,6 +12,9 @@ type Props = {
   onClose: () => void;
   onReset?: () => void;
   onOpenSettings?: () => void;
+  isSending?: boolean;
+  isAwaitingReply?: boolean;
+  isToolRunning?: boolean;
   title?: string;
   subtitle?: string;
   placeholder?: string;
@@ -23,6 +26,9 @@ export default function ChatPanel({
   onClose,
   onReset,
   onOpenSettings,
+  isSending = false,
+  isAwaitingReply = false,
+  isToolRunning = false,
   title = "Influ.AI",
   subtitle = "Marketing Agent",
   placeholder = "Ask anything about marketing ...",
@@ -30,17 +36,15 @@ export default function ChatPanel({
   const [draft, setDraft] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
 
-  // Keep the newest message in view.
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages]);
+  }, [messages, isAwaitingReply, isToolRunning]);
 
   return (
     <Card
       as="aside"
       className="flex flex-col overflow-hidden max-lg:fixed max-lg:inset-2 max-lg:z-40 max-lg:bg-white lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)]"
     >
-      {/* Header */}
       <div className="flex items-center gap-3 border-b border-[#E6E8F5] px-4 py-3">
         <span className="grid size-9 place-items-center rounded-full bg-[#ECEBFF] text-[#5B57E6]">
           <Sparkles className="size-4" aria-hidden="true" />
@@ -49,22 +53,26 @@ export default function ChatPanel({
           <h2 className="truncate text-[13px] font-semibold text-neutral-900">{title}</h2>
           <p className="truncate text-xs text-neutral-500">{subtitle}</p>
         </div>
-        <button
-          type="button"
-          onClick={onReset}
-          aria-label="Start a new chat"
-          className={`rounded-md p-1.5 text-neutral-600 hover:bg-neutral-100 ${FOCUS_RING}`}
-        >
-          <RotateCcw className="size-4" />
-        </button>
-        <button
-          type="button"
-          onClick={onOpenSettings}
-          aria-label="Chat settings"
-          className={`rounded-md p-1.5 text-neutral-600 hover:bg-neutral-100 ${FOCUS_RING}`}
-        >
-          <Settings className="size-4" />
-        </button>
+        {onReset ? (
+          <button
+            type="button"
+            onClick={onReset}
+            aria-label="Start a new chat"
+            className={`rounded-md p-1.5 text-neutral-600 hover:bg-neutral-100 ${FOCUS_RING}`}
+          >
+            <RotateCcw className="size-4" />
+          </button>
+        ) : null}
+        {onOpenSettings ? (
+          <button
+            type="button"
+            onClick={onOpenSettings}
+            aria-label="Chat settings"
+            className={`rounded-md p-1.5 text-neutral-600 hover:bg-neutral-100 ${FOCUS_RING}`}
+          >
+            <Settings className="size-4" />
+          </button>
+        ) : null}
         <button
           type="button"
           onClick={onClose}
@@ -75,9 +83,8 @@ export default function ChatPanel({
         </button>
       </div>
 
-      {/* Messages */}
       <div role="log" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-        {messages.length === 0 ? (
+        {messages.length === 0 && !isAwaitingReply ? (
           <p className="mt-8 text-center text-xs text-neutral-500">Ask me anything about your marketing.</p>
         ) : (
           messages.map((m) => (
@@ -90,18 +97,36 @@ export default function ChatPanel({
               }`}
             >
               {m.content}
+              {m.status === "failed" ? (
+                <span className="mt-1 block text-xs text-rose-600">
+                  {m.errorMessage || "That message failed."}
+                </span>
+              ) : null}
+              {m.status === "running" && m.toolName ? (
+                <span className="mt-1 block text-xs text-neutral-500">Running {m.toolName}…</span>
+              ) : null}
             </div>
           ))
         )}
+
+        {isAwaitingReply ? (
+          <div className="mr-auto max-w-[85%] rounded-2xl rounded-bl-md border border-[#E6E8F5] bg-[#F6F7FD] px-3 py-2 text-[13px] text-neutral-500">
+            Thinking…
+          </div>
+        ) : null}
+
+        {isToolRunning && !isSending ? (
+          <p className="text-center text-xs text-neutral-500">Working on it. This can take a while.</p>
+        ) : null}
+
         <div ref={endRef} />
       </div>
 
-      {/* Input */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           const text = draft.trim();
-          if (!text) return;
+          if (!text || isSending) return;
           onSend(text);
           setDraft("");
         }}
@@ -123,8 +148,9 @@ export default function ChatPanel({
         </button>
         <button
           type="submit"
+          disabled={isSending}
           aria-label="Send message"
-          className={`grid size-10 place-items-center rounded-full bg-[#5B57E6] text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
+          className={`grid size-10 place-items-center rounded-full bg-[#5B57E6] text-white hover:bg-[#4A46D0] disabled:opacity-50 ${FOCUS_RING}`}
         >
           <Send className="size-4" />
         </button>
