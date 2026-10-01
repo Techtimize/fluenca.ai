@@ -316,10 +316,10 @@ export default function CompanyOverviewPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,#E9ECFF_0%,#FFFFFF_45%)]">
+    <main className="min-w-0">
       <TopBar />
 
-      <div className="grid w-full gap-4 px-4 pb-10 pt-2 sm:px-6 lg:grid-cols-[340px_1fr] lg:px-10">
+      <div className="grid w-full gap-4 lg:grid-cols-[340px_1fr]">
         <aside className="rounded-3xl border border-[#E6E8F5] bg-white/80 p-5 backdrop-blur lg:sticky lg:top-6 lg:self-start">
           <h1 className="text-base font-semibold text-neutral-900">Company Overview</h1>
           <p className="mb-4 mt-1 text-xs leading-5 text-neutral-500">

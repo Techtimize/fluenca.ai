@@ -15,7 +15,6 @@ import {
   Users,
   Wrench,
 } from "lucide-react";
-import SidebarRail, { DASHBOARD_CONTENT_OFFSET } from "@/components/dashboard/sidebarRail";
 import TopBar from "@/components/dashboard/topBar";
 import Card from "@/components/shared/card";
 import { PAGE_ROUTES } from "@/constant/page-routes";
@@ -109,11 +108,7 @@ export default function DnaPage() {
   const { data: analyzeCompanyResults } = AnalyzeCompanyResultsQuery(company_user_id);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,#E9ECFF_0%,#FFFFFF_45%)]">
-      <SidebarRail />
-
-      <div className={DASHBOARD_CONTENT_OFFSET}>
-        <main className="min-w-0">
+    <main className="min-w-0">
           <TopBar user={MOCK_DASHBOARD.user} placeholder="Search company DNA..." />
 
           <div className="grid w-full gap-4 lg:grid-cols-[320px_1fr]">
@@ -375,7 +370,5 @@ export default function DnaPage() {
             </div>
           </div>
         </main>
-      </div>
-    </div>
   );
 }

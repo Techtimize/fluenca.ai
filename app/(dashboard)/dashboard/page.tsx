@@ -7,7 +7,6 @@ import ChatInput from "@/components/dashboard/chat/chatInput";
 import ChatPanel from "@/components/dashboard/chat/chatPanel";
 import CompanyCard from "@/components/dashboard/cards/companyCard";
 import DocumentationCard from "@/components/dashboard/documentationCard";
-import SidebarRail, { DASHBOARD_CONTENT_OFFSET } from "@/components/dashboard/sidebarRail";
 import TopBar from "@/components/dashboard/topBar";
 import { mapAnalyzeCompanyToDashboard } from "@/lib/dashboard/map-analyze-company";
 import { MOCK_DASHBOARD } from "@/lib/mock/dashboard";
@@ -53,13 +52,13 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,#E4E8FF_0%,#FFFFFF_50%)]">
-      <SidebarRail />
-
+    <>
       <div
-        className={`${DASHBOARD_CONTENT_OFFSET} ${
-          chatOpen ? "pb-4 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-4" : "pb-32"
-        }`}
+        className={
+          chatOpen
+            ? "pb-4 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-4"
+            : "pb-32"
+        }
       >
         <main className="min-w-0">
           <TopBar user={user} />
@@ -116,6 +115,6 @@ export default function DashboardPage() {
       </div>
 
       {!chatOpen && <ChatInput onOpen={() => setChatOpen(true)} onSend={handleSend} />}
-    </div>
+    </>
   );
 }

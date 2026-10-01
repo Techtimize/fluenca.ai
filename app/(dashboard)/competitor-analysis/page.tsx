@@ -4,7 +4,6 @@ import { useState } from "react";
 import { AtSign, Link2, Loader2, Plus, Sparkles, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import CompetitorResults from "@/components/dashboard/competitors/CompetitorResults";
-import SidebarRail, { DASHBOARD_CONTENT_OFFSET } from "@/components/dashboard/sidebarRail";
 import TopBar from "@/components/dashboard/topBar";
 import Card from "@/components/shared/card";
 import { Button } from "@/components/ui/button";
@@ -118,11 +117,7 @@ export default function CompetitorAnalysisPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,#E4E8FF_0%,#FFFFFF_50%)]">
-      <SidebarRail />
-
-      <div className={DASHBOARD_CONTENT_OFFSET}>
-        <main className="min-w-0 space-y-4">
+    <main className="min-w-0 space-y-4">
           <TopBar
             user={{ name: companyName || "User" }}
             placeholder="Search competitors..."
@@ -332,7 +327,5 @@ export default function CompetitorAnalysisPage() {
             }}
           />
         </main>
-      </div>
-    </div>
   );
 }

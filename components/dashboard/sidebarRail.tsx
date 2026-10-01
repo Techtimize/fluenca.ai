@@ -17,7 +17,6 @@ const EXPANDED_PAD = "15.5rem";
 
 const DEFAULT_NAV: NavItem[] = [
   { id: "home", label: "Home", icon: "home", href: PAGE_ROUTES.DASHBOARD },
-  { id: "dashboard", label: "Dashboard", icon: "dashboard", href: "#" },
   { id: "trends", label: "Trends", icon: "trending", href: PAGE_ROUTES.TRENDS },
   { id: "overview", label: "Company overview", icon: "clipboard", href: PAGE_ROUTES.COMPANY_OVERVIEW },
   { id: "dna", label: "Company DNA", icon: "dna", href: PAGE_ROUTES.DNA },
@@ -28,7 +27,6 @@ const DEFAULT_NAV: NavItem[] = [
     href: PAGE_ROUTES.COMPETITOR_ANALYSIS,
   },
   { id: "calendar", label: "Calendar", icon: "calendar", href: PAGE_ROUTES.CALENDAR },
-  { id: "billing", label: "Billing", icon: "billing", href: "#" },
 ];
 
 type Props = {
@@ -73,7 +71,7 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
     try {
       localStorage.setItem(STORAGE_KEY, String(collapsed));
     } catch {
-      // ignore
+      console.error("Error saving sidebar collapsed state");
     }
   }, [collapsed]);
 

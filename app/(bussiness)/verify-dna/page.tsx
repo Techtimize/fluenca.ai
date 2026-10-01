@@ -1,7 +1,8 @@
-'use client';
-import { useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import {
   Bell,
   Building2,
@@ -12,83 +13,66 @@ import {
   Sparkles,
   Users,
   Wrench,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import { PAGE_ROUTES } from '@/constant/page-routes';
-import { DnaQuery, OnboardingDetailsQuery } from '@/routes/bussiness/Bussiness-Query';
-import { AnalyzeCompanyMutation, RetryDnaMutation } from '@/routes/bussiness/Bussiness-Mutation';
-import { FOCUS_RING } from '@/utils/ui-classes';
-import useAuthStore from '@/store/AuthsStore';
-import { toast } from 'sonner';
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { toast } from "sonner";
+import { PAGE_ROUTES } from "@/constant/page-routes";
+import { AnalyzeCompanyMutation, RetryDnaMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import { DnaQuery, OnboardingDetailsQuery } from "@/routes/bussiness/Bussiness-Query";
+import useAuthStore from "@/store/AuthsStore";
+import { FOCUS_RING } from "@/utils/ui-classes";
+
+const HIDDEN_SECTION_TITLES = new Set([
+  "voice & tone",
+  "voice and tone",
+  "things to avoid",
+  "company & team",
+  "company and team",
+]);
+
+function getSectionIcon(key: string, title: string): LucideIcon {
+  const haystack = `${key} ${title}`.toLowerCase();
+  if (haystack.includes("audience") || haystack.includes("customer")) return Users;
+  if (haystack.includes("position") || haystack.includes("offer")) return Crosshair;
+  if (haystack.includes("service") || haystack.includes("product")) return Layers3;
+  if (haystack.includes("tech") || haystack.includes("stack")) return Wrench;
+  if (haystack.includes("company") || haystack.includes("brand")) return Building2;
+  if (haystack.includes("dna")) return Dna;
+  return Sparkles;
+}
 
 export default function VerifyDna() {
-    const { data: dna, isLoading } = DnaQuery();
-    const { mutate: retryDna, isPending: isRetrying } = RetryDnaMutation();
-    const { mutate: analyzeCompany } = AnalyzeCompanyMutation();
-    const companyUserId = useAuthStore((state) => state.company_user_id);
-
-    const isReady = dna?.status === 'ready';
-    const isFailed = dna?.status === 'failed';
-
-export default function VerifyDna() {
-  const { company_user_id } = useAuthStore();
+  const company_user_id = useAuthStore((state) => state.company_user_id);
   const { data: dna, isLoading } = DnaQuery();
   const { data: onboarding } = OnboardingDetailsQuery();
   const { mutate: retryDna, isPending: isRetrying } = RetryDnaMutation();
   const { mutate: analyzeCompany, isPending: isAnalyzing } = AnalyzeCompanyMutation();
 
-  const [activeId, setActiveId] = useState('');
+  const [activeId, setActiveId] = useState("");
 
-  const isReady = dna?.status === 'ready';
-  const isFailed = dna?.status === 'failed';
+  const isReady = dna?.status === "ready";
+  const isFailed = dna?.status === "failed";
   const isBuilding =
-    isLoading || dna?.status === 'generating' || dna?.status === 'not_started';
+    isLoading || dna?.status === "generating" || dna?.status === "not_started";
 
   const companyId = onboarding?.company_id || company_user_id;
   const companyData =
     dna?.document?.trim() ||
     (dna?.sections ?? [])
       .map((section) => `## ${section.title}\n${section.text}`)
-      .join('\n\n');
-
-  const handleContinue = () => {
-    if (!companyId) {
-      toast.error('Company ID is missing. Please complete onboarding again.');
-      return;
-    }
-    if (!companyData) {
-      toast.error('Company DNA data is missing. Please wait for DNA to finish.');
-      return;
-    }
-
-    analyzeCompany({
-      company_id: companyId,
-      company_data: companyData,
-    });
-  };
-
-  const HIDDEN_SECTION_TITLES = new Set([
-    'voice & tone',
-    'voice and tone',
-    'things to avoid',
-    'company & team',
-    'company and team',
-  ]);
+      .join("\n\n");
 
   const sections = useMemo(
     () =>
       (dna?.sections ?? [])
         .filter((section) => {
-          const title = section.title
-            .replace(/^#+\s*/, '')
-            .trim()
-            .toLowerCase();
-          const key = section.key.trim().toLowerCase().replace(/[_-]+/g, ' ');
+          const title = section.title.replace(/^#+\s*/, "").trim().toLowerCase();
+          const key = section.key.trim().toLowerCase().replace(/[_-]+/g, " ");
           return !HIDDEN_SECTION_TITLES.has(title) && !HIDDEN_SECTION_TITLES.has(key);
         })
         .map((section) => ({
           ...section,
-          id: section.key || section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          id: section.key || section.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
           Icon: getSectionIcon(section.key, section.title),
         })),
     [dna?.sections],
@@ -97,12 +81,13 @@ export default function VerifyDna() {
   useEffect(() => {
     if (!sections.length) return;
     setActiveId((current) => current || sections[0].id);
+
     const observer = new IntersectionObserver(
       (entries) => {
         const hit = entries.find((entry) => entry.isIntersecting);
         if (hit) setActiveId(hit.target.id);
       },
-      { rootMargin: '-15% 0px -70% 0px' },
+      { rootMargin: "-15% 0px -70% 0px" },
     );
 
     sections.forEach((section) => {
@@ -115,7 +100,23 @@ export default function VerifyDna() {
 
   const scrollTo = (id: string) => {
     setActiveId(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleContinue = () => {
+    if (!companyId) {
+      toast.error("Company ID is missing. Please complete onboarding again.");
+      return;
+    }
+    if (!companyData) {
+      toast.error("Company DNA data is missing. Please wait for DNA to finish.");
+      return;
+    }
+
+    analyzeCompany({
+      company_id: companyId,
+      company_data: companyData,
+    });
   };
 
   return (
@@ -148,8 +149,8 @@ export default function VerifyDna() {
         </div>
       </header>
 
-      <div className="w-full px-4 pb-16 pt-2 sm:px-6 lg:px-10">
-        <div className="mb-8 mx-auto max-w-3xl text-center">
+      <main className="w-full px-4 pb-16 pt-2 sm:px-6 lg:px-10">
+        <div className="mx-auto mb-8 max-w-3xl text-center">
           <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[#5B57E6]">
             Company DNA
           </p>
@@ -157,12 +158,12 @@ export default function VerifyDna() {
             Verify what we learned
           </h1>
           <p className="mt-3 text-sm leading-6 text-neutral-500 sm:text-[15px]">
-            Everything our AI agents gathered about your company, laid out by section.
-            Review each part before we build your workspace.
+            Everything our AI agents gathered about your company, laid out by section. Review each
+            part before we build your workspace.
           </p>
         </div>
 
-        {isBuilding && (
+        {isBuilding ? (
           <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 text-sm text-neutral-500">
             <Loader2 className="size-7 animate-spin text-[#5B57E6]" />
             <p className="font-medium text-neutral-700">Building your company DNA...</p>
@@ -170,15 +171,15 @@ export default function VerifyDna() {
               Reading positioning, audience, and offer signals from your public presence.
             </p>
           </div>
-        )}
+        ) : null}
 
-        {isFailed && (
+        {isFailed ? (
           <div className="flex min-h-[40vh] flex-col items-start justify-center gap-4">
             <h2 className="text-xl font-semibold text-neutral-900">
               We couldn&apos;t finish your DNA
             </h2>
             <p className="max-w-lg text-sm leading-6 text-[#B42318]">
-              {dna?.error || 'Something went wrong while generating your company DNA.'}
+              {dna?.error || "Something went wrong while generating your company DNA."}
             </p>
             <button
               type="button"
@@ -186,12 +187,12 @@ export default function VerifyDna() {
               disabled={isRetrying}
               className={`h-11 rounded-full bg-[#5B57E6] px-6 text-sm font-semibold text-white hover:bg-[#4A46D0] disabled:opacity-60 ${FOCUS_RING}`}
             >
-              {isRetrying ? 'Retrying...' : 'Try again'}
+              {isRetrying ? "Retrying..." : "Try again"}
             </button>
           </div>
-        )}
+        ) : null}
 
-        {isReady && sections.length > 0 && (
+        {isReady && sections.length > 0 ? (
           <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-14">
             <aside className="lg:sticky lg:top-6 lg:self-start">
               <p className="mb-3 text-[12px] font-medium uppercase tracking-[0.12em] text-neutral-400">
@@ -207,11 +208,11 @@ export default function VerifyDna() {
                         <button
                           type="button"
                           onClick={() => scrollTo(section.id)}
-                          aria-current={active ? 'true' : undefined}
+                          aria-current={active ? "true" : undefined}
                           className={`flex w-full items-center gap-2.5 rounded-full px-3 py-2.5 text-left text-[13px] transition-colors lg:rounded-none lg:border-l-2 lg:px-2.5 ${FOCUS_RING} ${
                             active
-                              ? 'bg-[#ECEBFF] font-medium text-[#5B57E6] lg:border-[#5B57E6] lg:bg-transparent'
-                              : 'bg-white/70 text-neutral-700 hover:text-neutral-950 lg:border-transparent lg:bg-transparent'
+                              ? "bg-[#ECEBFF] font-medium text-[#5B57E6] lg:border-[#5B57E6] lg:bg-transparent"
+                              : "bg-white/70 text-neutral-700 hover:text-neutral-950 lg:border-transparent lg:bg-transparent"
                           }`}
                         >
                           <Icon className="size-3.5 shrink-0" aria-hidden="true" />
@@ -241,14 +242,13 @@ export default function VerifyDna() {
                       </span>
                       <div>
                         <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#5B57E6]">
-                          Part {String(index + 1).padStart(2, '0')}
+                          Part {String(index + 1).padStart(2, "0")}
                         </p>
                         <h2 className="mt-1 text-xl font-semibold text-neutral-900 sm:text-2xl">
                           {section.title}
                         </h2>
                       </div>
                     </div>
-                )}
 
                     <div className="w-full space-y-4 pl-0 sm:pl-[52px]">
                       {section.text
@@ -284,26 +284,28 @@ export default function VerifyDna() {
                       Analyzing company...
                     </>
                   ) : (
-                    'Looks good, continue'
+                    "Looks good, continue"
                   )}
                 </button>
               </div>
             </div>
           </div>
-        )}
+        ) : null}
 
-                        <div className="mt-8 flex justify-center">
-                            <Link
-                                href={PAGE_ROUTES.DASHBOARD}
-                                onClick={() => analyzeCompany({ company_id: companyUserId, company_data: JSON.stringify(dna) })}
-                                className="flex h-11 items-center rounded-full bg-[#5B5BD6] px-8 text-sm font-semibold text-white shadow-lg hover:bg-[#4a4ac5]"
-                            >
-                                Looks good, continue
-                            </Link>
-                        </div>
-                    </>
-                )}
-            </main>
-        </div>
-    );
+        {isReady && !isBuilding && !isFailed && sections.length === 0 ? (
+          <div className="flex min-h-[30vh] flex-col items-center justify-center gap-3 text-center">
+            <p className="text-sm font-medium text-neutral-700">No DNA sections available yet.</p>
+            <button
+              type="button"
+              onClick={() => retryDna()}
+              disabled={isRetrying}
+              className={`h-11 rounded-full bg-[#5B57E6] px-6 text-sm font-semibold text-white hover:bg-[#4A46D0] disabled:opacity-60 ${FOCUS_RING}`}
+            >
+              {isRetrying ? "Retrying..." : "Generate again"}
+            </button>
+          </div>
+        ) : null}
+      </main>
+    </div>
+  );
 }

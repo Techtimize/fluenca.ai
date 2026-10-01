@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import SidebarRail, { DASHBOARD_CONTENT_OFFSET } from "@/components/dashboard/sidebarRail";
 import TopBar from "@/components/dashboard/topBar";
 import TrendsExploreCard from "@/components/dashboard/trends/TrendsExploreCard";
 import TrendsFiltersBar from "@/components/dashboard/trends/TrendsFiltersBar";
@@ -89,11 +88,7 @@ export default function TrendsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,#E4E8FF_0%,#FFFFFF_50%)]">
-      <SidebarRail />
-
-      <div className={DASHBOARD_CONTENT_OFFSET}>
-        <main className="min-w-0">
+    <main className="min-w-0">
           <TopBar
             user={MOCK_DASHBOARD.user}
             placeholder="Search trends..."
@@ -190,7 +185,5 @@ export default function TrendsPage() {
             />
           </div> */}
         </main>
-      </div>
-    </div>
   );
 }
