@@ -546,8 +546,8 @@ function AnalyzeCompanyInsights({ data }: { data: AnalyzeCompanyResponse }) {
 export default function DnaPage() {
   const t = useTranslations("dna");
   const tTop = useTranslations("topBar");
-  const companyUserId = useAuthStore((state) => state.company_user_id);
-  const { data: analyzeCompanyResults, isLoading, isError } = AnalyzeCompanyResultsQuery(companyUserId);
+  const companyId = useAuthStore((state) => state.company_id);
+  const { data: analyzeCompanyResults, isLoading, isError } = AnalyzeCompanyResultsQuery(companyId);
   const analysis = (analyzeCompanyResults as AnalyzeCompanyResultsResponse | undefined)?.result;
 
   return (

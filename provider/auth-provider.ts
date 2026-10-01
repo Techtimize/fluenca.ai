@@ -6,6 +6,7 @@ const AUTH_COOKIE_NAMES = [
   'role',
   'onboarding_completed',
   'company_user_id',
+  'company_id',
   'status',
 ] as const;
 
@@ -35,6 +36,7 @@ function syncAuthCookies(payload: {
   role: string;
   onboarding_completed: boolean;
   company_user_id?: string;
+  company_id?: string;
   status?: string;
 }) {
   setCookie('access_token', payload.access_token);
@@ -45,6 +47,9 @@ function syncAuthCookies(payload: {
   );
   if (payload.company_user_id) {
     setCookie('company_user_id', payload.company_user_id);
+  }
+  if (payload.company_id) {
+    setCookie('company_id', payload.company_id);
   }
   if (payload.status) {
     setCookie('status', payload.status);
@@ -61,22 +66,35 @@ export const setAuthTokenProvider = (
   company_user_id: string,
   status: string,
   company_name?: string,
+  onboarding_completed?: boolean,
+  company_id?: string,
 ) => {
   useAuthStore.getState().setAuthSession({
     access_token: token,
     user_id: company_user_id,
     company_user_id,
+    company_id: company_id ?? '',
     role,
     status,
     company_name: company_name ?? '',
   });
 
+  const completed =
+    typeof onboarding_completed === 'boolean'
+      ? onboarding_completed
+      : useAuthStore.getState().onboarding_completed;
+
+  if (typeof onboarding_completed === 'boolean') {
+    useAuthStore.getState().setOnboardingCompleted(onboarding_completed);
+  }
+
   syncAuthCookies({
     access_token: token,
     role,
     company_user_id,
+    company_id,
     status,
-    onboarding_completed: useAuthStore.getState().onboarding_completed,
+    onboarding_completed: completed,
   });
 };
 
@@ -89,6 +107,12 @@ export const setCompanyUserIdProvider = (company_user_id: string) => {
   if (!company_user_id) return;
   useAuthStore.getState().setCompanyUserId(company_user_id);
   setCookie('company_user_id', company_user_id);
+};
+
+export const setCompanyIdProvider = (company_id: string) => {
+  if (!company_id) return;
+  useAuthStore.getState().setCompanyId(company_id);
+  setCookie('company_id', company_id);
 };
 
 export const getAuthTokenProvider = (): string => {
@@ -117,4 +141,8 @@ export const getAuthStatusProvider = (): string => {
 
 export const getAuthUserIdProvider = (): string => {
   return useAuthStore.getState().user_id || '';
+};
+
+export const getCompanyIdProvider = (): string => {
+  return useAuthStore.getState().company_id || '';
 };

@@ -185,7 +185,7 @@ export default function SignUpPage() {
               <button
                 type="submit"
                 disabled={signupMutation.isPending}
-                className="h-10 w-full rounded-full bg-[#5B5BD6] text-sm font-semibold text-white shadow-lg transition-all hover:bg-[#4a4ac5] disabled:cursor-not-allowed disabled:opacity-60 sm:h-11 sm:text-base"
+                className="h-10 cursor-pointer w-full rounded-full bg-[#5B5BD6] text-sm font-semibold text-white shadow-lg transition-all hover:bg-[#4a4ac5] disabled:cursor-not-allowed disabled:opacity-60 sm:h-11 sm:text-base"
               >
                 {signupMutation.isPending ? tCommon('loading') : t('signup.submit')}
               </button>

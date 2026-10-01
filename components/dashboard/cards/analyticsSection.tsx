@@ -72,28 +72,30 @@ export default function AnalyticsSection({
         </div>
       </div>
 
-      {/* Metrics: 4 across normally, 2x2 when compact */}
-      <ul className={`mt-4 grid gap-4 sm:grid-cols-2 ${compact ? "" : "xl:grid-cols-4"}`}>
+      {/* Metrics: 4 across in one row from md up */}
+      <ul className={`mt-4 grid gap-4 ${compact ? "sm:grid-cols-2" : "grid-cols-2 md:grid-cols-4"}`}>
         {data.metrics.map((m) => (
           <MetricCard key={m.id} metric={m} />
         ))}
       </ul>
 
-      {/* Overall + integrations: when compact, the last card spans full width if the count is odd */}
+      {/* Overall + analysis charts: 4 across in one row */}
       <div
         className={`mt-4 grid gap-4 ${
           compact
             ? "sm:grid-cols-2 sm:[&>*:last-child:nth-child(odd)]:col-span-2"
             : data.charts
-              ? "md:grid-cols-2 xl:grid-cols-4"
-              : "lg:grid-cols-[300px_repeat(2,minmax(0,1fr))]"
+              ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"
+              : "lg:grid-cols-[minmax(260px,1.1fr)_repeat(2,minmax(0,1fr))]"
         }`}
       >
         <OverallPerformanceCard data={data.overall} />
         {data.charts ? <AnalyticsChartsRow charts={data.charts} /> : null}
-        {data.integrations.map((i) => (
-          <IntegrationCard key={i.id} integration={i} onConnect={onConnectIntegration} />
-        ))}
+        {!data.charts
+          ? data.integrations.map((i) => (
+              <IntegrationCard key={i.id} integration={i} onConnect={onConnectIntegration} />
+            ))
+          : null}
       </div>
 
       {/* Vitals: side by side normally, stacked when compact */}

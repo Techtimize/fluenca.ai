@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import AnalyticsSection from "@/components/dashboard/cards/analyticsSection";
-import AnalyzeCompanyInsights from "@/components/dashboard/analyzeCompanyInsights";
 import ChatInput from "@/components/dashboard/chat/chatInput";
 import ChatPanel from "@/components/dashboard/chat/chatPanel";
 import CompanyCard from "@/components/dashboard/cards/companyCard";
@@ -18,10 +17,12 @@ import type { Device } from "@/types/dashboard";
 import type { AnalyzeCompanyResultsResponse } from "@/types/bussiness/analyzecompany-type";
 import { stripMarkdown } from "@/utils/text-utils";
 
+const DOC_ORDER = ["company", "marketing", "pain", "competitors"] as const;
+
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
-  const companyId = useAuthStore((s) => s.company_user_id);
-  const company_name = useAuthStore((s) => s.company_name);
+  const companyId = useAuthStore((s) => s.company_id);
+  const companyName = useAuthStore((s) => s.company_name);
 
   const {
     data: analyzeResults,
@@ -31,37 +32,56 @@ export default function DashboardPage() {
     error,
   } = AnalyzeCompanyResultsQuery(companyId);
 
-  const mapped = useMemo(
-    () => (analyzeResults ? mapAnalyzeCompanyToDashboard(analyzeResults) : null),
-    [analyzeResults],
-  );
+  const mapped = useMemo(() => {
+    const payload = analyzeResults as AnalyzeCompanyResultsResponse | AnalyzeCompanyResultsResponse["result"] | undefined;
+    if (!payload) return null;
+    const analysis =
+      payload && typeof payload === "object" && "result" in payload
+        ? (payload as AnalyzeCompanyResultsResponse).result
+        : (payload as AnalyzeCompanyResultsResponse["result"]);
+    return analysis ? mapAnalyzeCompanyToDashboard(analysis) : null;
+  }, [analyzeResults]);
 
-  const hasCompanyId = Boolean(companyId);
-  const showLoading = hasCompanyId && (isLoading || isFetching) && !mapped;
-  const company = mapped?.company ?? (hasCompanyId ? null : MOCK_DASHBOARD.company);
-  // summary_text sits inside the results API's `result` wrapper.
   const result = (analyzeResults as AnalyzeCompanyResultsResponse | undefined)?.result;
   const summaryText = result?.company_summary?.summary_text;
-  const docs = mapped?.docs ?? (hasCompanyId ? [] : MOCK_DASHBOARD.docs);
-  // Analytics graphs are built from the unwrapped analysis.
-  const resultAnalytics = useMemo(
-    () => (result ? mapAnalyzeCompanyToDashboard(result).analytics : null),
-    [result],
-  );
-  const analytics = resultAnalytics ?? mapped?.analytics ?? MOCK_DASHBOARD.analytics;
+
+  const company = mapped?.company
+    ? {
+        ...mapped.company,
+        description: summaryText ? stripMarkdown(summaryText) : mapped.company.description,
+      }
+    : MOCK_DASHBOARD.company;
+
+  const docs = useMemo(() => {
+    const source = mapped?.docs?.length ? mapped.docs : MOCK_DASHBOARD.docs;
+    const preferred = DOC_ORDER.map((id) => source.find((item) => item.id === id)).filter(
+      Boolean,
+    ) as typeof MOCK_DASHBOARD.docs;
+    return preferred.length ? preferred : source.slice(0, 4);
+  }, [mapped?.docs]);
+
+  const analytics = mapped?.analytics ?? MOCK_DASHBOARD.analytics;
   const user = {
-    name: company_name || mapped?.company.name || MOCK_DASHBOARD.user.name,
+    name: companyName || mapped?.company.name || MOCK_DASHBOARD.user.name,
   };
 
-  const [source, setSource] = useState(analytics.sources[0]);
+  const [source, setSource] = useState(analytics.sources[0] ?? "Website");
   const [device, setDevice] = useState<Device>("mobile");
   const [chatOpen, setChatOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  useEffect(() => {
+    if (!analytics.sources.includes(source)) {
+      setSource(analytics.sources[0] ?? "Website");
+    }
+  }, [analytics.sources, source]);
 
   const handleSend = (text: string) => {
     setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "user", content: text }]);
     setChatOpen(true);
   };
+
+  const showLoading = Boolean(companyId) && (isLoading || isFetching) && !mapped;
 
   return (
     <>
@@ -72,61 +92,55 @@ export default function DashboardPage() {
             : "pb-32"
         }
       >
-        <main className="min-w-0">
+        <main className="min-w-0 space-y-4">
           <TopBar user={user} />
 
-          {!hasCompanyId ? (
-            <div className="mb-4 rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
+          {!companyId ? (
+            <div className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
               {t("noCompanyId")}
             </div>
           ) : null}
 
           {showLoading ? (
             <div className="rounded-3xl border border-[#E6E8F5] bg-white/90 px-5 py-8 text-sm text-neutral-600">
-              Loading company analysis…
+              {t("loading")}
             </div>
           ) : null}
 
           {isError ? (
-            <div className="mb-4 rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
-              {error instanceof Error ? error.message : "Failed to load company analysis."}
+            <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+              {error instanceof Error ? error.message : t("error")}
             </div>
           ) : null}
 
-          {company ? (
-            <div className={`grid gap-4 ${chatOpen ? "" : "lg:grid-cols-[minmax(0,1fr)_360px]"}`}>
-              <CompanyCard company={summaryText ? { ...company, description: stripMarkdown(summaryText) } : company} profile={result?.company} />
-              <DocumentationCard items={docs} />
-            </div>
-          ) : null}
+          <div className={`grid gap-4 ${chatOpen ? "" : "xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]"}`}>
+            <CompanyCard company={company} profile={result?.company} />
+            {!chatOpen ? <DocumentationCard items={docs} goalLabel={t("setYourGoal")} /> : null}
+          </div>
 
-          {mapped ? (
-            <>
-              <AnalyticsSection
-                data={analytics}
-                source={source}
-                device={device}
-                compact={chatOpen}
-                onSourceChange={setSource}
-                onDeviceChange={setDevice}
-                onConnectIntegration={(id) => console.log("TODO: start connect flow for", id)}
-              />
-              {/* {analyzeResults ? <AnalyzeCompanyInsights data={analyzeResults} /> : null} */}
-            </>
-          ) : null}
+          <AnalyticsSection
+            data={analytics}
+            source={source}
+            device={device}
+            compact={chatOpen}
+            onSourceChange={setSource}
+            onDeviceChange={setDevice}
+          />
         </main>
 
-        {chatOpen && (
+        {chatOpen ? (
           <ChatPanel
             messages={messages}
             onSend={handleSend}
             onClose={() => setChatOpen(false)}
             onReset={() => setMessages([])}
           />
-        )}
+        ) : null}
       </div>
 
-      {!chatOpen && <ChatInput onOpen={() => setChatOpen(true)} onSend={handleSend} />}
+      {!chatOpen ? (
+        <ChatInput onOpen={() => setChatOpen(true)} onSend={handleSend} placeholder={t("chatPlaceholder")} />
+      ) : null}
     </>
   );
 }

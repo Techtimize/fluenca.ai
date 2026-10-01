@@ -46,9 +46,20 @@ export default function Login() {
     SignInMutation.mutate(data, {
       onSuccess: (response) => {
         const nextRole = response.user.role?.toLowerCase() ?? '';
+        const onboardingComplete =
+          response.user.onboarded_complete === true ||
+          response.user.onboarding_completed === true;
         const isSuperAdmin =
           nextRole === 'super_admin' || nextRole === 'superadmin' || nextRole === 'admin';
-        router.push(isSuperAdmin ? PAGE_ROUTES.SUPERADMIN : PAGE_ROUTES.ONBOARDING);
+
+        if (isSuperAdmin) {
+          router.push(PAGE_ROUTES.SUPERADMIN);
+          return;
+        }
+
+        router.push(
+          onboardingComplete ? PAGE_ROUTES.DASHBOARD : PAGE_ROUTES.ONBOARDING,
+        );
       },
     });
   };
