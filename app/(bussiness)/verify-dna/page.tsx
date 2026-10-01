@@ -5,11 +5,13 @@ import { Bell, Dna, Loader2 } from 'lucide-react';
 import { PAGE_ROUTES } from '@/constant/page-routes';
 import { DnaQuery } from '@/routes/bussiness/Bussiness-Query';
 import { AnalyzeCompanyMutation, RetryDnaMutation } from '@/routes/bussiness/Bussiness-Mutation';
+import useAuthStore from '@/store/AuthsStore';
 
 export default function VerifyDna() {
     const { data: dna, isLoading } = DnaQuery();
     const { mutate: retryDna, isPending: isRetrying } = RetryDnaMutation();
     const { mutate: analyzeCompany } = AnalyzeCompanyMutation();
+    const companyUserId = useAuthStore((state) => state.company_user_id);
 
     const isReady = dna?.status === 'ready';
     const isFailed = dna?.status === 'failed';
@@ -101,6 +103,7 @@ export default function VerifyDna() {
                         <div className="mt-8 flex justify-center">
                             <Link
                                 href={PAGE_ROUTES.DASHBOARD}
+                                onClick={() => analyzeCompany({ company_id: companyUserId, company_data: JSON.stringify(dna) })}
                                 className="flex h-11 items-center rounded-full bg-[#5B5BD6] px-8 text-sm font-semibold text-white shadow-lg hover:bg-[#4a4ac5]"
                             >
                                 Looks good, continue
