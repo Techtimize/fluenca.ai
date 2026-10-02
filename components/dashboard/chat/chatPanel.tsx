@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
+  ArrowRight,
   History,
   MessageSquarePlus,
   Mic,
@@ -132,6 +134,7 @@ export default function ChatPanel({
   subtitle = "Marketing Agent",
   placeholder = "Ask anything about marketing ...",
 }: Props) {
+  const router = useRouter();
   const [draft, setDraft] = useState("");
   const [voiceBaseText, setVoiceBaseText] = useState("");
   const [capabilitiesOpen, setCapabilitiesOpen] = useState(false);
@@ -302,6 +305,16 @@ export default function ChatPanel({
               ) : null}
               {m.status === "running" && m.toolName ? (
                 <span className="mt-1 block text-xs text-neutral-500">Running {m.toolName}…</span>
+              ) : null}
+              {m.toolName === "navigate_to_page" && typeof m.toolResult?.path === "string" ? (
+                <button
+                  type="button"
+                  onClick={() => router.push(m.toolResult!.path as string)}
+                  className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#5B57E6] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#4A46D0]"
+                >
+                  Go there
+                  <ArrowRight className="size-3.5" />
+                </button>
               ) : null}
             </div>
           ))
