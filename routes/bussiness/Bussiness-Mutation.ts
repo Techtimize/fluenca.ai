@@ -205,6 +205,7 @@ export function ContentRecommendationMutation() {
 type SendMessageVariables = {
   message: string;
   screenContext?: string;
+  imageUrl?: string;
   onChunk: (text: string) => void;
   onDone: (event: SendMessageDoneEvent) => void;
 };
@@ -213,8 +214,8 @@ export const SendMessageMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ message, screenContext, onChunk, onDone }: SendMessageVariables) =>
-      SendMessageApi(message, { onChunk, onDone }, screenContext),
+    mutationFn: ({ message, screenContext, imageUrl, onChunk, onDone }: SendMessageVariables) =>
+      SendMessageApi(message, { onChunk, onDone }, screenContext, imageUrl),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: CHAT_HISTORY_KEY });
     },

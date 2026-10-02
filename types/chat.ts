@@ -10,6 +10,7 @@ export type ChatMessage = {
   toolName?: string | null;
   toolResult?: Record<string, unknown> | null;
   errorMessage?: string | null;
+  imageUrl?: string | null;
 };
 
 export type ChatMessageResponse = {
@@ -20,6 +21,7 @@ export type ChatMessageResponse = {
   status: ChatMessageStatus;
   tool_result: Record<string, unknown> | null;
   error_message: string | null;
+  image_url: string | null;
   created_at: string;
 };
 

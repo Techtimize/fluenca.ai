@@ -9,6 +9,15 @@ export const ChatHistoryApi = async (): Promise<ChatHistoryResponse> => {
   return response.data;
 };
 
+export const UploadAttachmentApi = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await api.post<{ url: string }>(BUSSINESSENDPOINT.ATTACHMENTS, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data.url;
+};
+
 type StreamHandlers = {
   onChunk: (text: string) => void;
   onDone: (event: SendMessageDoneEvent) => void;
@@ -36,6 +45,7 @@ export const SendMessageApi = async (
   message: string,
   handlers: StreamHandlers,
   screenContext?: string,
+  imageUrl?: string,
 ): Promise<void> => {
   const token = getAuthTokenProvider();
 
@@ -46,7 +56,11 @@ export const SendMessageApi = async (
       Accept: "text/event-stream",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({ message, screen_context: screenContext || undefined }),
+    body: JSON.stringify({
+      message,
+      screen_context: screenContext || undefined,
+      image_url: imageUrl || undefined,
+    }),
   });
 
   if (response.status === 401) {

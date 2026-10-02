@@ -86,8 +86,8 @@ export default function DashboardPage() {
     return bits.join(". ");
   }, [company.name, source, device, analytics.metrics]);
 
-  const handleSend = (text: string) => {
-    send(text, screenContext);
+  const handleSend = (text: string, imageUrl?: string) => {
+    send(text, screenContext, imageUrl);
     setChatOpen(true);
   };
 

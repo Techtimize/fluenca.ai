@@ -32,4 +32,5 @@ export const BUSSINESSENDPOINT = {
     },
 
     MESSAGES: '/chatbot/messages',
+    ATTACHMENTS: '/chatbot/attachments',
 }

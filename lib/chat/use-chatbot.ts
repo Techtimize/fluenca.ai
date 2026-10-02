@@ -14,6 +14,7 @@ export const useChatbot = (enabled = true) => {
   const sendMessage = SendMessageMutation();
 
   const [pendingUserText, setPendingUserText] = useState<string | null>(null);
+  const [pendingImageUrl, setPendingImageUrl] = useState<string | undefined>(undefined);
   const [streamingText, setStreamingText] = useState("");
   const streamedRef = useRef("");
 
@@ -23,7 +24,12 @@ export const useChatbot = (enabled = true) => {
     const live: ChatMessage[] = [...history];
 
     if (pendingUserText !== null) {
-      live.push({ id: PENDING_USER_ID, role: "user", content: pendingUserText });
+      live.push({
+        id: PENDING_USER_ID,
+        role: "user",
+        content: pendingUserText,
+        imageUrl: pendingImageUrl,
+      });
     }
     if (streamingText) {
       live.push({
@@ -35,19 +41,21 @@ export const useChatbot = (enabled = true) => {
     }
 
     return live;
-  }, [history, pendingUserText, streamingText]);
+  }, [history, pendingUserText, pendingImageUrl, streamingText]);
 
-  const send = (text: string, screenContext?: string) => {
+  const send = (text: string, screenContext?: string, imageUrl?: string) => {
     if (sendMessage.isPending) return;
 
     streamedRef.current = "";
     setPendingUserText(text);
+    setPendingImageUrl(imageUrl);
     setStreamingText("");
 
     sendMessage.mutate(
       {
         message: text,
         screenContext,
+        imageUrl,
         onChunk: (chunk) => {
           streamedRef.current += chunk;
           setStreamingText(streamedRef.current);
@@ -59,6 +67,7 @@ export const useChatbot = (enabled = true) => {
       {
         onSettled: () => {
           setPendingUserText(null);
+          setPendingImageUrl(undefined);
           setStreamingText("");
         },
       },
