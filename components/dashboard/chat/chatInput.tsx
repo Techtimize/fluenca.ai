@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Mic, Paperclip, Send } from "lucide-react";
+import { useSpeechInput } from "@/lib/chat/use-speech-input";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
 type Props = {
@@ -13,6 +14,15 @@ type Props = {
 // Fixed to the bottom of the screen, so it stays visible while the page scrolls.
 export default function ChatInput({ onSend, onOpen, placeholder = "Ask anything about marketing ..." }: Props) {
   const [message, setMessage] = useState("");
+  const [voiceBaseText, setVoiceBaseText] = useState("");
+
+  const handleTranscript = useCallback(
+    (transcript: string) => {
+      setMessage(voiceBaseText ? `${voiceBaseText} ${transcript}` : transcript);
+    },
+    [voiceBaseText],
+  );
+  const speech = useSpeechInput(handleTranscript);
 
   return (
     <form
@@ -44,10 +54,21 @@ export default function ChatInput({ onSend, onOpen, placeholder = "Ask anything 
       />
       <button
         type="button"
-        disabled
-        aria-label="Use voice input (coming soon)"
-        title="Coming soon"
-        className="cursor-not-allowed text-neutral-300"
+        disabled={!speech.isSupported}
+        onClick={() => {
+          onOpen?.();
+          if (!speech.isListening) setVoiceBaseText(message);
+          speech.toggle();
+        }}
+        aria-label={speech.isSupported ? "Use voice input" : "Voice input not supported in this browser"}
+        title={speech.isSupported ? undefined : "Voice input not supported in this browser"}
+        className={
+          speech.isListening
+            ? "animate-pulse text-rose-600"
+            : speech.isSupported
+              ? "text-neutral-600 hover:text-neutral-900"
+              : "cursor-not-allowed text-neutral-300"
+        }
       >
         <Mic className="size-4" />
       </button>

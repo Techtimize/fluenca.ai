@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Mic, Paperclip, RotateCcw, Send, Settings, Sparkles, X } from "lucide-react";
 import Card from "@/components/shared/card";
+import { useSpeechInput } from "@/lib/chat/use-speech-input";
 import type { ChatMessage } from "@/types/chat";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
@@ -34,7 +35,16 @@ export default function ChatPanel({
   placeholder = "Ask anything about marketing ...",
 }: Props) {
   const [draft, setDraft] = useState("");
+  const [voiceBaseText, setVoiceBaseText] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
+
+  const handleTranscript = useCallback(
+    (transcript: string) => {
+      setDraft(voiceBaseText ? `${voiceBaseText} ${transcript}` : transcript);
+    },
+    [voiceBaseText],
+  );
+  const speech = useSpeechInput(handleTranscript);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -151,10 +161,20 @@ export default function ChatPanel({
         />
         <button
           type="button"
-          disabled
-          aria-label="Use voice input (coming soon)"
-          title="Coming soon"
-          className="cursor-not-allowed text-neutral-300"
+          disabled={!speech.isSupported}
+          onClick={() => {
+            if (!speech.isListening) setVoiceBaseText(draft);
+            speech.toggle();
+          }}
+          aria-label={speech.isSupported ? "Use voice input" : "Voice input not supported in this browser"}
+          title={speech.isSupported ? undefined : "Voice input not supported in this browser"}
+          className={
+            speech.isListening
+              ? "animate-pulse text-rose-600"
+              : speech.isSupported
+                ? "text-neutral-600 hover:text-neutral-900"
+                : "cursor-not-allowed text-neutral-300"
+          }
         >
           <Mic className="size-4" />
         </button>
