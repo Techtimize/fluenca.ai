@@ -3,6 +3,7 @@ import api from "../apiClient";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/onboarding-type";
 import { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
 import { CompetitorAnalysisRequest, CompetitorAnalysisResponse } from "@/types/bussiness/competitoranalysis-type";import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/onboarding-type";
+import { BuisnessNicheTrendResponse, NicheTrendsRequest } from "@/types/bussiness/neche_trends";
 
 
 export const WaitlistApi = async (email: string) => {
@@ -32,5 +33,15 @@ export const SocialGrowthApi = async (prompt: string) => {
 
 export const CompetitorAnalysisApi = async (data: CompetitorAnalysisRequest) => {
     const response = await api.post<CompetitorAnalysisResponse>(BUSSINESSENDPOINT.COMPETITOR_ANALYSIS, data);
+    return response.data;
+}
+
+export const NicheTrendApi = async (data: NicheTrendsRequest) => {
+    const response = await api.post<BuisnessNicheTrendResponse>(BUSSINESSENDPOINT.NICHE_TREND, data);
+    return response.data;
+}
+
+export const ContentRecommendationApi = async (prompt: string) => {
+    const response = await api.post(BUSSINESSENDPOINT.CONTENT_RECOMMENDATION, {prompt: prompt});
     return response.data;
 }

@@ -235,7 +235,7 @@ export default function SignUpPage() {
           />
           {/* Dashboard preview image */}
           <Image
-            src="/assets/signup-preview.png"
+            src="/assets/Main Screen (1).svg"
             alt="Dashboard preview"
             width={100}
             height={100}

@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse, OnboardingRequestProps, OnboardingResponseProps } from "@/types/bussiness/onboarding-type";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
+import { NicheTrendsRequest } from "@/types/bussiness/neche_trends";
 
 export function WaitlistMutation() {
     return useMutation({
@@ -57,3 +58,4 @@ export function AnalyzeCompanyMutation() {
         },
     });
 }
+
