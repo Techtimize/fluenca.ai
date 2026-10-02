@@ -10,9 +10,8 @@ import { PAGE_ROUTES } from "@/constant/page-routes";
 import { setCompanyUserIdProvider, setOnboardingCompletedProvider } from "@/provider/auth-provider";
 import { CompetitorAnalysisAsyncResponse, CompetitorAnalysisRequest } from "@/types/bussiness/competitoranalysis-type";
 import { ContentRecommendationRequest, ContentRecommendationResponse } from "@/types/bussiness/content-recommendation-type";
-import { SendMessageDoneEvent } from "@/types/chat";
+import { ChatMode, SendMessageDoneEvent } from "@/types/chat";
 import { SendMessageApi } from "../chatbot/chatbot.routes";
-import { CHAT_HISTORY_KEY } from "./Bussiness-Query";
 import { ScriptGenerationRequest, ScriptGenerationResponse } from "@/types/bussiness/script-type";
 
 export function WaitlistMutation() {
@@ -205,6 +204,10 @@ export function ContentRecommendationMutation() {
 
 type SendMessageVariables = {
   message: string;
+  conversationId?: string;
+  screenContext?: string;
+  imageUrl?: string;
+  mode?: ChatMode;
   onChunk: (text: string) => void;
   onDone: (event: SendMessageDoneEvent) => void;
 };
@@ -213,10 +216,11 @@ export const SendMessageMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ message, onChunk, onDone }: SendMessageVariables) =>
-      SendMessageApi(message, { onChunk, onDone }),
+    mutationFn: ({ message, conversationId, screenContext, imageUrl, mode, onChunk, onDone }: SendMessageVariables) =>
+      SendMessageApi(message, { onChunk, onDone }, { conversationId, screenContext, imageUrl, mode }),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: CHAT_HISTORY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["chat-history"] });
+      queryClient.invalidateQueries({ queryKey: ["chat-conversations"] });
     },
     onError: (error: Error) => {
       toast("The assistant is unavailable", { description: error.message });
