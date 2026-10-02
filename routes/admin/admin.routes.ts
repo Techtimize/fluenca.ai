@@ -20,3 +20,7 @@ export const UpdateUserStatusApi = async (
   const response = await api.patch<AdminUser>(ADMINENDPOINT.userStatus(userId), data);
   return response.data;
 };
+
+export const DeleteUserApi = async (userId: string): Promise<void> => {
+  await api.delete(ADMINENDPOINT.user(userId));
+};

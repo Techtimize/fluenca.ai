@@ -190,6 +190,9 @@
     "confirmSuspendBody": "{email} will be signed out and unable to log in until reactivated.",
     "confirmReactivateTitle": "Reactivate this user?",
     "confirmReactivateBody": "{email} will be able to log in again.",
+    "delete": "Delete",
+    "confirmDeleteTitle": "Delete this user?",
+    "confirmDeleteBody": "This permanently deletes {email}'s account. This cannot be undone.",
     "total": "{count} total"
   },
   "onboarding": {

@@ -5,7 +5,7 @@ export interface AdminUser {
   role: string;
   status: string;
   organization_id: string | null;
-  organization_name: string | null;
+  company_name: string | null;
   last_login_at: string | null;
   created_at: string;
 }

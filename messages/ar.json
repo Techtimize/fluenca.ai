@@ -190,6 +190,9 @@
     "confirmSuspendBody": "سيتم تسجيل خروج {email} ولن يتمكن من تسجيل الدخول حتى تتم إعادة التفعيل.",
     "confirmReactivateTitle": "إعادة تفعيل هذا المستخدم؟",
     "confirmReactivateBody": "سيتمكن {email} من تسجيل الدخول مرة أخرى.",
+    "delete": "حذف",
+    "confirmDeleteTitle": "حذف هذا المستخدم؟",
+    "confirmDeleteBody": "سيؤدي هذا إلى حذف حساب {email} نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
     "total": "{count} إجمالي"
   },
   "onboarding": {
