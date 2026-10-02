@@ -215,7 +215,7 @@ export default function SignUpPage() {
             sizes="50vw"
           />
           <Image
-            src="/assets/signup-preview.png"
+            src="/assets/signup-preview.svg"
             alt="Dashboard preview"
             width={900}
             height={1100}
