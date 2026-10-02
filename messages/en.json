@@ -181,6 +181,15 @@
     "colRole": "Role",
     "colStatus": "Status",
     "colJoined": "Joined",
+    "colActions": "Actions",
+    "you": "You",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
+    "lastLogin": "Last login",
+    "confirmSuspendTitle": "Suspend this user?",
+    "confirmSuspendBody": "{email} will be signed out and unable to log in until reactivated.",
+    "confirmReactivateTitle": "Reactivate this user?",
+    "confirmReactivateBody": "{email} will be able to log in again.",
     "total": "{count} total"
   },
   "onboarding": {

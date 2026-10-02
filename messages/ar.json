@@ -181,6 +181,15 @@
     "colRole": "الدور",
     "colStatus": "الحالة",
     "colJoined": "تاريخ الانضمام",
+    "colActions": "الإجراءات",
+    "you": "أنت",
+    "suspend": "تعليق",
+    "reactivate": "إعادة التفعيل",
+    "lastLogin": "آخر تسجيل دخول",
+    "confirmSuspendTitle": "تعليق هذا المستخدم؟",
+    "confirmSuspendBody": "سيتم تسجيل خروج {email} ولن يتمكن من تسجيل الدخول حتى تتم إعادة التفعيل.",
+    "confirmReactivateTitle": "إعادة تفعيل هذا المستخدم؟",
+    "confirmReactivateBody": "سيتمكن {email} من تسجيل الدخول مرة أخرى.",
     "total": "{count} إجمالي"
   },
   "onboarding": {
