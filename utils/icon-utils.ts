@@ -7,8 +7,10 @@ import {
   BarChart2,
   BarChart3,
   BarChart4,
+  CalendarDays,
   ClipboardList,
   CreditCard,
+  Dna,
   FileText,
   Gauge,
   Home,
@@ -17,6 +19,7 @@ import {
   Megaphone,
   Search,
   TrendingUp,
+  Users,
   Zap,
 } from "lucide-react";
 
@@ -41,6 +44,9 @@ const ICONS: Record<string, LucideIcon> = {
   trending: TrendingUp,
   activity: Activity,
   zap: Zap,
+  dna: Dna,
+  calendar: CalendarDays,
+  users: Users,
 };
 
 export function getIcon(name?: string): LucideIcon {

@@ -1,4 +1,3 @@
-// All app page paths. Use these instead of hardcoding paths in router.push / Link.
 export const PAGE_ROUTES = {
     HOME: '/',
     COMING_SOON: '/coming-soon',
@@ -16,8 +15,18 @@ export const PAGE_ROUTES = {
     COMPANY_DETAIL: '/company-detail',
     QUESTIONS: '/questions',
     ANALYZING: '/analyzing',
+    VERIFY_DNA: '/verify-dna',
+    DNA: '/dna',
 
     // Dashboard
     DASHBOARD: '/dashboard',
     COMPANY_OVERVIEW: '/company-overview',
+    TRENDS: '/trends',
+    COMPETITOR_ANALYSIS: '/competitor-analysis',
+    COMPETITORS: '/competitors',
+    CALENDAR: '/calendar',
+
+    // Super admin
+    SUPERADMIN: '/superadmin',
+    SUPERADMIN_USERS: '/superadmin',
 } as const;

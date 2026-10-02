@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+import { CompetitorAnalysisCompetitorApi, DnaApi, OnboardingDetailsApi } from "./bussiness.routes";
 import {
+    AnalyzeCompanyResultsApi,
   GoogleTrendExploreApi,
   GoogleTrendFiltersApi,
   GoogleTrendNowApi,
   GoogleTrendTrendingApi,
-  OnboardingDetailsApi,
 } from "./bussiness.routes";
 import type { GoogleTrendQueryParams } from "@/types/bussiness/google-trends-type";
 
@@ -26,6 +27,18 @@ export const GoogleTrendNowQuery = (params?: GoogleTrendQueryParams) => {
   });
 };
 
+
+export const DnaQuery = () => {
+    return useQuery({
+        queryKey: ['dna'],
+        queryFn: () => DnaApi(),
+        refetchInterval: (query) => {
+            const status = query.state.data?.status;
+            return status === 'ready' || status === 'failed' ? false : 3000;
+        },
+        refetchOnWindowFocus: false,
+    });
+}
 export const GoogleTrendTrendingQuery = (params?: GoogleTrendQueryParams) => {
   return useQuery({
     queryKey: ["google-trend-trending", params],
@@ -49,6 +62,26 @@ export const GoogleTrendFiltersQuery = () => {
   return useQuery({
     queryKey: ["google-trend-filters"],
     queryFn: () => GoogleTrendFiltersApi(),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const AnalyzeCompanyResultsQuery = (company_user_id: string) => {
+  return useQuery({
+    queryKey: ["analyze-company-results", company_user_id],
+    queryFn: () => AnalyzeCompanyResultsApi(company_user_id),
+    enabled: Boolean(company_user_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const CompetitorAnalysisCompetitorQuery = (company_id: string) => {
+  return useQuery({
+    queryKey: ["competitor-analysis-competitor", company_id],
+    queryFn: () => CompetitorAnalysisCompetitorApi(company_id),
+    enabled: Boolean(company_id),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

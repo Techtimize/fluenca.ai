@@ -81,7 +81,6 @@ export function ComingSoonWaitlistSection(
       return;
     }
 
-    // Fallback if the canvas instance isn't ready yet
     const mod = await import("canvas-confetti");
     const confetti = mod.default;
     if (typeof confetti !== "function") return;

@@ -58,14 +58,15 @@ export const isNetworkError = (error: unknown): boolean => {
     return false;
 };
 
-// Picks the backend's message from an API error, falling back when none is sent.
 export const getApiErrorMessage = (error: unknown, fallback = "Something went wrong"): string => {
+    if (error == null) return fallback;
+
     const axiosError = error as AxiosError<{
         message?: string;
         detail?: unknown;
         error?: string;
     }>;
-    const data = axiosError.response?.data;
+    const data = axiosError?.response?.data;
     const detail = data?.detail;
     const apiMessage =
         data?.message ||

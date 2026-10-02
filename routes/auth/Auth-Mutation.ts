@@ -4,15 +4,25 @@ import { useMutation } from "@tanstack/react-query";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { LoginRequestProps, LoginResponseProps } from "@/types/Auth/login-type";
 import { setAuthTokenProvider } from "@/provider/auth-provider";
-import useAuthStore from "@/store/AuthsStore";
 import { SignUpRequestProps, SignUpResponseProps } from "@/types/Auth/signup-type";
 
 export function LoginMutation() {
   return useMutation({
     mutationFn: (data: LoginRequestProps) => LoginApi(data),
     onSuccess: (response: LoginResponseProps) => {
-      setAuthTokenProvider(response.access_token, response.user.role);
-      useAuthStore.getState().setUserId(response.user.user_id);
+      const onboardingCompleted =
+        response.user.onboarded_complete === true ||
+        response.user.onboarding_completed === true;
+
+      setAuthTokenProvider(
+        response.access_token,
+        response.user.role,
+        response.user.user_id,
+        response.user.status,
+        response.user.company_name ?? undefined,
+        onboardingCompleted,
+        response.user.company_id ?? undefined,
+      );
       toast.success(response.message || "Logged in successfully");
     },
     onError: (error) => {

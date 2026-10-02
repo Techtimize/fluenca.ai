@@ -1,4 +1,4 @@
-export type Tone = "green" | "orange" | "purple" | "teal";
+export type Tone = "green" | "orange" | "purple" | "teal" | "sky" | "rose";
 export type VitalStatus = "good" | "needs" | "poor";
 export type Device = "mobile" | "desktop";
 
@@ -33,6 +33,14 @@ export type OverallPerformance = {
   score: number;
   mobile: number;
   desktop: number;
+  // When set, these replace the Mobile / Desktop boxes under the gauge.
+  stats?: { label: string; value: string }[];
+};
+
+export type AnalyticsCharts = {
+  strengthsWeaknesses: { group: string; strengths: number; weaknesses: number }[];
+  opportunitiesByPriority: { priority: string; count: number }[];
+  actions: { title: string; impact: string; effort: string; priority: number | null }[];
 };
 
 export type Integration = {
@@ -53,6 +61,7 @@ export type AnalyticsData = {
   overall: OverallPerformance;
   integrations: Integration[];
   vitals: VitalsGroup[];
+  charts?: AnalyticsCharts;
 };
 
 export type DashboardData = {
