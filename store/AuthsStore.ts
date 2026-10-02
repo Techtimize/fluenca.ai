@@ -11,7 +11,9 @@ interface AuthStore {
   role: string;
   status: string;
   onboarding_completed: boolean;
+  hasHydrated: boolean;
 
+  setHasHydrated: (hasHydrated: boolean) => void;
   setAuthSession: (payload: {
     access_token: string;
     user_id: string;
@@ -45,6 +47,7 @@ const initialAuthState = {
   role: '',
   status: '',
   onboarding_completed: false,
+  hasHydrated: false,
 };
 
 const useAuthStore = create<AuthStore>()(
@@ -86,12 +89,16 @@ const useAuthStore = create<AuthStore>()(
         getField: (field: keyof AuthStore) => get()[field],
         setField: (field: keyof AuthStore, value: AuthStore[keyof AuthStore]) =>
           set({ [field]: value }),
-        clearAuth: () => set({ ...initialAuthState }),
+        clearAuth: () => set({ ...initialAuthState, hasHydrated: true }),
+        setHasHydrated: (hasHydrated: boolean) => set({ hasHydrated }),
       }),
 
       {
         name: 'AuthStorage',
         storage: createJSONStorage(() => localStorage),
+        onRehydrateStorage: () => (state) => {
+          state?.setHasHydrated(true);
+        },
       },
     ),
     { name: 'AuthStore' },

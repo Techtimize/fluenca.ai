@@ -19,4 +19,19 @@ export interface User {
 }
 export type SignUpResponseProps = {
   message: string;
+  email: string;
+  status: string;
+};
+
+export type VerifyOtpRequestProps = {
+  email: string;
+  code: string;
+};
+
+export type ResendOtpRequestProps = {
+  email: string;
+};
+
+export type ResendOtpResponseProps = {
+  message: string;
 };

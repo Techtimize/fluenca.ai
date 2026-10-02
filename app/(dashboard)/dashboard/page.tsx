@@ -23,6 +23,8 @@ export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const companyId = useAuthStore((s) => s.company_id);
   const companyName = useAuthStore((s) => s.company_name);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const accessToken = useAuthStore((s) => s.access_token);
 
   const {
     data: analyzeResults,
@@ -68,7 +70,9 @@ export default function DashboardPage() {
   const [source, setSource] = useState(analytics.sources[0] ?? "Website");
   const [device, setDevice] = useState<Device>("mobile");
   const [chatOpen, setChatOpen] = useState(false);
-  const { messages, send, isSending, isAwaitingReply, isToolRunning } = useChatbot();
+  const { messages, send, isSending, isAwaitingReply, isToolRunning } = useChatbot(
+    hasHydrated && Boolean(accessToken),
+  );
 
   useEffect(() => {
     if (!analytics.sources.includes(source)) {

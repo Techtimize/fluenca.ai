@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Check, Eye, EyeOff, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -8,6 +8,47 @@ import { useTranslations } from 'next-intl';
 import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
 import { SignupMutation } from '@/routes/auth/Auth-Mutation';
 import { PAGE_ROUTES } from '@/constant/page-routes';
+
+type PasswordRule = { key: string; label: string; met: boolean };
+
+function PasswordStrengthMeter({ password, rules }: { password: string; rules: PasswordRule[] }) {
+  const metCount = rules.filter((rule) => rule.met).length;
+  const percent = (metCount / rules.length) * 100;
+  const barColor =
+    metCount <= 1 ? 'bg-red-400' : metCount <= 3 ? 'bg-amber-400' : 'bg-green-500';
+
+  if (!password) return null;
+
+  return (
+    <div className="space-y-1.5 pt-1">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+        <div
+          className={`h-full rounded-full transition-all duration-300 ease-out ${barColor}`}
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+      <ul className="grid grid-cols-2 gap-x-3 gap-y-1">
+        {rules.map((rule) => (
+          <li
+            key={rule.key}
+            className={`flex items-center gap-1 text-[11px] transition-colors duration-300 ${
+              rule.met ? 'text-green-600' : 'text-gray-400'
+            }`}
+          >
+            <span
+              className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full transition-colors duration-300 ${
+                rule.met ? 'bg-green-100' : 'bg-gray-100'
+              }`}
+            >
+              {rule.met ? <Check className="h-2.5 w-2.5" /> : <X className="h-2.5 w-2.5" />}
+            </span>
+            {rule.label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function SignUpPage() {
   const t = useTranslations('auth');
@@ -19,6 +60,7 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [passwordMismatchError, setPasswordMismatchError] = useState('');
   const signupMutation = SignupMutation();
   const router = useRouter();
@@ -32,6 +74,35 @@ export default function SignUpPage() {
     }
   };
 
+  // Mirrors the server's own rule (dto/request/auth/signup_request.py): the
+  // server is what actually enforces this, this is only instant feedback.
+  const passwordIsStrongEnough = (value: string) =>
+    value.length >= 8 &&
+    /[A-Z]/.test(value) &&
+    /[a-z]/.test(value) &&
+    /[0-9]/.test(value) &&
+    /[^a-zA-Z0-9]/.test(value);
+
+  const validatePasswordStrength = (value: string) => {
+    if (value && !passwordIsStrongEnough(value)) {
+      setPasswordError(t('signup.weakPassword'));
+    } else {
+      setPasswordError('');
+    }
+  };
+
+  const passwordRules: PasswordRule[] = [
+    { key: 'minLength', label: t('signup.passwordRules.minLength'), met: password.length >= 8 },
+    { key: 'uppercase', label: t('signup.passwordRules.uppercase'), met: /[A-Z]/.test(password) },
+    { key: 'lowercase', label: t('signup.passwordRules.lowercase'), met: /[a-z]/.test(password) },
+    { key: 'number', label: t('signup.passwordRules.number'), met: /[0-9]/.test(password) },
+    {
+      key: 'specialChar',
+      label: t('signup.passwordRules.specialChar'),
+      met: /[^a-zA-Z0-9]/.test(password),
+    },
+  ];
+
   const validatePasswordMatch = (value: string) => {
     if (value && value !== password) {
       setPasswordMismatchError(t('signup.passwordMismatch'));
@@ -43,12 +114,17 @@ export default function SignUpPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     validateEmail(email);
+    validatePasswordStrength(password);
     if (confirmPassword) {
       validatePasswordMatch(confirmPassword);
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setEmailError(t('signup.invalidEmail'));
+      return;
+    }
+    if (!passwordIsStrongEnough(password)) {
+      setPasswordError(t('signup.weakPassword'));
       return;
     }
     if (confirmPassword !== password) {
@@ -63,7 +139,8 @@ export default function SignUpPage() {
         confirm_password: confirmPassword,
       },
       {
-        onSuccess: () => router.push(PAGE_ROUTES.LOGIN),
+        onSuccess: () =>
+          router.push(`${PAGE_ROUTES.VERIFY_OTP}?email=${encodeURIComponent(email)}`),
       },
     );
   };
@@ -120,6 +197,7 @@ export default function SignUpPage() {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onBlur={(e) => validatePasswordStrength(e.target.value)}
                     placeholder={t('signup.newPasswordPlaceholder')}
                     className="h-10 w-full rounded-full border border-gray-200 bg-white px-4 pe-10 text-sm placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#5B5BD6] sm:h-11 sm:px-5 sm:pe-12"
                   />
@@ -135,6 +213,8 @@ export default function SignUpPage() {
                     )}
                   </button>
                 </div>
+                <PasswordStrengthMeter password={password} rules={passwordRules} />
+                {passwordError ? <p className="mt-1 text-xs text-red-500">{passwordError}</p> : null}
               </div>
 
               <div className="space-y-1">

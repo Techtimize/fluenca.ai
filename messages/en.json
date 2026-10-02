@@ -62,7 +62,15 @@
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
       "invalidEmail": "Please enter a valid email address",
-      "passwordMismatch": "Passwords do not match"
+      "passwordMismatch": "Passwords do not match",
+      "weakPassword": "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number and a special character",
+      "passwordRules": {
+        "minLength": "8+ characters",
+        "uppercase": "Uppercase letter",
+        "lowercase": "Lowercase letter",
+        "number": "Number",
+        "specialChar": "Special character"
+      }
     },
     "forgot": {
       "title": "Forgot password",
@@ -83,7 +91,12 @@
     "verifyOtp": {
       "title": "Enter verification code",
       "subtitle": "Check your email for the one-time code.",
-      "submit": "Verify"
+      "subtitleWithEmail": "We sent a 6-digit code to {email}.",
+      "codePlaceholder": "Enter 6-digit code",
+      "submit": "Verify",
+      "resend": "Resend code",
+      "resendIn": "Resend code in {seconds}s",
+      "noCode": "Didn't get a code?"
     }
   },
   "topBar": {
