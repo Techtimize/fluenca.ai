@@ -248,7 +248,7 @@ Report structure:
 - Color palette: {colors used, why}
 - Typography: {fonts, sizes, why}
 - Layout: {composition approach, why}
-- Brand alignment: {how brand guidelines influenced design}
+- Brand alignment: {how brand guidelines FLUENCAenced design}
 
 ## Output Files
 | File | Size | Platform | Preview |

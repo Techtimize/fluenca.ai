@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { CompetitorAnalysisCompetitorApi, ContentRecommendationResultApi, DnaApi, IntakeApi, OnboardingDetailsApi } from "./bussiness.routes";
+import { CompetitorAnalysisCompetitorApi, ContentRecommendationResultApi, DnaApi, IntakeApi, OnboardingDetailsApi, ScriptGenerationResultsApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   GoogleTrendExploreApi,
@@ -97,6 +97,16 @@ export const ContentRecommendationResultQuery = (company_id: string) => {
         refetchOnReconnect: false,
     });
 }
+
+export const ScriptGenerationResultsQuery = (company_id: string) => {
+  return useQuery({
+    queryKey: ["script-generation-results", company_id],
+    queryFn: () => ScriptGenerationResultsApi(company_id),
+    enabled: Boolean(company_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
 
 const POLL_INTERVAL_MS = 3000;
 
