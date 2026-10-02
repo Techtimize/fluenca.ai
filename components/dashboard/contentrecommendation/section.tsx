@@ -50,10 +50,12 @@ export default function Section({
   label,
   value,
   depth = 0,
+  companyId,
 }: {
   label: string;
   value: unknown;
   depth?: number;
+  companyId: string;
 }) {
   if (value === null || value === undefined || value === "") return null;
   if (Array.isArray(value) && !value.length) return null;
@@ -93,7 +95,12 @@ export default function Section({
       <ul className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
         {value.map((item, index) =>
           item && typeof item === "object" ? (
-            <IdeaCard key={index} item={item as Record<string, unknown>} index={index} />
+            <IdeaCard
+              key={index}
+              item={item as Record<string, unknown>}
+              index={index}
+              companyId={companyId}
+            />
           ) : isPrimitive(item) ? (
             <li key={index} className="self-start">
               <Chip>{String(item)}</Chip>
@@ -114,7 +121,13 @@ export default function Section({
     const grid = (
       <div className={`grid gap-2.5 ${isRoot ? "md:grid-cols-2" : ""}`}>
         {nested.map(([key, nestedValue]) => (
-          <Section key={key} label={key} value={nestedValue} depth={depth + 1} />
+          <Section
+            key={key}
+            label={key}
+            value={nestedValue}
+            depth={depth + 1}
+            companyId={companyId}
+          />
         ))}
       </div>
     );

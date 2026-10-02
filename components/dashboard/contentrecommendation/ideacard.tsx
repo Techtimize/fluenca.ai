@@ -1,5 +1,12 @@
+"use client";
+
 import Image from "next/image";
+import { FileText, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { ScriptGenerationMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import { FOCUS_RING } from "@/utils/ui-classes";
 import { Chip } from "./chipsandsection";
+import { ideaToScriptRequest } from "./scriptPayload";
 import { humanize, isPrimitive } from "./utils";
 
 const TITLE_KEYS = ["title", "name", "idea", "topic", "hook", "headline", "theme", "post_type"];
@@ -65,10 +72,14 @@ function PriorityBadge({ priority }: { priority: string }) {
 export default function IdeaCard({
   item,
   index,
+  companyId,
 }: {
   item: Record<string, unknown>;
   index: number;
+  companyId: string;
 }) {
+  const { mutate: generateScript, isPending } = ScriptGenerationMutation();
+
   const titleKey = TITLE_KEYS.find((key) => typeof item[key] === "string");
   const title = titleKey ? String(item[titleKey]) : `Idea ${index + 1}`;
 
@@ -93,11 +104,19 @@ export default function IdeaCard({
   const descriptionRow = rows.find(([key]) => DESC_KEYS.includes(key));
   const otherRows = rows.filter(([key]) => key !== descriptionRow?.[0]).slice(0, 3);
 
+  const handleGenerateScript = () => {
+    if (!companyId) {
+      toast.error("Company ID is missing. Please log in again.");
+      return;
+    }
+    generateScript(ideaToScriptRequest(companyId, item));
+  };
+
   return (
     <li className="flex flex-col overflow-hidden rounded-xl border border-[#E6E8F5] bg-white transition-colors hover:border-[#C8C6F5]">
       <div className="h-0.5 w-full bg-gradient-to-r from-[#2E2A9E] via-[#5B57E6] to-[#818CF8]" />
 
-      <div className="flex flex-col gap-2 p-3">
+      <div className="flex flex-1 flex-col gap-2 p-3">
         <div className="flex items-start justify-between gap-2">
           <p className="text-[13px] font-semibold leading-snug text-neutral-900">{title}</p>
           <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[#ECEBFF] text-[10px] font-semibold text-[#5B57E6]">
@@ -142,6 +161,20 @@ export default function IdeaCard({
             ))}
           </dl>
         ) : null}
+
+        <button
+          type="button"
+          onClick={handleGenerateScript}
+          disabled={isPending || !companyId}
+          className={`mt-auto inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg border border-[#D8D6F5] bg-[#F6F5FF] text-[12px] font-medium text-[#5B57E6] hover:bg-[#ECEBFF] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+        >
+          {isPending ? (
+            <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+          ) : (
+            <FileText className="size-3.5" aria-hidden="true" />
+          )}
+          {isPending ? "Generating script…" : "Generate script"}
+        </button>
       </div>
     </li>
   );

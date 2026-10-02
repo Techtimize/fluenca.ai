@@ -29,7 +29,7 @@ export default function ChatPanel({
   isSending = false,
   isAwaitingReply = false,
   isToolRunning = false,
-  title = "Influ.AI",
+  title = "FLUENCA.AI",
   subtitle = "Marketing Agent",
   placeholder = "Ask anything about marketing ...",
 }: Props) {
