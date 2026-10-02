@@ -32,7 +32,11 @@ const parseEvent = (block: string) => {
   }
 };
 
-export const SendMessageApi = async (message: string, handlers: StreamHandlers): Promise<void> => {
+export const SendMessageApi = async (
+  message: string,
+  handlers: StreamHandlers,
+  screenContext?: string,
+): Promise<void> => {
   const token = getAuthTokenProvider();
 
   const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}${BUSSINESSENDPOINT.MESSAGES}`, {
@@ -42,7 +46,7 @@ export const SendMessageApi = async (message: string, handlers: StreamHandlers):
       Accept: "text/event-stream",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, screen_context: screenContext || undefined }),
   });
 
   if (response.status === 401) {

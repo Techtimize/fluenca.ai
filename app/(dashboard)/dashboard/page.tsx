@@ -76,8 +76,18 @@ export default function DashboardPage() {
     }
   }, [analytics.sources, source]);
 
+  const screenContext = useMemo(() => {
+    const bits = [`Page: Dashboard`, `Company: ${company.name}`, `Analytics source tab: ${source} (${device})`];
+    if (analytics.metrics.length) {
+      bits.push(
+        `Visible metric scores: ${analytics.metrics.map((m) => `${m.label} ${m.score}`).join(", ")}`,
+      );
+    }
+    return bits.join(". ");
+  }, [company.name, source, device, analytics.metrics]);
+
   const handleSend = (text: string) => {
-    send(text);
+    send(text, screenContext);
     setChatOpen(true);
   };
 

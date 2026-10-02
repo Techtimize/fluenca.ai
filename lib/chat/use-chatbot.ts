@@ -37,7 +37,7 @@ export const useChatbot = (enabled = true) => {
     return live;
   }, [history, pendingUserText, streamingText]);
 
-  const send = (text: string) => {
+  const send = (text: string, screenContext?: string) => {
     if (sendMessage.isPending) return;
 
     streamedRef.current = "";
@@ -47,6 +47,7 @@ export const useChatbot = (enabled = true) => {
     sendMessage.mutate(
       {
         message: text,
+        screenContext,
         onChunk: (chunk) => {
           streamedRef.current += chunk;
           setStreamingText(streamedRef.current);
