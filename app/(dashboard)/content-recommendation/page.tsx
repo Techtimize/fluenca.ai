@@ -28,16 +28,16 @@ export default function ContentRecommendationPage() {
   const hasPayload = Boolean(data && Object.keys(data).length);
 
   return (
-    <main className="min-w-0 space-y-4 pb-4">
+    <main className="min-w-0 space-y-3 pb-4">
       <TopBar
         user={{ name: companyName || "User" }}
         placeholder="Search recommendations..."
       />
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold text-neutral-900">Content recommendations</h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <h1 className="text-lg font-semibold text-neutral-900">Content recommendations</h1>
+          <p className="text-[13px] text-neutral-500">
             AI-generated ideas, themes, and post plans for your brand.
           </p>
         </div>
@@ -47,7 +47,7 @@ export default function ContentRecommendationPage() {
             type="button"
             onClick={handleGenerate}
             disabled={isPending}
-            className={`inline-flex h-10 items-center gap-2 rounded-full bg-[#5B57E6] px-4 text-sm font-medium text-white hover:bg-[#4A46D0] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+            className={`inline-flex h-9 items-center gap-2 rounded-full bg-[#5B57E6] px-3.5 text-sm font-medium text-white hover:bg-[#4A46D0] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
             {isPending ? (
               <Loader2 className="size-4 animate-spin" />
@@ -60,7 +60,7 @@ export default function ContentRecommendationPage() {
       </div>
 
       {!companyId ? (
-        <Card className="border-amber-200 bg-amber-50/80 p-5">
+        <Card className="border-amber-200 bg-amber-50/80 p-4">
           <p className="text-sm text-amber-800">
             Company ID is missing. Complete company analysis first, then return here.
           </p>
@@ -68,14 +68,14 @@ export default function ContentRecommendationPage() {
       ) : null}
 
       {companyId && (isLoading || isFetching) && !data ? (
-        <Card className="flex items-center justify-center gap-3 p-12 text-neutral-500">
+        <Card className="flex items-center justify-center gap-3 p-8 text-neutral-500">
           <Loader2 className="size-5 animate-spin text-[#5B57E6]" />
           <span className="text-sm">Loading recommendations…</span>
         </Card>
       ) : null}
 
       {companyId && isError ? (
-        <Card className="border-rose-200 bg-rose-50/80 p-5">
+        <Card className="border-rose-200 bg-rose-50/80 p-4">
           <p className="text-sm text-rose-800">
             {getApiErrorMessage(error, "Failed to load content recommendations")}
           </p>

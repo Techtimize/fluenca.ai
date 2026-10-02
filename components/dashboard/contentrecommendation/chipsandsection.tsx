@@ -30,7 +30,7 @@ export function sectionIcon(label: string): LucideIcon {
 
 export function Chip({ children }: { children: string }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-[#E6E8F5] bg-[#F6F7FD] px-2.5 py-1 text-[11px] font-medium text-neutral-700">
+    <span className="inline-flex items-center rounded-full border border-[#E6E8F5] bg-[#F6F7FD] px-2 py-0.5 text-[10px] font-medium text-neutral-700">
       {children}
     </span>
   );

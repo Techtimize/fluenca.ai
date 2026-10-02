@@ -1,8 +1,10 @@
+import Image from "next/image";
 import { Chip } from "./chipsandsection";
 import { humanize, isPrimitive } from "./utils";
 
 const TITLE_KEYS = ["title", "name", "idea", "topic", "hook", "headline", "theme", "post_type"];
 const SKIP_KEYS = new Set(["platform", "priority", "channel"]);
+const DESC_KEYS = ["description", "summary", "caption", "body", "content", "angle"];
 
 function toDisplay(value: unknown): string {
   if (value == null) return "";
@@ -24,10 +26,11 @@ function PlatformBadge({ platform }: { platform: string }) {
   const lower = platform.toLowerCase();
   const isIg = lower.includes("instagram") || lower.includes("ig");
   const isLi = lower.includes("linkedin");
+  const icon = isIg ? "/assets/insta.png" : isLi ? "/assets/linkedin.png" : null;
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
         isIg
           ? "bg-[#FCE7F3] text-[#BE185D]"
           : isLi
@@ -35,6 +38,9 @@ function PlatformBadge({ platform }: { platform: string }) {
             : "border border-[#E6E8F5] bg-[#F6F7FD] text-neutral-700"
       }`}
     >
+      {icon ? (
+        <Image src={icon} alt="" width={12} height={12} className="size-3 rounded-[2px] object-contain" />
+      ) : null}
       {platform}
     </span>
   );
@@ -44,13 +50,13 @@ function PriorityBadge({ priority }: { priority: string }) {
   const lower = priority.toLowerCase();
   const tone =
     lower.includes("high") || lower === "1"
-      ? "bg-rose-50 text-rose-700 ring-rose-200"
+      ? "bg-rose-50 text-rose-700"
       : lower.includes("medium") || lower === "2"
-        ? "bg-amber-50 text-amber-700 ring-amber-200"
-        : "bg-emerald-50 text-emerald-700 ring-emerald-200";
+        ? "bg-amber-50 text-amber-700"
+        : "bg-emerald-50 text-emerald-700";
 
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ring-1 ${tone}`}>
+    <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${tone}`}>
       {priority}
     </span>
   );
@@ -84,46 +90,44 @@ export default function IdeaCard({
       ? String(item.priority)
       : null;
 
-  const descriptionRow = rows.find(([key]) =>
-    ["description", "summary", "caption", "body", "content", "angle"].includes(key),
-  );
-  const otherRows = rows.filter(([key]) => key !== descriptionRow?.[0]).slice(0, 4);
+  const descriptionRow = rows.find(([key]) => DESC_KEYS.includes(key));
+  const otherRows = rows.filter(([key]) => key !== descriptionRow?.[0]).slice(0, 3);
 
   return (
-    <li className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E6E8F5] bg-white shadow-[0_4px_20px_rgba(17,24,39,0.04)] transition-shadow hover:shadow-[0_8px_28px_rgba(91,87,230,0.10)]">
-      <div className="h-1 w-full bg-gradient-to-r from-[#2E2A9E] via-[#5B57E6] to-[#818CF8]" />
+    <li className="flex flex-col overflow-hidden rounded-xl border border-[#E6E8F5] bg-white transition-colors hover:border-[#C8C6F5]">
+      <div className="h-0.5 w-full bg-gradient-to-r from-[#2E2A9E] via-[#5B57E6] to-[#818CF8]" />
 
-      <div className="flex flex-1 flex-col p-4">
-        <div className="flex items-start justify-between gap-3">
-          <p className="text-[14px] font-semibold leading-5 text-neutral-900">{title}</p>
-          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#ECEBFF] text-[12px] font-semibold text-[#5B57E6]">
+      <div className="flex flex-col gap-2 p-3">
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-[13px] font-semibold leading-snug text-neutral-900">{title}</p>
+          <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[#ECEBFF] text-[10px] font-semibold text-[#5B57E6]">
             {index + 1}
           </span>
         </div>
 
         {(platform || priority) && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1">
             {platform ? <PlatformBadge platform={platform} /> : null}
             {priority ? <PriorityBadge priority={priority} /> : null}
           </div>
         )}
 
         {descriptionRow ? (
-          <p className="mt-3 line-clamp-4 text-[13px] leading-5 text-neutral-600">
+          <p className="line-clamp-3 text-[12px] leading-5 text-neutral-600">
             {toDisplay(descriptionRow[1])}
           </p>
         ) : null}
 
         {otherRows.length ? (
-          <dl className="mt-auto space-y-2.5 border-t border-[#EEF0F8] pt-3">
+          <dl className="space-y-1.5 border-t border-[#EEF0F8] pt-2">
             {otherRows.map(([key, value]) => (
-              <div key={key}>
-                <dt className="text-[10px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+              <div key={key} className="min-w-0">
+                <dt className="text-[10px] font-medium uppercase tracking-[0.04em] text-neutral-400">
                   {humanize(key)}
                 </dt>
-                <dd className="mt-0.5 text-[12px] leading-5 text-neutral-700">
+                <dd className="mt-0.5 text-[12px] leading-4 text-neutral-700">
                   {Array.isArray(value) && value.every(isPrimitive) ? (
-                    <ul className="mt-1 flex flex-wrap gap-1.5">
+                    <ul className="mt-1 flex flex-wrap gap-1">
                       {value.slice(0, 4).map((tag) => (
                         <li key={String(tag)}>
                           <Chip>{String(tag)}</Chip>
@@ -131,7 +135,7 @@ export default function IdeaCard({
                       ))}
                     </ul>
                   ) : (
-                    <span className="line-clamp-3">{toDisplay(value)}</span>
+                    <span className="line-clamp-2">{toDisplay(value)}</span>
                   )}
                 </dd>
               </div>

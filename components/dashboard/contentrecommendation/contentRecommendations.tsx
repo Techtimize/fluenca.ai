@@ -53,7 +53,7 @@ export default function ContentRecommendations({ data, companyId, empty = false 
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {entries.map(([key, value]) => (
         <Section key={key} label={key} value={value} />
       ))}
