@@ -15,7 +15,7 @@ export const BUSSINESSENDPOINT = {
 
     COMPETITOR_ANALYSIS: '/competitorAnalysis',
     COMPETITOR_ANALYSIS_ASYNC: '/competitorAnalysis/async',
-    COMPETITOR_ANALYSIS_JOB: (job_id: string) => `/competitorAnalysis/jobs/${job_id}`,  
+    COMPETITOR_ANALYSIS_JOB: (job_id: string) => `/competitorAnalysis/jobs/${job_id}`,
     COMPETITOR_ANALYSIS_COMPETITOR: (company_id: string) => `/competitorAnalysis/results/${company_id}`,
 
     TRENDS:{
@@ -25,6 +25,8 @@ export const BUSSINESSENDPOINT = {
     GOOGLE_TRENDS_FILTERS: '/google-trends/filters',
     },
 
+    NICHE_TREND: '/niche-trend/niche-trend',
+    CONTENT_ANALYSIS: '/posts/analyze',
 
     RECOMMENDATION:{
         CONTENT_RECOMMENDATION: '/contentRecommendation/recommend',

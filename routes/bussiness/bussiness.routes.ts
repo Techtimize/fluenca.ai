@@ -2,7 +2,7 @@ import { BUSSINESSENDPOINT } from "./Bussiness-Endpoint";
 import api from "../apiClient";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
-import { CompetitorAnalysisRequest, CompetitorAnalysisResponse, CompetitorsListResponse } from "@/types/bussiness/competitoranalysis-type";
+import { CompetitorAnalysisRequest, CompetitorsListResponse } from "@/types/bussiness/competitoranalysis-type";
 import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/onboarding-type";
 import { DnaResponseProps } from "@/types/bussiness/dna-type";
 import type {
@@ -12,6 +12,8 @@ import type {
   GoogleTrendQueryParams,
   GoogleTrendTrendingResponse,
 } from "@/types/bussiness/google-trends-type";
+import { BuisnessNicheTrendResponse, NicheTrendsRequest } from "@/types/bussiness/neche_trends";
+import { ContentRecommendationRequest } from "@/types/Trends/Content-recommendation-interface";
 
 function toQueryParams(params?: GoogleTrendQueryParams) {
   if (!params) return undefined;
@@ -48,7 +50,7 @@ export const SocialGrowthApi = async (prompt: string) => {
 
 export const CompetitorAnalysisAsyncApi = async (data: CompetitorAnalysisRequest) => {
     const response = await api.post(
-      BUSSINESSENDPOINT.COMPETITOR_ANALYSIS,
+      BUSSINESSENDPOINT.COMPETITOR_ANALYSIS_ASYNC,
       data,
     );
     return response.data;
@@ -113,7 +115,7 @@ export const NicheTrendApi = async (data: NicheTrendsRequest) => {
     return response.data;
 }
 
-export const ContentRecommendationApi = async (prompt: string) => {
-    const response = await api.post(BUSSINESSENDPOINT.CONTENT_RECOMMENDATION, {prompt: prompt});
+export const ContentRecommendationApi = async (data: ContentRecommendationRequest) => {
+    const response = await api.post(BUSSINESSENDPOINT.RECOMMENDATION.CONTENT_RECOMMENDATION, data);
     return response.data;
 }
