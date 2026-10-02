@@ -51,6 +51,15 @@ export const SendMessageApi = async (message: string, handlers: StreamHandlers):
     throw new Error("Unauthorized access");
   }
 
+  if (response.status === 403) {
+    const body = await response.json().catch(() => null);
+    if (body?.code === "account_suspended") {
+      clearAuthTokenProvider();
+      window.location.href = PAGE_ROUTES.LOGIN;
+      throw new Error("This account has been suspended. Please contact support.");
+    }
+  }
+
   if (!response.ok || !response.body) {
     throw new Error(`The assistant could not be reached (${response.status})`);
   }

@@ -132,7 +132,13 @@ export default function ChatPanel({
         }}
         className="m-3 flex items-center gap-2 rounded-full border border-[#E6E8F5] bg-white p-2 pl-4"
       >
-        <button type="button" aria-label="Attach a file" className="text-neutral-600 hover:text-neutral-900">
+        <button
+          type="button"
+          disabled
+          aria-label="Attach a file (coming soon)"
+          title="Coming soon"
+          className="cursor-not-allowed text-neutral-300"
+        >
           <Paperclip className="size-4" />
         </button>
         <input
@@ -143,7 +149,13 @@ export default function ChatPanel({
           aria-label="Message the assistant"
           className="h-9 min-w-0 flex-1 bg-transparent px-2 text-sm outline-none placeholder:text-neutral-500"
         />
-        <button type="button" aria-label="Use voice input" className="text-neutral-600 hover:text-neutral-900">
+        <button
+          type="button"
+          disabled
+          aria-label="Use voice input (coming soon)"
+          title="Coming soon"
+          className="cursor-not-allowed text-neutral-300"
+        >
           <Mic className="size-4" />
         </button>
         <button
