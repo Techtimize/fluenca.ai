@@ -51,7 +51,9 @@ export function useSpeechInput(onTranscript: (text: string) => void) {
     const recognition = new Ctor();
     recognition.lang = "en-US";
     recognition.interimResults = true;
-    recognition.continuous = false;
+    // Without this, the browser auto-stops after every brief pause in speech and
+    // restarts on the next click, which looked like the indicator flickering/unstable.
+    recognition.continuous = true;
 
     recognition.onresult = (event) => {
       const transcript = Array.from(event.results)

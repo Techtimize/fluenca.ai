@@ -33,4 +33,7 @@ export const BUSSINESSENDPOINT = {
 
     MESSAGES: '/chatbot/messages',
     ATTACHMENTS: '/chatbot/attachments',
+    CONVERSATIONS: '/chatbot/conversations',
+    conversation: (conversationId: string) => `/chatbot/conversations/${conversationId}`,
+    conversationMessages: (conversationId: string) => `/chatbot/conversations/${conversationId}/messages`,
 }

@@ -68,7 +68,19 @@ export default function DashboardPage() {
   const [source, setSource] = useState(analytics.sources[0] ?? "Website");
   const [device, setDevice] = useState<Device>("mobile");
   const [chatOpen, setChatOpen] = useState(false);
-  const { messages, send, isSending, isAwaitingReply, isToolRunning } = useChatbot();
+  const {
+    messages,
+    send,
+    isSending,
+    isAwaitingReply,
+    isToolRunning,
+    mode,
+    setMode,
+    conversations,
+    activeConversationId,
+    setActiveConversationId,
+    startNewConversation,
+  } = useChatbot();
 
   useEffect(() => {
     if (!analytics.sources.includes(source)) {
@@ -146,6 +158,12 @@ export default function DashboardPage() {
             isSending={isSending}
             isAwaitingReply={isAwaitingReply}
             isToolRunning={isToolRunning}
+            mode={mode}
+            onModeChange={setMode}
+            conversations={conversations}
+            activeConversationId={activeConversationId}
+            onSelectConversation={setActiveConversationId}
+            onReset={startNewConversation}
           />
         ) : null}
       </div>

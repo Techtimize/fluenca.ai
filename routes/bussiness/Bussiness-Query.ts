@@ -112,13 +112,13 @@ export const IntakeQuery = () => {
     });
 }
 
-export const CHAT_HISTORY_KEY = ["chat-history"];
+export const CHAT_HISTORY_KEY = (conversationId: string | null) => ["chat-history", conversationId];
 
-export const ChatHistoryQuery = (enabled = true) => {
+export const ChatHistoryQuery = (conversationId: string | null, enabled = true) => {
   return useQuery({
-    queryKey: CHAT_HISTORY_KEY,
-    queryFn: () => ChatHistoryApi(),
-    enabled,
+    queryKey: CHAT_HISTORY_KEY(conversationId),
+    queryFn: () => ChatHistoryApi(conversationId as string),
+    enabled: enabled && conversationId !== null,
     refetchInterval: (query) => {
       const messages = query.state.data?.messages ?? [];
       const last = messages[messages.length - 1];

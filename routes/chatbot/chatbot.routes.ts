@@ -2,10 +2,42 @@ import { clearAuthTokenProvider, getAuthTokenProvider } from "@/provider/auth-pr
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import api from "@/routes/apiClient";
 import { BUSSINESSENDPOINT } from "@/routes/bussiness/Bussiness-Endpoint";
-import type { ChatHistoryResponse, SendMessageDoneEvent } from "@/types/chat";
+import type {
+  ChatHistoryResponse,
+  ChatMode,
+  Conversation,
+  ConversationListResponse,
+  ConversationResponse,
+  SendMessageDoneEvent,
+} from "@/types/chat";
 
-export const ChatHistoryApi = async (): Promise<ChatHistoryResponse> => {
-  const response = await api.get<ChatHistoryResponse>(BUSSINESSENDPOINT.MESSAGES);
+const mapConversation = (c: ConversationResponse): Conversation => ({
+  id: c.conversation_id,
+  title: c.title,
+  lastMessageAt: c.last_message_at,
+  createdAt: c.created_at,
+});
+
+export const ListConversationsApi = async (): Promise<Conversation[]> => {
+  const response = await api.get<ConversationListResponse>(BUSSINESSENDPOINT.CONVERSATIONS);
+  return response.data.conversations.map(mapConversation);
+};
+
+export const CreateConversationApi = async (): Promise<Conversation> => {
+  const response = await api.post<ConversationResponse>(BUSSINESSENDPOINT.CONVERSATIONS);
+  return mapConversation(response.data);
+};
+
+export const RenameConversationApi = async (conversationId: string, title: string): Promise<Conversation> => {
+  const response = await api.patch<ConversationResponse>(
+    BUSSINESSENDPOINT.conversation(conversationId),
+    { title },
+  );
+  return mapConversation(response.data);
+};
+
+export const ChatHistoryApi = async (conversationId: string): Promise<ChatHistoryResponse> => {
+  const response = await api.get<ChatHistoryResponse>(BUSSINESSENDPOINT.conversationMessages(conversationId));
   return response.data;
 };
 
@@ -41,11 +73,17 @@ const parseEvent = (block: string) => {
   }
 };
 
+type SendMessageOptions = {
+  conversationId?: string;
+  screenContext?: string;
+  imageUrl?: string;
+  mode?: ChatMode;
+};
+
 export const SendMessageApi = async (
   message: string,
   handlers: StreamHandlers,
-  screenContext?: string,
-  imageUrl?: string,
+  options: SendMessageOptions = {},
 ): Promise<void> => {
   const token = getAuthTokenProvider();
 
@@ -58,8 +96,10 @@ export const SendMessageApi = async (
     },
     body: JSON.stringify({
       message,
-      screen_context: screenContext || undefined,
-      image_url: imageUrl || undefined,
+      conversation_id: options.conversationId || undefined,
+      screen_context: options.screenContext || undefined,
+      image_url: options.imageUrl || undefined,
+      mode: options.mode,
     }),
   });
 

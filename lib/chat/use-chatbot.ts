@@ -2,20 +2,27 @@
 
 import { useMemo, useRef, useState } from "react";
 import { mapChatHistory } from "@/lib/chat/map-chat-messages";
-import type { ChatMessage } from "@/types/chat";
+import type { ChatMessage, ChatMode } from "@/types/chat";
 import { ChatHistoryQuery } from "@/routes/bussiness/Bussiness-Query";
 import { SendMessageMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import { ConversationsQuery } from "@/routes/chatbot/Chatbot-Query";
 
 const PENDING_USER_ID = "pending-user";
 const STREAMING_ASSISTANT_ID = "streaming-assistant";
 
 export const useChatbot = (enabled = true) => {
-  const { data, isLoading, isError } = ChatHistoryQuery(enabled);
+  // null: no conversation picked yet — "New chat" state, nothing is sent to the
+  // backend until the first message, which creates one and this gets set to its id.
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+
+  const conversations = ConversationsQuery(enabled);
+  const { data, isLoading, isError } = ChatHistoryQuery(activeConversationId, enabled);
   const sendMessage = SendMessageMutation();
 
   const [pendingUserText, setPendingUserText] = useState<string | null>(null);
   const [pendingImageUrl, setPendingImageUrl] = useState<string | undefined>(undefined);
   const [streamingText, setStreamingText] = useState("");
+  const [mode, setMode] = useState<ChatMode>("action");
   const streamedRef = useRef("");
 
   const history = useMemo(() => mapChatHistory(data?.messages), [data?.messages]);
@@ -54,14 +61,19 @@ export const useChatbot = (enabled = true) => {
     sendMessage.mutate(
       {
         message: text,
+        conversationId: activeConversationId ?? undefined,
         screenContext,
         imageUrl,
+        mode,
         onChunk: (chunk) => {
           streamedRef.current += chunk;
           setStreamingText(streamedRef.current);
         },
-        onDone: () => {
+        onDone: (event) => {
           streamedRef.current = "";
+          if (event.conversation_id && event.conversation_id !== activeConversationId) {
+            setActiveConversationId(event.conversation_id);
+          }
         },
       },
       {
@@ -72,6 +84,14 @@ export const useChatbot = (enabled = true) => {
         },
       },
     );
+  };
+
+  const startNewConversation = () => {
+    if (sendMessage.isPending) return;
+    setActiveConversationId(null);
+    setPendingUserText(null);
+    setPendingImageUrl(undefined);
+    setStreamingText("");
   };
 
   const isAwaitingReply = sendMessage.isPending && !streamingText;
@@ -85,5 +105,11 @@ export const useChatbot = (enabled = true) => {
     isSending: sendMessage.isPending,
     isAwaitingReply,
     isToolRunning,
+    mode,
+    setMode,
+    conversations: conversations.data ?? [],
+    activeConversationId,
+    setActiveConversationId,
+    startNewConversation,
   };
 };
