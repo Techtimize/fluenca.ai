@@ -1,8 +1,7 @@
 "use client";
-
 import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import ContentRecommendations from "@/components/dashboard/contentRecommendations";
+import ContentRecommendations from "@/components/dashboard/contentrecommendation/contentRecommendations";
 import TopBar from "@/components/dashboard/topBar";
 import Card from "@/components/shared/card";
 import { getApiErrorMessage } from "@/errors/error-utils";
