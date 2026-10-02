@@ -12,6 +12,8 @@ import type {
   GoogleTrendQueryParams,
   GoogleTrendTrendingResponse,
 } from "@/types/bussiness/google-trends-type";
+import { ContentRecommendationRequest, ContentRecommendationResponse, ContentRecommendationResultResponse } from "@/types/bussiness/content-recommendation-type";
+import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
 
 function toQueryParams(params?: GoogleTrendQueryParams) {
   if (!params) return undefined;
@@ -108,3 +110,27 @@ export const GoogleTrendFiltersApi = async () => {
     return response.data;
 }
 
+export const ContentRecommendationApi = async (data: ContentRecommendationRequest): Promise<ContentRecommendationResponse> => {
+    const response = await api.post(BUSSINESSENDPOINT.RECOMMENDATION.CONTENT_RECOMMENDATION, data);
+    return response.data;
+}
+
+export const ContentRecommendationResultApi = async (company_id: string): Promise<ContentRecommendationResultResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.RECOMMENDATION.RECOMMENDATION_RESULT(company_id));
+    return response.data;
+}
+
+export const IntakeApi = async (): Promise<IntakeResponseProps> => {
+    const response = await api.get(BUSSINESSENDPOINT.INTAKE);
+    return response.data;
+}
+
+export const CompleteIntakeApi = async (): Promise<IntakeResponseProps> => {
+    const response = await api.post(BUSSINESSENDPOINT.INTAKE_COMPLETE);
+    return response.data;
+}
+
+export const AnswerQuestionApi = async ({ question_id, answer }: AnswerQuestionRequestProps): Promise<IntakeQuestion> => {
+    const response = await api.patch(BUSSINESSENDPOINT.INTAKE_QUESTION(question_id), { answer });
+    return response.data;
+}

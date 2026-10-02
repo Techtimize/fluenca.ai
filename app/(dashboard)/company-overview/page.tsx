@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Bell, Check, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { IntakeQuery } from "@/routes/company-details/CompanyDetails-Query";
 import { AnswerQuestionMutation, CompleteIntakeMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { IntakeSection } from "@/types/company-details-type";
+import { IntakeQuery } from "@/routes/bussiness/Bussiness-Query";
 
 type CompanyField = {
   id: string;
@@ -276,7 +276,6 @@ function TopBar() {
   );
 }
 
-/* ---------- Page ---------- */
 export default function CompanyOverviewPage() {
   const t = useTranslations("overview");
   const { data: intake, isLoading } = IntakeQuery();

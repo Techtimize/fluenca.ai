@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Bell } from 'lucide-react';
 import { PAGE_ROUTES } from '@/constant/page-routes';
-import { IntakeQuery } from '@/routes/company-details/CompanyDetails-Query';
 import { IntakeStep } from '@/types/company-details-type';
 import { truncateWords } from '@/utils/text-utils';
+import { IntakeQuery } from '@/routes/bussiness/Bussiness-Query';
 
 const STEPS: Record<IntakeStep, string> = {
     queued: 'Getting ready...',

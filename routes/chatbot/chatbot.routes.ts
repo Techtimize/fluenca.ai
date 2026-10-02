@@ -1,11 +1,11 @@
 import { clearAuthTokenProvider, getAuthTokenProvider } from "@/provider/auth-provider";
 import { PAGE_ROUTES } from "@/constant/page-routes";
-import api from "../apiClient";
-import { CHATBOTENDPOINT } from "./Chatbot-Endpoint";
+import api from "@/routes/apiClient";
+import { BUSSINESSENDPOINT } from "@/routes/bussiness/Bussiness-Endpoint";
 import type { ChatHistoryResponse, SendMessageDoneEvent } from "@/types/chat";
 
 export const ChatHistoryApi = async (): Promise<ChatHistoryResponse> => {
-  const response = await api.get<ChatHistoryResponse>(CHATBOTENDPOINT.MESSAGES);
+  const response = await api.get<ChatHistoryResponse>(BUSSINESSENDPOINT.MESSAGES);
   return response.data;
 };
 
@@ -35,7 +35,7 @@ const parseEvent = (block: string) => {
 export const SendMessageApi = async (message: string, handlers: StreamHandlers): Promise<void> => {
   const token = getAuthTokenProvider();
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}${CHATBOTENDPOINT.MESSAGES}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}${BUSSINESSENDPOINT.MESSAGES}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

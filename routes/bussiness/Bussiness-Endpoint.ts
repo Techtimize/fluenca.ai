@@ -29,5 +29,7 @@ export const BUSSINESSENDPOINT = {
     RECOMMENDATION:{
         CONTENT_RECOMMENDATION: '/contentRecommendation/recommend',
         RECOMMENDATION_RESULT:(company_id: string) => `/contentRecommendation/results/${company_id}`,
-    }
+    },
+
+    MESSAGES: '/chatbot/messages',
 }
