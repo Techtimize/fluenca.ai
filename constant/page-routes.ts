@@ -26,6 +26,8 @@ export const PAGE_ROUTES = {
     COMPETITORS: '/competitors',
     CALENDAR: '/calendar',
     CONTENT_RECOMMENDATION: '/content-recommendation',
+    SCRIPT: '/script',
+    CONTENT: '/content',
 
     // Super admin
     SUPERADMIN: '/superadmin',

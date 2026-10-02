@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, CompetitorAnalysisAsyncApi, CompleteIntakeApi, ContentRecommendationApi, OnboardingApi, RetryDnaApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, CompetitorAnalysisAsyncApi, CompleteIntakeApi, ContentRecommendationApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
@@ -12,6 +12,7 @@ import { CompetitorAnalysisAsyncResponse, CompetitorAnalysisRequest } from "@/ty
 import { ContentRecommendationRequest, ContentRecommendationResponse } from "@/types/bussiness/content-recommendation-type";
 import { ChatMode, SendMessageDoneEvent } from "@/types/chat";
 import { SendMessageApi } from "../chatbot/chatbot.routes";
+import { ScriptGenerationRequest, ScriptGenerationResponse } from "@/types/bussiness/script-type";
 
 export function WaitlistMutation() {
     return useMutation({
@@ -223,6 +224,25 @@ export const SendMessageMutation = () => {
     },
     onError: (error: Error) => {
       toast("The assistant is unavailable", { description: error.message });
+    },
+  });
+};
+
+
+export const ScriptGenerationMutation = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ScriptGenerationRequest) => ScriptGenerationApi(data),
+    onSuccess: (_response: ScriptGenerationResponse, variables) => {
+      toast.success("Script generated successfully");
+      queryClient.invalidateQueries({
+        queryKey: ["script-generation-results", variables.company_id],
+      });
+      router.push(PAGE_ROUTES.SCRIPT);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to generate script"));
     },
   });
 };

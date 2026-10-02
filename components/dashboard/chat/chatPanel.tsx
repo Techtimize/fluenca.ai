@@ -128,7 +128,7 @@ export default function ChatPanel({
   conversations = [],
   activeConversationId = null,
   onSelectConversation,
-  title = "Influ.AI",
+  title = "FLUENCA.AI",
   subtitle = "Marketing Agent",
   placeholder = "Ask anything about marketing ...",
 }: Props) {

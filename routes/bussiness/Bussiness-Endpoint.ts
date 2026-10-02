@@ -31,6 +31,12 @@ export const BUSSINESSENDPOINT = {
         RECOMMENDATION_RESULT:(company_id: string) => `/contentRecommendation/results/${company_id}`,
     },
 
+    GENERATION:{
+    SCRIPT_GENERATION: '/scriptGeneration/script',
+    SCRIPT_GENERATION_RESULTS:(company_id: string) => `/scriptGeneration/results/${company_id}`,
+    DELETE_SCRIPT:(script_id: string) => `/scriptGeneration/script/${script_id}`,
+    },
+
     MESSAGES: '/chatbot/messages',
     ATTACHMENTS: '/chatbot/attachments',
     CONVERSATIONS: '/chatbot/conversations',
