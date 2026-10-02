@@ -25,7 +25,7 @@ import {
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { AdminUsersQuery } from "@/routes/admin/Admin-Query";
-import { UpdateUserStatusMutation } from "@/routes/admin/Admin-Mutation";
+import { DeleteUserMutation, UpdateUserStatusMutation } from "@/routes/admin/Admin-Mutation";
 import useAuthStore from "@/store/AuthsStore";
 import type { AdminUser } from "@/types/admin/users-type";
 
@@ -71,7 +71,7 @@ function RolePill({ role }: { role?: string | null }) {
 
 function matchesQuery(user: AdminUser, query: string) {
   if (!query) return true;
-  const haystack = [user.email, user.full_name, user.organization_name, user.role, user.status]
+  const haystack = [user.email, user.full_name, user.company_name, user.role, user.status]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -88,10 +88,12 @@ export default function SuperAdminUsersPage() {
   const role = useAuthStore((s) => s.role);
   const { data, isLoading, isError, error, isFetching } = AdminUsersQuery();
   const updateStatus = UpdateUserStatusMutation();
+  const deleteUser = DeleteUserMutation();
   const q = query.trim().toLowerCase();
   const users = (data?.items ?? []).filter((user) => matchesQuery(user, q));
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [confirmTarget, setConfirmTarget] = useState<AdminUser | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
 
   const confirmStatusChange = () => {
     if (!confirmTarget) return;
@@ -100,6 +102,11 @@ export default function SuperAdminUsersPage() {
       { userId: confirmTarget.user_id, status: nextStatus },
       { onSuccess: () => setConfirmTarget(null) },
     );
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    deleteUser.mutate(deleteTarget.user_id, { onSuccess: () => setDeleteTarget(null) });
   };
 
   const isSuperAdmin = SUPER_ADMIN_ROLES.has(role.toLowerCase());
@@ -226,7 +233,7 @@ export default function SuperAdminUsersPage() {
                           <p className="truncate text-[12px] text-neutral-500">{user.email}</p>
                         </div>
                       </TableCell>
-                      <TableCell className="text-neutral-800">{user.organization_name || "—"}</TableCell>
+                      <TableCell className="text-neutral-800">{user.company_name || "—"}</TableCell>
                       <TableCell>
                         <RolePill role={user.role} />
                       </TableCell>
@@ -238,23 +245,35 @@ export default function SuperAdminUsersPage() {
                         {isSelf ? (
                           <span className="text-[12px] text-neutral-400">{t("you")}</span>
                         ) : (
-                          <button
-                            type="button"
-                            disabled={isPending}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setConfirmTarget(user);
-                            }}
-                            className="rounded-full border border-[#E6E8F5] px-3 py-1 text-[12px] font-medium text-neutral-700 hover:bg-[#F6F7FD] disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            {isPending ? (
-                              <Loader2 className="size-3 animate-spin" />
-                            ) : isSuspended ? (
-                              t("reactivate")
-                            ) : (
-                              t("suspend")
-                            )}
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              disabled={isPending}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setConfirmTarget(user);
+                              }}
+                              className="rounded-full border border-[#E6E8F5] px-3 py-1 text-[12px] font-medium text-neutral-700 hover:bg-[#F6F7FD] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {isPending ? (
+                                <Loader2 className="size-3 animate-spin" />
+                              ) : isSuspended ? (
+                                t("reactivate")
+                              ) : (
+                                t("suspend")
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteTarget(user);
+                              }}
+                              className="rounded-full border border-rose-200 px-3 py-1 text-[12px] font-medium text-rose-700 hover:bg-rose-50"
+                            >
+                              {t("delete")}
+                            </button>
+                          </div>
                         )}
                       </TableCell>
                     </TableRow>
@@ -275,7 +294,7 @@ export default function SuperAdminUsersPage() {
           {selectedUser ? (
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
               <dt className="text-neutral-500">{t("colCompany")}</dt>
-              <dd className="text-neutral-900">{selectedUser.organization_name || "—"}</dd>
+              <dd className="text-neutral-900">{selectedUser.company_name || "—"}</dd>
               <dt className="text-neutral-500">{t("colRole")}</dt>
               <dd className="text-neutral-900">{selectedUser.role}</dd>
               <dt className="text-neutral-500">{t("colStatus")}</dt>
@@ -319,6 +338,25 @@ export default function SuperAdminUsersPage() {
               ) : (
                 t("suspend")
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("confirmDeleteTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("confirmDeleteBody", { email: deleteTarget?.email ?? "" })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleteUser.isPending}>
+              {tCommon("cancel")}
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete} disabled={deleteUser.isPending}>
+              {deleteUser.isPending ? <Loader2 className="size-3.5 animate-spin" /> : t("delete")}
             </Button>
           </DialogFooter>
         </DialogContent>
