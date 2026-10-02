@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { CompetitorAnalysisCompetitorApi, DnaApi, OnboardingDetailsApi } from "./bussiness.routes";
+import { CompetitorAnalysisCompetitorApi, ContentRecommendationResultApi, DnaApi, IntakeApi, OnboardingDetailsApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   GoogleTrendExploreApi,
@@ -8,6 +8,7 @@ import {
   GoogleTrendTrendingApi,
 } from "./bussiness.routes";
 import type { GoogleTrendQueryParams } from "@/types/bussiness/google-trends-type";
+import { ChatHistoryApi } from "../chatbot/chatbot.routes";
 
 export const OnboardingDetailsQuery = () => {
   return useQuery({
@@ -82,6 +83,47 @@ export const CompetitorAnalysisCompetitorQuery = (company_id: string) => {
     queryKey: ["competitor-analysis-competitor", company_id],
     queryFn: () => CompetitorAnalysisCompetitorApi(company_id),
     enabled: Boolean(company_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const ContentRecommendationResultQuery = (company_id: string) => {
+    return useQuery({
+        queryKey: ["content-recommendation-result", company_id],
+        queryFn: () => ContentRecommendationResultApi(company_id),
+        enabled: Boolean(company_id),
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+    });
+}
+
+const POLL_INTERVAL_MS = 3000;
+
+export const IntakeQuery = () => {
+    return useQuery({
+        queryKey: ['intake'],
+        queryFn: () => IntakeApi(),
+        refetchInterval: (query) => {
+            const status = query.state.data?.status;
+            return !status || status === 'not_started' || status === 'running' ? POLL_INTERVAL_MS : false;
+        },
+        refetchOnWindowFocus: false,
+    });
+}
+
+export const CHAT_HISTORY_KEY = ["chat-history"];
+
+export const ChatHistoryQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: CHAT_HISTORY_KEY,
+    queryFn: () => ChatHistoryApi(),
+    enabled,
+    refetchInterval: (query) => {
+      const messages = query.state.data?.messages ?? [];
+      const last = messages[messages.length - 1];
+      return last?.status === "running" ? 3000 : false;
+    },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

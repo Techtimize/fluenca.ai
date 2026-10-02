@@ -1,8 +1,7 @@
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, CompetitorAnalysisAsyncApi, OnboardingApi, RetryDnaApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, CompetitorAnalysisAsyncApi, CompleteIntakeApi, ContentRecommendationApi, OnboardingApi, RetryDnaApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AnswerQuestionApi, CompleteIntakeApi } from "../company-details/companyDetails.routes";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
 import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/bussiness/onboarding-type";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
@@ -10,6 +9,10 @@ import { getApiErrorMessage } from "@/errors/error-utils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { setCompanyUserIdProvider, setOnboardingCompletedProvider } from "@/provider/auth-provider";
 import { CompetitorAnalysisAsyncResponse, CompetitorAnalysisRequest } from "@/types/bussiness/competitoranalysis-type";
+import { ContentRecommendationRequest, ContentRecommendationResponse } from "@/types/bussiness/content-recommendation-type";
+import { SendMessageDoneEvent } from "@/types/chat";
+import { SendMessageApi } from "../chatbot/chatbot.routes";
+import { CHAT_HISTORY_KEY } from "./Bussiness-Query";
 
 export function WaitlistMutation() {
     return useMutation({
@@ -178,3 +181,44 @@ export function CompetitorAnalysisAsyncMutation() {
         },
     });
 }
+
+export function ContentRecommendationMutation() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  return useMutation({
+      mutationFn: (data: ContentRecommendationRequest) => ContentRecommendationApi(data),
+      onSuccess: (response: ContentRecommendationResponse, variables) => {
+          if (!response?.success) {
+              toast.error(response?.message || "Failed to generate content recommendations");
+              return;
+          }
+          toast.success(response.message || "Content recommendations generated");
+          queryClient.invalidateQueries({ queryKey: ["content-recommendation-result", variables.company_id] });
+          router.push(PAGE_ROUTES.CONTENT_RECOMMENDATION);
+      },
+      onError: (error) => {
+          toast.error(getApiErrorMessage(error, "Failed to get content recommendations"));
+      },
+  });
+}
+
+type SendMessageVariables = {
+  message: string;
+  onChunk: (text: string) => void;
+  onDone: (event: SendMessageDoneEvent) => void;
+};
+
+export const SendMessageMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ message, onChunk, onDone }: SendMessageVariables) =>
+      SendMessageApi(message, { onChunk, onDone }),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: CHAT_HISTORY_KEY });
+    },
+    onError: (error: Error) => {
+      toast("The assistant is unavailable", { description: error.message });
+    },
+  });
+};

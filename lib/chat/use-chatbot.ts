@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { ChatHistoryQuery } from "@/routes/chatbot/Chatbot-Query";
-import { SendMessageMutation } from "@/routes/chatbot/Chatbot-Mutation";
 import { mapChatHistory } from "@/lib/chat/map-chat-messages";
 import type { ChatMessage } from "@/types/chat";
+import { ChatHistoryQuery } from "@/routes/bussiness/Bussiness-Query";
+import { SendMessageMutation } from "@/routes/bussiness/Bussiness-Mutation";
 
 const PENDING_USER_ID = "pending-user";
 const STREAMING_ASSISTANT_ID = "streaming-assistant";

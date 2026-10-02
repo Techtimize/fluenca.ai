@@ -23,6 +23,12 @@ const DEFAULT_NAV: NavItem[] = [
   { id: "overview", label: "Company overview", icon: "clipboard", href: PAGE_ROUTES.COMPANY_OVERVIEW },
   { id: "dna", label: "Company DNA", icon: "dna", href: PAGE_ROUTES.DNA },
   {
+    id: "content-recommendation",
+    label: "Content recommendation",
+    icon: "lightbulb",
+    href: PAGE_ROUTES.CONTENT_RECOMMENDATION,
+  },
+  {
     id: "competitors",
     label: "Competitor analysis",
     icon: "chart",
