@@ -1,58 +1,95 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import ContentRecommendations from "@/components/dashboard/contentRecommendations";
-import SidebarRail, { DASHBOARD_CONTENT_OFFSET } from "@/components/dashboard/sidebarRail";
 import TopBar from "@/components/dashboard/topBar";
 import Card from "@/components/shared/card";
 import { getApiErrorMessage } from "@/errors/error-utils";
-import useAuthStore from "@/store/AuthsStore";
+import { ContentRecommendationMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { ContentRecommendationResultQuery } from "@/routes/bussiness/Bussiness-Query";
+import useAuthStore from "@/store/AuthsStore";
+import { FOCUS_RING } from "@/utils/ui-classes";
 
 export default function ContentRecommendationPage() {
-  const companyId = useAuthStore((s) => s.company_id);
-  const companyName = useAuthStore((s) => s.company_name);
-  const { data, isLoading, isError, error } = ContentRecommendationResultQuery(companyId);
+  const companyId = useAuthStore((s) => s.company_id);
+  const companyName = useAuthStore((s) => s.company_name);
+  const { data, isLoading, isError, error, isFetching } =
+    ContentRecommendationResultQuery(companyId);
+  const { mutate: recommend, isPending } = ContentRecommendationMutation();
 
-return (
-<div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,#E4E8FF_0%,#FFFFFF_50%)]">
-      <SidebarRail />
+  const handleGenerate = () => {
+    if (!companyId) {
+      toast.error("Company ID is missing. Please log in again.");
+      return;
+    }
+    recommend({ company_id: companyId });
+  };
 
-      <div className={DASHBOARD_CONTENT_OFFSET}>
-        <main className="min-w-0 space-y-4">
-          <TopBar user={{ name: companyName || "User" }} placeholder="Search recommendations..." />
+  const hasPayload = Boolean(data && Object.keys(data).length);
 
-          <div>
-            <h1 className="text-xl font-semibold text-neutral-900">Content recommendation</h1>
-            <p className="mt-1 text-sm text-neutral-500">
-              Content ideas and plans generated for your company.
-            </p>
-          </div>
+  return (
+    <main className="min-w-0 space-y-4 pb-4">
+      <TopBar
+        user={{ name: companyName || "User" }}
+        placeholder="Search recommendations..."
+      />
 
-          {!companyId ? (
-            <Card className="border-amber-200 bg-amber-50/80 p-5">
-              <p className="text-sm text-amber-800">Company ID is missing. Please log in again.</p>
-            </Card>
-          ) : null}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold text-neutral-900">Content recommendations</h1>
+          <p className="mt-1 text-sm text-neutral-500">
+            AI-generated ideas, themes, and post plans for your brand.
+          </p>
+        </div>
 
-          {companyId && isLoading ? (
-            <Card className="flex items-center justify-center gap-3 p-12 text-neutral-500">
-              <Loader2 className="size-5 animate-spin text-[#5B57E6]" />
-              <span className="text-sm">Loading recommendations…</span>
-            </Card>
-          ) : null}
+        {companyId ? (
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={isPending}
+            className={`inline-flex h-10 items-center gap-2 rounded-full bg-[#5B57E6] px-4 text-sm font-medium text-white hover:bg-[#4A46D0] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+          >
+            {isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Sparkles className="size-4" />
+            )}
+            {isPending ? "Generating…" : hasPayload ? "Regenerate" : "Generate"}
+          </button>
+        ) : null}
+      </div>
 
-          {companyId && isError ? (
-            <Card className="border-rose-200 bg-rose-50/80 p-5">
-              <p className="text-sm text-rose-800">
-                {getApiErrorMessage(error, "Failed to load content recommendations")}
-              </p>
-            </Card>
-          ) : null}
+      {!companyId ? (
+        <Card className="border-amber-200 bg-amber-50/80 p-5">
+          <p className="text-sm text-amber-800">
+            Company ID is missing. Complete company analysis first, then return here.
+          </p>
+        </Card>
+      ) : null}
 
-          {data ? <ContentRecommendations data={data} /> : null}
-        </main>
-      </div>
-    </div>
-  );
+      {companyId && (isLoading || isFetching) && !data ? (
+        <Card className="flex items-center justify-center gap-3 p-12 text-neutral-500">
+          <Loader2 className="size-5 animate-spin text-[#5B57E6]" />
+          <span className="text-sm">Loading recommendations…</span>
+        </Card>
+      ) : null}
+
+      {companyId && isError ? (
+        <Card className="border-rose-200 bg-rose-50/80 p-5">
+          <p className="text-sm text-rose-800">
+            {getApiErrorMessage(error, "Failed to load content recommendations")}
+          </p>
+        </Card>
+      ) : null}
+
+      {companyId && !isLoading && !isError ? (
+        <ContentRecommendations
+          data={data}
+          companyId={companyId}
+          empty={!hasPayload}
+        />
+      ) : null}
+    </main>
+  );
 }
