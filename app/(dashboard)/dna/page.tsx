@@ -21,9 +21,10 @@ import {
 } from "lucide-react";
 import { InstagramIcon, LinkedInIcon } from "@/components/shared/brandIcons";
 import TopBar from "@/components/dashboard/topBar";
+import TopicalMapSection from "@/components/dashboard/dna/topicalMapSection";
 import { MOCK_DASHBOARD } from "@/lib/mock/dashboard";
 import useAuthStore from "@/store/AuthsStore";
-import { AnalyzeCompanyResultsQuery } from "@/routes/bussiness/Bussiness-Query";
+import { AnalyzeCompanyResultsQuery, DnaQuery } from "@/routes/bussiness/Bussiness-Query";
 import type { AnalyzeCompanyResponse, AnalyzeCompanyResultsResponse } from "@/types/bussiness/analyzecompany-type";
 
 const PAIN_POINTS_PREVIEW = 8;
@@ -549,6 +550,8 @@ export default function DnaPage() {
   const companyId = useAuthStore((state) => state.company_id);
   const { data: analyzeCompanyResults, isLoading, isError } = AnalyzeCompanyResultsQuery(companyId);
   const analysis = (analyzeCompanyResults as AnalyzeCompanyResultsResponse | undefined)?.result;
+  const { data: dna } = DnaQuery();
+  const dnaReady = dna?.status === "ready";
 
   return (
     <main className="min-w-0">
@@ -570,6 +573,9 @@ export default function DnaPage() {
         <>
           <AnalyzeCompanyHeader data={analysis} />
           <AnalyzeCompanyInsights data={analysis} />
+          <div className="mt-4">
+            <TopicalMapSection dnaReady={dnaReady} />
+          </div>
         </>
       ) : null}
     </main>
