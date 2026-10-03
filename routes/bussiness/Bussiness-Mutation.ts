@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, CompetitorAnalysisAsyncApi, CompleteIntakeApi, ContentRecommendationApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, CompetitorAnalysisAsyncApi, CompleteIntakeApi, ContentRecommendationApi, ImageGenerationApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
@@ -14,6 +14,7 @@ import { SendMessageDoneEvent } from "@/types/chat";
 import { SendMessageApi } from "../chatbot/chatbot.routes";
 import { CHAT_HISTORY_KEY } from "./Bussiness-Query";
 import { ScriptGenerationRequest, ScriptGenerationResponse } from "@/types/bussiness/script-type";
+import { ImageGenerationRequest, ImageGenerationResponse } from "@/types/bussiness/imagegeneration-type";
 
 export function WaitlistMutation() {
     return useMutation({
@@ -239,6 +240,25 @@ export const ScriptGenerationMutation = () => {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to generate script"));
+    },
+  });
+};
+
+
+export const ImageGenerationMutation = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ImageGenerationRequest) => ImageGenerationApi(data),
+    onSuccess: (_response: ImageGenerationResponse, variables) => {
+      toast.success("Image generated successfully");
+      queryClient.invalidateQueries({
+        queryKey: ["company-image-generation-results", variables.company_id],
+      });
+      router.push(PAGE_ROUTES.CONTENT);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to generate image"));
     },
   });
 };

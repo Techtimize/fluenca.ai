@@ -11,12 +11,14 @@ import { getApiErrorMessage } from "@/errors/error-utils";
 import { ScriptGenerationResultsQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
 import { FOCUS_RING } from "@/utils/ui-classes";
+import { ScriptGenerationMutation } from "@/routes/bussiness/Bussiness-Mutation";
 
 export default function ScriptPage() {
   const companyId = useAuthStore((s) => s.company_id);
   const companyName = useAuthStore((s) => s.company_name);
   const { data, isLoading, isError, error, isFetching } =
     ScriptGenerationResultsQuery(companyId);
+  const { mutate: generateScript, isPending: isGeneratingScript } = ScriptGenerationMutation();
 
   const items = normalizeScriptResults(data);
   const hasResults = items.length > 0;

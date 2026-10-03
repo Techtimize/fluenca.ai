@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { CompetitorAnalysisCompetitorApi, ContentRecommendationResultApi, DnaApi, IntakeApi, OnboardingDetailsApi, ScriptGenerationResultsApi } from "./bussiness.routes";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisCompetitorApi, ContentRecommendationResultApi, DnaApi, IntakeApi, OnboardingDetailsApi, ScriptGenerationResultsApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   GoogleTrendExploreApi,
@@ -134,6 +134,17 @@ export const ChatHistoryQuery = (enabled = true) => {
       const last = messages[messages.length - 1];
       return last?.status === "running" ? 3000 : false;
     },
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+
+export const CompanyImageGenerationResultsQuery = (company_id: string) => {
+  return useQuery({
+    queryKey: ["company-image-generation-results", company_id],
+    queryFn: () => CompanyImageGenerationResultsApi(company_id),
+    enabled: Boolean(company_id),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

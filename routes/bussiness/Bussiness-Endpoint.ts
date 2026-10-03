@@ -25,7 +25,6 @@ export const BUSSINESSENDPOINT = {
     GOOGLE_TRENDS_FILTERS: '/google-trends/filters',
     },
 
-
     RECOMMENDATION:{
         CONTENT_RECOMMENDATION: '/contentRecommendation/recommend',
         RECOMMENDATION_RESULT:(company_id: string) => `/contentRecommendation/results/${company_id}`,
@@ -35,6 +34,10 @@ export const BUSSINESSENDPOINT = {
     SCRIPT_GENERATION: '/scriptGeneration/script',
     SCRIPT_GENERATION_RESULTS:(company_id: string) => `/scriptGeneration/results/${company_id}`,
     DELETE_SCRIPT:(script_id: string) => `/scriptGeneration/script/${script_id}`,
+
+    IMAGE_GENERATION: '/generation/image-generation',
+    COMPANY_IMAGE_GENERATION:(company_id: string) => `/generation/image-generation/${company_id}`,
+    LATEST_GENERATED_IMAGE:(company_id: string) => `/generation/image-generation/${company_id}/latest`,
     },
 
     MESSAGES: '/chatbot/messages',

@@ -15,6 +15,12 @@ import type {
 import { ContentRecommendationRequest, ContentRecommendationResponse, ContentRecommendationResultResponse } from "@/types/bussiness/content-recommendation-type";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
 import { ScriptGenerationRequest, ScriptGenerationResultsResponse } from "@/types/bussiness/script-type";
+import type {
+  CompanyImageGenerationResponse,
+  ImageGenerationRequest,
+  ImageGenerationResponse,
+  LatestGeneratedImageResponse,
+} from "@/types/bussiness/imagegeneration-type";
 
 function toQueryParams(params?: GoogleTrendQueryParams) {
   if (!params) return undefined;
@@ -145,5 +151,31 @@ export const ScriptGenerationResultsApi = async (
   company_id: string,
 ): Promise<ScriptGenerationResultsResponse> => {
     const response = await api.get(BUSSINESSENDPOINT.GENERATION.SCRIPT_GENERATION_RESULTS(company_id));
+    return response.data;
+}
+
+export const ImageGenerationApi = async (
+  data: ImageGenerationRequest,
+): Promise<ImageGenerationResponse> => {
+    const response = await api.post(BUSSINESSENDPOINT.GENERATION.IMAGE_GENERATION, data);
+    return response.data;
+}
+
+export const CompanyImageGenerationApi = async (
+  company_id: string,
+): Promise<CompanyImageGenerationResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.GENERATION.COMPANY_IMAGE_GENERATION(company_id));
+    return response.data;
+}
+
+export const LatestGeneratedImageApi = async (
+  company_id: string,
+): Promise<LatestGeneratedImageResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.GENERATION.LATEST_GENERATED_IMAGE(company_id));
+    return response.data;
+}
+
+export const CompanyImageGenerationResultsApi = async (company_id: string): Promise<CompanyImageGenerationResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.GENERATION.COMPANY_IMAGE_GENERATION(company_id));
     return response.data;
 }

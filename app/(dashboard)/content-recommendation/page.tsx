@@ -66,14 +66,6 @@ export default function ContentRecommendationPage() {
           </p>
         </Card>
       ) : null}
-
-      {companyId && (isLoading || isFetching) && !data ? (
-        <Card className="flex items-center justify-center gap-3 p-8 text-neutral-500">
-          <Loader2 className="size-5 animate-spin text-[#5B57E6]" />
-          <span className="text-sm">Loading recommendations…</span>
-        </Card>
-      ) : null}
-
       {companyId && isError ? (
         <Card className="border-rose-200 bg-rose-50/80 p-4">
           <p className="text-sm text-rose-800">
