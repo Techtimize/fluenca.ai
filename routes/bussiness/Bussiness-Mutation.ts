@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, CompleteIntakeApi, ContentRecommendationApi, ImageGenerationApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, CompleteIntakeApi, ContentRecommendationApi, ImageGenerationApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
@@ -15,6 +15,7 @@ import { SendMessageApi } from "../chatbot/chatbot.routes";
 import { CHAT_HISTORY_KEY } from "./Bussiness-Query";
 import { ScriptGenerationRequest, ScriptGenerationResponse } from "@/types/bussiness/script-type";
 import { ImageGenerationRequest, ImageGenerationResponse } from "@/types/bussiness/imagegeneration-type";
+import { IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 
 export function WaitlistMutation() {
     return useMutation({
@@ -301,6 +302,22 @@ export const ImageGenerationMutation = () => {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to generate image"));
+    },
+  });
+};
+
+export const IntelligenceRunMutation = () => {
+  return useMutation({
+    mutationFn: (data: IntelligenceRunRequest) => IntelligenceRunApi(data),
+    onSuccess: (response: IntelligenceRunResponse) => {
+      if (response?.success === false) {
+        toast.error(response.error || response.message || "Failed to run intelligence");
+        return;
+      }
+      toast.success(response?.message || "Intelligence run started successfully");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to run intelligence"));
     },
   });
 };
