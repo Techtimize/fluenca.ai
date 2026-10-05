@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, ScriptGenerationResultsApi } from "./bussiness.routes";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   GoogleTrendExploreApi,
@@ -251,3 +251,35 @@ export const IntelligenceJobQuery = (job_id: string) => {
     refetchOnReconnect: false,
   });
 };
+
+export const PlannerResultsQuery = (company_id: string) => {
+  return useQuery({
+    queryKey: ["planner-results", company_id],
+    queryFn: () => PlannerResultsApi(company_id),
+    enabled: Boolean(company_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const PlannerVersionsQuery = (company_id: string) => {
+  return useQuery({
+    queryKey: ["planner-versions", company_id],
+    queryFn: () => PlannerVersionsApi(company_id),
+    enabled: Boolean(company_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const PlannerSpecificVersionsQuery = (company_id: string, version: string) => {
+  return useQuery({
+    queryKey: ["planner-specific-versions", company_id, version],
+    queryFn: () => PlannerSpecificVersionsApi(company_id, version),
+    enabled: Boolean(company_id && version),
+    placeholderData: keepPreviousData,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+

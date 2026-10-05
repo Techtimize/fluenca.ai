@@ -523,7 +523,7 @@ export default function CompetitorResults({
 }: Props) {
   const t = useTranslations("competitors");
   const result = data?.result;
-  const competitors =
+  const rawCompetitors =
     result?.competitors?.length
       ? result.competitors
       : result?.competitors_overview?.competitors?.length
@@ -531,6 +531,13 @@ export default function CompetitorResults({
         : result?.competitive_matchup?.competitors?.length
           ? result.competitive_matchup.competitors
           : data?.competitors ?? [];
+  const competitors = rawCompetitors.filter(
+    (item): item is CompetitorListItem =>
+      Boolean(item) &&
+      typeof item === "object" &&
+      !("why_competitor" in item) &&
+      !("offers" in item),
+  );
 
   const hasAnalysis = Boolean(result || (data?.competitors && data.competitors.length > 0));
 

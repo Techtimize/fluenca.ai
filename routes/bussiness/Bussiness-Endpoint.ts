@@ -2,9 +2,10 @@
 export const BUSSINESSENDPOINT = {
     WAITLIST: '/waitlist',
     ONBOARDING: '/onboarding',
+    
     INTELLIGENCE_RUN: '/intelligence/run',
     INTELLIGENCE_JOB: (job_id: string) => `/intelligence/jobs/${job_id}`,
-    
+
     ONBOARDING_DETAILS: '/onboarding/details',
     INTAKE: '/intake',
     INTAKE_COMPLETE: '/intake/complete',
@@ -55,6 +56,12 @@ export const BUSSINESSENDPOINT = {
     IMAGE_GENERATION: '/generation/image-generation',
     COMPANY_IMAGE_GENERATION:(company_id: string) => `/generation/image-generation/${company_id}`,
     LATEST_GENERATED_IMAGE:(company_id: string) => `/generation/image-generation/${company_id}/latest`,
+    },
+
+    PLANNER:{
+        PLANNER_VERSIONS:(company_id: string) => `/planner/results/${company_id}/versions`,
+        PLANNER_SPECIFIC_VERSIONS:(company_id: string, version: string) => `/planner/results/${company_id}/versions/${version}`,
+        PLANNER_LATEST_RESPONSE:(company_id: string) => `/planner/results/${company_id}`,
     },
 
     MESSAGES: '/chatbot/messages',
