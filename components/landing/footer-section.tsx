@@ -67,7 +67,8 @@ export default function FooterSection({
                 width={96}
                 height={96}
                 priority
-                className="h-auto w-16 md:w-20 lg:w-24"
+                className="w-16 md:w-20 lg:w-24"
+                style={{ height: 'auto' }}
               />
             </Link>
           </div>
