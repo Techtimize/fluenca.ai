@@ -1,4 +1,8 @@
-import type { CompetitorListItem, CompetitorsListResponse } from "@/types/bussiness/competitoranalysis-type";
+import type {
+  CompetitiveBriefCompetitor,
+  CompetitorListItem,
+  CompetitorsListResponse,
+} from "@/types/bussiness/competitoranalysis-type";
 import type {
   ChartSegment,
   CompetitorRow,
@@ -23,14 +27,78 @@ function competitorHandle(item: CompetitorListItem) {
   return item.company_name || item.website || "—";
 }
 
-function getCompetitors(data: CompetitorsListResponse): CompetitorListItem[] {
+function websiteUrl(
+  website?: string | null | { url?: string },
+): string | null | undefined {
+  if (!website) return website;
+  if (typeof website === "string") return website;
+  return website.url || null;
+}
+
+function isBriefCompetitor(
+  item: CompetitorListItem | CompetitiveBriefCompetitor,
+): item is CompetitiveBriefCompetitor {
   return (
+    typeof item === "object" &&
+    item !== null &&
+    ("why_competitor" in item ||
+      "what_they_sell" in item ||
+      "links" in item ||
+      (typeof (item as CompetitiveBriefCompetitor).website === "object" &&
+        (item as CompetitiveBriefCompetitor).website !== null))
+  );
+}
+
+function toCompetitorListItem(
+  item: CompetitorListItem | CompetitiveBriefCompetitor,
+): CompetitorListItem {
+  if (!isBriefCompetitor(item)) {
+    return {
+      ...item,
+      website: websiteUrl(item.website) ?? item.website,
+    };
+  }
+
+  return {
+    name: item.name,
+    username: item.username,
+    profile_url: item.profile_url || item.links?.instagram?.url,
+    profile_picture_url:
+      item.profile_picture_url ||
+      item.image_url ||
+      item.links?.instagram?.profile_picture_url,
+    image_url: item.image_url || item.profile_picture_url,
+    followers: item.followers ?? item.links?.instagram?.followers ?? null,
+    website: websiteUrl(item.website) ?? item.links?.website?.url ?? null,
+    linkedin_url: item.linkedin_url || item.links?.linkedin?.url || null,
+    post_count:
+      item.posts_count ??
+      item.media_count ??
+      item.links?.instagram?.media_count ??
+      (Array.isArray(item.posts) ? item.posts.length : null),
+    posts: item.posts,
+    threat_level: item.threat_level,
+    is_hiring: item.is_hiring,
+    employee_count:
+      item.linkedin_total_employees ?? item.employee_count ?? null,
+    linkedin_company_size: item.linkedin_company_size,
+    linkedin_total_employees: item.linkedin_total_employees,
+    linkedin_profiles_sampled: item.linkedin_profiles_sampled,
+    services: item.what_they_sell || item.website?.services,
+    technologies: item.website?.technologies,
+    company_size: item.linkedin_company_size,
+  };
+}
+
+function getCompetitors(data: CompetitorsListResponse): CompetitorListItem[] {
+  const raw =
     data.result?.competitors ??
     data.result?.competitors_overview?.competitors ??
     data.result?.competitive_matchup?.competitors ??
     data.competitors ??
-    []
-  );
+    [];
+
+  return raw.map(toCompetitorListItem);
 }
 
 function buildStats(data: CompetitorsListResponse, competitors: CompetitorListItem[]): StatMetric[] {
