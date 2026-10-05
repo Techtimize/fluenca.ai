@@ -90,6 +90,12 @@ function toCompetitorListItem(
   };
 }
 
+export function normalizeCompetitorsList(
+  items?: Array<CompetitorListItem | CompetitiveBriefCompetitor> | null,
+): CompetitorListItem[] {
+  return (items ?? []).map(toCompetitorListItem);
+}
+
 function getCompetitors(data: CompetitorsListResponse): CompetitorListItem[] {
   const raw =
     data.result?.competitors ??
@@ -98,7 +104,7 @@ function getCompetitors(data: CompetitorsListResponse): CompetitorListItem[] {
     data.competitors ??
     [];
 
-  return raw.map(toCompetitorListItem);
+  return normalizeCompetitorsList(raw);
 }
 
 function buildStats(data: CompetitorsListResponse, competitors: CompetitorListItem[]): StatMetric[] {
