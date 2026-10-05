@@ -28,6 +28,7 @@ import type {
   ImageGenerationResponse,
   LatestGeneratedImageResponse,
 } from "@/types/bussiness/imagegeneration-type";
+import { IntelligenceJobResponse, IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 
 function toQueryParams(params?: GoogleTrendQueryParams) {
   if (!params) return undefined;
@@ -273,5 +274,19 @@ export const LatestGeneratedImageApi = async (
 
 export const CompanyImageGenerationResultsApi = async (company_id: string): Promise<CompanyImageGenerationResponse> => {
     const response = await api.get(BUSSINESSENDPOINT.GENERATION.COMPANY_IMAGE_GENERATION(company_id));
+    return response.data;
+}
+
+export const IntelligenceRunApi = async (
+  data: IntelligenceRunRequest,
+): Promise<IntelligenceRunResponse> => {
+    const response = await api.post(BUSSINESSENDPOINT.INTELLIGENCE_RUN, data);
+    return response.data;
+}
+
+export const IntelligenceJobApi = async (
+  job_id: string,
+): Promise<IntelligenceJobResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.INTELLIGENCE_JOB(job_id));
     return response.data;
 }

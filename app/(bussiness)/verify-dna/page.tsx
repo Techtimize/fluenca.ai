@@ -20,8 +20,8 @@ import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { PAGE_ROUTES } from "@/constant/page-routes";
-import { CompetitorAnalysisAsyncMutation, RetryDnaMutation } from "@/routes/bussiness/Bussiness-Mutation";
-import { CompetitorAnalysisJobQuery, DnaQuery, OnboardingDetailsQuery } from "@/routes/bussiness/Bussiness-Query";
+import { IntelligenceRunMutation, RetryDnaMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import { DnaQuery, IntelligenceJobQuery, OnboardingDetailsQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
@@ -35,6 +35,9 @@ const HIDDEN_SECTION_TITLES = new Set([
 
 const JOB_SUCCESS_STATUSES = new Set(["completed", "succeeded", "success", "ready"]);
 const JOB_FAILED_STATUSES = new Set(["failed", "error", "cancelled", "canceled"]);
+
+const DEFAULT_PLATFORMS = ["instagram", "linkedin"];
+const DEFAULT_SCRIPT_COUNT = 5;
 
 function getSectionIcon(key: string, title: string): LucideIcon {
   const haystack = `${key} ${title}`.toLowerCase();
@@ -55,18 +58,18 @@ export default function VerifyDna() {
   const { data: dna, isLoading } = DnaQuery();
   const { data: onboarding } = OnboardingDetailsQuery();
   const { mutate: retryDna, isPending: isRetrying } = RetryDnaMutation();
-  const { mutate: competitorAnalysisAsync, isPending: isCompetitorAnalysisAsync } =
-    CompetitorAnalysisAsyncMutation();
+  const { mutate: intelligenceRun, isPending: isIntelligenceRunPending } =
+    IntelligenceRunMutation();
 
   const [activeId, setActiveId] = useState("");
   const [jobId, setJobId] = useState("");
   const handledJobRef = useRef<string | null>(null);
 
   const {
-    data: competitorAnalysisJob,
-    isLoading: isCompetitorAnalysisJobLoading,
-    isFetching: isCompetitorAnalysisJobFetching,
-  } = CompetitorAnalysisJobQuery(jobId);
+    data: intelligenceJob,
+    isLoading: isIntelligenceJobLoading,
+    isFetching: isIntelligenceJobFetching,
+  } = IntelligenceJobQuery(jobId);
 
   const isReady = dna?.status === "ready";
   const isFailed = dna?.status === "failed";
@@ -80,15 +83,16 @@ export default function VerifyDna() {
       .map((section) => `## ${section.title}\n${section.text}`)
       .join("\n\n");
 
-  const jobStatus = String(competitorAnalysisJob?.status ?? "").toLowerCase();
+  const jobStatus = String(intelligenceJob?.status ?? "").toLowerCase();
   const isJobFailed = JOB_FAILED_STATUSES.has(jobStatus);
   const isJobSuccess = JOB_SUCCESS_STATUSES.has(jobStatus);
-  const isPollingJob =
-    Boolean(jobId) && !isJobSuccess && !isJobFailed;
+  const isPollingJob = Boolean(jobId) && !isJobSuccess && !isJobFailed;
   const isWorking =
-    isCompetitorAnalysisAsync ||
+    isIntelligenceRunPending ||
     isPollingJob ||
-    (Boolean(jobId) && (isCompetitorAnalysisJobLoading || isCompetitorAnalysisJobFetching) && !isJobFailed);
+    (Boolean(jobId) &&
+      (isIntelligenceJobLoading || isIntelligenceJobFetching) &&
+      !isJobFailed);
 
   const sections = useMemo(
     () =>
@@ -133,8 +137,8 @@ export default function VerifyDna() {
     if (isJobSuccess) {
       handledJobRef.current = `${jobId}:${jobStatus}`;
       toast.success(
-        typeof competitorAnalysisJob?.message === "string"
-          ? competitorAnalysisJob.message
+        typeof intelligenceJob?.message === "string"
+          ? intelligenceJob.message
           : t("jobComplete"),
       );
       router.push(PAGE_ROUTES.DASHBOARD);
@@ -144,14 +148,14 @@ export default function VerifyDna() {
     if (isJobFailed) {
       handledJobRef.current = `${jobId}:${jobStatus}`;
       toast.error(
-        (typeof competitorAnalysisJob?.error === "string" && competitorAnalysisJob.error) ||
-          (typeof competitorAnalysisJob?.message === "string" && competitorAnalysisJob.message) ||
+        (typeof intelligenceJob?.error === "string" && intelligenceJob.error) ||
+          (typeof intelligenceJob?.message === "string" && intelligenceJob.message) ||
           t("jobFailed"),
       );
     }
   }, [
-    competitorAnalysisJob?.error,
-    competitorAnalysisJob?.message,
+    intelligenceJob?.error,
+    intelligenceJob?.message,
     isJobFailed,
     isJobSuccess,
     jobId,
@@ -174,10 +178,11 @@ export default function VerifyDna() {
     handledJobRef.current = null;
     setJobId("");
 
-    competitorAnalysisAsync(
+    intelligenceRun(
       {
         company_id: companyId,
-        mode: "ai",
+        platforms: DEFAULT_PLATFORMS,
+        script_count: DEFAULT_SCRIPT_COUNT,
       },
       {
         onSuccess: (response) => {
