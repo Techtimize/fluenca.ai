@@ -129,28 +129,28 @@ export function buildPlannerEvents(data?: PlannerResultsResponse | null): Planne
 
   const datedItems = collectCalendarItems(planner);
   if (datedItems.length) {
-    return datedItems
-      .map((item, index) => {
-        if (!item.date) return null;
-        const date = startOfDay(new Date(item.date));
-        if (Number.isNaN(date.getTime())) return null;
-        return {
-          id: item.id || `cal-${item.date}-${index}`,
-          date,
-          title: item.title || item.topic || item.format || "Scheduled content",
-          description: item.caption || item.reason || item.hook,
-          platform: item.platform,
-          format: item.format,
-          priority:
-            typeof item.priority_score === "number"
-              ? String(item.priority_score)
-              : item.priority,
-          why: item.reason,
-          phase: item.phase,
-          what_to_do: item.title || item.topic || item.caption,
-        } satisfies PlannerEvent;
-      })
-      .filter((item): item is PlannerEvent => Boolean(item));
+    const events: PlannerEvent[] = [];
+    datedItems.forEach((item, index) => {
+      if (!item.date) return;
+      const date = startOfDay(new Date(item.date));
+      if (Number.isNaN(date.getTime())) return;
+      events.push({
+        id: item.id || `cal-${item.date}-${index}`,
+        date,
+        title: item.title || item.topic || item.format || "Scheduled content",
+        description: item.caption || item.reason || item.hook,
+        platform: item.platform,
+        format: item.format,
+        priority:
+          typeof item.priority_score === "number"
+            ? String(item.priority_score)
+            : item.priority,
+        why: item.reason,
+        phase: item.phase,
+        what_to_do: item.title || item.topic || item.caption,
+      });
+    });
+    return events;
   }
 
   const start = resolveStartDate(planner);
