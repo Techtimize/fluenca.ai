@@ -225,10 +225,14 @@
     "continueHint": "If this looks right, continue to your workspace setup.",
     "continue": "Looks good, continue",
     "analyzing": "Analyzing company...",
+    "pollingJob": "Running competitor analysis…",
+    "jobComplete": "Competitor analysis completed",
+    "jobFailed": "Competitor analysis failed. Please try again.",
     "empty": "No DNA sections available yet.",
     "generateAgain": "Generate again",
     "toastMissingCompanyId": "Company ID is missing. Please complete onboarding again.",
-    "toastMissingDna": "Company DNA data is missing. Please wait for DNA to finish."
+    "toastMissingDna": "Company DNA data is missing. Please wait for DNA to finish.",
+    "toastMissingJobId": "Job ID missing from analysis response. Please try again."
   },
   "comingSoon": {
     "headlineSolid": "Coming",
