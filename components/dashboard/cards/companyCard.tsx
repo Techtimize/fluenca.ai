@@ -3,14 +3,13 @@ import { ExternalLink, Globe, Pencil } from "lucide-react";
 import AssetImage from "@/components/shared/assetImage";
 import Card from "@/components/shared/card";
 import { FacebookIcon, InstagramIcon, LinkedInIcon } from "@/components/shared/brandIcons";
-import type { Company } from "@/types/dashboard";
-import type { AnalyzeCompanyProfile } from "@/types/bussiness/analyzecompany-type";
+import type { Company, CompanyProfile } from "@/types/dashboard";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
 type Props = {
   company: Company;
   // Company details from the analysis; shows positioning and social links.
-  profile?: AnalyzeCompanyProfile | null;
+  profile?: CompanyProfile | null;
   onEdit?: () => void;
 };
 
@@ -122,12 +121,38 @@ export default function CompanyCard({ company, profile, onEdit }: Props) {
         <>
           <h3 className="mb-2 mt-5 text-[13px] font-semibold text-neutral-900">Competitors</h3>
           <ul className="flex flex-wrap gap-3">
-            {company.competitors.map((c) => (
-              <li key={c.id} className="flex items-center gap-2 rounded-xl border border-[#E6E8F5] bg-white px-3 py-2 text-[13px] text-neutral-800">
-                <AssetImage src={c.logoSrc} alt="" width={24} height={24} className="size-6 rounded-md object-contain" />
-                {c.name}
-              </li>
-            ))}
+            {company.competitors.map((c) => {
+              const content = (
+                <>
+                  {c.logoSrc ? (
+                    <AssetImage src={c.logoSrc} alt="" width={24} height={24} className="size-6 rounded-md object-contain" />
+                  ) : (
+                    <span className="grid size-6 place-items-center rounded-md bg-[#EEF0FF] text-[11px] font-semibold text-[#5452F6]">
+                      {initials(c.name)}
+                    </span>
+                  )}
+                  {c.name}
+                </>
+              );
+              return (
+                <li key={c.id}>
+                  {c.href ? (
+                    <a
+                      href={c.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`flex items-center gap-2 rounded-xl border border-[#E6E8F5] bg-white px-3 py-2 text-[13px] text-neutral-800 hover:bg-neutral-50 ${FOCUS_RING}`}
+                    >
+                      {content}
+                    </a>
+                  ) : (
+                    <span className="flex items-center gap-2 rounded-xl border border-[#E6E8F5] bg-white px-3 py-2 text-[13px] text-neutral-800">
+                      {content}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </>
       )}

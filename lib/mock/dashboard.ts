@@ -29,8 +29,12 @@ export const MOCK_DASHBOARD: DashboardData = {
     { id: "pain", title: "Pain Points", subtitle: "Growth and development gaps.", icon: "layers", href: PAGE_ROUTES.DNA },
     { id: "competitors", title: "Competitors Analytics", subtitle: "Growth and development gaps.", icon: "chart", href: PAGE_ROUTES.COMPETITOR_ANALYSIS },
   ],
+  analyticsSources: [
+    { id: "website", label: "Website" },
+    { id: "instagram", label: "Instagram" },
+    { id: "linkedin", label: "LinkedIn" },
+  ],
   analytics: {
-    sources: ["Website", "Instagram", "LinkedIn"],
     metrics: [
       { id: "accessibility", label: "Accessibility", score: 92, change: "12.75%", icon: "accessibility", tone: "green" },
       { id: "performance", label: "Performance", score: 75, change: "10.00%", icon: "performance", tone: "orange" },
