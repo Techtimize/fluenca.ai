@@ -6,7 +6,7 @@ export type UserSummary = { name: string; avatarSrc?: string };
 export type NavItem = { id: string; label: string; icon: string; href: string };
 
 export type CompanyLink = { id: string; label: string; iconSrc: string; href?: string };
-export type Competitor = { id: string; name: string; logoSrc: string };
+export type Competitor = { id: string; name: string; logoSrc?: string | null; href?: string | null };
 export type Company = {
   name: string;
   tagline: string;
@@ -15,6 +15,14 @@ export type Company = {
   description: string;
   links: CompanyLink[];
   competitors: Competitor[];
+};
+
+// Positioning line and social links shown under the company description.
+export type CompanyProfile = {
+  positioning?: string | null;
+  linkedin_url?: string | null;
+  instagram_url?: string | null;
+  instagram_username?: string | null;
 };
 
 export type DocItem = { id: string; title: string; subtitle: string; icon: string; href: string };
@@ -31,15 +39,25 @@ export type Metric = {
 export type OverallPerformance = {
   summary: string;
   score: number;
-  mobile: number;
-  desktop: number;
+  mobile?: number;
+  desktop?: number;
   // When set, these replace the Mobile / Desktop boxes under the gauge.
   stats?: { label: string; value: string }[];
+};
+
+export type GrowthOpportunity = {
+  id: string;
+  area: string;
+  priority: string;
+  finding: string;
+  impact: string;
+  action: string;
 };
 
 export type AnalyticsCharts = {
   strengthsWeaknesses: { group: string; strengths: number; weaknesses: number }[];
   opportunitiesByPriority: { priority: string; count: number }[];
+  opportunities?: GrowthOpportunity[];
   actions: { title: string; impact: string; effort: string; priority: number | null }[];
 };
 
@@ -55,8 +73,11 @@ export type Integration = {
 export type Vital = { id: string; label: string; value: string; status: VitalStatus };
 export type VitalsGroup = { id: string; title: string; summary: string; vitals: Vital[] };
 
+export type AnalyticsSource = { id: string; label: string };
+
 export type AnalyticsData = {
-  sources: string[];
+  // When set, the channel has no results and this message replaces the cards.
+  emptyMessage?: string | null;
   metrics: Metric[];
   overall: OverallPerformance;
   integrations: Integration[];
@@ -68,5 +89,6 @@ export type DashboardData = {
   user: UserSummary;
   company: Company;
   docs: DocItem[];
+  analyticsSources: AnalyticsSource[];
   analytics: AnalyticsData;
 };

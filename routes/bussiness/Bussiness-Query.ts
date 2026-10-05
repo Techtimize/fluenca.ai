@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, ScriptGenerationResultsApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
+  AnalyzeCompanyDashboardApi,
   GoogleTrendExploreApi,
   GoogleTrendFiltersApi,
   GoogleTrendNowApi,
@@ -73,6 +74,16 @@ export const AnalyzeCompanyResultsQuery = (company_user_id: string) => {
     queryKey: ["analyze-company-results", company_user_id],
     queryFn: () => AnalyzeCompanyResultsApi(company_user_id),
     enabled: Boolean(company_user_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const AnalyzeCompanyDashboardQuery = (company_id: string) => {
+  return useQuery({
+    queryKey: ["analyze-company-dashboard", company_id],
+    queryFn: () => AnalyzeCompanyDashboardApi(company_id),
+    enabled: Boolean(company_id),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
