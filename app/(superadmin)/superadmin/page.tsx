@@ -206,6 +206,7 @@ export default function SuperAdminUsersPage() {
                 <TableRow className="hover:bg-transparent">
                   <TableHead>{t("colUser")}</TableHead>
                   <TableHead>{t("colCompany")}</TableHead>
+                  <TableHead>{t("colOnboarding")}</TableHead>
                   <TableHead>{t("colRole")}</TableHead>
                   <TableHead>{t("colStatus")}</TableHead>
                   <TableHead>{t("colJoined")}</TableHead>
@@ -234,6 +235,17 @@ export default function SuperAdminUsersPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-neutral-800">{user.company_name || "—"}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                            user.onboarding_completed_at
+                              ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                              : "bg-neutral-100 text-neutral-600"
+                          }`}
+                        >
+                          {user.onboarding_completed_at ? t("onboardingDone") : t("onboardingPending")}
+                        </span>
+                      </TableCell>
                       <TableCell>
                         <RolePill role={user.role} />
                       </TableCell>
@@ -295,6 +307,10 @@ export default function SuperAdminUsersPage() {
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
               <dt className="text-neutral-500">{t("colCompany")}</dt>
               <dd className="text-neutral-900">{selectedUser.company_name || "—"}</dd>
+              <dt className="text-neutral-500">{t("colOnboarding")}</dt>
+              <dd className="text-neutral-900">
+                {selectedUser.onboarding_completed_at ? t("onboardingDone") : t("onboardingPending")}
+              </dd>
               <dt className="text-neutral-500">{t("colRole")}</dt>
               <dd className="text-neutral-900">{selectedUser.role}</dd>
               <dt className="text-neutral-500">{t("colStatus")}</dt>
