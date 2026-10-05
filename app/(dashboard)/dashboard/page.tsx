@@ -103,8 +103,6 @@ export default function DashboardPage() {
     setChatOpen(true);
   };
 
-  const showLoading = Boolean(companyId) && (isLoading || isFetching) && !mapped;
-
   return (
     <>
       <div
@@ -116,19 +114,6 @@ export default function DashboardPage() {
       >
         <main className="min-w-0 space-y-4">
           <TopBar user={user} />
-
-          {!companyId ? (
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
-              {t("noCompanyId")}
-            </div>
-          ) : null}
-
-          {showLoading ? (
-            <div className="rounded-3xl border border-[#E6E8F5] bg-white/90 px-5 py-8 text-sm text-neutral-600">
-              {t("loading")}
-            </div>
-          ) : null}
-
           {isError ? (
             <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
               {error instanceof Error ? error.message : t("error")}

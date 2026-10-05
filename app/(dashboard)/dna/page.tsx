@@ -556,13 +556,6 @@ export default function DnaPage() {
   return (
     <main className="min-w-0">
       <TopBar user={MOCK_DASHBOARD.user} placeholder={tTop("searchDna")} />
-
-      {isLoading ? (
-        <div className="rounded-3xl border border-[#E6E8F5] bg-white/90 px-5 py-8 text-sm text-neutral-600">
-          {t("loading")}
-        </div>
-      ) : null}
-
       {isError ? (
         <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
           {t("error")}

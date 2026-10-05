@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   Bell,
@@ -19,8 +20,8 @@ import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { PAGE_ROUTES } from "@/constant/page-routes";
-import { AnalyzeCompanyMutation, RetryDnaMutation } from "@/routes/bussiness/Bussiness-Mutation";
-import { DnaQuery, OnboardingDetailsQuery } from "@/routes/bussiness/Bussiness-Query";
+import { CompetitorAnalysisAsyncMutation, RetryDnaMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import { CompetitorAnalysisJobQuery, DnaQuery, OnboardingDetailsQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
@@ -31,6 +32,9 @@ const HIDDEN_SECTION_TITLES = new Set([
   "company & team",
   "company and team",
 ]);
+
+const JOB_SUCCESS_STATUSES = new Set(["completed", "succeeded", "success", "ready"]);
+const JOB_FAILED_STATUSES = new Set(["failed", "error", "cancelled", "canceled"]);
 
 function getSectionIcon(key: string, title: string): LucideIcon {
   const haystack = `${key} ${title}`.toLowerCase();
@@ -46,13 +50,23 @@ function getSectionIcon(key: string, title: string): LucideIcon {
 export default function VerifyDna() {
   const t = useTranslations("verifyDna");
   const tCommon = useTranslations("common");
+  const router = useRouter();
   const company_user_id = useAuthStore((state) => state.company_user_id);
   const { data: dna, isLoading } = DnaQuery();
   const { data: onboarding } = OnboardingDetailsQuery();
   const { mutate: retryDna, isPending: isRetrying } = RetryDnaMutation();
-  const { mutate: analyzeCompany, isPending: isAnalyzing } = AnalyzeCompanyMutation();
+  const { mutate: competitorAnalysisAsync, isPending: isCompetitorAnalysisAsync } =
+    CompetitorAnalysisAsyncMutation();
 
   const [activeId, setActiveId] = useState("");
+  const [jobId, setJobId] = useState("");
+  const handledJobRef = useRef<string | null>(null);
+
+  const {
+    data: competitorAnalysisJob,
+    isLoading: isCompetitorAnalysisJobLoading,
+    isFetching: isCompetitorAnalysisJobFetching,
+  } = CompetitorAnalysisJobQuery(jobId);
 
   const isReady = dna?.status === "ready";
   const isFailed = dna?.status === "failed";
@@ -65,6 +79,16 @@ export default function VerifyDna() {
     (dna?.sections ?? [])
       .map((section) => `## ${section.title}\n${section.text}`)
       .join("\n\n");
+
+  const jobStatus = String(competitorAnalysisJob?.status ?? "").toLowerCase();
+  const isJobFailed = JOB_FAILED_STATUSES.has(jobStatus);
+  const isJobSuccess = JOB_SUCCESS_STATUSES.has(jobStatus);
+  const isPollingJob =
+    Boolean(jobId) && !isJobSuccess && !isJobFailed;
+  const isWorking =
+    isCompetitorAnalysisAsync ||
+    isPollingJob ||
+    (Boolean(jobId) && (isCompetitorAnalysisJobLoading || isCompetitorAnalysisJobFetching) && !isJobFailed);
 
   const sections = useMemo(
     () =>
@@ -102,6 +126,40 @@ export default function VerifyDna() {
     return () => observer.disconnect();
   }, [sections]);
 
+  useEffect(() => {
+    if (!jobId || !jobStatus) return;
+    if (handledJobRef.current === `${jobId}:${jobStatus}`) return;
+
+    if (isJobSuccess) {
+      handledJobRef.current = `${jobId}:${jobStatus}`;
+      toast.success(
+        typeof competitorAnalysisJob?.message === "string"
+          ? competitorAnalysisJob.message
+          : t("jobComplete"),
+      );
+      router.push(PAGE_ROUTES.DASHBOARD);
+      return;
+    }
+
+    if (isJobFailed) {
+      handledJobRef.current = `${jobId}:${jobStatus}`;
+      toast.error(
+        (typeof competitorAnalysisJob?.error === "string" && competitorAnalysisJob.error) ||
+          (typeof competitorAnalysisJob?.message === "string" && competitorAnalysisJob.message) ||
+          t("jobFailed"),
+      );
+    }
+  }, [
+    competitorAnalysisJob?.error,
+    competitorAnalysisJob?.message,
+    isJobFailed,
+    isJobSuccess,
+    jobId,
+    jobStatus,
+    router,
+    t,
+  ]);
+
   const scrollTo = (id: string) => {
     setActiveId(id);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -112,15 +170,29 @@ export default function VerifyDna() {
       toast.error(t("toastMissingCompanyId"));
       return;
     }
-    if (!companyData) {
-      toast.error(t("toastMissingDna"));
-      return;
-    }
 
-    analyzeCompany({
-      company_id: companyId,
-      company_data: companyData,
-    });
+    handledJobRef.current = null;
+    setJobId("");
+
+    competitorAnalysisAsync(
+      {
+        company_id: companyId,
+        mode: "ai",
+      },
+      {
+        onSuccess: (response) => {
+          if (response?.success === false) return;
+
+          const nextJobId = response?.job_id?.trim();
+          if (!nextJobId) {
+            toast.error(t("toastMissingJobId"));
+            return;
+          }
+
+          setJobId(nextJobId);
+        },
+      },
+    );
   };
 
   return (
@@ -273,19 +345,25 @@ export default function VerifyDna() {
               })}
 
               <div className="flex flex-col gap-3 border-t border-[#E6E8F5] pt-8 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-neutral-500">
-                  {t("continueHint")}
-                </p>
+                <div>
+                  <p className="text-sm text-neutral-500">{t("continueHint")}</p>
+                  {isPollingJob ? (
+                    <p className="mt-1 text-xs text-[#5B57E6]">{t("pollingJob")}</p>
+                  ) : null}
+                  {isJobFailed ? (
+                    <p className="mt-1 text-xs text-[#B42318]">{t("jobFailed")}</p>
+                  ) : null}
+                </div>
                 <button
                   type="button"
                   onClick={handleContinue}
-                  disabled={isAnalyzing || !companyId || !companyData}
+                  disabled={isWorking || !companyId || !companyData}
                   className={`inline-flex h-11 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2E2A9E] to-[#5B57E6] px-8 text-sm font-semibold text-white hover:from-[#4A46D0] hover:to-[#6B67E6] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
                 >
-                  {isAnalyzing ? (
+                  {isWorking ? (
                     <>
                       <Loader2 className="size-4 animate-spin" />
-                      {t("analyzing")}
+                      {isPollingJob ? t("pollingJob") : t("analyzing")}
                     </>
                   ) : (
                     t("continue")
