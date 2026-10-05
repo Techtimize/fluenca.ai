@@ -383,7 +383,7 @@ export default function CompanyOverviewPage() {
               </section>
             ))}
 
-          {/* {!isLoading && (
+          {!isLoading && (
             <div className="flex justify-end pt-6">
               <button
                 type="button"
@@ -394,7 +394,7 @@ export default function CompanyOverviewPage() {
                 {isSaving ? t("completing") : t("complete")}
               </button>
             </div>
-          )} */}
+          )}
         </div>
       </div>
     </main>

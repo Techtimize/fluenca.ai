@@ -1,10 +1,12 @@
 "use client";
+
 import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import ContentRecommendations from "@/components/dashboard/contentrecommendation/contentRecommendations";
 import TopBar from "@/components/dashboard/topBar";
+import ApiNotFoundCard from "@/components/notfound";
 import Card from "@/components/shared/card";
-import { getApiErrorMessage } from "@/errors/error-utils";
+import { getApiErrorMessage, isApiNotFoundError } from "@/errors/error-utils";
 import { ContentRecommendationMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { ContentRecommendationResultQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
@@ -13,7 +15,7 @@ import { FOCUS_RING } from "@/utils/ui-classes";
 export default function ContentRecommendationPage() {
   const companyId = useAuthStore((s) => s.company_id);
   const companyName = useAuthStore((s) => s.company_name);
-  const { data, isLoading, isError, error, isFetching } =
+  const { data, isLoading, isError, error, isFetching, refetch, isRefetching } =
     ContentRecommendationResultQuery(companyId);
   const { mutate: recommend, isPending } = ContentRecommendationMutation();
 
@@ -26,6 +28,7 @@ export default function ContentRecommendationPage() {
   };
 
   const hasPayload = Boolean(data && Object.keys(data).length);
+  const notFound = isError && isApiNotFoundError(error);
 
   return (
     <main className="min-w-0 space-y-3 pb-4">
@@ -66,7 +69,25 @@ export default function ContentRecommendationPage() {
           </p>
         </Card>
       ) : null}
-      {companyId && isError ? (
+
+      {companyId && (isLoading || isFetching) && !data && !notFound ? (
+        <Card className="flex items-center justify-center gap-3 p-8 text-neutral-500">
+          <Loader2 className="size-5 animate-spin text-[#5B57E6]" />
+          <span className="text-sm">Loading recommendations…</span>
+        </Card>
+      ) : null}
+
+      {companyId && notFound ? (
+        <ApiNotFoundCard
+          resource="recommendations"
+          actionLabel="Generate recommendations"
+          onAction={handleGenerate}
+          onRetry={() => void refetch()}
+          isRetrying={isRefetching || isPending}
+        />
+      ) : null}
+
+      {companyId && isError && !notFound ? (
         <Card className="border-rose-200 bg-rose-50/80 p-4">
           <p className="text-sm text-rose-800">
             {getApiErrorMessage(error, "Failed to load content recommendations")}
