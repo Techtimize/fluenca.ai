@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import AnalyticsSection from "@/components/dashboard/cards/analyticsSection";
 import ChatInput from "@/components/dashboard/chat/chatInput";
@@ -26,8 +26,6 @@ export default function DashboardPage() {
 
   const {
     data: analyzeResults,
-    isLoading,
-    isFetching,
     isError,
     error,
   } = AnalyzeCompanyResultsQuery(companyId);
@@ -52,20 +50,22 @@ export default function DashboardPage() {
       }
     : MOCK_DASHBOARD.company;
 
-  const docs = useMemo(() => {
-    const source = mapped?.docs?.length ? mapped.docs : MOCK_DASHBOARD.docs;
-    const preferred = DOC_ORDER.map((id) => source.find((item) => item.id === id)).filter(
-      Boolean,
-    ) as typeof MOCK_DASHBOARD.docs;
-    return preferred.length ? preferred : source.slice(0, 4);
-  }, [mapped?.docs]);
+  const docSource = mapped?.docs?.length ? mapped.docs : MOCK_DASHBOARD.docs;
+  const preferredDocs = DOC_ORDER.map((id) => docSource.find((item) => item.id === id)).filter(
+    Boolean,
+  ) as typeof MOCK_DASHBOARD.docs;
+  const docs = preferredDocs.length ? preferredDocs : docSource.slice(0, 4);
 
   const analytics = mapped?.analytics ?? MOCK_DASHBOARD.analytics;
   const user = {
     name: companyName || mapped?.company.name || MOCK_DASHBOARD.user.name,
   };
 
-  const [source, setSource] = useState(analytics.sources[0] ?? "Website");
+  const [selectedSource, setSource] = useState(analytics.sources[0] ?? "Website");
+  // Fall back to the first available source when the selection is no longer present.
+  const source = analytics.sources.includes(selectedSource)
+    ? selectedSource
+    : (analytics.sources[0] ?? "Website");
   const [device, setDevice] = useState<Device>("mobile");
   const [chatOpen, setChatOpen] = useState(false);
   const {
@@ -81,12 +81,6 @@ export default function DashboardPage() {
     setActiveConversationId,
     startNewConversation,
   } = useChatbot();
-
-  useEffect(() => {
-    if (!analytics.sources.includes(source)) {
-      setSource(analytics.sources[0] ?? "Website");
-    }
-  }, [analytics.sources, source]);
 
   const screenContext = useMemo(() => {
     const bits = [`Page: Dashboard`, `Company: ${company.name}`, `Analytics source tab: ${source} (${device})`];
