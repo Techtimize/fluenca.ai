@@ -34,8 +34,16 @@ export const BUSSINESSENDPOINT = {
     COMPETITOR_ANALYSIS_FIND_COMPETITORS: '/competitorAnalysis/find-competitors',
     COMPETITOR_ANALYSIS_JOB: (job_id: string) => `/competitorAnalysis/jobs/${job_id}`,  
     COMPETITOR_ANALYSIS_COMPETITOR: (company_id: string) => `/competitorAnalysis/results/${company_id}`,
+    COMPETITOR_ANALYSIS_DISCOVERED: (company_id: string) => `/competitorAnalysis/discovered/${company_id}`,
+
+    COMPETITOR_ANALYSIS_CONTENT: (company_id: string) => `/competitorAnalysis/content/${company_id}`,
+    COMPETITOR_ANALYSIS_COMPETITORS: (company_id: string) => `/competitorAnalysis/competitors/${company_id}`,
+    COMPETITOR_ANALYSIS_ANALYTICS: (company_id: string) => `/competitorAnalysis/analytics/${company_id}`,
+    COMPETITOR_ANALYSIS_HASHTAGS: (company_id: string) => `/competitorAnalysis/hashtags/${company_id}`,
     },
 
+
+    
     TRENDS:{
     GOOGLE_TRENDS_NOW: '/google-trends/now',
     GOOGLE_TRENDS_TRENDING: '/google-trends/trending',
