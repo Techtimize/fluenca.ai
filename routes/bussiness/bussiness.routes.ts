@@ -313,3 +313,8 @@ export const PlannerSpecificVersionsApi = async (
     const response = await api.get(BUSSINESSENDPOINT.PLANNER.PLANNER_SPECIFIC_VERSIONS(company_id, version));
     return response.data;
 }
+
+export const CompetitorAnalyticDashboardApi = async (company_id: string) => {
+    const response = await api.get(BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_COMPETITORS(company_id));
+    return response.data;
+}
