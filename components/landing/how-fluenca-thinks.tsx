@@ -1,15 +1,14 @@
 "use client";
 
 // components/landing/how-fluenca-thinks.tsx
-import { Lottie } from "lottie-react";
+import Lottie from "lottie-react";
 import animationData from "@/animations/how-fluenca-thinks.json";
 
 export default function HowFluencaThinks() {
   return (
     <section id="how-fluenca-thinks" className="w-full bg-white py-10 md:py-16">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="overflow-hidden rounded-3xl border border-slate-100 bg-gradient-to-b from-white to-slate-50/70 px-6 py-10 shadow-sm md:px-10">
-          {/* Header */}
+        <div className="px-6 py-10 md:px-10">
           <div className="grid items-start gap-6 md:grid-cols-[3fr_2fr] md:gap-10">
             <div>
               <span className="inline-block rounded-full border border-indigo-100 bg-indigo-50/60 px-3 py-1 text-[11px] font-normal text-indigo-500">
@@ -30,12 +29,16 @@ export default function HowFluencaThinks() {
           </div>
 
           {/* Animation (Lottie) */}
-          <div className="mt-10">
+          {/* The box gets the same shape as your animation, so it always has a height */}
+          <div
+            className="mt-10 w-full"
+            style={{ aspectRatio: `${animationData.w} / ${animationData.h}` }}
+          >
             <Lottie
-              src={animationData}
+              animationData={animationData}
               loop
               autoplay
-              className="h-auto w-full"
+              style={{ width: "100%", height: "100%" }}
             />
           </div>
         </div>

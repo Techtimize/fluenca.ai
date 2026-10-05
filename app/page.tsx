@@ -5,6 +5,11 @@ import { ComingSoonPage } from "./coming-soon/ComingSoonPage";
 import WhyFluenca from "@/components/landing/why-fluenca";
 import HowFluencaThinks from "@/components/landing/how-fluenca-thinks";
 import FaqSection from "@/components/landing/faq-section";
+import TestimonialsSection from "@/components/landing/testimonials-section";
+import CaseStudiesSection from "@/components/landing/case-studies-section";
+import FaqCtaSection from "@/components/landing/faq-cta-section";
+<FaqCtaSection arcsSrc="/assets/faq-arcs.svg" />
+import FooterSection from "@/components/landing/footer-section";
 
 const navigationItems = [
   { label: "Agents", href: "/agents", hasMenu: true },
@@ -40,7 +45,11 @@ export default function Home() {
         <WhyFluenca />
         <HowFluencaThinks />
         <FaqSection />
+        <TestimonialsSection />
+        <CaseStudiesSection />
+        <FaqCtaSection />
       </main>
+      <FooterSection />
     </div>
   );
 }
