@@ -23,6 +23,14 @@ const DEFAULT_NAV: NavItem[] = [
   { id: "overview", label: "Company overview", icon: "clipboard", href: PAGE_ROUTES.COMPANY_OVERVIEW },
   { id: "dna", label: "Company DNA", icon: "dna", href: PAGE_ROUTES.DNA },
   {
+    id: "content-recommendation",
+    label: "Content recommendation",
+    icon: "lightbulb",
+    href: PAGE_ROUTES.CONTENT_RECOMMENDATION,
+  },
+  { id: "script", label: "Script", icon: "file", href: PAGE_ROUTES.SCRIPT },
+  { id: "content", label: "Content", icon: "layers", href: PAGE_ROUTES.CONTENT },
+  {
     id: "competitors",
     label: "Competitor analysis",
     icon: "chart",
@@ -168,9 +176,6 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
             <ul className="flex-1 space-y-1.5 overflow-y-auto">
               {renderLinks({ showLabels: true, onNavigate: () => setMobileOpen(false) })}
             </ul>
-            <div className="mt-3">
-              <LanguageSwitcher variant="muted" className="w-full justify-center" />
-            </div>
             <button
               type="button"
               onClick={handleLogout}
@@ -201,9 +206,6 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
         </ul>
 
         <div className={`mt-auto flex gap-2 ${collapsed ? "flex-col items-center" : "w-full flex-col"}`}>
-          {!collapsed ? <LanguageSwitcher variant="muted" className="w-full justify-center" /> : null}
-          {collapsed ? <LanguageSwitcher variant="muted" compact /> : null}
-
           <button
             type="button"
             aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}

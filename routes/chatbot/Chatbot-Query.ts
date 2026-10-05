@@ -1,18 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChatHistoryApi } from "./chatbot.routes";
+import { ListConversationsApi } from "./chatbot.routes";
 
-export const CHAT_HISTORY_KEY = ["chat-history"];
+export const CONVERSATIONS_KEY = ["chat-conversations"];
 
-export const ChatHistoryQuery = (enabled = true) => {
+export const ConversationsQuery = (enabled = true) => {
   return useQuery({
-    queryKey: CHAT_HISTORY_KEY,
-    queryFn: () => ChatHistoryApi(),
+    queryKey: CONVERSATIONS_KEY,
+    queryFn: () => ListConversationsApi(),
     enabled,
-    refetchInterval: (query) => {
-      const messages = query.state.data?.messages ?? [];
-      const last = messages[messages.length - 1];
-      return last?.status === "running" ? 3000 : false;
-    },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

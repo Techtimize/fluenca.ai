@@ -84,3 +84,5 @@ export const getApiErrorMessage = (error: unknown, fallback = "Something went wr
 
     return fallback;
 };
+
+export { isApiNotFoundError } from "./is-api-not-found";

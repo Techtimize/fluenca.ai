@@ -2,6 +2,9 @@
 export const BUSSINESSENDPOINT = {
     WAITLIST: '/waitlist',
     ONBOARDING: '/onboarding',
+    INTELLIGENCE_RUN: '/intelligence/run',
+    INTELLIGENCE_JOB: (job_id: string) => `/intelligence/jobs/${job_id}`,
+    
     ONBOARDING_DETAILS: '/onboarding/details',
     INTAKE: '/intake',
     INTAKE_COMPLETE: '/intake/complete',
@@ -13,10 +16,12 @@ export const BUSSINESSENDPOINT = {
     ANALYZE_COMPANY_RESULTS:(company_id: string) => `/analyzeCompany/results/${company_id}`,
     GROWTH: '/social-growth',
 
+    ANALYSIS:{
     COMPETITOR_ANALYSIS: '/competitorAnalysis',
     COMPETITOR_ANALYSIS_ASYNC: '/competitorAnalysis/async',
-    COMPETITOR_ANALYSIS_JOB: (job_id: string) => `/competitorAnalysis/jobs/${job_id}`,
+    COMPETITOR_ANALYSIS_JOB: (job_id: string) => `/competitorAnalysis/jobs/${job_id}`,  
     COMPETITOR_ANALYSIS_COMPETITOR: (company_id: string) => `/competitorAnalysis/results/${company_id}`,
+    },
 
     TRENDS:{
     GOOGLE_TRENDS_NOW: '/google-trends/now',
@@ -25,13 +30,26 @@ export const BUSSINESSENDPOINT = {
     GOOGLE_TRENDS_FILTERS: '/google-trends/filters',
     },
 
-    NICHE_TREND: '/niche-trend/niche-trend',
-    CONTENT_ANALYSIS: '/posts/analyze',
-
     RECOMMENDATION:{
         CONTENT_RECOMMENDATION: '/contentRecommendation/recommend',
         RECOMMENDATION_RESULT:(company_id: string) => `/contentRecommendation/results/${company_id}`,
-    }
+    },
+
+    GENERATION:{
+    SCRIPT_GENERATION: '/scriptGeneration/script',
+    SCRIPT_GENERATION_RESULTS:(company_id: string) => `/scriptGeneration/results/${company_id}`,
+    DELETE_SCRIPT:(script_id: string) => `/scriptGeneration/script/${script_id}`,
+
+    IMAGE_GENERATION: '/generation/image-generation',
+    COMPANY_IMAGE_GENERATION:(company_id: string) => `/generation/image-generation/${company_id}`,
+    LATEST_GENERATED_IMAGE:(company_id: string) => `/generation/image-generation/${company_id}/latest`,
+    },
+
+    MESSAGES: '/chatbot/messages',
+    ATTACHMENTS: '/chatbot/attachments',
+    CONVERSATIONS: '/chatbot/conversations',
+    conversation: (conversationId: string) => `/chatbot/conversations/${conversationId}`,
+    conversationMessages: (conversationId: string) => `/chatbot/conversations/${conversationId}/messages`,
 }
 
 

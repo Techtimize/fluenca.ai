@@ -1,26 +1,43 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { SendMessageApi } from "./chatbot.routes";
-import { CHAT_HISTORY_KEY } from "./Chatbot-Query";
-import type { SendMessageDoneEvent } from "@/types/chat";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CreateConversationApi, RenameConversationApi, UploadAttachmentApi } from "./chatbot.routes";
+import { CONVERSATIONS_KEY } from "./Chatbot-Query";
+import { getApiErrorMessage } from "@/errors/error-utils";
 
-type SendMessageVariables = {
-  message: string;
-  onChunk: (text: string) => void;
-  onDone: (event: SendMessageDoneEvent) => void;
-};
+export function UploadAttachmentMutation() {
+  return useMutation({
+    mutationFn: (file: File) => UploadAttachmentApi(file),
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not upload the image"));
+    },
+  });
+}
 
-export const SendMessageMutation = () => {
+export function CreateConversationMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ message, onChunk, onDone }: SendMessageVariables) =>
-      SendMessageApi(message, { onChunk, onDone }),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: CHAT_HISTORY_KEY });
+    mutationFn: () => CreateConversationApi(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CONVERSATIONS_KEY });
     },
-    onError: (error: Error) => {
-      toast("The assistant is unavailable", { description: error.message });
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not start a new chat"));
     },
   });
-};
+}
+
+export function RenameConversationMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ conversationId, title }: { conversationId: string; title: string }) =>
+      RenameConversationApi(conversationId, title),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CONVERSATIONS_KEY });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not rename the chat"));
+    },
+  });
+}

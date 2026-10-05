@@ -33,6 +33,9 @@
     "trends": "Trends",
     "overview": "Company overview",
     "dna": "Company DNA",
+    "content-recommendation": "Content recommendation",
+    "script": "Script",
+    "content": "Content",
     "competitors": "Competitor analysis",
     "calendar": "Calendar",
     "users": "Users"
@@ -181,6 +184,18 @@
     "colRole": "Role",
     "colStatus": "Status",
     "colJoined": "Joined",
+    "colActions": "Actions",
+    "you": "You",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
+    "lastLogin": "Last login",
+    "confirmSuspendTitle": "Suspend this user?",
+    "confirmSuspendBody": "{email} will be signed out and unable to log in until reactivated.",
+    "confirmReactivateTitle": "Reactivate this user?",
+    "confirmReactivateBody": "{email} will be able to log in again.",
+    "delete": "Delete",
+    "confirmDeleteTitle": "Delete this user?",
+    "confirmDeleteBody": "This permanently deletes {email}'s account. This cannot be undone.",
     "total": "{count} total"
   },
   "onboarding": {
@@ -222,10 +237,14 @@
     "continueHint": "If this looks right, continue to your workspace setup.",
     "continue": "Looks good, continue",
     "analyzing": "Analyzing company...",
+    "pollingJob": "Running competitor analysis…",
+    "jobComplete": "Competitor analysis completed",
+    "jobFailed": "Competitor analysis failed. Please try again.",
     "empty": "No DNA sections available yet.",
     "generateAgain": "Generate again",
     "toastMissingCompanyId": "Company ID is missing. Please complete onboarding again.",
-    "toastMissingDna": "Company DNA data is missing. Please wait for DNA to finish."
+    "toastMissingDna": "Company DNA data is missing. Please wait for DNA to finish.",
+    "toastMissingJobId": "Job ID missing from analysis response. Please try again."
   },
   "comingSoon": {
     "headlineSolid": "Coming",

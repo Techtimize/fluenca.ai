@@ -33,6 +33,9 @@
     "trends": "الاتجاهات",
     "overview": "نظرة عامة على الشركة",
     "dna": "الحمض النووي للشركة",
+    "content-recommendation": "توصيات المحتوى",
+    "script": "السيناريو",
+    "content": "المحتوى",
     "competitors": "تحليل المنافسين",
     "calendar": "التقويم",
     "users": "المستخدمون"
@@ -181,6 +184,18 @@
     "colRole": "الدور",
     "colStatus": "الحالة",
     "colJoined": "تاريخ الانضمام",
+    "colActions": "الإجراءات",
+    "you": "أنت",
+    "suspend": "تعليق",
+    "reactivate": "إعادة التفعيل",
+    "lastLogin": "آخر تسجيل دخول",
+    "confirmSuspendTitle": "تعليق هذا المستخدم؟",
+    "confirmSuspendBody": "سيتم تسجيل خروج {email} ولن يتمكن من تسجيل الدخول حتى تتم إعادة التفعيل.",
+    "confirmReactivateTitle": "إعادة تفعيل هذا المستخدم؟",
+    "confirmReactivateBody": "سيتمكن {email} من تسجيل الدخول مرة أخرى.",
+    "delete": "حذف",
+    "confirmDeleteTitle": "حذف هذا المستخدم؟",
+    "confirmDeleteBody": "سيؤدي هذا إلى حذف حساب {email} نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
     "total": "{count} إجمالي"
   },
   "onboarding": {
@@ -222,10 +237,14 @@
     "continueHint": "إذا بدا هذا صحيحاً، تابع لإعداد مساحة عملك.",
     "continue": "يبدو جيداً، متابعة",
     "analyzing": "جارٍ تحليل الشركة...",
+    "pollingJob": "جارٍ تشغيل تحليل المنافسين…",
+    "jobComplete": "اكتمل تحليل المنافسين",
+    "jobFailed": "فشل تحليل المنافسين. يرجى المحاولة مرة أخرى.",
     "empty": "لا توجد أقسام للحمض النووي بعد.",
     "generateAgain": "إنشاء مرة أخرى",
     "toastMissingCompanyId": "معرّف الشركة غير موجود. يرجى إكمال الإعداد مرة أخرى.",
-    "toastMissingDna": "بيانات الحمض النووي غير موجودة. يرجى انتظار اكتمال الحمض النووي."
+    "toastMissingDna": "بيانات الحمض النووي غير موجودة. يرجى انتظار اكتمال الحمض النووي.",
+    "toastMissingJobId": "معرّف المهمة غير موجود في الاستجابة. يرجى المحاولة مرة أخرى."
   },
   "comingSoon": {
     "headlineSolid": "قريباً",
