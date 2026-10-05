@@ -1,3 +1,5 @@
+"use client";
+
 import { AnalyzeCompanyMutation } from '@/routes/bussiness/Bussiness-Mutation'
 import { AnalyzeCompanyResultsApi } from '@/routes/bussiness/bussiness.routes';
 import { useParams } from 'next/navigation';
