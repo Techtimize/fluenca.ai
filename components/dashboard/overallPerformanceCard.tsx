@@ -62,22 +62,22 @@ export default function OverallPerformanceCard({ data }: { data: OverallPerforma
             </div>
           ))}
         </dl>
-      ) : (
-      <dl className="mt-auto grid grid-cols-2 gap-3 pt-5">
-        <div className="rounded-xl bg-[#F1F4FF] px-3 py-2.5">
-          <dt className="flex items-center gap-1.5 text-xs text-neutral-600">
-            <Smartphone className="size-3.5" aria-hidden="true" /> Mobile
-          </dt>
-          <dd className="mt-1 text-sm font-semibold text-neutral-900">{data.mobile} %</dd>
-        </div>
-        <div className="rounded-xl bg-[#F1F4FF] px-3 py-2.5">
-          <dt className="flex items-center gap-1.5 text-xs text-neutral-600">
-            <Monitor className="size-3.5" aria-hidden="true" /> Desktop
-          </dt>
-          <dd className="mt-1 text-sm font-semibold text-neutral-900">{data.desktop} %</dd>
-        </div>
-      </dl>
-      )}
+      ) : data.mobile != null && data.desktop != null ? (
+        <dl className="mt-auto grid grid-cols-2 gap-3 pt-5">
+          <div className="rounded-xl bg-[#F1F4FF] px-3 py-2.5">
+            <dt className="flex items-center gap-1.5 text-xs text-neutral-600">
+              <Smartphone className="size-3.5" aria-hidden="true" /> Mobile
+            </dt>
+            <dd className="mt-1 text-sm font-semibold text-neutral-900">{data.mobile} %</dd>
+          </div>
+          <div className="rounded-xl bg-[#F1F4FF] px-3 py-2.5">
+            <dt className="flex items-center gap-1.5 text-xs text-neutral-600">
+              <Monitor className="size-3.5" aria-hidden="true" /> Desktop
+            </dt>
+            <dd className="mt-1 text-sm font-semibold text-neutral-900">{data.desktop} %</dd>
+          </div>
+        </dl>
+      ) : null}
     </section>
   );
 }
