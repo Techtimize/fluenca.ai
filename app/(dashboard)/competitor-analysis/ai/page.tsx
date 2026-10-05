@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
-import CompetitorResults from "@/components/dashboard/competitors/CompetitorResults";
+import CompetitiveBriefResults from "@/components/dashboard/competitors/CompetitiveBriefResults";
 import CompetitorVersionSelect from "@/components/dashboard/competitors/CompetitorVersionSelect";
 import {
   asCompetitorsListResponse,
@@ -118,14 +118,6 @@ export default function CompetitorAnalysisAiPage() {
         />
       </div>
 
-      {!companyId ? (
-        <Card className="border-amber-200 bg-amber-50/80 p-5">
-          <p className="text-sm text-amber-800">
-            Company ID is missing. Complete company analysis first, then return here.
-          </p>
-        </Card>
-      ) : null}
-
       <Card className="p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
@@ -160,7 +152,7 @@ export default function CompetitorAnalysisAiPage() {
         </div>
       </Card>
 
-      <CompetitorResults
+      <CompetitiveBriefResults
         data={competitorResults}
         isLoading={Boolean(companyId) && isLoading && !competitorResults}
         isError={isError && !notFound}

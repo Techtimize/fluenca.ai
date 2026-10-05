@@ -29,6 +29,7 @@ import type {
   LatestGeneratedImageResponse,
 } from "@/types/bussiness/imagegeneration-type";
 import { IntelligenceJobResponse, IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
+import type { PlannerResultsResponse, PlannerVersionsResponse } from "@/types/bussiness/planner-type";
 
 function toQueryParams(params?: GoogleTrendQueryParams) {
   if (!params) return undefined;
@@ -288,5 +289,27 @@ export const IntelligenceJobApi = async (
   job_id: string,
 ): Promise<IntelligenceJobResponse> => {
     const response = await api.get(BUSSINESSENDPOINT.INTELLIGENCE_JOB(job_id));
+    return response.data;
+}
+
+export const PlannerResultsApi = async (
+  company_id: string,
+): Promise<PlannerResultsResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.PLANNER.PLANNER_LATEST_RESPONSE(company_id));
+    return response.data;
+}
+
+export const PlannerVersionsApi = async (
+  company_id: string,
+): Promise<PlannerVersionsResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.PLANNER.PLANNER_VERSIONS(company_id));
+    return response.data;
+}
+
+export const PlannerSpecificVersionsApi = async (
+  company_id: string,
+  version: string,
+): Promise<PlannerResultsResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.PLANNER.PLANNER_SPECIFIC_VERSIONS(company_id, version));
     return response.data;
 }
