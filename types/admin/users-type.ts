@@ -6,6 +6,7 @@ export interface AdminUser {
   status: string;
   organization_id: string | null;
   company_name: string | null;
+  onboarding_completed_at: string | null;
   last_login_at: string | null;
   created_at: string;
 }
