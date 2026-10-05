@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi } from "./bussiness.routes";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   GoogleTrendExploreApi,
@@ -283,3 +283,13 @@ export const PlannerSpecificVersionsQuery = (company_id: string, version: string
   });
 };
 
+
+export const CompetitorAnalyticDashboardQuery = (company_id: string) => {
+  return useQuery({
+    queryKey: ["competitor-analytic-dashboard", company_id],
+    queryFn: () => CompetitorAnalyticDashboardApi(company_id),
+    enabled: Boolean(company_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
