@@ -19,6 +19,18 @@ export const BUSSINESSENDPOINT = {
     ANALYSIS:{
     COMPETITOR_ANALYSIS: '/competitorAnalysis',
     COMPETITOR_ANALYSIS_ASYNC: '/competitorAnalysis/async',
+
+    COMPETITOR_ANALYSIS_AI: '/competitorAnalysis/ai',
+    COMPETITOR_ANALYSIS_AI_VERSIONS: (company_id: string) => `/competitorAnalysis/ai/${company_id}/versions`,
+    COMPETITOR_ANALYSIS_AI_SPECIFIC_VERSIONS: (company_id: string,version: string) => `/competitorAnalysis/ai/${company_id}/versions/${version}`,
+    COMPETITOR_ANALYSIS_LATEST_AI_RESPONSE: (company_id: string) => `/competitorAnalysis/ai/${company_id}`,
+
+    COMPETITOR_ANALYSIS_MANUAL: '/competitorAnalysis/manual',
+    COMPETITOR_ANALYSIS_MANUAL_VERSIONS: (company_id: string) => `/competitorAnalysis/manual/${company_id}/versions`,
+    COMPETITOR_ANALYSIS_MANUAL_SPECIFIC_VERSIONS: (company_id: string, version: string) => `/competitorAnalysis/manual/${company_id}/versions/${version}`,
+    COMPETITOR_ANALYSIS_LATEST_MANUAL_RESPONSE: (company_id: string) => `/competitorAnalysis/manual/${company_id}`,
+    
+    COMPETITOR_ANALYSIS_FIND_COMPETITORS: '/competitorAnalysis/find-competitors',
     COMPETITOR_ANALYSIS_JOB: (job_id: string) => `/competitorAnalysis/jobs/${job_id}`,  
     COMPETITOR_ANALYSIS_COMPETITOR: (company_id: string) => `/competitorAnalysis/results/${company_id}`,
     },

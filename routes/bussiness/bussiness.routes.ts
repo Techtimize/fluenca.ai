@@ -19,7 +19,7 @@ import type {
   GoogleTrendQueryParams,
   GoogleTrendTrendingResponse,
 } from "@/types/bussiness/google-trends-type";
-import { ContentRecommendationRequest, ContentRecommendationResponse, ContentRecommendationResultResponse } from "@/types/bussiness/content-recommendation-type";
+import {  ContentRecommendationResponse, ContentRecommendationResultResponse } from "@/types/bussiness/content-recommendation-type";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
 import { ScriptGenerationRequest, ScriptGenerationResultsResponse } from "@/types/bussiness/script-type";
 import type {
@@ -67,7 +67,7 @@ export const SocialGrowthApi = async (prompt: string) => {
 
 export const CompetitorAnalysisAsyncApi = async (data: CompetitorAnalysisRequest) => {
     const response = await api.post(
-      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_ASYNC_ASYNC,
+      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_ASYNC,
       data,
     );
     return response.data;
@@ -291,12 +291,9 @@ export const IntelligenceJobApi = async (
 ): Promise<IntelligenceJobResponse> => {
     const response = await api.get(BUSSINESSENDPOINT.INTELLIGENCE_JOB(job_id));
     return response.data;
-}export const NicheTrendApi = async (data: NicheTrendsRequest) => {
-    const response = await api.post<BuisnessNicheTrendResponse>(BUSSINESSENDPOINT.NICHE_TREND, data);
-    return response.data;
 }
 
-export const ContentRecommendationApi = async (data: ContentRecommendationRequest) => {
-    const response = await api.post(BUSSINESSENDPOINT.RECOMMENDATION.CONTENT_RECOMMENDATION, data);
-    return response.data;
-}
+// export const NicheTrendApi = async (data: NicheTrendsRequest) => {
+//     const response = await api.post<BuisnessNicheTrendResponse>(BUSSINESSENDPOINT.NICHE_TREND, data);
+//     return response.data;
+// }
