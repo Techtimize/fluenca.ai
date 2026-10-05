@@ -2,6 +2,9 @@
 export const BUSSINESSENDPOINT = {
     WAITLIST: '/waitlist',
     ONBOARDING: '/onboarding',
+    INTELLIGENCE_RUN: '/intelligence/run',
+    INTELLIGENCE_JOB: (job_id: string) => `/intelligence/jobs/${job_id}`,
+    
     ONBOARDING_DETAILS: '/onboarding/details',
     INTAKE: '/intake',
     INTAKE_COMPLETE: '/intake/complete',

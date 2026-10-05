@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, ContentRecommendationResultApi, DnaApi, IntakeApi, OnboardingDetailsApi, ScriptGenerationResultsApi } from "./bussiness.routes";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, ScriptGenerationResultsApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   GoogleTrendExploreApi,
@@ -232,6 +232,21 @@ export const CompetitorAnalysisManualLatestResponseQuery = (company_id: string) 
     queryKey: ["competitor-analysis-manual-latest-response", company_id],
     queryFn: () => CompetitorAnalysisManualLatestResponseApi(company_id),
     enabled: Boolean(company_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const IntelligenceJobQuery = (job_id: string) => {
+  return useQuery({
+    queryKey: ["intelligence-job", job_id],
+    queryFn: () => IntelligenceJobApi(job_id),
+    enabled: Boolean(job_id),
+    refetchInterval: (query) => {
+      const status = String(query.state.data?.status ?? "").toLowerCase();
+      if (status && JOB_DONE_STATUSES.has(status)) return false;
+      return POLL_INTERVAL_MS;
+    },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
