@@ -237,9 +237,9 @@ export function mapAnalyzeCompanyToDashboard(
   const analytics: AnalyticsData = {
     sources: ["Website", "Instagram", "LinkedIn"],
     metrics: [
-      scoreMetric("website", "Website", presence?.website?.score, "sky", "accessibility"),
-      scoreMetric("differentiation", "Differentiation", data.market_position?.differentiation_strength, "purple", "performance"),
-      scoreMetric("clarity", "Positioning clarity", data.market_position?.positioning_clarity, "rose", "seo"),
+      scoreMetric("website", "Website", presence?.website?.score, "green", "accessibility"),
+      scoreMetric("differentiation", "Differentiation", data.market_position?.differentiation_strength, "orange", "performance"),
+      scoreMetric("clarity", "Positioning clarity", data.market_position?.positioning_clarity, "purple", "seo"),
       {
         id: "channels",
         label: "Channels analyzed",

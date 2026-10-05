@@ -46,7 +46,7 @@ export default function AnalyticsSection({
               aria-selected={source === s}
               onClick={() => onSourceChange(s)}
               className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${FOCUS_RING} ${
-                source === s ? "bg-[#2E2A9E] text-white" : "bg-[#F1F4FF] text-neutral-700 hover:bg-[#E6EAFF]"
+                source === s ? "bg-[#5452F6] text-white" : "bg-[#EEF0FF] text-neutral-800 hover:bg-[#E3E6FF]"
               }`}
             >
               {s}
@@ -62,7 +62,7 @@ export default function AnalyticsSection({
               aria-pressed={device === d}
               onClick={() => onDeviceChange(d)}
               className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium capitalize transition-colors ${FOCUS_RING} ${
-                device === d ? "bg-[#4F46E5] text-white" : "text-neutral-700"
+                device === d ? "bg-[#5452F6] text-white" : "text-[#5452F6]"
               }`}
             >
               {d === "mobile" ? <Smartphone className="size-3" /> : <Monitor className="size-3" />}
