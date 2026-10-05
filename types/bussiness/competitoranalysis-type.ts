@@ -15,6 +15,18 @@ export interface CompetitorAnalysisAsyncResponse {
 
 export type CompetitorAnalysisResponse = CompetitorAnalysisAsyncResponse;
 
+export interface CompetitorAnalysisJobResponse {
+  success?: boolean;
+  message?: string;
+  error?: string | null;
+  job_id?: string;
+  analysis_id?: string | null;
+  company_id?: string;
+  status?: string;
+  result?: unknown;
+  [key: string]: unknown;
+}
+
 export interface CompetitorThemeShare {
   theme?: string;
   count?: number;
@@ -681,7 +693,6 @@ export interface CompetitorAnalysisResult {
   competitor_vs_company_comparison?: CompetitorVsCompanyComparison;
 }
 
-/** GET /competitorAnalysis/competitor/:company_id response */
 export interface CompetitorsListResponse {
   success?: boolean;
   analysis_id?: string | null;
@@ -694,8 +705,33 @@ export interface CompetitorsListResponse {
   post_count?: number;
   result?: CompetitorAnalysisResult | null;
   error?: string | null;
-  /** Legacy list-only payloads */
+  version?: string | number | null;
   analysis_count?: number;
   count?: number;
   competitors?: CompetitorListItem[];
+}
+
+export interface CompetitorAnalysisVersionItem {
+  version: string;
+  label?: string;
+  created_at?: string;
+  status?: string;
+  analysis_id?: string;
+}
+
+export type CompetitorAnalysisVersionsResponse =
+  | CompetitorAnalysisVersionItem[]
+  | string[]
+  | number[]
+  | {
+      versions?: Array<CompetitorAnalysisVersionItem | string | number>;
+      data?: Array<CompetitorAnalysisVersionItem | string | number>;
+      items?: Array<CompetitorAnalysisVersionItem | string | number>;
+      results?: Array<CompetitorAnalysisVersionItem | string | number>;
+      [key: string]: unknown;
+    };
+
+export interface CompetitorAnalysisManualRequest {
+  company_id: string;
+  competitors: string[];
 }

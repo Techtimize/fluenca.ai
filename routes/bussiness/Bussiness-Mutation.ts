@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, CompetitorAnalysisAsyncApi, CompleteIntakeApi, ContentRecommendationApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, CompleteIntakeApi, ContentRecommendationApi, ImageGenerationApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
@@ -8,11 +8,12 @@ import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { setCompanyUserIdProvider, setOnboardingCompletedProvider } from "@/provider/auth-provider";
-import { CompetitorAnalysisAsyncResponse, CompetitorAnalysisRequest } from "@/types/bussiness/competitoranalysis-type";
+import { CompetitorAnalysisAsyncResponse, CompetitorAnalysisManualRequest, CompetitorAnalysisRequest } from "@/types/bussiness/competitoranalysis-type";
 import { ContentRecommendationRequest, ContentRecommendationResponse } from "@/types/bussiness/content-recommendation-type";
 import { ChatMode, SendMessageDoneEvent } from "@/types/chat";
 import { SendMessageApi } from "../chatbot/chatbot.routes";
 import { ScriptGenerationRequest, ScriptGenerationResponse } from "@/types/bussiness/script-type";
+import { ImageGenerationRequest, ImageGenerationResponse } from "@/types/bussiness/imagegeneration-type";
 
 export function WaitlistMutation() {
     return useMutation({
@@ -182,6 +183,48 @@ export function CompetitorAnalysisAsyncMutation() {
     });
 }
 
+export function CompetitorAnalysisAiMutation() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (company_id: string) => CompetitorAnalysisAiApi(company_id),
+        onSuccess: (response: CompetitorAnalysisAsyncResponse, company_id) => {
+            if (response?.success === false) {
+                toast.error(response.error || response.message || "Failed to analyze competitors");
+                return;
+            }
+            queryClient.invalidateQueries({ queryKey: ["competitor-analysis-ai-versions", company_id] });
+            queryClient.invalidateQueries({ queryKey: ["competitor-analysis-ai-latest-response", company_id] });
+            toast.success(response?.message || "Competitor analysis started successfully");
+        },
+        onError: (error) => {
+            toast.error(getApiErrorMessage(error, "Failed to analyze competitor"));
+        },
+    });
+}
+
+export function CompetitorAnalysisManualMutation() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: CompetitorAnalysisManualRequest) => CompetitorAnalysisManualApi(data),
+        onSuccess: (response: CompetitorAnalysisAsyncResponse, variables) => {
+            if (response?.success === false) {
+                toast.error(response.error || response.message || "Failed to analyze competitors");
+                return;
+            }
+            queryClient.invalidateQueries({
+                queryKey: ["competitor-analysis-manual-versions", variables.company_id],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["competitor-analysis-manual-latest-response", variables.company_id],
+            });
+            toast.success(response?.message || "Competitor analysis started successfully");
+        },
+        onError: (error) => {
+            toast.error(getApiErrorMessage(error, "Failed to analyze competitor"));
+        },
+    });
+}
+
 export function ContentRecommendationMutation() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -243,6 +286,25 @@ export const ScriptGenerationMutation = () => {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to generate script"));
+    },
+  });
+};
+
+
+export const ImageGenerationMutation = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ImageGenerationRequest) => ImageGenerationApi(data),
+    onSuccess: (_response: ImageGenerationResponse, variables) => {
+      toast.success("Image generated successfully");
+      queryClient.invalidateQueries({
+        queryKey: ["company-image-generation-results", variables.company_id],
+      });
+      router.push(PAGE_ROUTES.CONTENT);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to generate image"));
     },
   });
 };
