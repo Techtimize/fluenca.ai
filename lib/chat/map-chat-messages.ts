@@ -8,6 +8,7 @@ export const mapChatMessage = (message: ChatMessageResponse): ChatMessage => ({
   toolName: message.tool_name,
   toolResult: message.tool_result,
   errorMessage: message.error_message,
+  imageUrl: message.image_url,
 });
 
 export const mapChatHistory = (messages: ChatMessageResponse[] = []): ChatMessage[] =>

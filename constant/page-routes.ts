@@ -23,8 +23,13 @@ export const PAGE_ROUTES = {
     COMPANY_OVERVIEW: '/company-overview',
     TRENDS: '/trends',
     COMPETITOR_ANALYSIS: '/competitor-analysis',
+    COMPETITOR_ANALYSIS_AI: '/competitor-analysis/ai',
+    COMPETITOR_ANALYSIS_MANUAL: '/competitor-analysis/mannual',
     COMPETITORS: '/competitors',
     CALENDAR: '/calendar',
+    CONTENT_RECOMMENDATION: '/content-recommendation',
+    SCRIPT: '/script',
+    CONTENT: '/content',
 
     // Super admin
     SUPERADMIN: '/superadmin',

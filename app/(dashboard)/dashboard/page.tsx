@@ -68,7 +68,19 @@ export default function DashboardPage() {
   const [source, setSource] = useState(analytics.sources[0] ?? "Website");
   const [device, setDevice] = useState<Device>("mobile");
   const [chatOpen, setChatOpen] = useState(false);
-  const { messages, send, isSending, isAwaitingReply, isToolRunning } = useChatbot();
+  const {
+    messages,
+    send,
+    isSending,
+    isAwaitingReply,
+    isToolRunning,
+    mode,
+    setMode,
+    conversations,
+    activeConversationId,
+    setActiveConversationId,
+    startNewConversation,
+  } = useChatbot();
 
   useEffect(() => {
     if (!analytics.sources.includes(source)) {
@@ -76,12 +88,20 @@ export default function DashboardPage() {
     }
   }, [analytics.sources, source]);
 
-  const handleSend = (text: string) => {
-    send(text);
+  const screenContext = useMemo(() => {
+    const bits = [`Page: Dashboard`, `Company: ${company.name}`, `Analytics source tab: ${source} (${device})`];
+    if (analytics.metrics.length) {
+      bits.push(
+        `Visible metric scores: ${analytics.metrics.map((m) => `${m.label} ${m.score}`).join(", ")}`,
+      );
+    }
+    return bits.join(". ");
+  }, [company.name, source, device, analytics.metrics]);
+
+  const handleSend = (text: string, imageUrl?: string) => {
+    send(text, screenContext, imageUrl);
     setChatOpen(true);
   };
-
-  const showLoading = Boolean(companyId) && (isLoading || isFetching) && !mapped;
 
   return (
     <>
@@ -94,19 +114,6 @@ export default function DashboardPage() {
       >
         <main className="min-w-0 space-y-4">
           <TopBar user={user} />
-
-          {!companyId ? (
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
-              {t("noCompanyId")}
-            </div>
-          ) : null}
-
-          {showLoading ? (
-            <div className="rounded-3xl border border-[#E6E8F5] bg-white/90 px-5 py-8 text-sm text-neutral-600">
-              {t("loading")}
-            </div>
-          ) : null}
-
           {isError ? (
             <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
               {error instanceof Error ? error.message : t("error")}
@@ -136,6 +143,12 @@ export default function DashboardPage() {
             isSending={isSending}
             isAwaitingReply={isAwaitingReply}
             isToolRunning={isToolRunning}
+            mode={mode}
+            onModeChange={setMode}
+            conversations={conversations}
+            activeConversationId={activeConversationId}
+            onSelectConversation={setActiveConversationId}
+            onReset={startNewConversation}
           />
         ) : null}
       </div>

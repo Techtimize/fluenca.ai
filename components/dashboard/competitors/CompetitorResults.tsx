@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import {
   AlertTriangle,
-  BarChart3,
   Building2,
   Crosshair,
   Search,
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import CompetitorComparisonInsights from "@/components/dashboard/competitors/CompetitorComparisonInsights";
 import CompetitorStrategyMoves from "@/components/dashboard/competitors/CompetitorStrategyMoves";
+import ApiNotFoundCard from "@/components/notfound";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
@@ -504,16 +504,22 @@ type Props = {
   data?: CompetitorsListResponse | null;
   isLoading?: boolean;
   isError?: boolean;
+  isNotFound?: boolean;
   errorMessage?: string;
   onRunAnalysis?: () => void;
+  onRetry?: () => void;
+  isRetrying?: boolean;
 };
 
 export default function CompetitorResults({
   data,
   isLoading,
   isError,
+  isNotFound,
   errorMessage,
   onRunAnalysis,
+  onRetry,
+  isRetrying,
 }: Props) {
   const t = useTranslations("competitors");
   const result = data?.result;
@@ -544,6 +550,18 @@ export default function CompetitorResults({
     );
   }
 
+  if (isNotFound) {
+    return (
+      <ApiNotFoundCard
+        resource="competitors"
+        onRetry={onRetry}
+        isRetrying={isRetrying}
+        actionLabel={onRunAnalysis ? t("runAnalysis") : undefined}
+        onAction={onRunAnalysis}
+      />
+    );
+  }
+
   if (isError) {
     return (
       <Card className="border-rose-200 bg-rose-50/80 p-5 sm:p-6">
@@ -554,35 +572,13 @@ export default function CompetitorResults({
 
   if (!hasAnalysis) {
     return (
-      <Card className="overflow-hidden p-0">
-        <div className="relative px-6 py-10 text-center sm:px-10 sm:py-12">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,#ECEBFF_0%,transparent_55%)]"
-          />
-          <div className="relative mx-auto flex max-w-md flex-col items-center">
-            <span className="grid size-14 place-items-center rounded-3xl bg-[#ECEBFF] text-[#5B57E6] shadow-[0_8px_24px_rgba(91,87,230,0.18)]">
-              <BarChart3 className="size-6" aria-hidden="true" />
-            </span>
-            <h2 className="mt-5 text-lg font-semibold text-neutral-900">
-              {t("emptyTitle")}
-            </h2>
-            <p className="mt-2 text-[14px] leading-6 text-neutral-500">
-              {t("emptyBody")}
-            </p>
-            {onRunAnalysis ? (
-              <Button
-                type="button"
-                onClick={onRunAnalysis}
-                className="mt-6 h-11 gap-2 rounded-full bg-[#5B57E6] px-5 text-white hover:bg-[#4A46D0]"
-              >
-                <Sparkles className="size-4" />
-                {t("runAnalysis")}
-              </Button>
-            ) : null}
-          </div>
-        </div>
-      </Card>
+      <ApiNotFoundCard
+        resource="competitors"
+        title={t("emptyTitle")}
+        description={t("emptyBody")}
+        actionLabel={onRunAnalysis ? t("runAnalysis") : undefined}
+        onAction={onRunAnalysis}
+      />
     );
   }
 

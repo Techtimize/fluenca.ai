@@ -1,13 +1,26 @@
 import api from "../apiClient";
-import { ADMINENDPOINT } from "./api/Admin-Endpoint";
-import type { AdminUser, AdminUsersResponse } from "@/types/admin/users-type";
+import { ADMINENDPOINT } from "./Admin-Endpoint";
+import type {
+  AdminUsersResponse,
+  AdminUser,
+  UpdateUserStatusRequest,
+} from "@/types/admin/users-type";
 
-function normalizeUsers(payload: AdminUsersResponse | AdminUser[]): AdminUser[] {
-  if (Array.isArray(payload)) return payload;
-  return payload.users ?? payload.data ?? payload.results ?? [];
-}
+export const AdminUsersApi = async (): Promise<AdminUsersResponse> => {
+  const response = await api.get<AdminUsersResponse>(ADMINENDPOINT.USERS, {
+    params: { limit: 100 },
+  });
+  return response.data;
+};
 
-export const AdminUsersApi = async (): Promise<AdminUser[]> => {
-  const response = await api.get<AdminUsersResponse | AdminUser[]>(ADMINENDPOINT.USERS);
-  return normalizeUsers(response.data);
+export const UpdateUserStatusApi = async (
+  userId: string,
+  data: UpdateUserStatusRequest,
+): Promise<AdminUser> => {
+  const response = await api.patch<AdminUser>(ADMINENDPOINT.userStatus(userId), data);
+  return response.data;
+};
+
+export const DeleteUserApi = async (userId: string): Promise<void> => {
+  await api.delete(ADMINENDPOINT.user(userId));
 };

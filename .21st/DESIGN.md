@@ -5,7 +5,7 @@ Generated from project sources at 2026-09-27T19:05:19.818Z.
 
 ## Project
 
-- Name: influe
+- Name: FLUENCAe
 - Product type: Unknown
 - Stack: nextjs, react, shadcn, tailwind-v4
 - Color mode: light-and-dark

@@ -18,9 +18,9 @@ export default function NotFound() {
   return (
     <div className="flex min-h-dvh flex-col overflow-hidden bg-[radial-gradient(ellipse_at_15%_100%,rgba(219,224,255,0.68)_0%,rgba(255,255,255,0)_46%)]">
       <header className="mx-auto flex w-full max-w-360 items-center justify-between px-6 py-5 md:px-10">
-        <Link href={PAGE_ROUTES.HOME} aria-label="INFLU home" className="flex items-center gap-2">
+        <Link href={PAGE_ROUTES.HOME} aria-label="FLUENCA home" className="flex items-center gap-2">
           <Image src="/assets/Logo.png" alt="" width={34} height={40} priority className="h-9 w-auto" />
-          <span className="font-display text-2xl font-medium tracking-[0.04em] text-ink">INFLU</span>
+          <span className="font-display text-2xl font-medium tracking-[0.04em] text-ink">FLUENCA</span>
         </Link>
         <Link
           href={PAGE_ROUTES.HOME}
@@ -49,7 +49,7 @@ export default function NotFound() {
               className="inline-flex h-11 items-center gap-2 rounded-full bg-brand px-5 font-body text-caption font-medium text-white shadow-[0_3px_0_#bfc1ff] transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               <House aria-hidden="true" className="size-4" />
-              Go to INFLU
+              Go to FLUENCA
             </Link>
             <button
               type="button"
@@ -65,7 +65,7 @@ export default function NotFound() {
         <div className="mx-auto w-full max-w-135">
           <Image
             src="/assets/flowcircle.png"
-            alt="INFLU agents coordinate research, planning, publishing, and analytics around one goal."
+            alt="FLUENCA agents coordinate research, planning, publishing, and analytics around one goal."
             width={640}
             height={640}
             priority

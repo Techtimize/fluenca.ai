@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Bell, Check, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { IntakeQuery } from "@/routes/company-details/CompanyDetails-Query";
 import { AnswerQuestionMutation, CompleteIntakeMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { IntakeSection } from "@/types/company-details-type";
+import { IntakeQuery } from "@/routes/bussiness/Bussiness-Query";
 
 type CompanyField = {
   id: string;
@@ -24,7 +24,7 @@ type CompanySection = {
   total: number;
 };
 
-/* ---------- API → UI mapping ---------- */
+
 const toCompanySections = (sections: IntakeSection[]): CompanySection[] =>
   sections.map((section) => {
     const fields = section.questions.map((question) => {
@@ -248,7 +248,7 @@ function TopBar() {
       <div className="flex items-center gap-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/assets/Logo.svg" alt="" className="size-7" />
-        <span className="text-lg font-semibold tracking-wide text-neutral-900">INFLU</span>
+        <span className="text-lg font-semibold tracking-wide text-neutral-900">FLUENCA</span>
       </div>
 
       <div className="flex items-center gap-3">
@@ -276,7 +276,6 @@ function TopBar() {
   );
 }
 
-/* ---------- Page ---------- */
 export default function CompanyOverviewPage() {
   const t = useTranslations("overview");
   const { data: intake, isLoading } = IntakeQuery();

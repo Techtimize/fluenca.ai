@@ -24,18 +24,29 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
-  (error: AxiosError) => {
+  (error: AxiosError<{ code?: string }>) => {
     const originalRequest = error.config;
 
     const isLoginRequest =
       originalRequest?.url?.includes(AUTHENDPOINT.LOGIN) &&
       originalRequest?.method === 'post';
 
+    const isAccountSuspended = error.response?.data?.code === 'account_suspended';
+
     if (error.response && error.response.status === 401 && !isLoginRequest) {
       clearAuthTokenProvider();
 
       toast('Unauthorized access', {
         description: 'You are not authorized to access this resource',
+      });
+      window.location.href = PAGE_ROUTES.LOGIN;
+    }
+
+    if (isAccountSuspended) {
+      clearAuthTokenProvider();
+
+      toast('Account suspended', {
+        description: 'This account has been suspended. Please contact support.',
       });
       window.location.href = PAGE_ROUTES.LOGIN;
     }

@@ -1,10 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Loader2, Search, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import TopBar from "@/components/dashboard/topBar";
 import Card from "@/components/shared/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -16,6 +25,7 @@ import {
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { AdminUsersQuery } from "@/routes/admin/Admin-Query";
+import { DeleteUserMutation, UpdateUserStatusMutation } from "@/routes/admin/Admin-Mutation";
 import useAuthStore from "@/store/AuthsStore";
 import type { AdminUser } from "@/types/admin/users-type";
 
@@ -61,15 +71,7 @@ function RolePill({ role }: { role?: string | null }) {
 
 function matchesQuery(user: AdminUser, query: string) {
   if (!query) return true;
-  const haystack = [
-    user.email,
-    user.contact_person,
-    user.company_name,
-    user.industry,
-    user.role,
-    user.status,
-    user.phone,
-  ]
+  const haystack = [user.email, user.full_name, user.company_name, user.role, user.status]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -82,14 +84,30 @@ export default function SuperAdminUsersPage() {
   const tTop = useTranslations("topBar");
   const [query, setQuery] = useState("");
   const companyName = useAuthStore((s) => s.company_name);
+  const currentUserId = useAuthStore((s) => s.user_id);
   const role = useAuthStore((s) => s.role);
   const { data, isLoading, isError, error, isFetching } = AdminUsersQuery();
+  const updateStatus = UpdateUserStatusMutation();
+  const deleteUser = DeleteUserMutation();
+  const q = query.trim().toLowerCase();
+  const users = (data?.items ?? []).filter((user) => matchesQuery(user, q));
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<AdminUser | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
 
-  const users = useMemo(() => {
-    const list = data ?? [];
-    const q = query.trim().toLowerCase();
-    return list.filter((user) => matchesQuery(user, q));
-  }, [data, query]);
+  const confirmStatusChange = () => {
+    if (!confirmTarget) return;
+    const nextStatus = confirmTarget.status.toLowerCase() === "suspended" ? "active" : "suspended";
+    updateStatus.mutate(
+      { userId: confirmTarget.user_id, status: nextStatus },
+      { onSuccess: () => setConfirmTarget(null) },
+    );
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    deleteUser.mutate(deleteTarget.user_id, { onSuccess: () => setDeleteTarget(null) });
+  };
 
   const isSuperAdmin = SUPER_ADMIN_ROLES.has(role.toLowerCase());
 
@@ -123,7 +141,7 @@ export default function SuperAdminUsersPage() {
           <h1 className="text-xl font-semibold text-neutral-900">{t("usersTitle")}</h1>
           <p className="mt-1 text-sm text-neutral-500">
             {t("usersSubtitle")}
-            {typeof data?.length === "number" ? ` · ${t("total", { count: data.length })}` : ""}
+            {typeof data?.total === "number" ? ` · ${t("total", { count: data.total })}` : ""}
           </p>
         </div>
 
@@ -191,44 +209,158 @@ export default function SuperAdminUsersPage() {
                   <TableHead>{t("colRole")}</TableHead>
                   <TableHead>{t("colStatus")}</TableHead>
                   <TableHead>{t("colJoined")}</TableHead>
+                  <TableHead>{t("colActions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.user_id}>
-                    <TableCell>
-                      <div className="min-w-0">
-                        <p className="truncate font-medium text-neutral-900">
-                          {user.contact_person || user.email}
-                        </p>
-                        <p className="truncate text-[12px] text-neutral-500">{user.email}</p>
-                        {user.phone ? (
-                          <p className="truncate text-[12px] text-neutral-400">{user.phone}</p>
-                        ) : null}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="min-w-0">
-                        <p className="truncate text-neutral-800">{user.company_name || "—"}</p>
-                        {user.industry ? (
-                          <p className="truncate text-[12px] text-neutral-500">{user.industry}</p>
-                        ) : null}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <RolePill role={user.role} />
-                    </TableCell>
-                    <TableCell>
-                      <StatusPill status={user.status} />
-                    </TableCell>
-                    <TableCell className="text-neutral-600">{formatDate(user.created_at)}</TableCell>
-                  </TableRow>
-                ))}
+                {users.map((user) => {
+                  const isSelf = user.user_id === currentUserId;
+                  const isSuspended = user.status.toLowerCase() === "suspended";
+                  const isPending =
+                    updateStatus.isPending && updateStatus.variables?.userId === user.user_id;
+
+                  return (
+                    <TableRow
+                      key={user.user_id}
+                      onClick={() => setSelectedUser(user)}
+                      className="cursor-pointer"
+                    >
+                      <TableCell>
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-neutral-900">
+                            {user.full_name || user.email}
+                          </p>
+                          <p className="truncate text-[12px] text-neutral-500">{user.email}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-neutral-800">{user.company_name || "—"}</TableCell>
+                      <TableCell>
+                        <RolePill role={user.role} />
+                      </TableCell>
+                      <TableCell>
+                        <StatusPill status={user.status} />
+                      </TableCell>
+                      <TableCell className="text-neutral-600">{formatDate(user.created_at)}</TableCell>
+                      <TableCell>
+                        {isSelf ? (
+                          <span className="text-[12px] text-neutral-400">{t("you")}</span>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              disabled={isPending}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setConfirmTarget(user);
+                              }}
+                              className="rounded-full border border-[#E6E8F5] px-3 py-1 text-[12px] font-medium text-neutral-700 hover:bg-[#F6F7FD] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {isPending ? (
+                                <Loader2 className="size-3 animate-spin" />
+                              ) : isSuspended ? (
+                                t("reactivate")
+                              ) : (
+                                t("suspend")
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteTarget(user);
+                              }}
+                              className="rounded-full border border-rose-200 px-3 py-1 text-[12px] font-medium text-rose-700 hover:bg-rose-50"
+                            >
+                              {t("delete")}
+                            </button>
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
         ) : null}
       </Card>
+
+      <Dialog open={selectedUser !== null} onOpenChange={(open) => !open && setSelectedUser(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedUser?.full_name || selectedUser?.email}</DialogTitle>
+            <DialogDescription>{selectedUser?.email}</DialogDescription>
+          </DialogHeader>
+          {selectedUser ? (
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+              <dt className="text-neutral-500">{t("colCompany")}</dt>
+              <dd className="text-neutral-900">{selectedUser.company_name || "—"}</dd>
+              <dt className="text-neutral-500">{t("colRole")}</dt>
+              <dd className="text-neutral-900">{selectedUser.role}</dd>
+              <dt className="text-neutral-500">{t("colStatus")}</dt>
+              <dd className="text-neutral-900">{selectedUser.status}</dd>
+              <dt className="text-neutral-500">{t("colJoined")}</dt>
+              <dd className="text-neutral-900">{formatDate(selectedUser.created_at)}</dd>
+              <dt className="text-neutral-500">{t("lastLogin")}</dt>
+              <dd className="text-neutral-900">{formatDate(selectedUser.last_login_at)}</dd>
+            </dl>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={confirmTarget !== null} onOpenChange={(open) => !open && setConfirmTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {confirmTarget?.status.toLowerCase() === "suspended"
+                ? t("confirmReactivateTitle")
+                : t("confirmSuspendTitle")}
+            </DialogTitle>
+            <DialogDescription>
+              {confirmTarget?.status.toLowerCase() === "suspended"
+                ? t("confirmReactivateBody", { email: confirmTarget?.email ?? "" })
+                : t("confirmSuspendBody", { email: confirmTarget?.email ?? "" })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmTarget(null)} disabled={updateStatus.isPending}>
+              {tCommon("cancel")}
+            </Button>
+            <Button
+              variant={confirmTarget?.status.toLowerCase() === "suspended" ? "default" : "destructive"}
+              onClick={confirmStatusChange}
+              disabled={updateStatus.isPending}
+            >
+              {updateStatus.isPending ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : confirmTarget?.status.toLowerCase() === "suspended" ? (
+                t("reactivate")
+              ) : (
+                t("suspend")
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("confirmDeleteTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("confirmDeleteBody", { email: deleteTarget?.email ?? "" })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleteUser.isPending}>
+              {tCommon("cancel")}
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete} disabled={deleteUser.isPending}>
+              {deleteUser.isPending ? <Loader2 className="size-3.5 animate-spin" /> : t("delete")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

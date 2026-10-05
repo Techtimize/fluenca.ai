@@ -12,7 +12,7 @@ type Props = {
   data: AnalyticsData;
   source: string;
   device: Device;
-  compact?: boolean; // true while the chat panel is open (narrower content column)
+  compact?: boolean;
   onSourceChange: (source: string) => void;
   onDeviceChange: (device: Device) => void;
   onConnectIntegration?: (id: string) => void;
@@ -54,7 +54,7 @@ export default function AnalyticsSection({
           ))}
         </div>
 
-        <div className="flex rounded-full bg-[#F1F4FF] p-1">
+        {/* <div className="flex rounded-full bg-[#F1F4FF] p-1">
           {(["mobile", "desktop"] as const).map((d) => (
             <button
               key={d}
@@ -69,7 +69,7 @@ export default function AnalyticsSection({
               {d}
             </button>
           ))}
-        </div>
+        </div> */}
       </div>
 
       {/* Metrics: 4 across in one row from md up */}

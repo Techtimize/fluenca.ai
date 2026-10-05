@@ -2,7 +2,14 @@ import { BUSSINESSENDPOINT } from "./Bussiness-Endpoint";
 import api from "../apiClient";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
-import { CompetitorAnalysisRequest, CompetitorsListResponse } from "@/types/bussiness/competitoranalysis-type";
+import {
+  CompetitorAnalysisJobResponse,
+  CompetitorAnalysisManualRequest,
+  CompetitorAnalysisRequest,
+  CompetitorAnalysisResponse,
+  CompetitorAnalysisVersionsResponse,
+  CompetitorsListResponse,
+} from "@/types/bussiness/competitoranalysis-type";
 import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/onboarding-type";
 import { DnaResponseProps } from "@/types/bussiness/dna-type";
 import type {
@@ -12,6 +19,16 @@ import type {
   GoogleTrendQueryParams,
   GoogleTrendTrendingResponse,
 } from "@/types/bussiness/google-trends-type";
+import { ContentRecommendationRequest, ContentRecommendationResponse, ContentRecommendationResultResponse } from "@/types/bussiness/content-recommendation-type";
+import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
+import { ScriptGenerationRequest, ScriptGenerationResultsResponse } from "@/types/bussiness/script-type";
+import type {
+  CompanyImageGenerationResponse,
+  ImageGenerationRequest,
+  ImageGenerationResponse,
+  LatestGeneratedImageResponse,
+} from "@/types/bussiness/imagegeneration-type";
+import { IntelligenceJobResponse, IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 import { BuisnessNicheTrendResponse, NicheTrendsRequest } from "@/types/bussiness/neche_trends";
 import { ContentRecommendationRequest } from "@/types/Trends/Content-recommendation-interface";
 
@@ -50,15 +67,104 @@ export const SocialGrowthApi = async (prompt: string) => {
 
 export const CompetitorAnalysisAsyncApi = async (data: CompetitorAnalysisRequest) => {
     const response = await api.post(
-      BUSSINESSENDPOINT.COMPETITOR_ANALYSIS_ASYNC,
+      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_ASYNC_ASYNC,
       data,
+    );
+    return response.data;
+}
+
+export const CompetitorAnalysisJobApi = async (
+  job_id: string,
+): Promise<CompetitorAnalysisJobResponse> => {
+    const response = await api.get(
+      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_JOB(job_id),
     );
     return response.data;
 }
 
 export const CompetitorAnalysisCompetitorApi = async (company_id: string) => {
     const response = await api.get<CompetitorsListResponse>(
-      BUSSINESSENDPOINT.COMPETITOR_ANALYSIS_COMPETITOR(company_id),
+      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_COMPETITOR(company_id),
+    );
+    return response.data;
+}
+
+export const CompetitorAnalysisAiApi = async (company_id: string) => {
+    const response = await api.post(
+      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_AI,
+      { company_id: company_id },
+    );
+    return response.data;
+}
+
+export const CompetitorAnalysisAiVersionsApi = async (
+  company_id: string,
+): Promise<CompetitorAnalysisVersionsResponse> => {
+    const response = await api.get(
+      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_AI_VERSIONS(company_id),
+    );
+    return response.data;
+}
+
+export const CompetitorAnalysisAiSpecificVersionsApi = async (
+  company_id: string,
+  version: string,
+): Promise<CompetitorsListResponse> => {
+    const response = await api.get(
+      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_AI_SPECIFIC_VERSIONS(company_id, version),
+    );
+    return response.data;
+}
+
+export const CompetitorAnalysisAiLatestResponseApi = async (
+  company_id: string,
+): Promise<CompetitorsListResponse> => {
+    const response = await api.get(
+      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_LATEST_AI_RESPONSE(company_id),
+    );
+    return response.data;
+}
+
+export const CompetitorAnalysisManualApi = async (data: CompetitorAnalysisManualRequest) => {
+    const response = await api.post(
+      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_MANUAL,
+      data,
+    );
+    return response.data;
+}
+
+export const CompetitorAnalysisManualVersionsApi = async (
+  company_id: string,
+): Promise<CompetitorAnalysisVersionsResponse> => {
+    const response = await api.get(
+      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_MANUAL_VERSIONS(company_id),
+    );
+    return response.data;
+}
+
+export const CompetitorAnalysisManualSpecificVersionsApi = async (
+  company_id: string,
+  version: string,
+): Promise<CompetitorsListResponse> => {
+    const response = await api.get(
+      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_MANUAL_SPECIFIC_VERSIONS(company_id, version),
+    );
+    return response.data;
+}
+
+export const CompetitorAnalysisManualLatestResponseApi = async (
+  company_id: string,
+): Promise<CompetitorsListResponse> => {
+    const response = await api.get(
+      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_LATEST_MANUAL_RESPONSE(company_id),
+    );
+    return response.data;
+}
+
+export const CompetitorAnalysisFindCompetitorsApi = async (company_id: string) => {
+    const response = await api.post(
+      BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_FIND_COMPETITORS,
+      { company_id: company_id },
     );
     return response.data;
 }
@@ -110,7 +216,82 @@ export const GoogleTrendFiltersApi = async () => {
     return response.data;
 }
 
-export const NicheTrendApi = async (data: NicheTrendsRequest) => {
+export const ContentRecommendationApi = async (data: ContentRecommendationRequest): Promise<ContentRecommendationResponse> => {
+    const response = await api.post(BUSSINESSENDPOINT.RECOMMENDATION.CONTENT_RECOMMENDATION, data);
+    return response.data;
+}
+
+export const ContentRecommendationResultApi = async (company_id: string): Promise<ContentRecommendationResultResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.RECOMMENDATION.RECOMMENDATION_RESULT(company_id));
+    return response.data;
+}
+
+export const IntakeApi = async (): Promise<IntakeResponseProps> => {
+    const response = await api.get(BUSSINESSENDPOINT.INTAKE);
+    return response.data;
+}
+
+export const CompleteIntakeApi = async (): Promise<IntakeResponseProps> => {
+    const response = await api.post(BUSSINESSENDPOINT.INTAKE_COMPLETE);
+    return response.data;
+}
+
+export const AnswerQuestionApi = async ({ question_id, answer }: AnswerQuestionRequestProps): Promise<IntakeQuestion> => {
+    const response = await api.patch(BUSSINESSENDPOINT.INTAKE_QUESTION(question_id), { answer });
+    return response.data;
+}
+
+export const ScriptGenerationApi = async (data: ScriptGenerationRequest) => {
+    const response = await api.post(BUSSINESSENDPOINT.GENERATION.SCRIPT_GENERATION, data);
+    return response.data;
+}
+
+export const ScriptGenerationResultsApi = async (
+  company_id: string,
+): Promise<ScriptGenerationResultsResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.GENERATION.SCRIPT_GENERATION_RESULTS(company_id));
+    return response.data;
+}
+
+export const ImageGenerationApi = async (
+  data: ImageGenerationRequest,
+): Promise<ImageGenerationResponse> => {
+    const response = await api.post(BUSSINESSENDPOINT.GENERATION.IMAGE_GENERATION, data);
+    return response.data;
+}
+
+export const CompanyImageGenerationApi = async (
+  company_id: string,
+): Promise<CompanyImageGenerationResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.GENERATION.COMPANY_IMAGE_GENERATION(company_id));
+    return response.data;
+}
+
+export const LatestGeneratedImageApi = async (
+  company_id: string,
+): Promise<LatestGeneratedImageResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.GENERATION.LATEST_GENERATED_IMAGE(company_id));
+    return response.data;
+}
+
+export const CompanyImageGenerationResultsApi = async (company_id: string): Promise<CompanyImageGenerationResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.GENERATION.COMPANY_IMAGE_GENERATION(company_id));
+    return response.data;
+}
+
+export const IntelligenceRunApi = async (
+  data: IntelligenceRunRequest,
+): Promise<IntelligenceRunResponse> => {
+    const response = await api.post(BUSSINESSENDPOINT.INTELLIGENCE_RUN, data);
+    return response.data;
+}
+
+export const IntelligenceJobApi = async (
+  job_id: string,
+): Promise<IntelligenceJobResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.INTELLIGENCE_JOB(job_id));
+    return response.data;
+}export const NicheTrendApi = async (data: NicheTrendsRequest) => {
     const response = await api.post<BuisnessNicheTrendResponse>(BUSSINESSENDPOINT.NICHE_TREND, data);
     return response.data;
 }

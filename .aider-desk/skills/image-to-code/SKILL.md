@@ -738,7 +738,7 @@ If the text is too small to extract reliably:
 - or generate a second clearer version of that section
 
 Do not ignore text extraction.
-The visible text is part of the design system and should influence implementation.
+The visible text is part of the design system and should FLUENCAence implementation.
 
 ---
 

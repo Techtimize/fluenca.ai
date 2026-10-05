@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Bell } from 'lucide-react';
 import { PAGE_ROUTES } from '@/constant/page-routes';
-import { IntakeQuery } from '@/routes/company-details/CompanyDetails-Query';
 import { IntakeStep } from '@/types/company-details-type';
 import { truncateWords } from '@/utils/text-utils';
+import { IntakeQuery } from '@/routes/bussiness/Bussiness-Query';
 
 const STEPS: Record<IntakeStep, string> = {
     queued: 'Getting ready...',
@@ -27,12 +27,10 @@ export default function CompanyDetail() {
     const router = useRouter();
     const { data: intake } = IntakeQuery();
     const [batch, setBatch] = useState(0);
-
     const isReady = intake?.status === 'review' || intake?.status === 'completed';
     const questions = (intake?.sections ?? []).flatMap((section) => section.questions);
     const totalBatches = Math.ceil(questions.length / BATCH_SIZE);
 
-    // Once the intake is ready, show its questions 3 at a time, then move on.
     useEffect(() => {
         if (!isReady) return;
         if (batch >= totalBatches) {
@@ -53,7 +51,6 @@ export default function CompanyDetail() {
 
     return (
         <div className="relative min-h-screen w-full overflow-hidden bg-white">
-            {/* Soft background glow */}
             <div className="pointer-events-none absolute -left-40 -top-40 h-[520px] w-[720px] rounded-full bg-[#DCE1FB] opacity-70 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-40 -right-40 h-[420px] w-[620px] rounded-full bg-[#E6E9FB] opacity-70 blur-3xl" />
 
