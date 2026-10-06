@@ -9,7 +9,7 @@ import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/bussine
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
-import { setCompanyUserIdProvider, setOnboardingCompletedProvider } from "@/provider/auth-provider";
+import { setCompanyIdProvider, setOnboardingCompletedProvider } from "@/provider/auth-provider";
 import { CompetitorAnalysisAsyncResponse, CompetitorAnalysisManualRequest, CompetitorAnalysisRequest } from "@/types/bussiness/competitoranalysis-type";
 import { ContentRecommendationRequest, ContentRecommendationResponse } from "@/types/bussiness/content-recommendation-type";
 import { ChatMode, SendMessageDoneEvent } from "@/types/chat";
@@ -74,7 +74,7 @@ export function AnalyzeCompanyMutation() {
                 toast.error("Company ID missing from analysis response");
                 return;
             }
-            setCompanyUserIdProvider(companyId);
+            setCompanyIdProvider(companyId);
             setOnboardingCompletedProvider(true);
             const resultsKey = ["analyze-company-results", companyId] as const;
             queryClient.setQueryData(resultsKey, response);

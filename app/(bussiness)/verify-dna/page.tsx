@@ -54,7 +54,7 @@ export default function VerifyDna() {
   const t = useTranslations("verifyDna");
   const tCommon = useTranslations("common");
   const router = useRouter();
-  const company_user_id = useAuthStore((state) => state.company_user_id);
+  const userId = useAuthStore((state) => state.user_id);
   const { data: dna, isLoading } = DnaQuery();
   const { data: onboarding } = OnboardingDetailsQuery();
   const { mutate: retryDna, isPending: isRetrying } = RetryDnaMutation();
@@ -76,7 +76,7 @@ export default function VerifyDna() {
   const isBuilding =
     isLoading || dna?.status === "generating" || dna?.status === "not_started";
 
-  const companyId = onboarding?.company_id || company_user_id;
+  const companyId = onboarding?.company_id || userId;
   const companyData =
     dna?.document?.trim() ||
     (dna?.sections ?? [])
