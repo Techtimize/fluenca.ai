@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2 } from "lucide-react";
 import AnalyticsSection from "@/components/dashboard/cards/analyticsSection";
 import ChatInput from "@/components/dashboard/chat/chatInput";
 import ChatPanel from "@/components/dashboard/chat/chatPanel";
 import CompanyCard from "@/components/dashboard/cards/companyCard";
+import DashboardSkeleton from "@/components/dashboard/dashboardSkeleton";
 import DocumentationCard from "@/components/dashboard/documentationCard";
 import TopBar from "@/components/dashboard/topBar";
 import { mapDashboard } from "@/lib/dashboard/map-dashboard";
@@ -118,13 +118,9 @@ export default function DashboardPage() {
             </div>
           ) : null}
 
-          {isLoading ? (
-            <div className="grid min-h-[40vh] place-items-center">
-              <Loader2 className="size-7 animate-spin text-[#5452F6]" />
-            </div>
-          ) : null}
+          {isLoading ? <DashboardSkeleton compact={chatOpen} /> : null}
 
-          {mapped ? (
+          {!isLoading && mapped ? (
             <div
               className={`grid gap-4 ${chatOpen ? "" : "xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]"}`}
             >
@@ -143,7 +139,7 @@ export default function DashboardPage() {
             </div>
           ) : null}
 
-          {analytics ? (
+          {!isLoading && analytics ? (
             <AnalyticsSection
               data={analytics}
               sources={sources}
