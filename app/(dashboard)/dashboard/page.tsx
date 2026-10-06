@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
 import AnalyticsSection from "@/components/dashboard/cards/analyticsSection";
 import ChatInput from "@/components/dashboard/chat/chatInput";
 import ChatPanel from "@/components/dashboard/chat/chatPanel";
@@ -10,43 +11,38 @@ import DocumentationCard from "@/components/dashboard/documentationCard";
 import TopBar from "@/components/dashboard/topBar";
 import { mapDashboard } from "@/lib/dashboard/map-dashboard";
 import { useChatbot } from "@/lib/chat/use-chatbot";
-import { MOCK_DASHBOARD } from "@/lib/mock/dashboard";
 import { AnalyzeCompanyDashboardQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
-import type { AnalyticsData, Device } from "@/types/dashboard";
-
-// Used until the dashboard API responds: mock data on the first tab, empty states on the rest.
-const MOCK_CHANNELS: Record<string, AnalyticsData> = Object.fromEntries(
-  MOCK_DASHBOARD.analyticsSources.map((s, index) => [
-    s.id,
-    index === 0 ? MOCK_DASHBOARD.analytics : { ...MOCK_DASHBOARD.analytics, emptyMessage: `${s.label} has not been analyzed yet.` },
-  ]),
-);
+import type { Device } from "@/types/dashboard";
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const companyId = useAuthStore((s) => s.company_id);
   const companyName = useAuthStore((s) => s.company_name);
 
-  const { data: dashboard, isError, error } = AnalyzeCompanyDashboardQuery(companyId);
+  const {
+    data: dashboard,
+    isLoading,
+    isError,
+    error,
+  } = AnalyzeCompanyDashboardQuery(companyId);
 
-  const mapped = useMemo(() => (dashboard?.data ? mapDashboard(dashboard) : null), [dashboard]);
+  const mapped = useMemo(
+    () => (dashboard?.data ? mapDashboard(dashboard) : null),
+    [dashboard],
+  );
 
-  const company = mapped?.company ?? MOCK_DASHBOARD.company;
-  const profile = mapped?.profile;
-  const docs = mapped?.docs.length ? mapped.docs : MOCK_DASHBOARD.docs;
-  const sources = mapped?.sources.length ? mapped.sources : MOCK_DASHBOARD.analyticsSources;
-  const channels = mapped?.sources.length ? mapped.channels : MOCK_CHANNELS;
+  const sources = mapped?.sources ?? [];
+  const channels = mapped?.channels ?? {};
   const defaultSource = mapped?.defaultSource || sources[0]?.id || "";
 
-  const user = {
-    name: companyName || mapped?.company.name || MOCK_DASHBOARD.user.name,
-  };
+  const user = { name: companyName || mapped?.company.name || "" };
 
   // null means "use the channel the backend marks as default".
   const [selectedSource, setSource] = useState<string | null>(null);
-  const source = selectedSource && channels[selectedSource] ? selectedSource : defaultSource;
-  const analytics = channels[source] ?? MOCK_DASHBOARD.analytics;
+  const source =
+    selectedSource && channels[selectedSource] ? selectedSource : defaultSource;
+  const analytics = channels[source];
   const sourceLabel = sources.find((s) => s.id === source)?.label ?? source;
   const [device, setDevice] = useState<Device>("mobile");
   const [chatOpen, setChatOpen] = useState(false);
@@ -64,15 +60,16 @@ export default function DashboardPage() {
     startNewConversation,
   } = useChatbot();
 
-  const screenContext = useMemo(() => {
-    const bits = [`Page: Dashboard`, `Company: ${company.name}`, `Analytics source tab: ${sourceLabel} (${device})`];
-    if (analytics.metrics.length) {
-      bits.push(
-        `Visible metric scores: ${analytics.metrics.map((m) => `${m.label} ${m.score}`).join(", ")}`,
-      );
-    }
-    return bits.join(". ");
-  }, [company.name, sourceLabel, device, analytics.metrics]);
+  const screenContext = [
+    `Page: Dashboard`,
+    `Company: ${mapped?.company.name ?? ""}`,
+    `Analytics source tab: ${sourceLabel} (${device})`,
+    analytics?.metrics.length
+      ? `Visible metric scores: ${analytics.metrics.map((m) => `${m.label} ${m.score}`).join(", ")}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join(". ");
 
   const handleSend = (text: string, imageUrl?: string) => {
     send(text, screenContext, imageUrl);
@@ -96,20 +93,37 @@ export default function DashboardPage() {
             </div>
           ) : null}
 
-          <div className={`grid gap-4 ${chatOpen ? "" : "xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]"}`}>
-            <CompanyCard company={company} profile={profile} />
-            {!chatOpen ? <DocumentationCard items={docs} goalLabel={t("setYourGoal")} /> : null}
-          </div>
+          {isLoading ? (
+            <div className="grid min-h-[40vh] place-items-center">
+              <Loader2 className="size-7 animate-spin text-[#5452F6]" />
+            </div>
+          ) : null}
 
-          <AnalyticsSection
-            data={analytics}
-            sources={sources}
-            source={source}
-            device={device}
-            compact={chatOpen}
-            onSourceChange={setSource}
-            onDeviceChange={setDevice}
-          />
+          {mapped ? (
+            <div
+              className={`grid gap-4 ${chatOpen ? "" : "xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]"}`}
+            >
+              <CompanyCard company={mapped.company} profile={mapped.profile} />
+              {!chatOpen && mapped.docs.length ? (
+                <DocumentationCard
+                  items={mapped.docs}
+                  goalLabel={t("setYourGoal")}
+                />
+              ) : null}
+            </div>
+          ) : null}
+
+          {analytics ? (
+            <AnalyticsSection
+              data={analytics}
+              sources={sources}
+              source={source}
+              device={device}
+              compact={chatOpen}
+              onSourceChange={setSource}
+              onDeviceChange={setDevice}
+            />
+          ) : null}
         </main>
 
         {chatOpen ? (
@@ -131,7 +145,11 @@ export default function DashboardPage() {
       </div>
 
       {!chatOpen ? (
-        <ChatInput onOpen={() => setChatOpen(true)} onSend={handleSend} placeholder={t("chatPlaceholder")} />
+        <ChatInput
+          onOpen={() => setChatOpen(true)}
+          onSend={handleSend}
+          placeholder={t("chatPlaceholder")}
+        />
       ) : null}
     </>
   );
