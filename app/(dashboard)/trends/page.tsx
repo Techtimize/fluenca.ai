@@ -8,7 +8,7 @@ import TrendsFiltersBar from "@/components/dashboard/trends/TrendsFiltersBar";
 import TrendsListCard from "@/components/dashboard/trends/TrendsListCard";
 import TrendsStatsRow from "@/components/dashboard/trends/TrendsStatsRow";
 import Card from "@/components/shared/card";
-import { MOCK_DASHBOARD } from "@/lib/mock/dashboard";
+import useAuthStore from "@/store/AuthsStore";
 import {
   normalizeExploreData,
   normalizeNowResponse,
@@ -26,6 +26,7 @@ import {
 export default function TrendsPage() {
   const t = useTranslations("trends");
   const tTop = useTranslations("topBar");
+  const companyName = useAuthStore((s) => s.company_name);
   const [geo, setGeo] = useState("US");
   const [category, setCategory] = useState("0");
   const [time, setTime] = useState("now 1-d");
@@ -93,7 +94,7 @@ export default function TrendsPage() {
   return (
     <main className="min-w-0">
           <TopBar
-            user={MOCK_DASHBOARD.user}
+            user={{ name: companyName || "" }}
             placeholder={tTop("searchTrends")}
             onSearch={(query) => {
               if (!query.trim()) return;
