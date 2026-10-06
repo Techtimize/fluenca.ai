@@ -5,12 +5,34 @@ export type Device = "mobile" | "desktop";
 export type UserSummary = { name: string; avatarSrc?: string };
 export type NavItem = { id: string; label: string; icon: string; href: string };
 
-export type CompanyLink = { id: string; label: string; iconSrc: string; href?: string };
-export type Competitor = { id: string; name: string; logoSrc?: string | null; href?: string | null };
+export type CompanyLink = {
+  id: string;
+  label: string;
+  iconSrc: string;
+  href?: string;
+  imageUrl?: string | null;
+};
+
+export type Competitor = {
+  id: string;
+  name: string;
+  logoSrc?: string | null;
+  href?: string | null;
+  websiteUrl?: string | null;
+  instagramUrl?: string | null;
+  linkedinUrl?: string | null;
+  instagramImageUrl?: string | null;
+  linkedinImageUrl?: string | null;
+};
+
 export type Company = {
   name: string;
   tagline: string;
   logoSrc: string;
+  logoUrl?: string | null;
+  instagramImageUrl?: string | null;
+  linkedinImageUrl?: string | null;
+  coreOffering?: string | null;
   tags: string[];
   description: string;
   links: CompanyLink[];
@@ -20,6 +42,7 @@ export type Company = {
 // Positioning line and social links shown under the company description.
 export type CompanyProfile = {
   positioning?: string | null;
+  core_offering?: string | null;
   linkedin_url?: string | null;
   instagram_url?: string | null;
   instagram_username?: string | null;
