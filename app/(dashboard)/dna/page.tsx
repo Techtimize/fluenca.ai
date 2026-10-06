@@ -22,7 +22,6 @@ import {
 import { InstagramIcon, LinkedInIcon } from "@/components/shared/brandIcons";
 import TopBar from "@/components/dashboard/topBar";
 import TopicalMapSection from "@/components/dashboard/dna/topicalMapSection";
-import { MOCK_DASHBOARD } from "@/lib/mock/dashboard";
 import useAuthStore from "@/store/AuthsStore";
 import { AnalyzeCompanyResultsQuery, DnaQuery } from "@/routes/bussiness/Bussiness-Query";
 import type { AnalyzeCompanyResponse, AnalyzeCompanyResultsResponse } from "@/types/bussiness/analyzecompany-type";
@@ -548,6 +547,7 @@ export default function DnaPage() {
   const t = useTranslations("dna");
   const tTop = useTranslations("topBar");
   const companyId = useAuthStore((state) => state.company_id);
+  const companyName = useAuthStore((state) => state.company_name);
   const { data: analyzeCompanyResults, isLoading, isError } = AnalyzeCompanyResultsQuery(companyId);
   const analysis = (analyzeCompanyResults as AnalyzeCompanyResultsResponse | undefined)?.result;
   const { data: dna } = DnaQuery();
@@ -555,7 +555,7 @@ export default function DnaPage() {
 
   return (
     <main className="min-w-0">
-      <TopBar user={MOCK_DASHBOARD.user} placeholder={tTop("searchDna")} />
+      <TopBar user={{ name: companyName || "" }} placeholder={tTop("searchDna")} />
       {isError ? (
         <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
           {t("error")}
