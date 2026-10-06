@@ -5,7 +5,6 @@ const AUTH_COOKIE_NAMES = [
   'access_token',
   'role',
   'onboarding_completed',
-  'company_user_id',
   'company_id',
   'status',
 ] as const;
@@ -35,7 +34,6 @@ function syncAuthCookies(payload: {
   access_token: string;
   role: string;
   onboarding_completed: boolean;
-  company_user_id?: string;
   company_id?: string;
   status?: string;
 }) {
@@ -45,9 +43,6 @@ function syncAuthCookies(payload: {
     'onboarding_completed',
     payload.onboarding_completed ? 'true' : 'false',
   );
-  if (payload.company_user_id) {
-    setCookie('company_user_id', payload.company_user_id);
-  }
   if (payload.company_id) {
     setCookie('company_id', payload.company_id);
   }
@@ -63,7 +58,7 @@ export function clearAuthCookies() {
 export const setAuthTokenProvider = (
   token: string,
   role: string,
-  company_user_id: string,
+  userId: string,
   status: string,
   company_name?: string,
   onboarding_completed?: boolean,
@@ -71,8 +66,7 @@ export const setAuthTokenProvider = (
 ) => {
   useAuthStore.getState().setAuthSession({
     access_token: token,
-    user_id: company_user_id,
-    company_user_id,
+    user_id: userId,
     company_id: company_id ?? '',
     role,
     status,
@@ -91,7 +85,6 @@ export const setAuthTokenProvider = (
   syncAuthCookies({
     access_token: token,
     role,
-    company_user_id,
     company_id,
     status,
     onboarding_completed: completed,
@@ -101,12 +94,6 @@ export const setAuthTokenProvider = (
 export const setOnboardingCompletedProvider = (completed: boolean) => {
   useAuthStore.getState().setOnboardingCompleted(completed);
   setCookie('onboarding_completed', completed ? 'true' : 'false');
-};
-
-export const setCompanyUserIdProvider = (company_user_id: string) => {
-  if (!company_user_id) return;
-  useAuthStore.getState().setCompanyUserId(company_user_id);
-  setCookie('company_user_id', company_user_id);
 };
 
 export const setCompanyIdProvider = (company_id: string) => {
