@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi } from "./bussiness.routes";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   AnalyzeCompanyDashboardApi,
@@ -109,11 +109,28 @@ export const ContentRecommendationResultQuery = (company_id: string) => {
     });
 }
 
-export const ScriptGenerationResultsQuery = (company_id: string) => {
+export const ScriptGenerationResultsByCompanyIdQuery = (
+  company_id: string,
+  params?: { limit?: number; offset?: number },
+) => {
+  const limit = params?.limit ?? 20;
+  const offset = params?.offset ?? 0;
+
   return useQuery({
-    queryKey: ["script-generation-results", company_id],
-    queryFn: () => ScriptGenerationResultsApi(company_id),
+    queryKey: ["script-generation-results", company_id, { limit, offset }],
+    queryFn: () =>
+      ScriptGenerationResultsByCompanyIdApi(company_id, { limit, offset }),
     enabled: Boolean(company_id),
+    placeholderData: keepPreviousData,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const ScriptGenerationResultsQuery = () => {
+  return useQuery({
+    queryKey: ["script-generation-results"],
+    queryFn: () => ScriptGenerationResultsApi(),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

@@ -7,10 +7,7 @@ export function ProjectSection({ project }: { project: ScriptProject }) {
     <Card className="p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-[#5B57E6]">
-            Project
-          </p>
-          <h2 className="mt-1 text-[15px] font-semibold text-neutral-900">
+          <h2 className="text-[15px] font-semibold text-neutral-900">
             {project.name || "Untitled project"}
           </h2>
           {project.description ? (

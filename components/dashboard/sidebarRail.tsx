@@ -20,7 +20,6 @@ const EXPANDED_PAD = "15.5rem";
 const DEFAULT_NAV: NavItem[] = [
   { id: "home", label: "Home", icon: "home", href: PAGE_ROUTES.DASHBOARD },
   { id: "trends", label: "Trends", icon: "trending", href: PAGE_ROUTES.TRENDS },
-  { id: "overview", label: "Company overview", icon: "clipboard", href: PAGE_ROUTES.COMPANY_OVERVIEW },
   { id: "dna", label: "Company DNA", icon: "dna", href: PAGE_ROUTES.DNA },
   {
     id: "content-recommendation",

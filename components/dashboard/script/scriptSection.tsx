@@ -5,10 +5,7 @@ import { Field } from "./primitives";
 export function ScriptSection({ script }: { script: Script }) {
   return (
     <Card className="p-4">
-      <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-[#5B57E6]">
-        Script
-      </p>
-      <h3 className="mt-1 text-[15px] font-semibold text-neutral-900">
+      <h3 className="text-[15px] font-semibold text-neutral-900">
         {script.title || "Untitled script"}
       </h3>
 

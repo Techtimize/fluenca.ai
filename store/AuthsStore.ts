@@ -6,7 +6,6 @@ interface AuthStore {
   access_token: string;
   user_id: string;
   company_name: string;
-  company_user_id: string;
   company_id: string;
   role: string;
   status: string;
@@ -18,13 +17,11 @@ interface AuthStore {
     role: string;
     status?: string;
     company_name?: string;
-    company_user_id?: string;
     company_id?: string;
   }) => void;
   setUserId: (user_id: string) => void;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
   setCompanyName: (company_name: string) => void;
-  setCompanyUserId: (company_user_id: string) => void;
   setCompanyId: (company_id: string) => void;
   setRole: (role: string) => void;
   setStatus: (status: string) => void;
@@ -40,7 +37,6 @@ const initialAuthState = {
   access_token: '',
   user_id: '',
   company_name: '',
-  company_user_id: '',
   company_id: '',
   role: '',
   status: '',
@@ -59,7 +55,6 @@ const useAuthStore = create<AuthStore>()(
           role,
           status = '',
           company_name = '',
-          company_user_id = '',
           company_id = '',
         }) =>
           set({
@@ -69,13 +64,11 @@ const useAuthStore = create<AuthStore>()(
             role,
             status,
             company_name,
-            company_user_id: company_user_id || user_id,
             company_id,
           }),
         setUserId: (user_id: string) => set({ user_id }),
         setIsAuthenticated: (isAuthenticated: boolean) => set({ isAuthenticated }),
         setCompanyName: (company_name: string) => set({ company_name }),
-        setCompanyUserId: (company_user_id: string) => set({ company_user_id }),
         setCompanyId: (company_id: string) => set({ company_id }),
         setRole: (role: string) => set({ role }),
         setStatus: (status: string) => set({ status }),

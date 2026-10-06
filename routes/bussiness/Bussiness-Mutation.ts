@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, CompleteIntakeApi, ContentRecommendationApi, ImageGenerationApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, CompleteIntakeApi, ContentRecommendationApi, DeleteImageApi, ImageGenerationApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
@@ -15,6 +15,8 @@ import { SendMessageApi } from "../chatbot/chatbot.routes";
 import { ScriptGenerationRequest, ScriptGenerationResponse } from "@/types/bussiness/script-type";
 import { ImageGenerationRequest, ImageGenerationResponse } from "@/types/bussiness/imagegeneration-type";
 import { IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
+import useAuthStore from "@/store/AuthsStore";
+
 
 export function WaitlistMutation() {
     return useMutation({
@@ -291,7 +293,6 @@ export const ScriptGenerationMutation = () => {
   });
 };
 
-
 export const ImageGenerationMutation = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -310,6 +311,29 @@ export const ImageGenerationMutation = () => {
   });
 };
 
+export const DeleteImageMutation = () => {
+  const queryClient = useQueryClient();
+  const companyId = useAuthStore((s) => s.company_id);
+
+  return useMutation({
+    mutationFn: (image_id: string) => {
+      if (!companyId) {
+        throw new Error("Company ID is missing");
+      }
+      return DeleteImageApi(companyId, image_id);
+    },
+    onSuccess: () => {
+      toast.success("Image deleted successfully");
+      queryClient.invalidateQueries({
+        queryKey: ["company-image-generation-results", companyId],
+      });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to delete image"));
+    },
+  });
+};
+
 export const IntelligenceRunMutation = () => {
   return useMutation({
     mutationFn: (data: IntelligenceRunRequest) => IntelligenceRunApi(data),
@@ -324,5 +348,20 @@ export const IntelligenceRunMutation = () => {
     onError: () => {
       toast.error("We couldn't start building your workspace. Please try again.");
     },
+  });
+};
+
+
+export const BlogPostMutation = () => {
+  const router = useRouter();
+  return useMutation({
+    mutationFn: (brief_id: string) => BlogPostApi(brief_id),
+    onSuccess: (response) => {
+      toast.success("Blog post created successfully");
+      router.push(PAGE_ROUTES.BLOGS);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to create blog post"));
+      },
   });
 };
