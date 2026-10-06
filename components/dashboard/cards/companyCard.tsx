@@ -157,13 +157,12 @@ export default function CompanyCard({
 }: Props) {
   const website = company.links.find((link) => link.id === "web");
   const logoUrl = company.logoUrl || company.logoSrc;
-  const coreOffering = company.coreOffering || profile?.core_offering;
 
   return (
     <Card className="flex h-full flex-col p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-2xl bg-linear-to-br from-[#4F46E5] to-[#8B5CF6] text-base font-semibold text-white">
+          <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-2xl text-base font-semibold text-white">
             {logoUrl ? (
               <AssetImage
                 src={logoUrl}
