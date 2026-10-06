@@ -52,7 +52,6 @@ function hostLabel(url: string): string {
   }
 }
 
-// "https://www.linkedin.com/company/ishout-media/" -> "ishout-media"
 function linkedinLabel(url: string): string {
   const slug = url.replace(/\/+$/, "").split("/").pop();
   return slug && !slug.includes("linkedin.") ? slug : "LinkedIn";
@@ -61,30 +60,50 @@ function linkedinLabel(url: string): string {
 function mapCompany(card: DashboardCompanyCard): Company {
   const { socials } = card;
   const instagramHandle = socials.instagram_username?.replace(/^@/, "");
+  const logoUrl = card.logo_url || null;
 
   return {
     name: card.name || "Company",
     tagline: card.tagline,
-    logoSrc: "/assets/techtimize-logo.png",
+    logoSrc: logoUrl || "/assets/techtimize-logo.png",
+    logoUrl,
+    instagramImageUrl: card.instagram_image_url || null,
+    linkedinImageUrl: card.linkedin_image_url || null,
+    coreOffering: card.core_offering || null,
     tags: card.tags ?? [],
     description: card.description ?? "",
     links: [
       card.website_url
-        ? { id: "web", label: hostLabel(card.website_url), iconSrc: "/assets/icons/globe.png", href: card.website_url }
+        ? {
+            id: "web",
+            label: hostLabel(card.website_url),
+            iconSrc: "/assets/globe.png",
+            href: card.website_url,
+          }
         : null,
       socials.instagram_url || instagramHandle
         ? {
             id: "instagram",
             label: instagramHandle ? `@${instagramHandle}` : "Instagram",
-            iconSrc: "/assets/icons/instagram.png",
+            iconSrc: "/assets/insta.png",
             href: socials.instagram_url ?? `https://instagram.com/${instagramHandle}`,
           }
         : null,
       socials.linkedin_url
-        ? { id: "linkedin", label: linkedinLabel(socials.linkedin_url), iconSrc: "/assets/icons/linkedin.png", href: socials.linkedin_url }
+        ? {
+            id: "linkedin",
+            label: linkedinLabel(socials.linkedin_url),
+            iconSrc: "/assets/linkedin.png",
+            href: socials.linkedin_url,
+          }
         : null,
       socials.facebook_url
-        ? { id: "facebook", label: "Facebook", iconSrc: "/assets/icons/facebook.png", href: socials.facebook_url }
+        ? {
+            id: "facebook",
+            label: "Facebook",
+            iconSrc: "/assets/icons/facebook.png",
+            href: socials.facebook_url,
+          }
         : null,
     ].filter((link): link is NonNullable<typeof link> => Boolean(link)),
     competitors: (card.competitors ?? []).map((c) => ({
@@ -92,6 +111,11 @@ function mapCompany(card: DashboardCompanyCard): Company {
       name: c.name,
       logoSrc: c.logo_url,
       href: c.website_url ?? c.linkedin_url ?? c.instagram_url,
+      websiteUrl: c.website_url,
+      instagramUrl: c.instagram_url,
+      linkedinUrl: c.linkedin_url,
+      instagramImageUrl: c.instagram_image_url ?? null,
+      linkedinImageUrl: c.linkedin_image_url ?? null,
     })),
   };
 }
@@ -151,6 +175,7 @@ export function mapDashboard(response: DashboardResponse): DashboardView {
     company: mapCompany(company_card),
     profile: {
       positioning: company_card.positioning,
+      core_offering: company_card.core_offering,
       linkedin_url: company_card.socials.linkedin_url,
       instagram_url: company_card.socials.instagram_url,
       instagram_username: company_card.socials.instagram_username,
