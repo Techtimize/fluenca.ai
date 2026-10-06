@@ -52,6 +52,12 @@ function hostLabel(url: string): string {
   }
 }
 
+// "https://www.linkedin.com/company/ishout-media/" -> "ishout-media"
+function linkedinLabel(url: string): string {
+  const slug = url.replace(/\/+$/, "").split("/").pop();
+  return slug && !slug.includes("linkedin.") ? slug : "LinkedIn";
+}
+
 function mapCompany(card: DashboardCompanyCard): Company {
   const { socials } = card;
   const instagramHandle = socials.instagram_username?.replace(/^@/, "");
@@ -75,7 +81,7 @@ function mapCompany(card: DashboardCompanyCard): Company {
           }
         : null,
       socials.linkedin_url
-        ? { id: "linkedin", label: "LinkedIn", iconSrc: "/assets/icons/linkedin.png", href: socials.linkedin_url }
+        ? { id: "linkedin", label: linkedinLabel(socials.linkedin_url), iconSrc: "/assets/icons/linkedin.png", href: socials.linkedin_url }
         : null,
       socials.facebook_url
         ? { id: "facebook", label: "Facebook", iconSrc: "/assets/icons/facebook.png", href: socials.facebook_url }
