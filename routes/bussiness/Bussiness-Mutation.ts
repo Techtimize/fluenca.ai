@@ -314,14 +314,15 @@ export const IntelligenceRunMutation = () => {
   return useMutation({
     mutationFn: (data: IntelligenceRunRequest) => IntelligenceRunApi(data),
     onSuccess: (response: IntelligenceRunResponse) => {
+      // The backend message is meant for developers ("Poll GET /api/v1/..."), so show our own copy.
       if (response?.success === false) {
-        toast.error(response.error || response.message || "Failed to run intelligence");
+        toast.error("We couldn't start building your workspace. Please try again.");
         return;
       }
-      toast.success(response?.message || "Intelligence run started successfully");
+      toast.success("We're building your workspace. This takes a few minutes.");
     },
-    onError: (error) => {
-      toast.error(getApiErrorMessage(error, "Failed to run intelligence"));
+    onError: () => {
+      toast.error("We couldn't start building your workspace. Please try again.");
     },
   });
 };
