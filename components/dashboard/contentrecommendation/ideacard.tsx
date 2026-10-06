@@ -4,30 +4,10 @@ import Image from "next/image";
 import { FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ScriptGenerationMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import type { ContentIdea } from "@/types/bussiness/content-recommendation-type";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import { Chip } from "./chipsandsection";
 import { ideaToScriptRequest } from "./scriptPayload";
-import { humanize, isPrimitive } from "./utils";
-
-const TITLE_KEYS = ["title", "name", "idea", "topic", "hook", "headline", "theme", "post_type"];
-const SKIP_KEYS = new Set(["platform", "priority", "channel"]);
-const DESC_KEYS = ["description", "summary", "caption", "body", "content", "angle"];
-
-function toDisplay(value: unknown): string {
-  if (value == null) return "";
-  if (isPrimitive(value)) return String(value);
-  if (Array.isArray(value)) {
-    return value.filter(isPrimitive).map(String).join(", ");
-  }
-  if (typeof value === "object") {
-    const record = value as Record<string, unknown>;
-    const primary = TITLE_KEYS.map((key) => record[key]).find(
-      (item) => typeof item === "string" || typeof item === "number",
-    );
-    if (primary != null) return String(primary);
-  }
-  return "";
-}
 
 function PlatformBadge({ platform }: { platform: string }) {
   const lower = platform.toLowerCase();
@@ -56,9 +36,9 @@ function PlatformBadge({ platform }: { platform: string }) {
 function PriorityBadge({ priority }: { priority: string }) {
   const lower = priority.toLowerCase();
   const tone =
-    lower.includes("high") || lower === "1"
+    lower.includes("high") || Number(priority) >= 80
       ? "bg-rose-50 text-rose-700"
-      : lower.includes("medium") || lower === "2"
+      : lower.includes("medium") || Number(priority) >= 50
         ? "bg-amber-50 text-amber-700"
         : "bg-emerald-50 text-emerald-700";
 
@@ -69,40 +49,55 @@ function PriorityBadge({ priority }: { priority: string }) {
   );
 }
 
+function ideaTitle(item: ContentIdea, index: number) {
+  return (
+    item.title ||
+    item.name ||
+    item.idea ||
+    item.topic ||
+    item.headline ||
+    item.theme ||
+    `Idea ${index + 1}`
+  );
+}
+
 export default function IdeaCard({
   item,
   index,
   companyId,
 }: {
-  item: Record<string, unknown>;
+  item: ContentIdea;
   index: number;
   companyId: string;
 }) {
   const { mutate: generateScript, isPending } = ScriptGenerationMutation();
 
-  const titleKey = TITLE_KEYS.find((key) => typeof item[key] === "string");
-  const title = titleKey ? String(item[titleKey]) : `Idea ${index + 1}`;
-
-  const rows = Object.entries(item).filter(([key, value]) => {
-    if (key === titleKey || SKIP_KEYS.has(key)) return false;
-    if (isPrimitive(value)) return String(value).length > 0;
-    if (Array.isArray(value)) return value.length > 0 && value.every(isPrimitive);
-    return false;
-  });
-
-  const platform =
-    typeof item.platform === "string"
-      ? item.platform
-      : typeof item.channel === "string"
-        ? item.channel
-        : null;
+  const title = ideaTitle(item, index);
+  const platform = item.platform || item.channel || null;
   const priority =
-    typeof item.priority === "string" || typeof item.priority === "number"
+    item.priority != null
       ? String(item.priority)
-      : null;
-
-  const descriptionRow = rows.find(([key]) => DESC_KEYS.includes(key));
-  const otherRows = rows.filter(([key]) => key !== descriptionRow?.[0]).slice(0, 3);
+      : item.priority_score != null
+        ? String(item.priority_score)
+        : null;
+  const description =
+    item.caption ||
+    item.description ||
+    item.summary ||
+    item.angle ||
+    item.hook ||
+    item.body ||
+    item.content ||
+    "";
+  const keyPoints = item.key_points?.filter(Boolean) ?? [];
+  const hashtags = item.hashtags?.filter(Boolean) ?? [];
+  const meta = [
+    item.format || item.post_type,
+    item.content_pillar || item.pillar,
+    item.objective || item.goal,
+    item.target_audience,
+    item.date,
+  ].filter(Boolean) as string[];
 
   const handleGenerateScript = () => {
     if (!companyId) {
@@ -127,46 +122,54 @@ export default function IdeaCard({
         {(platform || priority) && (
           <div className="flex flex-wrap gap-1">
             {platform ? <PlatformBadge platform={platform} /> : null}
-            {priority ? <PriorityBadge priority={priority} /> : null}
           </div>
         )}
 
-        {descriptionRow ? (
-          <p className="line-clamp-3 text-[12px] leading-5 text-neutral-600">
-            {toDisplay(descriptionRow[1])}
-          </p>
+        {description ? (
+          <p className="line-clamp-3 text-[12px] leading-5 text-neutral-600">{description}</p>
         ) : null}
 
-        {otherRows.length ? (
-          <dl className="space-y-1.5 border-t border-[#EEF0F8] pt-2">
-            {otherRows.map(([key, value]) => (
-              <div key={key} className="min-w-0">
-                <dt className="text-[10px] font-medium uppercase tracking-[0.04em] text-neutral-400">
-                  {humanize(key)}
-                </dt>
-                <dd className="mt-0.5 text-[12px] leading-4 text-neutral-700">
-                  {Array.isArray(value) && value.every(isPrimitive) ? (
-                    <ul className="mt-1 flex flex-wrap gap-1">
-                      {value.slice(0, 4).map((tag) => (
-                        <li key={String(tag)}>
-                          <Chip>{String(tag)}</Chip>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <span className="line-clamp-2">{toDisplay(value)}</span>
-                  )}
-                </dd>
-              </div>
+        {meta.length ? (
+          <ul className="flex flex-wrap gap-1">
+            {meta.map((value) => (
+              <li key={value}>
+                <Chip>{value}</Chip>
+              </li>
             ))}
-          </dl>
+          </ul>
+        ) : null}
+
+        {keyPoints.length ? (
+          <ul className="space-y-1 border-t border-[#EEF0F8] pt-2">
+            {keyPoints.slice(0, 3).map((point) => (
+              <li key={point} className="text-[12px] leading-4 text-neutral-600">
+                · {point}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        {hashtags.length ? (
+          <ul className="flex flex-wrap gap-1">
+            {hashtags.slice(0, 4).map((tag) => (
+              <li key={tag}>
+                <Chip>{tag}</Chip>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        {item.cta || item.call_to_action ? (
+          <p className="text-[11px] font-medium text-[#5B57E6]">
+            CTA: {item.cta || item.call_to_action}
+          </p>
         ) : null}
 
         <button
           type="button"
           onClick={handleGenerateScript}
           disabled={isPending || !companyId}
-          className={`mt-auto inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg border border-[#D8D6F5] bg-[#F6F5FF] text-[12px] font-medium text-[#5B57E6] hover:bg-[#ECEBFF] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+          className={`mt-auto bg-brand-600 cursor-pointer hover:bg-brand-700 text-white inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg border border-[#D8D6F5] bg-[#F6F5FF] text-[12px] font-medium text-[#5B57E6] hover:bg-[#ECEBFF] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
         >
           {isPending ? (
             <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
