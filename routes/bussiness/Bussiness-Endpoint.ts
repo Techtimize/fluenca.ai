@@ -7,6 +7,8 @@ export const BUSSINESSENDPOINT = {
     INTELLIGENCE_JOB: (job_id: string) => `/intelligence/jobs/${job_id}`,
 
     ONBOARDING_DETAILS: '/onboarding/details',
+
+    
     INTAKE: '/intake',
     INTAKE_COMPLETE: '/intake/complete',
     INTAKE_QUESTION: (questionId: string) => `/intake/questions/${questionId}`,
@@ -59,12 +61,15 @@ export const BUSSINESSENDPOINT = {
 
     GENERATION:{
     SCRIPT_GENERATION: '/scriptGeneration/script',
-    SCRIPT_GENERATION_RESULTS:(company_id: string) => `/scriptGeneration/results/${company_id}`,
+    SCRIPT_GENERATION_RESULTS: '/scriptGeneration/results',
+    SCRIPT_GENERATION_RESULTS_BY_COMPANY_ID:(company_id: string) => `/scriptGeneration/results/${company_id}`,
     DELETE_SCRIPT:(script_id: string) => `/scriptGeneration/script/${script_id}`,
 
     IMAGE_GENERATION: '/generation/image-generation',
     COMPANY_IMAGE_GENERATION:(company_id: string) => `/generation/image-generation/${company_id}`,
     LATEST_GENERATED_IMAGE:(company_id: string) => `/generation/image-generation/${company_id}/latest`,
+    DELETE_IMAGE: (company_id: string, image_id: string) => `/generation/image-generation/${company_id}/images/${image_id}`,
+    DELETE_IMAGE_BY_NAME: (company_id: string, image_name: string) => `/generation/image-generation/${company_id}/images/${image_name}`,
     },
 
     PLANNER:{
@@ -78,4 +83,7 @@ export const BUSSINESSENDPOINT = {
     CONVERSATIONS: '/chatbot/conversations',
     conversation: (conversationId: string) => `/chatbot/conversations/${conversationId}`,
     conversationMessages: (conversationId: string) => `/chatbot/conversations/${conversationId}/messages`,
+
+    BLOG_POST: '/blog-posts',
+    BLOG_POST_DETAILS: (blog_post_id: string) => `/blog-posts/${blog_post_id}`,
 }

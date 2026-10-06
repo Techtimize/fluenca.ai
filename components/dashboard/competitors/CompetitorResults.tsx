@@ -709,7 +709,6 @@ export default function CompetitorResults({
       </Section>
 
       <CompetitorStrategyMoves actions={actions} />
-
       <CompetitorComparisonInsights
         comparison={comparison}
         gaps={quantifiedGaps}

@@ -105,6 +105,7 @@ export interface ScriptGenerationMeta {
 }
 
 export interface ScriptGenerationResponse {
+  id?: string;
   company_id?: string;
   content_type?: string;
   project?: ScriptProject;
@@ -119,13 +120,29 @@ export interface ScriptGenerationResponse {
   scene_planner?: string;
 }
 
+export interface ScriptGenerationResultsParams {
+  limit?: number;
+  offset?: number;
+}
+
+export interface ScriptGenerationResultsPage {
+  results?: ScriptGenerationResponse[];
+  scripts?: ScriptGenerationResponse[];
+  data?: ScriptGenerationResponse[] | ScriptGenerationResponse;
+  items?: ScriptGenerationResponse[];
+  total?: number;
+  total_count?: number;
+  count?: number;
+  limit?: number;
+  offset?: number;
+  page?: number;
+  has_more?: boolean;
+  has_next?: boolean;
+  next_offset?: number;
+  [key: string]: unknown;
+}
+
 export type ScriptGenerationResultsResponse =
   | ScriptGenerationResponse
   | ScriptGenerationResponse[]
-  | {
-      results?: ScriptGenerationResponse[];
-      scripts?: ScriptGenerationResponse[];
-      data?: ScriptGenerationResponse[] | ScriptGenerationResponse;
-      items?: ScriptGenerationResponse[];
-      [key: string]: unknown;
-    };
+  | ScriptGenerationResultsPage;
