@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { IntelligenceRunMutation, RetryDnaMutation } from "@/routes/bussiness/Bussiness-Mutation";
-import { DnaQuery, IntelligenceJobQuery, OnboardingDetailsQuery } from "@/routes/bussiness/Bussiness-Query";
+import { DnaQuery, OnboardingDetailsQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
@@ -32,9 +32,6 @@ const HIDDEN_SECTION_TITLES = new Set([
   "company & team",
   "company and team",
 ]);
-
-const JOB_SUCCESS_STATUSES = new Set(["completed", "succeeded", "success", "ready"]);
-const JOB_FAILED_STATUSES = new Set(["failed", "error", "cancelled", "canceled"]);
 
 const DEFAULT_PLATFORMS = ["instagram", "linkedin"];
 const DEFAULT_SCRIPT_COUNT = 5;
@@ -61,15 +58,8 @@ export default function VerifyDna() {
   const { mutate: intelligenceRun, isPending: isIntelligenceRunPending } =
     IntelligenceRunMutation();
 
+  // Empty until the user scrolls or clicks; the first section is highlighted by default.
   const [activeId, setActiveId] = useState("");
-  const [jobId, setJobId] = useState("");
-  const handledJobRef = useRef<string | null>(null);
-
-  const {
-    data: intelligenceJob,
-    isLoading: isIntelligenceJobLoading,
-    isFetching: isIntelligenceJobFetching,
-  } = IntelligenceJobQuery(jobId);
 
   const isReady = dna?.status === "ready";
   const isFailed = dna?.status === "failed";
@@ -83,16 +73,7 @@ export default function VerifyDna() {
       .map((section) => `## ${section.title}\n${section.text}`)
       .join("\n\n");
 
-  const jobStatus = String(intelligenceJob?.status ?? "").toLowerCase();
-  const isJobFailed = JOB_FAILED_STATUSES.has(jobStatus);
-  const isJobSuccess = JOB_SUCCESS_STATUSES.has(jobStatus);
-  const isPollingJob = Boolean(jobId) && !isJobSuccess && !isJobFailed;
-  const isWorking =
-    isIntelligenceRunPending ||
-    isPollingJob ||
-    (Boolean(jobId) &&
-      (isIntelligenceJobLoading || isIntelligenceJobFetching) &&
-      !isJobFailed);
+  const isWorking = isIntelligenceRunPending;
 
   const sections = useMemo(
     () =>
@@ -112,7 +93,6 @@ export default function VerifyDna() {
 
   useEffect(() => {
     if (!sections.length) return;
-    setActiveId((current) => current || sections[0].id);
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -130,39 +110,7 @@ export default function VerifyDna() {
     return () => observer.disconnect();
   }, [sections]);
 
-  useEffect(() => {
-    if (!jobId || !jobStatus) return;
-    if (handledJobRef.current === `${jobId}:${jobStatus}`) return;
-
-    if (isJobSuccess) {
-      handledJobRef.current = `${jobId}:${jobStatus}`;
-      toast.success(
-        typeof intelligenceJob?.message === "string"
-          ? intelligenceJob.message
-          : t("jobComplete"),
-      );
-      router.push(PAGE_ROUTES.DASHBOARD);
-      return;
-    }
-
-    if (isJobFailed) {
-      handledJobRef.current = `${jobId}:${jobStatus}`;
-      toast.error(
-        (typeof intelligenceJob?.error === "string" && intelligenceJob.error) ||
-          (typeof intelligenceJob?.message === "string" && intelligenceJob.message) ||
-          t("jobFailed"),
-      );
-    }
-  }, [
-    intelligenceJob?.error,
-    intelligenceJob?.message,
-    isJobFailed,
-    isJobSuccess,
-    jobId,
-    jobStatus,
-    router,
-    t,
-  ]);
+  const currentId = activeId || sections[0]?.id || "";
 
   const scrollTo = (id: string) => {
     setActiveId(id);
@@ -175,8 +123,8 @@ export default function VerifyDna() {
       return;
     }
 
-    handledJobRef.current = null;
-    setJobId("");
+    // Load the progress page's code while the run request is in flight, so navigation is instant.
+    router.prefetch(`${PAGE_ROUTES.VERIFY_DNA}/progress/loading`);
 
     intelligenceRun(
       {
@@ -194,7 +142,8 @@ export default function VerifyDna() {
             return;
           }
 
-          setJobId(nextJobId);
+          // The progress page polls the job and sends the user back here if it fails.
+          router.push(`${PAGE_ROUTES.VERIFY_DNA}/progress/${encodeURIComponent(nextJobId)}`);
         },
       },
     );
@@ -282,7 +231,7 @@ export default function VerifyDna() {
               <nav aria-label="DNA sections">
                 <ul className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:gap-1 lg:overflow-visible lg:pb-0">
                   {sections.map((section, index) => {
-                    const active = section.id === activeId;
+                    const active = section.id === currentId;
                     const Icon = section.Icon;
                     return (
                       <li key={section.id} className="shrink-0">
@@ -352,12 +301,6 @@ export default function VerifyDna() {
               <div className="flex flex-col gap-3 border-t border-[#E6E8F5] pt-8 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm text-neutral-500">{t("continueHint")}</p>
-                  {isPollingJob ? (
-                    <p className="mt-1 text-xs text-[#5B57E6]">{t("pollingJob")}</p>
-                  ) : null}
-                  {isJobFailed ? (
-                    <p className="mt-1 text-xs text-[#B42318]">{t("jobFailed")}</p>
-                  ) : null}
                 </div>
                 <button
                   type="button"
@@ -368,7 +311,7 @@ export default function VerifyDna() {
                   {isWorking ? (
                     <>
                       <Loader2 className="size-4 animate-spin" />
-                      {isPollingJob ? t("pollingJob") : t("analyzing")}
+                      {t("analyzing")}
                     </>
                   ) : (
                     t("continue")
