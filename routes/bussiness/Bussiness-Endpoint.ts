@@ -8,7 +8,6 @@ export const BUSSINESSENDPOINT = {
 
     ONBOARDING_DETAILS: '/onboarding/details',
 
-    
     INTAKE: '/intake',
     INTAKE_COMPLETE: '/intake/complete',
     INTAKE_QUESTION: (questionId: string) => `/intake/questions/${questionId}`,

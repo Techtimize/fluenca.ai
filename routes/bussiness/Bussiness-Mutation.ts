@@ -85,6 +85,12 @@ export function AnalyzeCompanyMutation() {
                 toast.error("Failed to get company analysis results");
             }
 
+            queryClient.invalidateQueries({
+              queryKey: ["analyze-company-dashboard", companyId],
+            });
+            queryClient.invalidateQueries({
+              queryKey: ["analyze-company-results", companyId],
+            });
             toast.success("Company analyzed successfully");
             router.push(PAGE_ROUTES.DASHBOARD);
         },
