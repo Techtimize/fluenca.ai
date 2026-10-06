@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import type { AnalyticsCharts } from "@/types/dashboard";
+import { ChevronDown } from "lucide-react";
+import type { AnalyticsCharts, GrowthOpportunity } from "@/types/dashboard";
 
 // Light, bright fills; every bar carries a value label, so the light tones stay readable.
 const STRENGTH = "#818CF8";
@@ -7,6 +8,12 @@ const WEAKNESS = "#FB7185";
 const SINGLE = "#818CF8";
 
 const LEVELS = ["High", "Medium", "Low"];
+
+const PRIORITY_DOT: Record<string, string> = {
+  high: "bg-[#F43F5E]",
+  medium: "bg-[#F59E0B]",
+  low: "bg-[#10B981]",
+};
 
 function ChartCard({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
   return (
@@ -59,7 +66,47 @@ function StrengthsWeaknessesChart({ data }: { data: AnalyticsCharts["strengthsWe
 }
 
 /* ---------- Growth opportunities by priority (single series, column bars) ---------- */
-function OpportunitiesChart({ data }: { data: AnalyticsCharts["opportunitiesByPriority"] }) {
+function OpportunityList({ items }: { items: GrowthOpportunity[] }) {
+  return (
+    <ul className="mt-5 space-y-2 border-t border-neutral-100 pt-4">
+      {items.map((item) => (
+        <li key={item.id}>
+          <details className="group rounded-xl bg-[#F6F7FD] px-3 py-2.5">
+            <summary className="flex cursor-pointer list-none items-start gap-2 [&::-webkit-details-marker]:hidden">
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-1.5 text-[11px] font-medium text-neutral-700">
+                  <span className={`size-1.5 rounded-full ${PRIORITY_DOT[item.priority?.toLowerCase()] ?? "bg-neutral-400"}`} aria-hidden="true" />
+                  {item.area}
+                  <span className="sr-only">, {item.priority} priority</span>
+                </span>
+                <span className="mt-1 block text-xs text-neutral-800">{item.finding}</span>
+              </span>
+              <ChevronDown className="mt-0.5 size-3.5 shrink-0 text-neutral-500 transition-transform group-open:rotate-180" aria-hidden="true" />
+            </summary>
+            <dl className="mt-2 space-y-1.5 text-[11px] leading-4">
+              <div>
+                <dt className="font-medium text-neutral-500">Why it matters</dt>
+                <dd className="text-neutral-700">{item.impact}</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-neutral-500">Next step</dt>
+                <dd className="text-neutral-700">{item.action}</dd>
+              </div>
+            </dl>
+          </details>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function OpportunitiesChart({
+  data,
+  items = [],
+}: {
+  data: AnalyticsCharts["opportunitiesByPriority"];
+  items?: GrowthOpportunity[];
+}) {
   const max = Math.max(1, ...data.map((row) => row.count));
   const total = data.reduce((sum, row) => sum + row.count, 0);
   return (
@@ -82,6 +129,7 @@ function OpportunitiesChart({ data }: { data: AnalyticsCharts["opportunitiesByPr
           </span>
         ))}
       </div>
+      {items.length ? <OpportunityList items={items} /> : null}
     </ChartCard>
   );
 }
@@ -149,7 +197,7 @@ export default function AnalyticsChartsRow({ charts }: { charts: AnalyticsCharts
   return (
     <>
       <StrengthsWeaknessesChart data={charts.strengthsWeaknesses} />
-      <OpportunitiesChart data={charts.opportunitiesByPriority} />
+      <OpportunitiesChart data={charts.opportunitiesByPriority} items={charts.opportunities} />
       {charts.actions.length ? <ImpactEffortMatrix data={charts.actions} /> : null}
     </>
   );
