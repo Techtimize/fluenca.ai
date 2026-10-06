@@ -20,6 +20,8 @@ export interface DashboardCompetitor {
   instagram_url: string | null;
   linkedin_url: string | null;
   logo_url: string | null;
+  instagram_image_url?: string | null;
+  linkedin_image_url?: string | null;
 }
 
 export interface DashboardCompanyCard {
@@ -28,6 +30,10 @@ export interface DashboardCompanyCard {
   website_url: string | null;
   description: string;
   positioning: string | null;
+  core_offering?: string | null;
+  logo_url?: string | null;
+  instagram_image_url?: string | null;
+  linkedin_image_url?: string | null;
   tags: string[];
   socials: DashboardSocials;
   competitors: DashboardCompetitor[];

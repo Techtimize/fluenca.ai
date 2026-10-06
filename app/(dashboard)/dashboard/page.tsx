@@ -12,6 +12,7 @@ import TopBar from "@/components/dashboard/topBar";
 import { mapDashboard } from "@/lib/dashboard/map-dashboard";
 import { useChatbot } from "@/lib/chat/use-chatbot";
 import { AnalyzeCompanyDashboardQuery } from "@/routes/bussiness/Bussiness-Query";
+import { AnalyzeCompanyMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import useAuthStore from "@/store/AuthsStore";
 import type { Device } from "@/types/dashboard";
 
@@ -25,20 +26,44 @@ export default function DashboardPage() {
     isLoading,
     isError,
     error,
+    refetch,
   } = AnalyzeCompanyDashboardQuery(companyId);
+
+  const { mutate: analyzeCompany, isPending } = AnalyzeCompanyMutation();
 
   const mapped = useMemo(
     () => (dashboard?.data ? mapDashboard(dashboard) : null),
     [dashboard],
   );
 
+  const handleAnalyzeCompany = () => {
+    if (!companyId || isPending) return;
+
+    const companyData =
+      mapped?.company.description ||
+      mapped?.company.coreOffering ||
+      mapped?.profile.core_offering ||
+      mapped?.company.name ||
+      companyName ||
+      "";
+
+    analyzeCompany(
+      {
+        company_id: companyId,
+        company_data: companyData,
+      },
+      {
+        onSettled: () => {
+          void refetch();
+        },
+      },
+    );
+  };
+
   const sources = mapped?.sources ?? [];
   const channels = mapped?.channels ?? {};
   const defaultSource = mapped?.defaultSource || sources[0]?.id || "";
-
   const user = { name: companyName || mapped?.company.name || "" };
-
-  // null means "use the channel the backend marks as default".
   const [selectedSource, setSource] = useState<string | null>(null);
   const source =
     selectedSource && channels[selectedSource] ? selectedSource : defaultSource;
@@ -103,7 +128,12 @@ export default function DashboardPage() {
             <div
               className={`grid gap-4 ${chatOpen ? "" : "xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]"}`}
             >
-              <CompanyCard company={mapped.company} profile={mapped.profile} />
+              <CompanyCard
+                company={mapped.company}
+                profile={mapped.profile}
+                onRefresh={handleAnalyzeCompany}
+                isRefreshing={isPending}
+              />
               {!chatOpen && mapped.docs.length ? (
                 <DocumentationCard
                   items={mapped.docs}
