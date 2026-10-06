@@ -22,7 +22,11 @@ import type {
 } from "@/types/bussiness/google-trends-type";
 import { ContentRecommendationRequest, ContentRecommendationResponse, ContentRecommendationResultResponse } from "@/types/bussiness/content-recommendation-type";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
-import { ScriptGenerationRequest, ScriptGenerationResultsResponse } from "@/types/bussiness/script-type";
+import {
+  ScriptGenerationRequest,
+  ScriptGenerationResultsParams,
+  ScriptGenerationResultsResponse,
+} from "@/types/bussiness/script-type";
 import type {
   CompanyImageGenerationResponse,
   ImageGenerationRequest,
@@ -253,10 +257,24 @@ export const ScriptGenerationApi = async (data: ScriptGenerationRequest) => {
     return response.data;
 }
 
-export const ScriptGenerationResultsApi = async (
+export const ScriptGenerationResultsByCompanyIdApi = async (
   company_id: string,
+  params?: ScriptGenerationResultsParams,
 ): Promise<ScriptGenerationResultsResponse> => {
-    const response = await api.get(BUSSINESSENDPOINT.GENERATION.SCRIPT_GENERATION_RESULTS(company_id));
+    const response = await api.get(
+      BUSSINESSENDPOINT.GENERATION.SCRIPT_GENERATION_RESULTS_BY_COMPANY_ID(company_id),
+      {
+        params: {
+          limit: params?.limit,
+          offset: params?.offset,
+        },
+      },
+    );
+    return response.data;
+}
+
+export const ScriptGenerationResultsApi = async (): Promise<ScriptGenerationResultsResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.GENERATION.SCRIPT_GENERATION_RESULTS);
     return response.data;
 }
 
@@ -271,6 +289,11 @@ export const CompanyImageGenerationApi = async (
   company_id: string,
 ): Promise<CompanyImageGenerationResponse> => {
     const response = await api.get(BUSSINESSENDPOINT.GENERATION.COMPANY_IMAGE_GENERATION(company_id));
+    return response.data;
+}
+
+export const DeleteImageApi = async (company_id: string, image_id: string) => {
+    const response = await api.delete(BUSSINESSENDPOINT.GENERATION.DELETE_IMAGE(company_id, image_id));
     return response.data;
 }
 
@@ -326,3 +349,14 @@ export const CompetitorAnalyticDashboardApi = async (company_id: string) => {
     const response = await api.get(BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_COMPETITORS(company_id));
     return response.data;
 }
+
+export const BlogPostApi = async (brief_id: string) => {
+    const response = await api.post(BUSSINESSENDPOINT.BLOG_POST, { params: { brief_id: brief_id } });
+    return response.data;
+}
+
+export const BlogPostDetailsApi = async (blog_post_id: string) => {
+    const response = await api.get(BUSSINESSENDPOINT.BLOG_POST_DETAILS(blog_post_id));
+    return response.data;
+}
+

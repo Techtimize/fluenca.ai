@@ -29,7 +29,9 @@ export const PAGE_ROUTES = {
     CALENDAR: '/calendar',
     CONTENT_RECOMMENDATION: '/content-recommendation',
     SCRIPT: '/script',
+    SCRIPT_DETAIL: (id: string) => `/script/${id}`,
     CONTENT: '/content',
+    BLOGS: '/blogs',
 
     // Super admin
     SUPERADMIN: '/superadmin',
