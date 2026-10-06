@@ -1,3 +1,5 @@
+"use client";
+
 import { BlogPostMutation } from '@/routes/bussiness/Bussiness-Mutation'
 import React from 'react'
 
