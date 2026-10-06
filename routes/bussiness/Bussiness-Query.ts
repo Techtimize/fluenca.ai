@@ -253,7 +253,13 @@ export const IntelligenceJobQuery = (job_id: string) => {
     queryKey: ["intelligence-job", job_id],
     queryFn: () => IntelligenceJobApi(job_id),
     enabled: Boolean(job_id),
+    // A 4xx (e.g. 404 "Job not found") will not fix itself, so fail fast instead of retrying.
+    retry: (failureCount, error) => {
+      const status = (error as { response?: { status?: number } })?.response?.status ?? 0;
+      return status >= 400 && status < 500 ? false : failureCount < 2;
+    },
     refetchInterval: (query) => {
+      if (query.state.status === "error") return false;
       const status = String(query.state.data?.status ?? "").toLowerCase();
       if (status && JOB_DONE_STATUSES.has(status)) return false;
       return POLL_INTERVAL_MS;
