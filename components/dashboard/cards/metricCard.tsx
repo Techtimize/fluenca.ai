@@ -3,10 +3,10 @@ import type { Metric, Tone } from "@/types/dashboard";
 import { getIcon } from "@/utils/icon-utils";
 
 const TONES: Record<Tone, { iconBg: string; text: string; bar: string }> = {
-  green: { iconBg: "bg-[#EAF7E4]", text: "text-[#3BA61F]", bar: "bg-[#3BA61F]" },
-  orange: { iconBg: "bg-[#FFF3E2]", text: "text-[#E08A0B]", bar: "bg-[#E08A0B]" },
-  purple: { iconBg: "bg-[#ECEBFF]", text: "text-[#6366F1]", bar: "bg-[#818CF8]" },
-  teal: { iconBg: "bg-[#DDF6F4]", text: "text-[#0D9488]", bar: "bg-[#2DD4BF]" },
+  green: { iconBg: "bg-[#EAF6E3]", text: "text-[#3E9E1C]", bar: "bg-[#3E9E1C]" },
+  orange: { iconBg: "bg-[#FDF0DD]", text: "text-[#D98306]", bar: "bg-[#D98306]" },
+  purple: { iconBg: "bg-[#E6E8FC]", text: "text-[#4A57EC]", bar: "bg-[#4A57EC]" },
+  teal: { iconBg: "bg-[#DDF2F4]", text: "text-[#0E8F9B]", bar: "bg-[#0E8F9B]" },
   sky: { iconBg: "bg-[#E0F2FE]", text: "text-[#0284C7]", bar: "bg-[#38BDF8]" },
   rose: { iconBg: "bg-[#FDE8EE]", text: "text-[#E11D48]", bar: "bg-[#FB7185]" },
 };

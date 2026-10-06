@@ -2,6 +2,7 @@ import { BUSSINESSENDPOINT } from "./Bussiness-Endpoint";
 import api from "../apiClient";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
+import type { DashboardResponse } from "@/types/bussiness/dashboard-type";
 import {
   CompetitorAnalysisJobResponse,
   CompetitorAnalysisManualRequest,
@@ -180,6 +181,13 @@ export const RetryDnaApi = async (): Promise<DnaResponseProps> => {
 export const AnalyzeCompanyResultsApi = async (company_id: string) => {
     const response = await api.get<AnalyzeCompanyResponse>(
       BUSSINESSENDPOINT.ANALYZE_COMPANY_RESULTS(company_id),
+    );
+    return response.data;
+}
+
+export const AnalyzeCompanyDashboardApi = async (company_id: string) => {
+    const response = await api.get<DashboardResponse>(
+      BUSSINESSENDPOINT.ANALYZE_COMPANY_DASHBOARD(company_id),
     );
     return response.data;
 }
