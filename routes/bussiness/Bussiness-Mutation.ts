@@ -122,7 +122,6 @@ export function AnswerQuestionMutation() {
                 const required_unanswered = questions.filter(
                     (q) => q.required && !(q.answer && q.answer.trim()),
                 ).length;
-
                 return {
                     ...intake,
                     sections,

@@ -20,7 +20,7 @@ import type {
   GoogleTrendQueryParams,
   GoogleTrendTrendingResponse,
 } from "@/types/bussiness/google-trends-type";
-import { ContentRecommendationRequest, ContentRecommendationResponse, ContentRecommendationResultResponse } from "@/types/bussiness/content-recommendation-type";
+import {  ContentRecommendationResponse, ContentRecommendationResultResponse } from "@/types/bussiness/content-recommendation-type";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
 import {
   ScriptGenerationRequest,
@@ -34,6 +34,8 @@ import type {
   LatestGeneratedImageResponse,
 } from "@/types/bussiness/imagegeneration-type";
 import { IntelligenceJobResponse, IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
+import { BuisnessNicheTrendResponse, NicheTrendsRequest } from "@/types/bussiness/neche_trends";
+import { ContentRecommendationRequest } from "@/types/Trends/Content-recommendation-interface";
 import type { PlannerResultsResponse, PlannerVersionsResponse } from "@/types/bussiness/planner-type";
 
 function toQueryParams(params?: GoogleTrendQueryParams) {
@@ -318,6 +320,10 @@ export const IntelligenceJobApi = async (
     return response.data;
 }
 
+// export const NicheTrendApi = async (data: NicheTrendsRequest) => {
+//     const response = await api.post<BuisnessNicheTrendResponse>(BUSSINESSENDPOINT.NICHE_TREND, data);
+//     return response.data;
+// }
 export const PlannerResultsApi = async (
   company_id: string,
 ): Promise<PlannerResultsResponse> => {
