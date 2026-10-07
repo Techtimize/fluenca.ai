@@ -1,6 +1,6 @@
 import Card from "@/components/shared/card";
 import type { ScriptProject } from "@/types/bussiness/script-type";
-import { MetaChip } from "./primitives";
+import { MetaChip, PlatformChip } from "./primitives";
 
 export function ProjectSection({ project }: { project: ScriptProject }) {
   return (
@@ -17,7 +17,7 @@ export function ProjectSection({ project }: { project: ScriptProject }) {
       </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
-        <MetaChip label="Platform" value={project.platform} />
+        <PlatformChip platform={project.platform} />
         <MetaChip label="Format" value={project.format} />
         <MetaChip label="Tone" value={project.tone} />
         <MetaChip label="Audience" value={project.audience} />
