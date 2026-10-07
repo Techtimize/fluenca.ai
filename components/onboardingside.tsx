@@ -6,7 +6,7 @@ export default function OnboardingSide() {
   return (
     <Card className="w-full h-full rounded-none border-0 ring-0 bg-linear-to-b from-brand via-[#CCCCF5] to-white">
       <Image
-        src="/assets/lines.png"
+        src="/assets/Lines.png"
         alt="lines"
         width={100}
         height={100}
