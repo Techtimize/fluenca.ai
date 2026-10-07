@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle2, Loader2, Plug, Unplug } from "lucide-react";
+import { CheckCircle2, Clock3, Loader2, Plug, Unplug } from "lucide-react";
 import { toast } from "sonner";
 import TopBar from "@/components/dashboard/topBar";
 import Card from "@/components/shared/card";
@@ -20,7 +20,45 @@ import {
   findSocialAccount,
   isSocialAccountConnected,
   normalizeSocialAccounts,
+  type SocialAccount,
 } from "@/types/bussiness/social-accounts-type";
+
+type PlatformId = "instagram" | "linkedin" | "x";
+
+type PlatformCardConfig = {
+  id: PlatformId;
+  title: string;
+  description: string;
+  iconSrc: string;
+  ready: boolean;
+};
+
+const PLATFORMS: PlatformCardConfig[] = [
+  {
+    id: "instagram",
+    title: "Instagram",
+    description:
+      "Authorize Instagram via Meta OAuth. After you approve, you’ll return here with your account linked.",
+    iconSrc: "/assets/insta.png",
+    ready: true,
+  },
+  {
+    id: "linkedin",
+    title: "LinkedIn",
+    description:
+      "Connect your company page to sync hiring signals, posts, and audience insights.",
+    iconSrc: "/assets/linkedin.png",
+    ready: false,
+  },
+  {
+    id: "x",
+    title: "X",
+    description:
+      "Link your X account to pull post performance and brand mentions into Fluenca.",
+    iconSrc: "/assets/x.png",
+    ready: false,
+  },
+];
 
 function decodeConnectError(value: string | null) {
   if (!value) return null;
@@ -29,6 +67,132 @@ function decodeConnectError(value: string | null) {
   } catch {
     return value;
   }
+}
+
+function accountHandle(account?: SocialAccount | null) {
+  const value =
+    account?.username || account?.account_name || account?.display_name || null;
+  if (!value) return null;
+  return String(value).replace(/^@/, "");
+}
+
+function PlatformCard({
+  platform,
+  account,
+  isLoading,
+  isConnecting,
+  isDisconnecting,
+  onConnect,
+  onDisconnect,
+}: {
+  platform: PlatformCardConfig;
+  account?: SocialAccount | null;
+  isLoading?: boolean;
+  isConnecting?: boolean;
+  isDisconnecting?: boolean;
+  onConnect: () => void;
+  onDisconnect?: () => void;
+}) {
+  const connected = platform.ready && isSocialAccountConnected(account);
+  const handle = accountHandle(account);
+
+  return (
+    <Card className="p-5 sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex min-w-0 items-start gap-3">
+          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#F6F7FD] ring-1 ring-[#E6E8F5]">
+            <Image
+              src={platform.iconSrc}
+              alt=""
+              width={28}
+              height={28}
+              className="size-7 object-contain"
+            />
+          </span>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-[16px] font-semibold text-neutral-900">
+                {platform.title}
+              </h2>
+              {!platform.ready ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#F0F1F8] px-2.5 py-0.5 text-[11px] font-medium text-neutral-500">
+                  <Clock3 className="size-3.5" aria-hidden="true" />
+                  Coming soon
+                </span>
+              ) : isLoading ? (
+                <span className="rounded-full bg-[#F0F1F8] px-2.5 py-0.5 text-[11px] font-medium text-neutral-500">
+                  Checking…
+                </span>
+              ) : connected ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#E6F7F4] px-2.5 py-0.5 text-[11px] font-medium text-[#0F766E]">
+                  <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                  Connected
+                </span>
+              ) : (
+                <span className="rounded-full bg-[#F6F7FD] px-2.5 py-0.5 text-[11px] font-medium text-neutral-500">
+                  Not connected
+                </span>
+              )}
+            </div>
+            <p className="mt-1 text-[13px] leading-5 text-neutral-500">
+              {platform.description}
+            </p>
+            {connected && handle ? (
+              <p className="mt-2 text-[13px] font-medium text-neutral-800">
+                @{handle}
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {connected && onDisconnect ? (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isDisconnecting}
+              onClick={onDisconnect}
+              className="h-11 gap-2 rounded-full px-4"
+            >
+              {isDisconnecting ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Unplug className="size-4" />
+              )}
+              Disconnect
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            disabled={!platform.ready || isConnecting || isLoading}
+            onClick={onConnect}
+            className={`h-11 gap-2 rounded-full px-5 ${
+              platform.ready
+                ? "bg-[#5B57E6] text-white hover:bg-[#4A46D0]"
+                : "bg-[#EEF0F8] text-neutral-500"
+            }`}
+          >
+            {isConnecting ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Image
+                src={platform.iconSrc}
+                alt=""
+                width={16}
+                height={16}
+                className="size-4 object-contain"
+              />
+            )}
+            {!platform.ready
+              ? "Soon"
+              : connected
+                ? `Reconnect ${platform.title}`
+                : `Connect ${platform.title}`}
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
 }
 
 function IntegrationsPageContent() {
@@ -56,7 +220,6 @@ function IntegrationsPageContent() {
     [accountsData],
   );
   const instagramAccount = findSocialAccount(accounts, "instagram");
-  const instagramConnected = isSocialAccountConnected(instagramAccount);
 
   useEffect(() => {
     if (handledReturn.current) return;
@@ -80,14 +243,6 @@ function IntegrationsPageContent() {
     router.replace(PAGE_ROUTES.INTEGRATIONS);
   }, [refetch, router, searchParams]);
 
-  const handleConnectInstagram = () => {
-    connectInstagram();
-  };
-
-  const handleDisconnectInstagram = () => {
-    disconnectAccount("instagram");
-  };
-
   return (
     <main className="min-w-0 space-y-4 pb-6">
       <TopBar
@@ -106,8 +261,8 @@ function IntegrationsPageContent() {
               Connect your social accounts
             </h1>
             <p className="mt-2 max-w-2xl text-[14px] leading-6 text-neutral-600">
-              Link Instagram so Fluenca can pull account insights and keep your
-              competitor and content workflows in sync.
+              Link Instagram now. LinkedIn and X are shown here and will open for
+              connection soon.
             </p>
           </div>
           {isFetching && !isLoading ? (
@@ -127,97 +282,32 @@ function IntegrationsPageContent() {
         </Card>
       ) : null}
 
-      <Card className="p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex min-w-0 items-start gap-3">
-            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#F6F7FD] ring-1 ring-[#E6E8F5]">
-              <Image
-                src="/assets/insta.png"
-                alt=""
-                width={28}
-                height={28}
-                className="size-7 object-contain"
-              />
-            </span>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-[16px] font-semibold text-neutral-900">
-                  Instagram
-                </h2>
-                {isLoading ? (
-                  <span className="rounded-full bg-[#F0F1F8] px-2.5 py-0.5 text-[11px] font-medium text-neutral-500">
-                    Checking…
-                  </span>
-                ) : instagramConnected ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#E6F7F4] px-2.5 py-0.5 text-[11px] font-medium text-[#0F766E]">
-                    <CheckCircle2 className="size-3.5" aria-hidden="true" />
-                    Connected
-                  </span>
-                ) : (
-                  <span className="rounded-full bg-[#F6F7FD] px-2.5 py-0.5 text-[11px] font-medium text-neutral-500">
-                    Not connected
-                  </span>
-                )}
-              </div>
-              <p className="mt-1 text-[13px] leading-5 text-neutral-500">
-                Authorize Instagram via Meta OAuth. After you approve, you’ll return
-                here with your account linked.
-              </p>
-              {instagramConnected &&
-              (instagramAccount?.username ||
-                instagramAccount?.account_name ||
-                instagramAccount?.display_name) ? (
-                <p className="mt-2 text-[13px] font-medium text-neutral-800">
-                  @
-                  {String(
-                    instagramAccount?.username ||
-                      instagramAccount?.account_name ||
-                      instagramAccount?.display_name,
-                  ).replace(/^@/, "")}
-                </p>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {instagramConnected ? (
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isDisconnecting}
-                onClick={handleDisconnectInstagram}
-                className="h-11 gap-2 rounded-full px-4"
-              >
-                {isDisconnecting ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <Unplug className="size-4" />
-                )}
-                Disconnect
-              </Button>
-            ) : null}
-            <Button
-              type="button"
-              disabled={isConnecting || isLoading}
-              onClick={handleConnectInstagram}
-              className="h-11 gap-2 rounded-full bg-[#5B57E6] px-5 text-white hover:bg-[#4A46D0]"
-            >
-              {isConnecting ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Image
-                  src="/assets/insta.png"
-                  alt=""
-                  width={16}
-                  height={16}
-                  className="size-4 object-contain"
-                />
-              )}
-              {instagramConnected ? "Reconnect Instagram" : "Connect Instagram"}
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <div className="space-y-3">
+        {PLATFORMS.map((platform) => (
+          <PlatformCard
+            key={platform.id}
+            platform={platform}
+            account={platform.id === "instagram" ? instagramAccount : null}
+            isLoading={platform.ready ? isLoading : false}
+            isConnecting={platform.id === "instagram" ? isConnecting : false}
+            isDisconnecting={
+              platform.id === "instagram" ? isDisconnecting : false
+            }
+            onConnect={() => {
+              if (platform.id === "instagram") {
+                connectInstagram();
+                return;
+              }
+              toast.message(`${platform.title} connection is coming soon`);
+            }}
+            onDisconnect={
+              platform.id === "instagram"
+                ? () => disconnectAccount("instagram")
+                : undefined
+            }
+          />
+        ))}
+      </div>
     </main>
   );
 }
