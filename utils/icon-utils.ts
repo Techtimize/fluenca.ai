@@ -1,6 +1,6 @@
-import type { LucideIcon } from "lucide-react";
+import { createElement } from "react";
+import type { LucideIcon, LucideProps } from "lucide-react";
 import {
-  Accessibility,
   Activity,
   BadgeCheck,
   BarChart,
@@ -9,6 +9,7 @@ import {
   BarChart4,
   CalendarDays,
   Lightbulb,
+  PersonStanding,
   ClipboardList,
   CreditCard,
   Dna,
@@ -25,7 +26,7 @@ import {
 
 // The API sends icon names as strings. Add new names here when you need them.
 const ICONS: Record<string, LucideIcon> = {
-  accessibility: Accessibility,
+  accessibility: PersonStanding,
   performance: Gauge,
   "best-practices": BadgeCheck,
   "best_practices": BadgeCheck,
@@ -53,4 +54,10 @@ export function getIcon(name?: string): LucideIcon {
   if (!name) return FileText;
   const normalized = name.toLowerCase().trim();
   return ICONS[normalized] || FileText;
+}
+
+// Renders an icon by name. Use this instead of `const Icon = getIcon(name)` inside a component,
+// which React Compiler rejects as "creating a component during render".
+export function DynamicIcon({ name, ...props }: LucideProps & { name?: string }) {
+  return createElement(getIcon(name), props);
 }
