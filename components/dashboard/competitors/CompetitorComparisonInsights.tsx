@@ -4,7 +4,6 @@ import {
   AtSign,
   Crosshair,
   FileText,
-  Gauge,
   Globe2,
   Layers3,
   Share2,
@@ -215,6 +214,286 @@ function comparisonLabel(item: CompetitorSideBySideComparison) {
     item.username ||
     "Competitor"
   );
+}
+
+function dimPct(
+  item: CompetitorSideBySideComparison,
+  key: "content" | "location" | "services" | "marketing" | "technology",
+) {
+  const dim = item.similarity_dimensions?.[key];
+  if (typeof dim?.similarity_pct === "number") return formatPercent(dim.similarity_pct);
+  if (typeof dim?.overlap_pct === "number") return formatPercent(dim.overlap_pct);
+  return "—";
+}
+
+function dimVerdict(
+  item: CompetitorSideBySideComparison,
+  key: "content" | "location" | "services" | "marketing" | "technology",
+) {
+  const verdict = item.similarity_dimensions?.[key]?.verdict;
+  return verdict ? verdict.replace(/_/g, " ") : null;
+}
+
+function CompetitorVsCompanyTable({
+  company,
+  comparisons,
+}: {
+  company?: CompetitorVsCompanyComparison["company"];
+  comparisons: CompetitorSideBySideComparison[];
+}) {
+  if (!comparisons.length) return null;
+
+  const yourName = company?.name || "Your company";
+  const yourFollowers = company?.social?.followers;
+  const yourEngagement = company?.social?.avg_engagement_rate;
+  const yourFormat = company?.social?.primary_format;
+  const yourCadence = formatPostingFrequency(company?.social?.posting_frequency);
+
+  type Row = {
+    id: string;
+    label: string;
+    yours: string;
+    values: string[];
+    notes?: Array<string | null>;
+  };
+
+  const rows: Row[] = [
+    {
+      id: "similarity",
+      label: "Overall similarity",
+      yours: "—",
+      values: comparisons.map((item) => {
+        const pct =
+          item.competitive_position?.similarity_pct ??
+          item.overall_similarity_pct ??
+          (typeof item.match_score === "number"
+            ? item.match_score <= 1
+              ? Math.round(item.match_score * 100)
+              : item.match_score
+            : null);
+        return pct != null ? `${Math.round(pct)}%` : "—";
+      }),
+      notes: comparisons.map((item) => item.competitive_position?.position || null),
+    },
+    {
+      id: "match",
+      label: "Match score",
+      yours: "—",
+      values: comparisons.map((item) =>
+        typeof item.match_score === "number" ? formatPercent(item.match_score) : "—",
+      ),
+    },
+    {
+      id: "position",
+      label: "Competitive position",
+      yours: "You",
+      values: comparisons.map(
+        (item) => item.competitive_position?.summary || item.competitive_position?.position || "—",
+      ),
+    },
+    {
+      id: "services",
+      label: "Services overlap",
+      yours: company?.services?.length
+        ? `${company.services.length} services`
+        : "—",
+      values: comparisons.map((item) => {
+        const block = item.services_comparison || item.service_comparison;
+        if (typeof block?.overlap_pct === "number") return formatPercent(block.overlap_pct);
+        return dimPct(item, "services");
+      }),
+      notes: comparisons.map((item) => {
+        const block = item.services_comparison || item.service_comparison;
+        if (block?.shared_count != null) return `${block.shared_count} shared`;
+        return dimVerdict(item, "services");
+      }),
+    },
+    {
+      id: "technology",
+      label: "Technology overlap",
+      yours: company?.technologies?.length
+        ? `${company.technologies.length} technologies`
+        : "—",
+      values: comparisons.map((item) => {
+        const block = item.technology_comparison;
+        if (typeof block?.overlap_pct === "number") return formatPercent(block.overlap_pct);
+        return dimPct(item, "technology");
+      }),
+      notes: comparisons.map((item) => {
+        const block = item.technology_comparison;
+        if (block?.shared_count != null) return `${block.shared_count} shared`;
+        return dimVerdict(item, "technology");
+      }),
+    },
+    {
+      id: "content",
+      label: "Content similarity",
+      yours: yourFormat || "—",
+      values: comparisons.map((item) => dimPct(item, "content")),
+      notes: comparisons.map((item) => {
+        const format =
+          item.content_comparison?.competitor_primary_format ||
+          item.content?.competitor_primary_format ||
+          item.competitor?.social?.primary_format;
+        return format || dimVerdict(item, "content");
+      }),
+    },
+    {
+      id: "marketing",
+      label: "Marketing similarity",
+      yours: "—",
+      values: comparisons.map((item) => dimPct(item, "marketing")),
+      notes: comparisons.map((item) => dimVerdict(item, "marketing")),
+    },
+    {
+      id: "location",
+      label: "Location similarity",
+      yours: "—",
+      values: comparisons.map((item) => dimPct(item, "location")),
+      notes: comparisons.map((item) => dimVerdict(item, "location")),
+    },
+    {
+      id: "followers",
+      label: "Instagram followers",
+      yours: formatNumber(yourFollowers),
+      values: comparisons.map((item) =>
+        formatNumber(
+          item.social_comparison?.competitor?.followers ??
+            item.social_comparison?.their_followers ??
+            item.social_comparison?.competitor_followers,
+        ),
+      ),
+      notes: comparisons.map((item) => {
+        const gap = item.social_comparison?.delta?.follower_gap;
+        if (typeof gap !== "number") return null;
+        if (gap === 0) return "Even";
+        return gap > 0 ? `Ahead by ${formatNumber(gap)}` : `Behind by ${formatNumber(Math.abs(gap))}`;
+      }),
+    },
+    {
+      id: "engagement",
+      label: "Engagement rate",
+      yours: formatEngagement(yourEngagement),
+      values: comparisons.map((item) =>
+        formatEngagement(
+          item.social_comparison?.competitor?.avg_engagement_rate ??
+            item.social_comparison?.their_engagement ??
+            item.social_comparison?.competitor_engagement,
+        ),
+      ),
+    },
+    {
+      id: "format",
+      label: "Primary format",
+      yours: yourFormat || "—",
+      values: comparisons.map(
+        (item) =>
+          item.content_comparison?.competitor_primary_format ||
+          item.social_comparison?.competitor?.primary_format ||
+          item.competitor?.social?.primary_format ||
+          "—",
+      ),
+    },
+    {
+      id: "cadence",
+      label: "Posting cadence",
+      yours: yourCadence || "—",
+      values: comparisons.map(
+        (item) =>
+          formatPostingFrequency(
+            item.social_comparison?.competitor?.posting_frequency ||
+              item.social_comparison?.competitor_posting_frequency,
+          ) || "—",
+      ),
+    },
+    {
+      id: "hiring",
+      label: "Hiring",
+      yours:
+        itemHiringLabel(comparisons[0]?.hiring_comparison?.company_is_hiring) || "—",
+      values: comparisons.map((item) =>
+        itemHiringLabel(
+          item.hiring_comparison?.competitor_is_hiring ?? item.competitor?.is_hiring,
+        ),
+      ),
+    },
+  ];
+
+  return (
+    <div className="overflow-x-auto rounded-2xl border border-[#E6E8F5]">
+      <table className="min-w-full border-collapse text-left">
+        <thead>
+          <tr className="bg-[#F8F9FF]">
+            <th className="sticky left-0 z-[1] bg-[#F8F9FF] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+              Metric
+            </th>
+            <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-500">
+              <span className="inline-flex items-center gap-2 normal-case tracking-normal">
+                <Avatar name={yourName} size="sm" />
+                <span className="max-w-[140px] truncate text-[12px] font-semibold text-[#5B57E6]">
+                  {yourName}
+                </span>
+              </span>
+            </th>
+            {comparisons.map((item, index) => {
+              const name = comparisonLabel(item);
+              const image =
+                item.profile_picture_url ||
+                item.image_url ||
+                undefined;
+              return (
+                <th
+                  key={`${name}-${index}`}
+                  className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-500"
+                >
+                  <span className="inline-flex items-center gap-2 normal-case tracking-normal">
+                    <Avatar name={name} imageUrl={image} size="sm" />
+                    <span className="max-w-[140px] truncate text-[12px] font-semibold text-neutral-700">
+                      {name}
+                    </span>
+                  </span>
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr
+              key={row.id}
+              className="border-t border-[#EEF0F8] align-top odd:bg-white even:bg-[#FCFCFF]"
+            >
+              <td className="sticky left-0 z-[1] bg-inherit px-4 py-3 text-[12px] font-semibold text-neutral-900">
+                {row.label}
+              </td>
+              <td className="px-4 py-3 text-[12px] leading-5 text-neutral-700">
+                <span className="font-medium text-neutral-900">{row.yours}</span>
+              </td>
+              {row.values.map((value, index) => (
+                <td
+                  key={`${row.id}-${index}`}
+                  className="px-4 py-3 text-[12px] leading-5 text-neutral-700"
+                >
+                  <p className="font-medium text-neutral-900">{value}</p>
+                  {row.notes?.[index] ? (
+                    <p className="mt-0.5 text-[11px] capitalize text-neutral-500">
+                      {row.notes[index]}
+                    </p>
+                  ) : null}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function itemHiringLabel(value?: boolean | null) {
+  if (value === true) return "Hiring";
+  if (value === false) return "Not hiring";
+  return "—";
 }
 
 function gapTitle(item: CompetitorQuantifiedGapItem) {
@@ -560,59 +839,145 @@ function ComparisonCard({ item, index }: { item: CompetitorSideBySideComparison;
   );
 }
 
-function GapCard({ item, index }: { item: CompetitorQuantifiedGapItem; index: number }) {
+function priorityClass(priority?: string | number | null) {
+  const value = String(priority ?? "").toLowerCase();
+  if (value === "high" || value === "1") {
+    return "bg-[#FEE2E2] text-[#B91C1C]";
+  }
+  if (value === "medium" || value === "2") {
+    return "bg-[#FEF3C7] text-[#B45309]";
+  }
+  if (value === "low" || value === "3") {
+    return "bg-[#E6F7F4] text-[#0F766E]";
+  }
+  return "bg-[#ECEBFF] text-[#5B57E6]";
+}
+
+function GapsTable({
+  items,
+  contentGaps,
+  technologyGaps,
+}: {
+  items: CompetitorQuantifiedGapItem[];
+  contentGaps?: unknown[] | null;
+  technologyGaps?: unknown[] | null;
+}) {
+  const extraRows: CompetitorQuantifiedGapItem[] = [
+    ...(contentGaps ?? []).map((gap) => ({
+      item: toDisplayLabel(gap),
+      category: "content",
+      type: "content_gap",
+    })),
+    ...(technologyGaps ?? []).map((gap) => ({
+      item: toDisplayLabel(gap),
+      category: "technology",
+      type: "technology_gap",
+    })),
+  ].filter((row) => Boolean(row.item));
+
+  const rows = [...items, ...extraRows];
+  if (!rows.length) return null;
+
   return (
-    <li className="rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] p-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="font-mono text-[10px] font-semibold tracking-wider text-neutral-400">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-        {item.priority != null ? (
-          <span className="rounded-full bg-[#ECEBFF] px-2.5 py-0.5 text-[11px] font-medium text-[#5B57E6]">
-            {String(item.priority)}
-          </span>
-        ) : null}
-        {item.category || item.type ? (
-          <span className="rounded-full bg-white px-2.5 py-0.5 text-[11px] text-neutral-600 ring-1 ring-[#E6E8F5]">
-            {item.category || item.type}
-          </span>
-        ) : null}
-        <p className="text-[13px] font-semibold capitalize text-neutral-900">{gapTitle(item)}</p>
-      </div>
-      {(item.description || item.action) && (
-        <p className="mt-2 text-[13px] leading-5 text-neutral-600">
-          {toDisplayLabel(item.description || item.action)}
-        </p>
-      )}
-      <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-neutral-600">
-        {item.competitor_count != null ? (
-          <span className="rounded-full border border-[#E6E8F5] bg-white px-2.5 py-1">
-            {item.competitor_count} competitors
-          </span>
-        ) : null}
-        {item.gap_score != null || item.score != null ? (
-          <span className="rounded-full border border-[#E6E8F5] bg-white px-2.5 py-1">
-            Gap score · {toDisplayLabel(item.gap_score ?? item.score)}
-          </span>
-        ) : null}
-        {item.market_coverage_pct != null ? (
-          <span className="rounded-full border border-[#E6E8F5] bg-white px-2.5 py-1">
-            Market coverage · {formatPercent(item.market_coverage_pct)}
-          </span>
-        ) : null}
-        {item.competitor || item.competitor_name ? (
-          <span className="rounded-full border border-[#E6E8F5] bg-white px-2.5 py-1">
-            vs {toDisplayLabel(item.competitor || item.competitor_name)}
-          </span>
-        ) : null}
-        {item.impact ? (
-          <span className="inline-flex items-center gap-1 rounded-full border border-[#E6E8F5] bg-white px-2.5 py-1">
-            <Gauge className="size-3 text-[#5B57E6]" />
-            {toDisplayLabel(item.impact)}
-          </span>
-        ) : null}
-      </div>
-    </li>
+    <div className="overflow-x-auto rounded-2xl border border-[#E6E8F5]">
+      <table className="min-w-full border-collapse text-left">
+        <thead>
+          <tr className="bg-[#F8F9FF]">
+            <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+              #
+            </th>
+            <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+              Gap
+            </th>
+            <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+              Category
+            </th>
+            <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+              Priority
+            </th>
+            <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+              Gap score
+            </th>
+            <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+              Market coverage
+            </th>
+            <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+              Competitors
+            </th>
+            <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+              Detail
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((item, index) => {
+            const title = gapTitle(item);
+            const category = toDisplayLabel(item.category || item.type).replace(/_/g, " ");
+            const detail =
+              toDisplayLabel(item.description || item.action || item.impact) ||
+              (item.competitor || item.competitor_name
+                ? `vs ${toDisplayLabel(item.competitor || item.competitor_name)}`
+                : "");
+            const score = item.gap_score ?? item.score;
+
+            return (
+              <tr
+                key={`${title}-${item.category || item.type || ""}-${index}`}
+                className="border-t border-[#EEF0F8] align-top odd:bg-white even:bg-[#FCFCFF]"
+              >
+                <td className="px-4 py-3 font-mono text-[11px] font-semibold text-neutral-400">
+                  {String(index + 1).padStart(2, "0")}
+                </td>
+                <td className="px-4 py-3">
+                  <p className="text-[13px] font-semibold capitalize text-neutral-900">{title}</p>
+                  {item.metric ? (
+                    <p className="mt-0.5 text-[11px] text-neutral-500">{toDisplayLabel(item.metric)}</p>
+                  ) : null}
+                </td>
+                <td className="px-4 py-3">
+                  {category ? (
+                    <span className="inline-flex rounded-full bg-white px-2.5 py-1 text-[11px] capitalize text-neutral-600 ring-1 ring-[#E6E8F5]">
+                      {category}
+                    </span>
+                  ) : (
+                    <span className="text-[12px] text-neutral-400">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  {item.priority != null && item.priority !== "" ? (
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ${priorityClass(item.priority)}`}
+                    >
+                      {String(item.priority)}
+                    </span>
+                  ) : (
+                    <span className="text-[12px] text-neutral-400">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-[13px] font-semibold tabular-nums text-neutral-900">
+                  {score != null ? toDisplayLabel(score) : "—"}
+                </td>
+                <td className="px-4 py-3 text-[13px] font-medium tabular-nums text-neutral-800">
+                  {item.market_coverage_pct != null
+                    ? formatPercent(item.market_coverage_pct)
+                    : "—"}
+                </td>
+                <td className="px-4 py-3 text-[13px] text-neutral-700">
+                  {item.competitor_count != null
+                    ? item.competitor_count
+                    : item.competitor || item.competitor_name
+                      ? toDisplayLabel(item.competitor || item.competitor_name)
+                      : "—"}
+                </td>
+                <td className="max-w-[280px] px-4 py-3 text-[12px] leading-5 text-neutral-600">
+                  {detail || "—"}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -748,15 +1113,9 @@ export default function CompetitorComparisonInsights({
           </div>
         ) : null}
 
-        <div className="space-y-4 px-5 py-5 sm:px-6">
+        <div className="px-5 py-5 sm:px-6">
           {comparisons.length ? (
-            comparisons.map((item, index) => (
-              <ComparisonCard
-                key={`${comparisonLabel(item)}-${index}`}
-                item={item}
-                index={index}
-              />
-            ))
+            <CompetitorVsCompanyTable company={company} comparisons={comparisons} />
           ) : (
             <div className="rounded-2xl border border-dashed border-[#E6E8F5] bg-[#F8F9FF] px-4 py-8 text-center">
               <FileText className="mx-auto size-5 text-neutral-300" />
@@ -794,32 +1153,19 @@ export default function CompetitorComparisonInsights({
           </div>
         </div>
 
-        {gapItems.length ? (
-          <ul className="mt-4 space-y-3">
-            {gapItems.map((item, index) => (
-              <GapCard key={`${gapTitle(item)}-${index}`} item={item} index={index} />
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-4 text-[13px] text-neutral-500">No quantified gaps returned for this run.</p>
-        )}
-
-        {(contentGaps?.length || technologyGaps?.length) ? (
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            {contentGaps?.length ? (
-              <div className="rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] p-4">
-                <p className="mb-2 text-[12px] font-medium text-neutral-600">Content gaps</p>
-                <ChipList items={contentGaps} />
-              </div>
-            ) : null}
-            {technologyGaps?.length ? (
-              <div className="rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] p-4">
-                <p className="mb-2 text-[12px] font-medium text-neutral-600">Technology gaps</p>
-                <ChipList items={technologyGaps} />
-              </div>
-            ) : null}
+        {gapItems.length || contentGaps?.length || technologyGaps?.length ? (
+          <div className="mt-4">
+            <GapsTable
+              items={gapItems}
+              contentGaps={contentGaps}
+              technologyGaps={technologyGaps}
+            />
           </div>
-        ) : null}
+        ) : (
+          <p className="mt-4 text-[13px] text-neutral-500">
+            No quantified gaps returned for this run.
+          </p>
+        )}
       </Card>
     </div>
   );

@@ -1,14 +1,15 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import {
-  AlertTriangle,
+  Briefcase,
   Building2,
   Crosshair,
+  Globe2,
   Search,
   Sparkles,
-  Target,
   TrendingUp,
   Users,
 } from "lucide-react";
@@ -25,6 +26,60 @@ import type {
   CompetitorLinkedInEmployee,
   CompetitorJobOpening,
 } from "@/types/bussiness/competitoranalysis-type";
+import { FOCUS_RING } from "@/utils/ui-classes";
+
+type ChannelScore = {
+  score?: number | null;
+  status?: string | null;
+  followers?: number | null;
+  engagement_rate?: number | null;
+  strengths?: string[];
+  weaknesses?: string[];
+  score_reason?: string | null;
+  content_strength?: number | null;
+  audience_strength?: number | null;
+};
+
+type WebsiteIntelItem = {
+  name?: string | null;
+  website?: string | null;
+  username?: string | null;
+  intelligence?: {
+    company_name?: string | null;
+    url?: string | null;
+    description?: string | null;
+    positioning?: string | null;
+    services?: string[];
+    features?: string[];
+  } | null;
+};
+
+type LinkedInReportCompetitor = {
+  name?: string | null;
+  website?: string | null;
+  linkedin_url?: string | null;
+  hiring?: boolean | null;
+  industry?: string | null;
+  employees?: CompetitorLinkedInEmployee[];
+  tagline?: string | null;
+};
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function asChannelScore(value: unknown): ChannelScore | null {
+  const record = asRecord(value);
+  if (!record) return null;
+  return record as ChannelScore;
+}
+
+function asStringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string" && item.trim() !== "");
+}
 
 function formatNumber(value?: number | null) {
   if (typeof value !== "number") return "—";
@@ -163,26 +218,31 @@ function Section({
   description,
   icon: Icon,
   children,
+  aside,
 }: {
   title: string;
   description?: string;
-  icon?: typeof Target;
+  icon?: typeof Crosshair;
   children: ReactNode;
+  aside?: ReactNode;
 }) {
   return (
     <Card className="p-5 sm:p-6">
-      <div className="flex items-start gap-3">
-        {Icon ? (
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#ECEBFF] text-[#5B57E6]">
-            <Icon className="size-4" aria-hidden="true" />
-          </span>
-        ) : null}
-        <div className="min-w-0">
-          <h3 className="text-[15px] font-semibold text-neutral-900">{title}</h3>
-          {description ? (
-            <p className="mt-1 text-[13px] leading-5 text-neutral-500">{description}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3">
+          {Icon ? (
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#ECEBFF] text-[#5B57E6]">
+              <Icon className="size-4" aria-hidden="true" />
+            </span>
           ) : null}
+          <div className="min-w-0">
+            <h3 className="text-[15px] font-semibold text-neutral-900">{title}</h3>
+            {description ? (
+              <p className="mt-1 text-[13px] leading-5 text-neutral-500">{description}</p>
+            ) : null}
+          </div>
         </div>
+        {aside}
       </div>
       <div className="mt-4">{children}</div>
     </Card>
@@ -396,6 +456,561 @@ function LinkedInEmployeeBlock({ item }: { item: CompetitorListItem }) {
   );
 }
 
+function ChannelScoreCard({
+  title,
+  iconSrc,
+  channel,
+  fallbackLabel,
+}: {
+  title: string;
+  iconSrc: string;
+  channel?: ChannelScore | null;
+  fallbackLabel?: string;
+}) {
+  if (!channel) return null;
+  const hasContent =
+    channel.score != null ||
+    channel.status ||
+    channel.followers != null ||
+    channel.engagement_rate != null ||
+    channel.strengths?.length ||
+    channel.weaknesses?.length ||
+    channel.score_reason;
+
+  if (!hasContent) return null;
+
+  return (
+    <div className="rounded-2xl border border-[#E6E8F5] bg-white p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#F6F7FD] ring-1 ring-[#E6E8F5]">
+            <Image src={iconSrc} alt="" width={16} height={16} className="size-4 object-contain" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[13px] font-semibold text-neutral-900">{title}</p>
+            {channel.status ? (
+              <p className="mt-0.5 text-[12px] text-neutral-500">{channel.status}</p>
+            ) : fallbackLabel ? (
+              <p className="mt-0.5 text-[12px] text-neutral-500">{fallbackLabel}</p>
+            ) : null}
+          </div>
+        </div>
+        {channel.score != null ? (
+          <span className="rounded-full bg-[#ECEBFF] px-2.5 py-1 text-[12px] font-semibold tabular-nums text-[#5B57E6]">
+            {Math.round(channel.score)}/100
+          </span>
+        ) : null}
+      </div>
+
+      <dl className="mt-3 grid grid-cols-2 gap-2">
+        {channel.followers != null ? (
+          <div className="rounded-xl bg-[#F8F9FF] p-2.5">
+            <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">Followers</dt>
+            <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+              {formatNumber(channel.followers)}
+            </dd>
+          </div>
+        ) : null}
+        {channel.engagement_rate != null ? (
+          <div className="rounded-xl bg-[#F8F9FF] p-2.5">
+            <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">Engagement</dt>
+            <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+              {formatEngagement(channel.engagement_rate)}
+            </dd>
+          </div>
+        ) : null}
+        {channel.audience_strength != null ? (
+          <div className="rounded-xl bg-[#F8F9FF] p-2.5">
+            <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">Audience</dt>
+            <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+              {formatNumber(channel.audience_strength)}
+            </dd>
+          </div>
+        ) : null}
+        {channel.content_strength != null ? (
+          <div className="rounded-xl bg-[#F8F9FF] p-2.5">
+            <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">Content</dt>
+            <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+              {formatNumber(channel.content_strength)}
+            </dd>
+          </div>
+        ) : null}
+      </dl>
+
+      {channel.score_reason ? (
+        <p className="mt-3 text-[12px] leading-5 text-neutral-600">{channel.score_reason}</p>
+      ) : null}
+
+      {channel.strengths?.length ? (
+        <div className="mt-3">
+          <p className="mb-1.5 text-[11px] font-medium text-emerald-700">Strengths</p>
+          <ChipList items={channel.strengths.slice(0, 4)} />
+        </div>
+      ) : null}
+      {channel.weaknesses?.length ? (
+        <div className="mt-3">
+          <p className="mb-1.5 text-[11px] font-medium text-rose-600">Weaknesses</p>
+          <ChipList items={channel.weaknesses.slice(0, 4)} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function InstagramChannelSection({
+  yourScore,
+  yourUsername,
+  yourProfileUrl,
+  yourImageUrl,
+  competitors,
+}: {
+  yourScore?: ChannelScore | null;
+  yourUsername?: string | null;
+  yourProfileUrl?: string | null;
+  yourImageUrl?: string | null;
+  competitors: CompetitorListItem[];
+}) {
+  const instagramCompetitors = competitors.filter(
+    (item) => item.username || item.instagram_analysis || item.profile_url,
+  );
+  if (!yourScore && !yourUsername && !instagramCompetitors.length) return null;
+
+  return (
+    <Section
+      title="Instagram comparison"
+      description="Start with social presence — your score versus competitor Instagram profiles."
+      icon={Users}
+      aside={
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F6F7FD] px-2.5 py-1 text-[11px] font-medium text-neutral-600 ring-1 ring-[#E6E8F5]">
+          <Image src="/assets/insta.png" alt="" width={14} height={14} className="size-3.5 object-contain" />
+          Instagram first
+        </span>
+      }
+    >
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <div className="space-y-3">
+          <ChannelScoreCard
+            title="Your Instagram"
+            iconSrc="/assets/insta.png"
+            channel={yourScore}
+            fallbackLabel={yourUsername ? `@${yourUsername.replace(/^@/, "")}` : undefined}
+          />
+          {yourUsername ? (
+            <div className="rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] p-4">
+              <div className="flex items-center gap-3">
+                <Avatar
+                  name={yourUsername}
+                  imageUrl={yourImageUrl || undefined}
+                  size="lg"
+                />
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+                    Your profile
+                  </p>
+                  {yourProfileUrl ? (
+                    <a
+                      href={yourProfileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`mt-0.5 inline-flex text-[14px] font-semibold text-[#5B57E6] hover:underline ${FOCUS_RING}`}
+                    >
+                      @{yourUsername.replace(/^@/, "")}
+                    </a>
+                  ) : (
+                    <p className="mt-0.5 text-[14px] font-semibold text-neutral-900">
+                      @{yourUsername.replace(/^@/, "")}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {instagramCompetitors.map((item, index) => {
+            const analysis = item.instagram_analysis as
+              | {
+                  username?: string;
+                  followers?: number | null;
+                  post_count?: number | null;
+                  primary_format?: string | null;
+                  bio?: string | null;
+                  posting_frequency?: unknown;
+                }
+              | undefined;
+            const handle = item.username || analysis?.username;
+            const display = handle
+              ? handle.startsWith("@")
+                ? handle
+                : `@${handle}`
+              : competitorLabel(item);
+            return (
+              <li
+                key={`instagram-${index}-${handle || item.name || "competitor"}`}
+                className="rounded-2xl border border-[#E6E8F5] bg-white p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <Avatar
+                    name={display}
+                    imageUrl={item.profile_picture_url || item.image_url}
+                    size="md"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <Image
+                        src="/assets/insta.png"
+                        alt=""
+                        width={14}
+                        height={14}
+                        className="size-3.5 object-contain"
+                      />
+                      <p className="truncate text-[13px] font-semibold text-neutral-900">
+                        {display}
+                      </p>
+                    </div>
+                    {item.name && item.name !== handle ? (
+                      <p className="mt-0.5 truncate text-[12px] text-neutral-500">{item.name}</p>
+                    ) : null}
+                  </div>
+                </div>
+                <dl className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="rounded-xl bg-[#F8F9FF] p-2.5">
+                    <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">
+                      Followers
+                    </dt>
+                    <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+                      {formatNumber(item.followers ?? analysis?.followers)}
+                    </dd>
+                  </div>
+                  <div className="rounded-xl bg-[#F8F9FF] p-2.5">
+                    <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">
+                      Posts
+                    </dt>
+                    <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+                      {formatNumber(
+                        item.post_count ??
+                          analysis?.post_count ??
+                          (Array.isArray(item.posts) ? item.posts.length : null),
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+                {analysis?.primary_format || analysis?.bio ? (
+                  <p className="mt-3 line-clamp-2 text-[12px] leading-5 text-neutral-600">
+                    {analysis.primary_format || analysis.bio}
+                  </p>
+                ) : item.bio ? (
+                  <p className="mt-3 line-clamp-2 text-[12px] leading-5 text-neutral-600">
+                    {item.bio}
+                  </p>
+                ) : null}
+                {item.profile_url ? (
+                  <a
+                    href={item.profile_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`mt-3 inline-flex text-[12px] font-medium text-[#5B57E6] hover:underline ${FOCUS_RING}`}
+                  >
+                    View Instagram
+                  </a>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </Section>
+  );
+}
+
+function WebsiteChannelSection({
+  yourScore,
+  yourWebsite,
+  yourServices,
+  websiteIntel,
+}: {
+  yourScore?: ChannelScore | null;
+  yourWebsite?: string | null;
+  yourServices?: string[] | null;
+  websiteIntel: WebsiteIntelItem[];
+}) {
+  if (!yourScore && !yourWebsite && !websiteIntel.length) return null;
+
+  return (
+    <Section
+      title="Website comparison"
+      description="Positioning, services, and proof signals from competitor sites."
+      icon={Globe2}
+    >
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+        <div className="space-y-3">
+          <ChannelScoreCard
+            title="Your website"
+            iconSrc="/assets/globe.png"
+            channel={yourScore}
+            fallbackLabel={yourWebsite || undefined}
+          />
+          {yourWebsite || yourServices?.length ? (
+            <div className="rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+                Your site
+              </p>
+              {yourWebsite ? (
+                <a
+                  href={yourWebsite}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={`mt-1 inline-flex break-all text-[13px] font-semibold text-[#5B57E6] hover:underline ${FOCUS_RING}`}
+                >
+                  {yourWebsite.replace(/^https?:\/\//, "")}
+                </a>
+              ) : null}
+              {yourServices?.length ? (
+                <div className="mt-3">
+                  <ChipList items={yourServices.slice(0, 6)} />
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+
+        <ul className="grid gap-3 md:grid-cols-2">
+          {websiteIntel.map((item, index) => {
+            const intel = item.intelligence;
+            const name = intel?.company_name || item.name || `Site ${index + 1}`;
+            const url = intel?.url || item.website;
+            return (
+              <li
+                key={`website-${index}-${name}-${url || "no-url"}`}
+                className="rounded-2xl border border-[#E6E8F5] bg-white p-4"
+              >
+                <div className="flex items-start gap-2.5">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#ECEBFF] text-[#5B57E6]">
+                    <Building2 className="size-4" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-[14px] font-semibold text-neutral-900">{name}</p>
+                    {url ? (
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`mt-0.5 inline-flex truncate text-[12px] text-[#5B57E6] hover:underline ${FOCUS_RING}`}
+                      >
+                        {url.replace(/^https?:\/\//, "")}
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+                {intel?.description || intel?.positioning ? (
+                  <p className="mt-3 line-clamp-3 text-[12px] leading-5 text-neutral-600">
+                    {intel.description || intel.positioning}
+                  </p>
+                ) : null}
+                {intel?.services?.length ? (
+                  <div className="mt-3">
+                    <ChipList items={intel.services.slice(0, 4)} />
+                  </div>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </Section>
+  );
+}
+
+function LinkedInChannelSection({
+  yourScore,
+  yourLinkedInUrl,
+  reportCompetitors,
+  competitors,
+}: {
+  yourScore?: ChannelScore | null;
+  yourLinkedInUrl?: string | null;
+  reportCompetitors: LinkedInReportCompetitor[];
+  competitors: CompetitorListItem[];
+}) {
+  const listCompetitors = competitors.filter(
+    (item) => item.linkedin_url || item.linkedin_analysis || item.employees?.length,
+  );
+  const linkedInItems = reportCompetitors.length ? reportCompetitors : listCompetitors;
+  const seenLinkedIn = new Set<string>();
+  const uniqueLinkedInItems = linkedInItems.filter((item) => {
+    const record = item as LinkedInReportCompetitor & CompetitorListItem;
+    const key = (
+      record.linkedin_url ||
+      record.name ||
+      record.company_name ||
+      record.username ||
+      ""
+    )
+      .toLowerCase()
+      .trim();
+    if (!key) return true;
+    if (seenLinkedIn.has(key)) return false;
+    seenLinkedIn.add(key);
+    return true;
+  });
+
+  if (!yourScore && !yourLinkedInUrl && !uniqueLinkedInItems.length) {
+    return null;
+  }
+
+  return (
+    <Section
+      title="LinkedIn comparison"
+      description="Hiring signals, leadership profiles, and company reach."
+      icon={Briefcase}
+      aside={
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F6F7FD] px-2.5 py-1 text-[11px] font-medium text-neutral-600 ring-1 ring-[#E6E8F5]">
+          <Image
+            src="/assets/linkedin.png"
+            alt=""
+            width={14}
+            height={14}
+            className="size-3.5 object-contain"
+          />
+          LinkedIn
+        </span>
+      }
+    >
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+        <div className="space-y-3">
+          <ChannelScoreCard
+            title="Your LinkedIn"
+            iconSrc="/assets/linkedin.png"
+            channel={yourScore}
+          />
+          {yourLinkedInUrl ? (
+            <div className="rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+                Your company page
+              </p>
+              <a
+                href={yourLinkedInUrl}
+                target="_blank"
+                rel="noreferrer"
+                className={`mt-1 inline-flex break-all text-[13px] font-semibold text-[#5B57E6] hover:underline ${FOCUS_RING}`}
+              >
+                View LinkedIn
+              </a>
+            </div>
+          ) : null}
+        </div>
+
+        <ul className="grid gap-3 md:grid-cols-2">
+          {uniqueLinkedInItems.map((item, index) => {
+            const isListItem = "linkedin_analysis" in item || "match_score" in item;
+            const listItem = isListItem ? (item as CompetitorListItem) : null;
+            const reportItem = !isListItem ? (item as LinkedInReportCompetitor) : null;
+            const name =
+              reportItem?.name ||
+              listItem?.name ||
+              listItem?.company_name ||
+              `Competitor ${index + 1}`;
+            const url = reportItem?.linkedin_url || listItem?.linkedin_url;
+            const hiring =
+              reportItem?.hiring ?? listItem?.is_hiring ?? listItem?.linkedin_analysis?.is_hiring;
+            const employees = reportItem?.employees || listItem?.employees || [];
+            const employeeCount =
+              listItem?.linkedin_total_employees ??
+              listItem?.linkedin_analysis?.employee_count ??
+              listItem?.employee_count ??
+              employees.length;
+
+            return (
+              <li
+                key={`linkedin-${index}-${name}-${url || "no-url"}`}
+                className="rounded-2xl border border-[#E6E8F5] bg-white p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start gap-2.5">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#F6F7FD] ring-1 ring-[#E6E8F5]">
+                      <Image
+                        src="/assets/linkedin.png"
+                        alt=""
+                        width={16}
+                        height={16}
+                        className="size-4 object-contain"
+                      />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-[14px] font-semibold text-neutral-900">{name}</p>
+                      {url ? (
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`mt-0.5 inline-flex text-[12px] text-[#5B57E6] hover:underline ${FOCUS_RING}`}
+                        >
+                          View LinkedIn
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
+                  {hiring === true ? (
+                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.04em] text-emerald-700">
+                      Hiring
+                    </span>
+                  ) : hiring === false ? (
+                    <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.04em] text-neutral-500">
+                      Not hiring
+                    </span>
+                  ) : null}
+                </div>
+
+                <dl className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="rounded-xl bg-[#F8F9FF] p-2.5">
+                    <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">
+                      Employees
+                    </dt>
+                    <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+                      {formatNumber(employeeCount)}
+                    </dd>
+                  </div>
+                  <div className="rounded-xl bg-[#F8F9FF] p-2.5">
+                    <dt className="text-[10px] uppercase tracking-[0.04em] text-neutral-400">
+                      Profiles
+                    </dt>
+                    <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
+                      {formatNumber(
+                        listItem?.linkedin_profiles_sampled ?? employees.length,
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+
+                {employees.length ? (
+                  <ul className="mt-3 space-y-2">
+                    {employees.slice(0, 3).map((employee, empIndex) => (
+                      <li
+                        key={`${employee.name || empIndex}`}
+                        className="rounded-xl border border-[#E6E8F5] bg-[#FBFBFF] px-2.5 py-2"
+                      >
+                        <p className="text-[12px] font-semibold text-neutral-900">
+                          {employee.name || `Leader ${empIndex + 1}`}
+                        </p>
+                        <p className="mt-0.5 line-clamp-1 text-[11px] text-neutral-500">
+                          {employee.designation || employee.title || "LinkedIn profile"}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : reportItem?.tagline ? (
+                  <p className="mt-3 text-[12px] leading-5 text-neutral-600">{reportItem.tagline}</p>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </Section>
+  );
+}
+
 function CompetitorCards({ competitors }: { competitors: CompetitorListItem[] }) {
   return (
     <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -533,7 +1148,7 @@ type Props = {
   isRetrying?: boolean;
 };
 
-export default function CompetitorResults({
+export default function ManualCompetitorResults({
   data,
   isLoading,
   isError,
@@ -613,10 +1228,6 @@ export default function CompetitorResults({
 
   const overview = result?.overview;
   const company = result?.company;
-  const dna =
-    result?.company_social_analysis?.company_dna ||
-    result?.company_analysis?.company_dna;
-  const exec = result?.report?.["01_executive_summary"];
   const actions =
     result?.report?.["11_recommended_actions"]?.actions ||
     result?.recommendations ||
@@ -637,34 +1248,94 @@ export default function CompetitorResults({
     [];
   const resultError = result?.error || data?.error;
   const status = data?.status || result?.meta?.status;
+  const summary = data?.summary || result?.summary || overview?.key_insight;
+
+  const digitalPresence = asRecord(result?.report?.["03_digital_presence"]);
+  const instagramScore = asChannelScore(digitalPresence?.instagram);
+  const websiteScore = asChannelScore(digitalPresence?.website);
+  const linkedinScore = asChannelScore(digitalPresence?.linkedin);
+
+  const userInstagram = asRecord(
+    asRecord(result?.company_analysis)?.user_instagram,
+  );
+  const yourInstagramUsername =
+    (typeof userInstagram?.username === "string" && userInstagram.username) ||
+    company?.instagram_username ||
+    null;
+  const yourInstagramImage =
+    (typeof userInstagram?.profile_picture_url === "string" &&
+      userInstagram.profile_picture_url) ||
+    null;
+  const yourInstagramUrl =
+    company?.instagram_url ||
+    (yourInstagramUsername
+      ? `https://www.instagram.com/${yourInstagramUsername.replace(/^@/, "")}/`
+      : null);
+
+  const websiteIntel = (
+    Array.isArray(result?.competitor_website_intel)
+      ? result.competitor_website_intel
+      : []
+  ) as WebsiteIntelItem[];
+
+  const linkedinReport = asRecord(result?.report?.["07_linkedin_analysis"]);
+  const linkedinReportCompetitors = (
+    Array.isArray(linkedinReport?.competitors) ? linkedinReport.competitors : []
+  ) as LinkedInReportCompetitor[];
 
   return (
     <div className="space-y-4">
-      <Card className="p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 className="text-[15px] font-semibold text-neutral-900">
-              {company?.name || "Competitor analysis"}
-            </h2>
-            <p className="mt-1 text-sm text-neutral-500">
-              {overview?.market_position ||
-                overview?.company_type ||
-                "Latest competitor intelligence"}
-            </p>
+      <Card className="overflow-hidden p-0">
+        <div className="border-b border-[#E6E8F5] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] px-5 py-5 sm:px-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5B57E6]">
+                Manual competitor brief
+              </p>
+              <h2 className="mt-1 text-[18px] font-semibold tracking-tight text-neutral-900">
+                {company?.name || "Competitor analysis"}
+              </h2>
+              {summary ? (
+                <p className="mt-2 max-w-3xl text-[13px] leading-5 text-neutral-600">
+                  {summary}
+                </p>
+              ) : null}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {status ? <Badge>{status}</Badge> : null}
+              <Badge>{`${data?.competitor_count ?? result?.competitor_count ?? competitors.length} competitors`}</Badge>
+              <Badge>{`${data?.post_count ?? result?.post_count ?? 0} posts`}</Badge>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {status ? <Badge>{status}</Badge> : null}
-            <Badge>{`${data?.competitor_count ?? result?.competitor_count ?? competitors.length} competitors`}</Badge>
-            <Badge>{`${data?.post_count ?? result?.post_count ?? 0} posts`}</Badge>
-          </div>
+          {resultError ? (
+            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-800">
+              {String(resultError)}
+            </div>
+          ) : null}
         </div>
-        {resultError ? (
-          <div className="mt-4 flex gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-800">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-            <span>{resultError}</span>
-          </div>
-        ) : null}
       </Card>
+
+      <InstagramChannelSection
+        yourScore={instagramScore}
+        yourUsername={yourInstagramUsername}
+        yourProfileUrl={yourInstagramUrl}
+        yourImageUrl={yourInstagramImage}
+        competitors={competitors}
+      />
+
+      <WebsiteChannelSection
+        yourScore={websiteScore}
+        yourWebsite={company?.website}
+        yourServices={asStringList(company?.services)}
+        websiteIntel={websiteIntel}
+      />
+
+      <LinkedInChannelSection
+        yourScore={linkedinScore}
+        yourLinkedInUrl={company?.linkedin_url}
+        reportCompetitors={linkedinReportCompetitors}
+        competitors={competitors}
+      />
 
       <Section
         title="Market position"
