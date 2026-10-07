@@ -40,6 +40,7 @@ type WithoutId<T> = T extends unknown ? Omit<T, "id"> : never;
 type NewItem = WithoutId<FeedItem>;
 
 export const STEP_LABELS: Record<string, string> = {
+  generate_dna: "Company DNA",
   analyze_company: "Company analysis",
   discover_competitors: "Competitor discovery",
   competitor_analysis: "Competitor analysis",
@@ -60,6 +61,35 @@ const strs = (v: unknown) =>
   Array.isArray(v) ? v.map(str).filter(Boolean) : [];
 const host = (url: string) =>
   url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+
+// DNA result: { sections: [{ key, title, text }], document } — one short card per section.
+const DNA_SNIPPET_CHARS = 220;
+
+function dnaItems(result: Rec, add: (item: NewItem) => void) {
+  const snippet = (text: string) =>
+    text.length > DNA_SNIPPET_CHARS
+      ? `${text.slice(0, DNA_SNIPPET_CHARS).trimEnd()}…`
+      : text;
+  const sections = Array.isArray(result.sections)
+    ? result.sections.map(rec).filter(Boolean)
+    : [];
+  if (sections.length) {
+    sections.forEach((section) => {
+      const title = str(section!.title).replace(/^#+\s*/, "");
+      const text = str(section!.text).replace(/\s+/g, " ");
+      if (title && text)
+        add({ kind: "text", label: title, value: snippet(text) });
+    });
+    return;
+  }
+  // No sections: fall back to the first paragraphs of the document.
+  str(result.document)
+    .split(/\n{2,}/)
+    .map((p) => p.replace(/^#+\s*/, "").trim())
+    .filter(Boolean)
+    .slice(0, 6)
+    .forEach((p) => add({ kind: "insight", text: snippet(p) }));
+}
 
 function companyItems(result: Rec, add: (item: NewItem) => void) {
   const c = rec(result.company);
@@ -266,7 +296,8 @@ export function buildFeed(job?: IntelligenceJobResponse): FeedItem[] {
 
     const result = rec(step.result);
     if (!result) continue;
-    if (step.name === "analyze_company") companyItems(result, add);
+    if (step.name === "generate_dna") dnaItems(result, add);
+    else if (step.name === "analyze_company") companyItems(result, add);
     else if (step.name === "discover_competitors") competitorItems(result, add);
     else if (step.name === "competitor_analysis")
       summaryItems(str(result.summary), add);
