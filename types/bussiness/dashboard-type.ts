@@ -20,6 +20,8 @@ export interface DashboardCompetitor {
   instagram_url: string | null;
   linkedin_url: string | null;
   logo_url: string | null;
+  why_competitor?: string | null;
+  confidence?: number | null;
   instagram_image_url?: string | null;
   linkedin_image_url?: string | null;
 }
@@ -75,6 +77,9 @@ export interface DashboardStrengthsWeaknessesGroup {
   label: string;
   strengths: number;
   weaknesses: number;
+  // The actual signals behind the counts; currently sent for the channel group only.
+  strength_points?: string[];
+  weakness_points?: string[];
 }
 
 export interface DashboardGrowthOpportunity {

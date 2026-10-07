@@ -242,11 +242,6 @@ export const IntakeApi = async (): Promise<IntakeResponseProps> => {
     return response.data;
 }
 
-export const CompleteIntakeApi = async (): Promise<IntakeResponseProps> => {
-    const response = await api.post(BUSSINESSENDPOINT.INTAKE_COMPLETE);
-    return response.data;
-}
-
 export const AnswerQuestionApi = async ({ question_id, answer }: AnswerQuestionRequestProps): Promise<IntakeQuestion> => {
     const response = await api.patch(BUSSINESSENDPOINT.INTAKE_QUESTION(question_id), { answer });
     return response.data;
