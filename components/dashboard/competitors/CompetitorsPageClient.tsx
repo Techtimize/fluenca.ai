@@ -3,6 +3,7 @@
 import CompetitorResults from "@/components/dashboard/competitors/CompetitorResults";
 import { CompetitorsDetailTable } from "@/components/dashboard/competitors/CompetitorsDetailTable";
 import { getApiErrorMessage } from "@/errors/error-utils";
+import { normalizeCompetitorsList } from "@/lib/dashboard/map-competitors-page";
 import { CompetitorAnalysisCompetitorQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
 
@@ -21,11 +22,12 @@ export function CompetitorsPageClient() {
     void refetch();
   };
 
-  const competitors =
+  const competitors = normalizeCompetitorsList(
     data?.result?.competitors ??
-    data?.result?.competitors_overview?.competitors ??
-    data?.competitors ??
-    [];
+      data?.result?.competitors_overview?.competitors ??
+      data?.competitors ??
+      [],
+  );
 
   return (
     <div className="space-y-4">

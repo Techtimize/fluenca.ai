@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, ScriptGenerationResultsApi } from "./bussiness.routes";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
+  AnalyzeCompanyDashboardApi,
   GoogleTrendExploreApi,
   GoogleTrendFiltersApi,
   GoogleTrendNowApi,
@@ -68,11 +69,21 @@ export const GoogleTrendFiltersQuery = () => {
   });
 };
 
-export const AnalyzeCompanyResultsQuery = (company_user_id: string) => {
+export const AnalyzeCompanyResultsQuery = (company_id: string) => {
   return useQuery({
-    queryKey: ["analyze-company-results", company_user_id],
-    queryFn: () => AnalyzeCompanyResultsApi(company_user_id),
-    enabled: Boolean(company_user_id),
+    queryKey: ["analyze-company-results", company_id],
+    queryFn: () => AnalyzeCompanyResultsApi(company_id),
+    enabled: Boolean(company_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const AnalyzeCompanyDashboardQuery = (company_id: string) => {
+  return useQuery({
+    queryKey: ["analyze-company-dashboard", company_id],
+    queryFn: () => AnalyzeCompanyDashboardApi(company_id),
+    enabled: Boolean(company_id),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
@@ -98,11 +109,28 @@ export const ContentRecommendationResultQuery = (company_id: string) => {
     });
 }
 
-export const ScriptGenerationResultsQuery = (company_id: string) => {
+export const ScriptGenerationResultsByCompanyIdQuery = (
+  company_id: string,
+  params?: { limit?: number; offset?: number },
+) => {
+  const limit = params?.limit ?? 20;
+  const offset = params?.offset ?? 0;
+
   return useQuery({
-    queryKey: ["script-generation-results", company_id],
-    queryFn: () => ScriptGenerationResultsApi(company_id),
+    queryKey: ["script-generation-results", company_id, { limit, offset }],
+    queryFn: () =>
+      ScriptGenerationResultsByCompanyIdApi(company_id, { limit, offset }),
     enabled: Boolean(company_id),
+    placeholderData: keepPreviousData,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const ScriptGenerationResultsQuery = () => {
+  return useQuery({
+    queryKey: ["script-generation-results"],
+    queryFn: () => ScriptGenerationResultsApi(),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
@@ -242,11 +270,59 @@ export const IntelligenceJobQuery = (job_id: string) => {
     queryKey: ["intelligence-job", job_id],
     queryFn: () => IntelligenceJobApi(job_id),
     enabled: Boolean(job_id),
+    // A 4xx (e.g. 404 "Job not found") will not fix itself, so fail fast instead of retrying.
+    retry: (failureCount, error) => {
+      const status = (error as { response?: { status?: number } })?.response?.status ?? 0;
+      return status >= 400 && status < 500 ? false : failureCount < 2;
+    },
     refetchInterval: (query) => {
+      if (query.state.status === "error") return false;
       const status = String(query.state.data?.status ?? "").toLowerCase();
       if (status && JOB_DONE_STATUSES.has(status)) return false;
       return POLL_INTERVAL_MS;
     },
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const PlannerResultsQuery = (company_id: string) => {
+  return useQuery({
+    queryKey: ["planner-results", company_id],
+    queryFn: () => PlannerResultsApi(company_id),
+    enabled: Boolean(company_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const PlannerVersionsQuery = (company_id: string) => {
+  return useQuery({
+    queryKey: ["planner-versions", company_id],
+    queryFn: () => PlannerVersionsApi(company_id),
+    enabled: Boolean(company_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const PlannerSpecificVersionsQuery = (company_id: string, version: string) => {
+  return useQuery({
+    queryKey: ["planner-specific-versions", company_id, version],
+    queryFn: () => PlannerSpecificVersionsApi(company_id, version),
+    enabled: Boolean(company_id && version),
+    placeholderData: keepPreviousData,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+
+export const CompetitorAnalyticDashboardQuery = (company_id: string) => {
+  return useQuery({
+    queryKey: ["competitor-analytic-dashboard", company_id],
+    queryFn: () => CompetitorAnalyticDashboardApi(company_id),
+    enabled: Boolean(company_id),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

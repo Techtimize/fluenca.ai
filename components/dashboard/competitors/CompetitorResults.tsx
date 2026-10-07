@@ -61,6 +61,28 @@ function toDisplayLabel(value: unknown): string {
   }
   if (typeof value === "object") {
     const record = value as Record<string, unknown>;
+    // API sometimes returns posting cadence as an object
+    if (
+      "posts_per_week" in record ||
+      "avg_days_between_posts" in record ||
+      ("post_count" in record && "date_range_days" in record)
+    ) {
+      const parts: string[] = [];
+      if (typeof record.posts_per_week === "number") {
+        parts.push(`${record.posts_per_week} posts/week`);
+      }
+      if (typeof record.avg_days_between_posts === "number") {
+        parts.push(`every ${record.avg_days_between_posts} days`);
+      }
+      if (typeof record.post_count === "number") {
+        if (typeof record.date_range_days === "number") {
+          parts.push(`${record.post_count} posts / ${record.date_range_days}d`);
+        } else if (!parts.length) {
+          parts.push(`${record.post_count} posts`);
+        }
+      }
+      if (parts.length) return parts.join(" · ");
+    }
     // API sometimes returns numeric ranges as { min, max }
     if ("min" in record || "max" in record) {
       const min = record.min;
@@ -523,7 +545,7 @@ export default function CompetitorResults({
 }: Props) {
   const t = useTranslations("competitors");
   const result = data?.result;
-  const competitors =
+  const rawCompetitors =
     result?.competitors?.length
       ? result.competitors
       : result?.competitors_overview?.competitors?.length
@@ -531,6 +553,13 @@ export default function CompetitorResults({
         : result?.competitive_matchup?.competitors?.length
           ? result.competitive_matchup.competitors
           : data?.competitors ?? [];
+  const competitors = rawCompetitors.filter(
+    (item): item is CompetitorListItem =>
+      Boolean(item) &&
+      typeof item === "object" &&
+      !("why_competitor" in item) &&
+      !("offers" in item),
+  );
 
   const hasAnalysis = Boolean(result || (data?.competitors && data.competitors.length > 0));
 
@@ -702,7 +731,6 @@ export default function CompetitorResults({
       </Section>
 
       <CompetitorStrategyMoves actions={actions} />
-
       <CompetitorComparisonInsights
         comparison={comparison}
         gaps={quantifiedGaps}

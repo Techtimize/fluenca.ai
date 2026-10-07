@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowLeft, AtSign, Link2, Loader2, Plus, Trash2, Users } from "lucide-react";
+import { AtSign, Link2, Loader2, Plus, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import CompetitorResults from "@/components/dashboard/competitors/CompetitorResults";
 import CompetitorVersionSelect from "@/components/dashboard/competitors/CompetitorVersionSelect";
@@ -11,11 +10,9 @@ import {
   LATEST_VERSION_VALUE,
   normalizeCompetitorVersions,
 } from "@/components/dashboard/competitors/versionUtils";
-import TopBar from "@/components/dashboard/topBar";
 import Card from "@/components/shared/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PAGE_ROUTES } from "@/constant/page-routes";
 import { getApiErrorMessage, isApiNotFoundError } from "@/errors/error-utils";
 import { CompetitorAnalysisManualMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import {
@@ -42,7 +39,6 @@ function isLikelyLinkedIn(value: string) {
 
 export default function CompetitorAnalysisManualPage() {
   const companyId = useAuthStore((s) => s.company_id);
-  const companyName = useAuthStore((s) => s.company_name);
   const [selectedVersion, setSelectedVersion] = useState(LATEST_VERSION_VALUE);
   const [instagramInput, setInstagramInput] = useState("");
   const [linkedinInput, setLinkedinInput] = useState("");
@@ -153,19 +149,12 @@ export default function CompetitorAnalysisManualPage() {
   };
 
   return (
-    <main className="min-w-0 space-y-4 pb-4">
-      <TopBar user={{ name: companyName || "User" }} placeholder="Search manual competitors..." />
-
+    <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Link
-            href={PAGE_ROUTES.COMPETITOR_ANALYSIS}
-            className={`mb-2 inline-flex items-center gap-1.5 text-[13px] font-medium text-[#5B57E6] hover:underline ${FOCUS_RING}`}
-          >
-            <ArrowLeft className="size-3.5" />
-            All modes
-          </Link>
-          <h1 className="text-xl font-semibold text-neutral-900">Manual competitor analysis</h1>
+          <h2 className="text-[16px] font-semibold text-neutral-900">
+            Manual competitor analysis
+          </h2>
           <p className="mt-1 text-sm text-neutral-500">
             Add competitors yourself and browse previous manual analysis versions.
           </p>
@@ -210,7 +199,7 @@ export default function CompetitorAnalysisManualPage() {
                     addCompetitor(instagramInput, "instagram");
                   }
                 }}
-                placeholder="@confiz"
+                placeholder="@username"
                 className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
               />
               <Button
@@ -240,7 +229,7 @@ export default function CompetitorAnalysisManualPage() {
                     addCompetitor(linkedinInput, "linkedin");
                   }
                 }}
-                placeholder="https://www.linkedin.com/company/systems-limited/"
+                placeholder="https://www.linkedin.com/company"
                 className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
               />
               <Button
@@ -317,6 +306,6 @@ export default function CompetitorAnalysisManualPage() {
         isRetrying={isRefetching || isPending}
         onRunAnalysis={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       />
-    </main>
+    </div>
   );
 }

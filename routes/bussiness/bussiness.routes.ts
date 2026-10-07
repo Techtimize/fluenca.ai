@@ -2,6 +2,7 @@ import { BUSSINESSENDPOINT } from "./Bussiness-Endpoint";
 import api from "../apiClient";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
+import type { DashboardResponse } from "@/types/bussiness/dashboard-type";
 import {
   CompetitorAnalysisJobResponse,
   CompetitorAnalysisManualRequest,
@@ -21,7 +22,11 @@ import type {
 } from "@/types/bussiness/google-trends-type";
 import {  ContentRecommendationResponse, ContentRecommendationResultResponse } from "@/types/bussiness/content-recommendation-type";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
-import { ScriptGenerationRequest, ScriptGenerationResultsResponse } from "@/types/bussiness/script-type";
+import {
+  ScriptGenerationRequest,
+  ScriptGenerationResultsParams,
+  ScriptGenerationResultsResponse,
+} from "@/types/bussiness/script-type";
 import type {
   CompanyImageGenerationResponse,
   ImageGenerationRequest,
@@ -31,6 +36,7 @@ import type {
 import { IntelligenceJobResponse, IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 import { BuisnessNicheTrendResponse, NicheTrendsRequest } from "@/types/bussiness/neche_trends";
 import { ContentRecommendationRequest } from "@/types/Trends/Content-recommendation-interface";
+import type { PlannerResultsResponse, PlannerVersionsResponse } from "@/types/bussiness/planner-type";
 
 function toQueryParams(params?: GoogleTrendQueryParams) {
   if (!params) return undefined;
@@ -185,6 +191,13 @@ export const AnalyzeCompanyResultsApi = async (company_id: string) => {
     return response.data;
 }
 
+export const AnalyzeCompanyDashboardApi = async (company_id: string) => {
+    const response = await api.get<DashboardResponse>(
+      BUSSINESSENDPOINT.ANALYZE_COMPANY_DASHBOARD(company_id),
+    );
+    return response.data;
+}
+
 export const GoogleTrendNowApi = async (params?: GoogleTrendQueryParams) => {
     const response = await api.get<GoogleTrendNowResponse>(
       BUSSINESSENDPOINT.TRENDS.GOOGLE_TRENDS_NOW,
@@ -231,11 +244,6 @@ export const IntakeApi = async (): Promise<IntakeResponseProps> => {
     return response.data;
 }
 
-export const CompleteIntakeApi = async (): Promise<IntakeResponseProps> => {
-    const response = await api.post(BUSSINESSENDPOINT.INTAKE_COMPLETE);
-    return response.data;
-}
-
 export const AnswerQuestionApi = async ({ question_id, answer }: AnswerQuestionRequestProps): Promise<IntakeQuestion> => {
     const response = await api.patch(BUSSINESSENDPOINT.INTAKE_QUESTION(question_id), { answer });
     return response.data;
@@ -246,10 +254,24 @@ export const ScriptGenerationApi = async (data: ScriptGenerationRequest) => {
     return response.data;
 }
 
-export const ScriptGenerationResultsApi = async (
+export const ScriptGenerationResultsByCompanyIdApi = async (
   company_id: string,
+  params?: ScriptGenerationResultsParams,
 ): Promise<ScriptGenerationResultsResponse> => {
-    const response = await api.get(BUSSINESSENDPOINT.GENERATION.SCRIPT_GENERATION_RESULTS(company_id));
+    const response = await api.get(
+      BUSSINESSENDPOINT.GENERATION.SCRIPT_GENERATION_RESULTS_BY_COMPANY_ID(company_id),
+      {
+        params: {
+          limit: params?.limit,
+          offset: params?.offset,
+        },
+      },
+    );
+    return response.data;
+}
+
+export const ScriptGenerationResultsApi = async (): Promise<ScriptGenerationResultsResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.GENERATION.SCRIPT_GENERATION_RESULTS);
     return response.data;
 }
 
@@ -264,6 +286,11 @@ export const CompanyImageGenerationApi = async (
   company_id: string,
 ): Promise<CompanyImageGenerationResponse> => {
     const response = await api.get(BUSSINESSENDPOINT.GENERATION.COMPANY_IMAGE_GENERATION(company_id));
+    return response.data;
+}
+
+export const DeleteImageApi = async (company_id: string, image_id: string) => {
+    const response = await api.delete(BUSSINESSENDPOINT.GENERATION.DELETE_IMAGE(company_id, image_id));
     return response.data;
 }
 
@@ -297,3 +324,40 @@ export const IntelligenceJobApi = async (
 //     const response = await api.post<BuisnessNicheTrendResponse>(BUSSINESSENDPOINT.NICHE_TREND, data);
 //     return response.data;
 // }
+export const PlannerResultsApi = async (
+  company_id: string,
+): Promise<PlannerResultsResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.PLANNER.PLANNER_LATEST_RESPONSE(company_id));
+    return response.data;
+}
+
+export const PlannerVersionsApi = async (
+  company_id: string,
+): Promise<PlannerVersionsResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.PLANNER.PLANNER_VERSIONS(company_id));
+    return response.data;
+}
+
+export const PlannerSpecificVersionsApi = async (
+  company_id: string,
+  version: string,
+): Promise<PlannerResultsResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.PLANNER.PLANNER_SPECIFIC_VERSIONS(company_id, version));
+    return response.data;
+}
+
+export const CompetitorAnalyticDashboardApi = async (company_id: string) => {
+    const response = await api.get(BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_COMPETITORS(company_id));
+    return response.data;
+}
+
+export const BlogPostApi = async (brief_id: string) => {
+    const response = await api.post(BUSSINESSENDPOINT.BLOG_POST, { params: { brief_id: brief_id } });
+    return response.data;
+}
+
+export const BlogPostDetailsApi = async (blog_post_id: string) => {
+    const response = await api.get(BUSSINESSENDPOINT.BLOG_POST_DETAILS(blog_post_id));
+    return response.data;
+}
+

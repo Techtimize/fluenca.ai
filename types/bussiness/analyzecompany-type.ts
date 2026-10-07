@@ -19,6 +19,16 @@ export type AnalyzeCompanyWebsiteSignals = {
   crawled: boolean;
 };
 
+export type AnalyzeCompanyBrandImages = {
+  logo_url?: string | null;
+  linkedin_url?: string | null;
+  instagram_url?: string | null;
+  linkedin_image_url?: string | null;
+  instagram_image_url?: string | null;
+  website_url?: string | null;
+  [key: string]: string | null | undefined;
+};
+
 export type AnalyzeCompanyProfile = {
   name: string;
   website: string;
@@ -36,6 +46,7 @@ export type AnalyzeCompanyProfile = {
   positioning: string;
   value_proposition: string;
   business_model: string;
+  brand_images?: AnalyzeCompanyBrandImages | null;
 };
 
 export type AnalyzeCompanyBrief = AnalyzeCompanyProfile & {
@@ -192,6 +203,7 @@ export type AnalyzeCompanyResponse = {
   success?: boolean;
   error?: string | null;
   company: AnalyzeCompanyProfile;
+  brand_images?: AnalyzeCompanyBrandImages | null;
   company_summary: AnalyzeCompanySummary;
   company_analysis: AnalyzeCompanyAnalysis;
   executive_snapshot: AnalyzeCompanyExecutiveSnapshot;

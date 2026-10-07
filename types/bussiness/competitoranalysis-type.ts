@@ -227,12 +227,329 @@ export interface CompetitorCompanyExtractedSignals {
 export interface CompetitorCompany {
   name?: string;
   website?: string;
+  market?: string;
+  region?: string;
+  one_liner?: string;
+  competitor_criteria?: string;
   services?: string[];
   linkedin_url?: string | null;
   instagram_url?: string | null;
+  instagram?: CompetitiveBriefInstagramProfile;
+  website_profile?: CompetitiveBriefWebsiteProfile;
   extracted_signals?: CompetitorCompanyExtractedSignals;
   flagship_services?: string[];
   instagram_username?: string | null;
+}
+
+export interface CompetitiveBriefLink {
+  url?: string;
+  verified?: boolean;
+  username?: string;
+  profile_picture_url?: string;
+  followers?: number;
+  following?: number;
+  media_count?: number;
+  posts_count?: number;
+  post_count?: number;
+  is_hiring?: boolean | null;
+  profiles_sampled?: number;
+  company_size?: string | null;
+  total_employees?: number | null;
+}
+
+export interface CompetitiveBriefInstagramProfile {
+  username?: string;
+  followers?: number;
+  following?: number;
+  media_count?: number;
+  posts_count?: number;
+  post_count?: number;
+  profile_url?: string;
+  profile_picture_url?: string;
+  name?: string;
+  posts?: CompetitiveBriefInstagramPost[];
+}
+
+export interface CompetitiveBriefWebsiteProfile {
+  url?: string;
+  products?: string[];
+  services?: string[];
+  industries?: string[];
+  description?: string;
+  positioning?: string;
+  technologies?: string[];
+  pricing_model?: string;
+  business_model?: string;
+  target_audience?: string;
+}
+
+export interface CompetitiveBriefEmployee {
+  name?: string;
+  level?: string;
+  title?: string;
+  source?: string;
+  designation?: string;
+  linkedin_url?: string | null;
+  evidence?: string;
+}
+
+export interface CompetitiveBriefCompetitorLinks {
+  website?: CompetitiveBriefLink;
+  linkedin?: CompetitiveBriefLink;
+  instagram?: CompetitiveBriefLink;
+}
+
+export interface CompetitiveBriefOffers {
+  core_offers?: string[];
+  primary_cta?: string;
+  pricing_model?: string;
+}
+
+export interface CompetitiveBriefOverlap {
+  audience?: string[];
+  services?: string[];
+  geography?: string;
+}
+
+export interface CompetitiveBriefPositioning {
+  proof_points?: string[];
+  differentiators?: string[];
+  primary_message?: string;
+  secondary_messages?: string[];
+}
+
+export interface CompetitiveBriefTalkingPoint {
+  theme?: string;
+  channel?: string;
+  evidence?: string;
+}
+
+export interface CompetitiveBriefCompeteChannel {
+  how?: string;
+  channel?: string;
+}
+
+export interface CompetitiveBriefCompetitor {
+  name?: string;
+  username?: string;
+  profile_url?: string;
+  profile_picture_url?: string;
+  image_url?: string;
+  followers?: number;
+  following?: number;
+  media_count?: number;
+  posts_count?: number;
+  posts?: CompetitiveBriefInstagramPost[];
+  website?: CompetitiveBriefWebsiteProfile;
+  linkedin_url?: string | null;
+  is_hiring?: boolean | null;
+  employees?: CompetitiveBriefEmployee[];
+  employee_count?: number | null;
+  linkedin_followers?: number | null;
+  linkedin_post_count?: number | null;
+  linkedin_company_size?: string | null;
+  linkedin_total_employees?: number | null;
+  linkedin_profiles_sampled?: number | null;
+  links?: CompetitiveBriefCompetitorLinks;
+  offers?: CompetitiveBriefOffers;
+  missing?: string[];
+  overlap?: CompetitiveBriefOverlap;
+  positioning?: string | CompetitiveBriefPositioning;
+  what_they_sell?: string[];
+  who_they_target?: string[];
+  threat_level?: string | null;
+  talking_about?: CompetitiveBriefTalkingPoint[];
+  threat_reason?: string;
+  why_competitor?: string;
+  target_audience?: string[];
+  competition_type?: string;
+  evidence_quality?: string;
+  where_they_compete?: CompetitiveBriefCompeteChannel[];
+}
+
+export interface CompetitiveBriefLinkedInSide {
+  name?: string;
+  linkedin_url?: string | null;
+  linkedin_followers?: number | null;
+  linkedin_company_size?: string | null;
+  linkedin_total_employees?: number | null;
+  linkedin_profiles_sampled?: number | null;
+  linkedin_post_count?: number | null;
+  employees?: CompetitiveBriefEmployee[];
+  is_hiring?: boolean | null;
+}
+
+export interface CompetitiveBriefLinkedInComparison {
+  columns?: string[];
+  rows?: CompetitiveBriefComparisonRow[];
+  your_company?: CompetitiveBriefLinkedInSide;
+  competitors?: CompetitiveBriefLinkedInSide[];
+  so_what?: string;
+}
+
+export interface CompetitiveBriefWebsiteComparison {
+  columns?: string[];
+  rows?: CompetitiveBriefComparisonRow[];
+  your_company?: CompetitiveBriefWebsiteProfile;
+  competitors?: Array<CompetitiveBriefWebsiteProfile & { name?: string }>;
+  so_what?: string;
+}
+
+export interface CompetitiveBriefCustomerProblemItem {
+  problem?: string;
+  why_it_matters?: string;
+  competitors_involved?: string[];
+}
+
+export interface CompetitiveBriefCustomerProblem {
+  summary?: string;
+  problems?: CompetitiveBriefCustomerProblemItem[];
+}
+
+export interface CompetitiveBriefGapItem {
+  gap?: string;
+  evidence?: string;
+  competitors_involved?: string[];
+}
+
+export interface CompetitiveBriefOpportunityItem {
+  gap?: string;
+  why_it_matters?: string;
+  opportunity?: string;
+  why?: string;
+  type?: string;
+}
+
+export interface CompetitiveBriefRecommendedAction {
+  action?: string;
+  why?: string;
+  how?: string;
+  effort?: string;
+  impact?: string;
+}
+
+export interface CompetitiveBriefComparisonRow {
+  area?: string;
+  your_company?: string;
+  competitors?: Record<string, string>;
+  insight?: string;
+}
+
+export interface CompetitiveBriefComparison {
+  columns?: string[];
+  rows?: CompetitiveBriefComparisonRow[];
+  so_what?: string;
+}
+
+export interface CompetitiveBriefInstagramPost {
+  competitor_name?: string;
+  username?: string;
+  id?: string;
+  caption?: string;
+  media_type?: string;
+  media_url?: string;
+  thumbnail_url?: string;
+  permalink?: string;
+  timestamp?: string;
+  likes?: number;
+  comments?: number;
+  engagement_rate?: number;
+  hashtags?: string[];
+}
+
+export interface CompetitiveBriefOwnedTopic {
+  owner?: string;
+  topic?: string;
+}
+
+export interface CompetitiveBriefContentGaps {
+  unowned_topics?: string[];
+  you_should_explore?: string[];
+  owned_by_competitors?: CompetitiveBriefOwnedTopic[];
+}
+
+export interface CompetitiveBriefOpportunity {
+  why?: string;
+  type?: string;
+  opportunity?: string;
+  gap?: string;
+  why_it_matters?: string;
+}
+
+export interface CompetitiveBriefPositioningGaps {
+  weak_messaging?: string[];
+  crowded_messages?: string[];
+  your_differentiation?: string[];
+}
+
+export interface CompetitiveBriefPriorityAction {
+  why?: string;
+  action?: string;
+  effort?: string;
+  impact?: string;
+}
+
+export interface CompetitiveBriefLandscapeSegment {
+  segment?: string;
+  competitors?: string[];
+  how_they_compete?: string;
+}
+
+export interface CompetitiveBriefLandscape {
+  summary?: string;
+  segments?: CompetitiveBriefLandscapeSegment[];
+}
+
+export interface CompetitiveBriefStrategy {
+  content_gaps?: CompetitiveBriefContentGaps;
+  opportunities?: CompetitiveBriefOpportunity[];
+  threat_signals?: string[];
+  positioning_gaps?: CompetitiveBriefPositioningGaps;
+  priority_actions?: CompetitiveBriefPriorityAction[];
+  competitive_landscape?: CompetitiveBriefLandscape;
+}
+
+export interface CompetitiveBriefWhitespaceGap {
+  gap?: string;
+  area?: string;
+  evidence?: string;
+  confidence?: string;
+  opportunity?: string;
+  competitors_involved?: string[];
+}
+
+export interface CompetitiveBriefCrowdedArea {
+  area?: string;
+  note?: string;
+  competitors?: string[];
+}
+
+export interface CompetitiveBriefMarketWhitespace {
+  gaps?: CompetitiveBriefWhitespaceGap[];
+  crowded_areas?: CompetitiveBriefCrowdedArea[];
+  whitespace_summary?: string;
+}
+
+export interface CompetitorResultMeta {
+  mode?: string;
+  status?: string;
+  version?: string | number;
+  platforms?: string[];
+  timestamp?: string;
+  agent_mode?: string;
+  post_limit?: number;
+  serverless?: boolean;
+  duration_sec?: number;
+  tavily_calls?: number;
+  skip_linkedin?: boolean;
+  linkedin_calls?: number;
+  prompt_version?: string;
+  firecrawl_calls?: number;
+  instagram_calls?: number;
+  response_format?: string;
+  competitor_limit?: number;
+  discovery_source?: string;
+  api_call_breakdown?: CompetitorApiCallBreakdown;
 }
 
 export interface CompetitorDna {
@@ -442,13 +759,25 @@ export interface CompetitorStrategicInsights {
   };
 }
 
+export interface CompetitorPostingFrequencyStats {
+  post_count?: number | null;
+  posts_per_week?: number | null;
+  date_range_days?: number | null;
+  avg_days_between_posts?: number | null;
+}
+
+export type CompetitorPostingFrequency =
+  | string
+  | CompetitorPostingFrequencyStats
+  | null;
+
 export interface CompetitorMatchupCompany {
   name?: string;
   social?: {
     followers?: number | null;
     content_themes?: string[];
     primary_format?: string | null;
-    posting_frequency?: string | null;
+    posting_frequency?: CompetitorPostingFrequency;
     avg_engagement_rate?: number | null;
   };
   website?: string | null;
@@ -492,7 +821,7 @@ export interface CompetitorSocialSnapshot {
   followers?: number | null;
   content_themes?: string[];
   primary_format?: string | null;
-  posting_frequency?: string | null;
+  posting_frequency?: CompetitorPostingFrequency;
   avg_engagement_rate?: number | null;
 }
 
@@ -523,9 +852,9 @@ export interface CompetitorSocialComparison {
   company_themes?: string[];
   competitor_themes?: string[];
   primary_format?: string | null;
-  posting_frequency?: string | null;
-  company_posting_frequency?: string | null;
-  competitor_posting_frequency?: string | null;
+  posting_frequency?: CompetitorPostingFrequency;
+  company_posting_frequency?: CompetitorPostingFrequency;
+  competitor_posting_frequency?: CompetitorPostingFrequency;
 }
 
 export interface CompetitorContentComparison {
@@ -619,19 +948,6 @@ export interface CompetitorApiCallBreakdown {
   linkedin_playwright_pages?: number;
 }
 
-export interface CompetitorResultMeta {
-  status?: string;
-  platforms?: string[];
-  timestamp?: string;
-  agent_mode?: string;
-  duration_sec?: number;
-  tavily_calls?: number;
-  linkedin_calls?: number;
-  firecrawl_calls?: number;
-  instagram_calls?: number;
-  api_call_breakdown?: CompetitorApiCallBreakdown;
-}
-
 export interface CompetitorAnalysisResult {
   meta?: CompetitorResultMeta;
   error?: string | null;
@@ -639,12 +955,25 @@ export interface CompetitorAnalysisResult {
   company?: CompetitorCompany;
   success?: boolean;
   summary?: string;
+  strategy?: CompetitiveBriefStrategy;
+  market_whitespace?: CompetitiveBriefMarketWhitespace;
+  excluded_competitors?: string[];
+  customer_problem?: CompetitiveBriefCustomerProblem;
+  opportunities?: CompetitiveBriefOpportunityItem[];
+  recommended_actions?: CompetitiveBriefRecommendedAction[];
+  competitive_comparison?: CompetitiveBriefComparison;
+  website_comparison?: CompetitiveBriefWebsiteComparison;
+  linkedin_comparison?: CompetitiveBriefLinkedInComparison;
+  instagram_content?: CompetitiveBriefInstagramPost[];
+  competitors_instagram?: CompetitiveBriefInstagramProfile[];
+  user_instagram?: CompetitiveBriefInstagramProfile;
+  brand_images?: Record<string, unknown>;
   analysis?: Record<string, unknown>;
   overview?: CompetitorOverview;
   ai_report?: Record<string, unknown> | null;
   web_crawl?: Record<string, unknown> | null;
   post_count?: number;
-  competitors?: CompetitorListItem[];
+  competitors?: Array<CompetitorListItem | CompetitiveBriefCompetitor>;
   gap_analysis?: Record<string, unknown> | null;
   matching_mode?: string;
   company_profile?: Record<string, unknown> | null;
@@ -661,7 +990,7 @@ export interface CompetitorAnalysisResult {
     social_handles?: Record<string, unknown>;
     linkedin_content_themes?: string[];
   };
-  competitive_gaps?: Record<string, unknown> | null;
+  competitive_gaps?: CompetitiveBriefGapItem[] | Record<string, unknown> | null;
   competitor_count?: number;
   customer_insights?: Record<string, unknown> | null;
   similarity_scores?: Array<Record<string, unknown>>;
@@ -708,7 +1037,20 @@ export interface CompetitorsListResponse {
   version?: string | number | null;
   analysis_count?: number;
   count?: number;
-  competitors?: CompetitorListItem[];
+  company?: CompetitorCompany;
+  competitors?: Array<CompetitorListItem | CompetitiveBriefCompetitor>;
+  customer_problem?: CompetitiveBriefCustomerProblem;
+  competitive_gaps?: CompetitiveBriefGapItem[];
+  opportunities?: CompetitiveBriefOpportunityItem[];
+  recommended_actions?: CompetitiveBriefRecommendedAction[];
+  competitive_comparison?: CompetitiveBriefComparison;
+  website_comparison?: CompetitiveBriefWebsiteComparison;
+  linkedin_comparison?: CompetitiveBriefLinkedInComparison;
+  instagram_content?: CompetitiveBriefInstagramPost[];
+  competitors_instagram?: CompetitiveBriefInstagramProfile[];
+  user_instagram?: CompetitiveBriefInstagramProfile;
+  brand_images?: Record<string, unknown>;
+  meta?: CompetitorResultMeta;
 }
 
 export interface CompetitorAnalysisVersionItem {

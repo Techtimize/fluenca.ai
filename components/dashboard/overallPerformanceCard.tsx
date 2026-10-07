@@ -1,36 +1,49 @@
+import { useId } from "react";
 import { Monitor, Smartphone } from "lucide-react";
 import type { OverallPerformance } from "@/types/dashboard";
 
 // The gauge is drawn in code because it changes with the score.
+// Each segment is a rounded block pointing at the centre, shaded blue (outer) to purple (inner).
+const BARS = 13;
+const SWEEP = 200; // degrees; a little past a half circle so the ends dip below the baseline
+const CX = 140, CY = 140, R_INNER = 84, R_OUTER = 132, BAR_WIDTH = 24;
+const TRACK = "#EEF0FD";
+
 function ScoreGauge({ score }: { score: number }) {
-  const bars = 13;
-  const cx = 110, cy = 105, r1 = 55, r2 = 92;
+  const gradientId = useId();
+  const pct = Math.max(0, Math.min(100, score)) / 100;
+  const filledCount = Math.round(pct * (BARS - 1)) + (pct > 0 ? 1 : 0);
 
   return (
-    <div className="relative mx-auto w-full max-w-[260px]">
-      <svg viewBox="0 0 220 115" className="w-full" role="img" aria-label={`Overall score ${score}%`}>
-        {Array.from({ length: bars }, (_, i) => {
-          const a = Math.PI - (i / (bars - 1)) * Math.PI;
-          const filled = i / (bars - 1) <= score / 100;
-          return (
-            <line
-              key={i}
-              x1={(cx + r1 * Math.cos(a)).toFixed(2)}
-              y1={(cy - r1 * Math.sin(a)).toFixed(2)}
-              x2={(cx + r2 * Math.cos(a)).toFixed(2)}
-              y2={(cy - r2 * Math.sin(a)).toFixed(2)}
-              stroke={filled ? "#818CF8" : "#EEF0F8"}
-              strokeWidth="11"
-              strokeLinecap="round"
-            />
-          );
-        })}
-      </svg>
-      <div className="absolute inset-x-0 bottom-0 text-center">
-        <p className="text-2xl font-semibold text-neutral-900">{score}%</p>
-        <p className="text-xs text-neutral-500">Overall Score</p>
-      </div>
-    </div>
+    <svg viewBox="0 0 280 182" className="mx-auto w-full max-w-70" role="img" aria-label={`Overall score ${score}%`}>
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#4A5DF9" />
+          <stop offset="100%" stopColor="#7C4FF0" />
+        </linearGradient>
+      </defs>
+      {Array.from({ length: BARS }, (_, i) => {
+        const angle = -SWEEP / 2 + (i / (BARS - 1)) * SWEEP;
+        return (
+          <rect
+            key={i}
+            x={CX - BAR_WIDTH / 2}
+            y={CY - R_OUTER}
+            width={BAR_WIDTH}
+            height={R_OUTER - R_INNER}
+            rx={11}
+            fill={i < filledCount ? `url(#${gradientId})` : TRACK}
+            transform={`rotate(${angle.toFixed(2)} ${CX} ${CY})`}
+          />
+        );
+      })}
+      <text x={CX} y={CY + 2} textAnchor="middle" className="fill-neutral-900 text-[38px] font-semibold">
+        {score}%
+      </text>
+      <text x={CX} y={CY + 26} textAnchor="middle" className="fill-neutral-700 text-[15px]">
+        Overall Score
+      </text>
+    </svg>
   );
 }
 
@@ -49,22 +62,22 @@ export default function OverallPerformanceCard({ data }: { data: OverallPerforma
             </div>
           ))}
         </dl>
-      ) : (
-      <dl className="mt-auto grid grid-cols-2 gap-3 pt-5">
-        <div className="rounded-xl bg-[#F1F4FF] px-3 py-2.5">
-          <dt className="flex items-center gap-1.5 text-xs text-neutral-600">
-            <Smartphone className="size-3.5" aria-hidden="true" /> Mobile
-          </dt>
-          <dd className="mt-1 text-sm font-semibold text-neutral-900">{data.mobile} %</dd>
-        </div>
-        <div className="rounded-xl bg-[#F1F4FF] px-3 py-2.5">
-          <dt className="flex items-center gap-1.5 text-xs text-neutral-600">
-            <Monitor className="size-3.5" aria-hidden="true" /> Desktop
-          </dt>
-          <dd className="mt-1 text-sm font-semibold text-neutral-900">{data.desktop} %</dd>
-        </div>
-      </dl>
-      )}
+      ) : data.mobile != null && data.desktop != null ? (
+        <dl className="mt-auto grid grid-cols-2 gap-3 pt-5">
+          <div className="rounded-xl bg-[#F1F4FF] px-3 py-2.5">
+            <dt className="flex items-center gap-1.5 text-xs text-neutral-600">
+              <Smartphone className="size-3.5" aria-hidden="true" /> Mobile
+            </dt>
+            <dd className="mt-1 text-sm font-semibold text-neutral-900">{data.mobile} %</dd>
+          </div>
+          <div className="rounded-xl bg-[#F1F4FF] px-3 py-2.5">
+            <dt className="flex items-center gap-1.5 text-xs text-neutral-600">
+              <Monitor className="size-3.5" aria-hidden="true" /> Desktop
+            </dt>
+            <dd className="mt-1 text-sm font-semibold text-neutral-900">{data.desktop} %</dd>
+          </div>
+        </dl>
+      ) : null}
     </section>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, CompleteIntakeApi, ContentRecommendationApi, ImageGenerationApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentRecommendationApi, DeleteImageApi, ImageGenerationApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
@@ -9,7 +9,7 @@ import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/bussine
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
-import { setCompanyUserIdProvider, setOnboardingCompletedProvider } from "@/provider/auth-provider";
+import { setCompanyIdProvider, setOnboardingCompletedProvider } from "@/provider/auth-provider";
 import { CompetitorAnalysisAsyncResponse, CompetitorAnalysisManualRequest, CompetitorAnalysisRequest } from "@/types/bussiness/competitoranalysis-type";
 import { ContentRecommendationRequest, ContentRecommendationResponse } from "@/types/bussiness/content-recommendation-type";
 import { ChatMode, SendMessageDoneEvent } from "@/types/chat";
@@ -17,6 +17,8 @@ import { SendMessageApi } from "../chatbot/chatbot.routes";
 import { ScriptGenerationRequest, ScriptGenerationResponse } from "@/types/bussiness/script-type";
 import { ImageGenerationRequest, ImageGenerationResponse } from "@/types/bussiness/imagegeneration-type";
 import { IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
+import useAuthStore from "@/store/AuthsStore";
+
 
 export function WaitlistMutation() {
     return useMutation({
@@ -72,7 +74,7 @@ export function AnalyzeCompanyMutation() {
                 toast.error("Company ID missing from analysis response");
                 return;
             }
-            setCompanyUserIdProvider(companyId);
+            setCompanyIdProvider(companyId);
             setOnboardingCompletedProvider(true);
             const resultsKey = ["analyze-company-results", companyId] as const;
             queryClient.setQueryData(resultsKey, response);
@@ -83,28 +85,17 @@ export function AnalyzeCompanyMutation() {
                 toast.error("Failed to get company analysis results");
             }
 
+            queryClient.invalidateQueries({
+              queryKey: ["analyze-company-dashboard", companyId],
+            });
+            queryClient.invalidateQueries({
+              queryKey: ["analyze-company-results", companyId],
+            });
             toast.success("Company analyzed successfully");
             router.push(PAGE_ROUTES.DASHBOARD);
         },
         onError: (error: unknown) => {
             toast.error(getApiErrorMessage(error, "Failed to analyze company"));
-        },
-    });
-}
-
-export function CompleteIntakeMutation() {
-    const router = useRouter();
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: () => CompleteIntakeApi(),
-        onSuccess: (response: IntakeResponseProps) => {
-            queryClient.setQueryData(['intake'], response);
-            setOnboardingCompletedProvider(true);
-            toast.success("Company overview saved successfully");
-            router.push(PAGE_ROUTES.VERIFY_DNA);
-        },
-        onError: (error) => {
-            toast.error(getApiErrorMessage(error, "Failed to save company overview"));
         },
     });
 }
@@ -292,7 +283,6 @@ export const ScriptGenerationMutation = () => {
   });
 };
 
-
 export const ImageGenerationMutation = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -311,18 +301,57 @@ export const ImageGenerationMutation = () => {
   });
 };
 
+export const DeleteImageMutation = () => {
+  const queryClient = useQueryClient();
+  const companyId = useAuthStore((s) => s.company_id);
+
+  return useMutation({
+    mutationFn: (image_id: string) => {
+      if (!companyId) {
+        throw new Error("Company ID is missing");
+      }
+      return DeleteImageApi(companyId, image_id);
+    },
+    onSuccess: () => {
+      toast.success("Image deleted successfully");
+      queryClient.invalidateQueries({
+        queryKey: ["company-image-generation-results", companyId],
+      });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to delete image"));
+    },
+  });
+};
+
 export const IntelligenceRunMutation = () => {
   return useMutation({
     mutationFn: (data: IntelligenceRunRequest) => IntelligenceRunApi(data),
     onSuccess: (response: IntelligenceRunResponse) => {
+      // The backend message is meant for developers ("Poll GET /api/v1/..."), so show our own copy.
       if (response?.success === false) {
-        toast.error(response.error || response.message || "Failed to run intelligence");
+        toast.error("We couldn't start building your workspace. Please try again.");
         return;
       }
-      toast.success(response?.message || "Intelligence run started successfully");
+      toast.success("We're building your workspace. This takes a few minutes.");
+    },
+    onError: () => {
+      toast.error("We couldn't start building your workspace. Please try again.");
+    },
+  });
+};
+
+
+export const BlogPostMutation = () => {
+  const router = useRouter();
+  return useMutation({
+    mutationFn: (brief_id: string) => BlogPostApi(brief_id),
+    onSuccess: (response) => {
+      toast.success("Blog post created successfully");
+      router.push(PAGE_ROUTES.BLOGS);
     },
     onError: (error) => {
-      toast.error(getApiErrorMessage(error, "Failed to run intelligence"));
-    },
+      toast.error(getApiErrorMessage(error, "Failed to create blog post"));
+      },
   });
 };

@@ -1,23 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import AnalyticsSection from "@/components/dashboard/cards/analyticsSection";
 import ChatInput from "@/components/dashboard/chat/chatInput";
 import ChatPanel from "@/components/dashboard/chat/chatPanel";
 import CompanyCard from "@/components/dashboard/cards/companyCard";
+import { DashboardSkeleton } from "@/components/shared/skeletons";
 import DocumentationCard from "@/components/dashboard/documentationCard";
 import TopBar from "@/components/dashboard/topBar";
-import { mapAnalyzeCompanyToDashboard } from "@/lib/dashboard/map-analyze-company";
+import { mapDashboard } from "@/lib/dashboard/map-dashboard";
 import { useChatbot } from "@/lib/chat/use-chatbot";
-import { MOCK_DASHBOARD } from "@/lib/mock/dashboard";
-import { AnalyzeCompanyResultsQuery } from "@/routes/bussiness/Bussiness-Query";
+import { AnalyzeCompanyDashboardQuery } from "@/routes/bussiness/Bussiness-Query";
+import { AnalyzeCompanyMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import useAuthStore from "@/store/AuthsStore";
 import type { Device } from "@/types/dashboard";
-import type { AnalyzeCompanyResultsResponse } from "@/types/bussiness/analyzecompany-type";
-import { stripMarkdown } from "@/utils/text-utils";
-
-const DOC_ORDER = ["company", "marketing", "pain", "competitors"] as const;
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
@@ -25,47 +22,53 @@ export default function DashboardPage() {
   const companyName = useAuthStore((s) => s.company_name);
 
   const {
-    data: analyzeResults,
+    data: dashboard,
     isLoading,
-    isFetching,
     isError,
     error,
-  } = AnalyzeCompanyResultsQuery(companyId);
+    refetch,
+  } = AnalyzeCompanyDashboardQuery(companyId);
 
-  const mapped = useMemo(() => {
-    const payload = analyzeResults as AnalyzeCompanyResultsResponse | AnalyzeCompanyResultsResponse["result"] | undefined;
-    if (!payload) return null;
-    const analysis =
-      payload && typeof payload === "object" && "result" in payload
-        ? (payload as AnalyzeCompanyResultsResponse).result
-        : (payload as AnalyzeCompanyResultsResponse["result"]);
-    return analysis ? mapAnalyzeCompanyToDashboard(analysis) : null;
-  }, [analyzeResults]);
+  const { mutate: analyzeCompany, isPending } = AnalyzeCompanyMutation();
 
-  const result = (analyzeResults as AnalyzeCompanyResultsResponse | undefined)?.result;
-  const summaryText = result?.company_summary?.summary_text;
+  const mapped = useMemo(
+    () => (dashboard?.data ? mapDashboard(dashboard) : null),
+    [dashboard],
+  );
 
-  const company = mapped?.company
-    ? {
-        ...mapped.company,
-        description: summaryText ? stripMarkdown(summaryText) : mapped.company.description,
-      }
-    : MOCK_DASHBOARD.company;
+  const handleAnalyzeCompany = () => {
+    if (!companyId || isPending) return;
 
-  const docs = useMemo(() => {
-    const source = mapped?.docs?.length ? mapped.docs : MOCK_DASHBOARD.docs;
-    const preferred = DOC_ORDER.map((id) => source.find((item) => item.id === id)).filter(
-      Boolean,
-    ) as typeof MOCK_DASHBOARD.docs;
-    return preferred.length ? preferred : source.slice(0, 4);
-  }, [mapped?.docs]);
+    const companyData =
+      mapped?.company.description ||
+      mapped?.company.coreOffering ||
+      mapped?.profile.core_offering ||
+      mapped?.company.name ||
+      companyName ||
+      "";
 
-  const analytics = mapped?.analytics ?? MOCK_DASHBOARD.analytics;
-  const user = {
-    name: companyName || mapped?.company.name || MOCK_DASHBOARD.user.name,
+    analyzeCompany(
+      {
+        company_id: companyId,
+        company_data: companyData,
+      },
+      {
+        onSettled: () => {
+          void refetch();
+        },
+      },
+    );
   };
 
-  const [source, setSource] = useState(analytics.sources[0] ?? "Website");
+  const sources = mapped?.sources ?? [];
+  const channels = mapped?.channels ?? {};
+  const defaultSource = mapped?.defaultSource || sources[0]?.id || "";
+  const user = { name: companyName || mapped?.company.name || "" };
+  const [selectedSource, setSource] = useState<string | null>(null);
+  const source =
+    selectedSource && channels[selectedSource] ? selectedSource : defaultSource;
+  const analytics = channels[source];
+  const sourceLabel = sources.find((s) => s.id === source)?.label ?? source;
   const [device, setDevice] = useState<Device>("mobile");
   const [chatOpen, setChatOpen] = useState(false);
   const {
@@ -82,21 +85,16 @@ export default function DashboardPage() {
     startNewConversation,
   } = useChatbot();
 
-  useEffect(() => {
-    if (!analytics.sources.includes(source)) {
-      setSource(analytics.sources[0] ?? "Website");
-    }
-  }, [analytics.sources, source]);
-
-  const screenContext = useMemo(() => {
-    const bits = [`Page: Dashboard`, `Company: ${company.name}`, `Analytics source tab: ${source} (${device})`];
-    if (analytics.metrics.length) {
-      bits.push(
-        `Visible metric scores: ${analytics.metrics.map((m) => `${m.label} ${m.score}`).join(", ")}`,
-      );
-    }
-    return bits.join(". ");
-  }, [company.name, source, device, analytics.metrics]);
+  const screenContext = [
+    `Page: Dashboard`,
+    `Company: ${mapped?.company.name ?? ""}`,
+    `Analytics source tab: ${sourceLabel} (${device})`,
+    analytics?.metrics.length
+      ? `Visible metric scores: ${analytics.metrics.map((m) => `${m.label} ${m.score}`).join(", ")}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join(". ");
 
   const handleSend = (text: string, imageUrl?: string) => {
     send(text, screenContext, imageUrl);
@@ -120,19 +118,38 @@ export default function DashboardPage() {
             </div>
           ) : null}
 
-          <div className={`grid gap-4 ${chatOpen ? "" : "xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]"}`}>
-            <CompanyCard company={company} profile={result?.company} />
-            {!chatOpen ? <DocumentationCard items={docs} goalLabel={t("setYourGoal")} /> : null}
-          </div>
+          {isLoading ? <DashboardSkeleton compact={chatOpen} /> : null}
 
-          <AnalyticsSection
-            data={analytics}
-            source={source}
-            device={device}
-            compact={chatOpen}
-            onSourceChange={setSource}
-            onDeviceChange={setDevice}
-          />
+          {!isLoading && mapped ? (
+            <div
+              className={`grid gap-4 ${chatOpen ? "" : "xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]"}`}
+            >
+              <CompanyCard
+                company={mapped.company}
+                profile={mapped.profile}
+                onRefresh={handleAnalyzeCompany}
+                isRefreshing={isPending}
+              />
+              {!chatOpen && mapped.docs.length ? (
+                <DocumentationCard
+                  items={mapped.docs}
+                  goalLabel={t("setYourGoal")}
+                />
+              ) : null}
+            </div>
+          ) : null}
+
+          {!isLoading && analytics ? (
+            <AnalyticsSection
+              data={analytics}
+              sources={sources}
+              source={source}
+              device={device}
+              compact={chatOpen}
+              onSourceChange={setSource}
+              onDeviceChange={setDevice}
+            />
+          ) : null}
         </main>
 
         {chatOpen ? (
@@ -154,7 +171,11 @@ export default function DashboardPage() {
       </div>
 
       {!chatOpen ? (
-        <ChatInput onOpen={() => setChatOpen(true)} onSend={handleSend} placeholder={t("chatPlaceholder")} />
+        <ChatInput
+          onOpen={() => setChatOpen(true)}
+          onSend={handleSend}
+          placeholder={t("chatPlaceholder")}
+        />
       ) : null}
     </>
   );

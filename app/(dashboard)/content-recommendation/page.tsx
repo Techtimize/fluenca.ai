@@ -7,6 +7,7 @@ import TopBar from "@/components/dashboard/topBar";
 import ApiNotFoundCard from "@/components/notfound";
 import Card from "@/components/shared/card";
 import { getApiErrorMessage, isApiNotFoundError } from "@/errors/error-utils";
+import { normalizeContentRecommendation } from "@/lib/dashboard/normalize-content-recommendation";
 import { ContentRecommendationMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { ContentRecommendationResultQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
@@ -15,9 +16,13 @@ import { FOCUS_RING } from "@/utils/ui-classes";
 export default function ContentRecommendationPage() {
   const companyId = useAuthStore((s) => s.company_id);
   const companyName = useAuthStore((s) => s.company_name);
-  const { data, isLoading, isError, error, isFetching, refetch, isRefetching } =
+  const { data, isLoading, isError, error, refetch, isRefetching } =
     ContentRecommendationResultQuery(companyId);
   const { mutate: recommend, isPending } = ContentRecommendationMutation();
+
+  const normalized = normalizeContentRecommendation(data);
+  const hasPayload = normalized.hasData;
+  const notFound = isError && isApiNotFoundError(error);
 
   const handleGenerate = () => {
     if (!companyId) {
@@ -26,9 +31,6 @@ export default function ContentRecommendationPage() {
     }
     recommend({ company_id: companyId });
   };
-
-  const hasPayload = Boolean(data && Object.keys(data).length);
-  const notFound = isError && isApiNotFoundError(error);
 
   return (
     <main className="min-w-0 space-y-3 pb-4">
@@ -39,7 +41,9 @@ export default function ContentRecommendationPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">Content recommendations</h1>
+          <h1 className="text-lg font-semibold text-neutral-900">
+            Content recommendations
+          </h1>
           <p className="text-[13px] text-neutral-500">
             AI-generated ideas, themes, and post plans for your brand.
           </p>
@@ -61,19 +65,10 @@ export default function ContentRecommendationPage() {
           </button>
         ) : null}
       </div>
-
-      {!companyId ? (
-        <Card className="border-amber-200 bg-amber-50/80 p-4">
-          <p className="text-sm text-amber-800">
-            Company ID is missing. Complete company analysis first, then return here.
-          </p>
-        </Card>
-      ) : null}
-
-      {companyId && (isLoading || isFetching) && !data && !notFound ? (
-        <Card className="flex items-center justify-center gap-3 p-8 text-neutral-500">
-          <Loader2 className="size-5 animate-spin text-[#5B57E6]" />
-          <span className="text-sm">Loading recommendations…</span>
+      {companyId && isLoading ? (
+        <Card className="flex items-center gap-3 p-4">
+          <Loader2 className="size-4 animate-spin text-[#5B57E6]" />
+          <p className="text-sm text-neutral-600">Loading recommendations…</p>
         </Card>
       ) : null}
 

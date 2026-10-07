@@ -19,35 +19,48 @@ const STEPS: Record<IntakeStep, string> = {
     done: 'Done',
 };
 const STEP_KEYS = Object.keys(STEPS) as IntakeStep[];
-const BATCH_SIZE = 3;
-const BATCH_MS = 1200;
-const PREVIEW_WORDS = 7;
+const VISIBLE_LINES = 4; // answered questions kept above the one being typed
+const CHARS_PER_TICK = 3;
+const TYPE_TICK_MS = 18;
+const LINE_PAUSE_MS = 260;
+const ANSWER_WORDS = 14;
 
 export default function CompanyDetail() {
     const router = useRouter();
     const { data: intake } = IntakeQuery();
-    const [batch, setBatch] = useState(0);
     const isReady = intake?.status === 'review' || intake?.status === 'completed';
     const questions = (intake?.sections ?? []).flatMap((section) => section.questions);
-    const totalBatches = Math.ceil(questions.length / BATCH_SIZE);
+
+    // Typewriter: `done` questions are fully shown, the next one types out `typed` characters.
+    const [done, setDone] = useState(0);
+    const [typed, setTyped] = useState(0);
+    const current = isReady ? questions[done] : undefined;
+    const label = current?.question ?? '';
+    const answer = current ? (current.answer ? truncateWords(current.answer, ANSWER_WORDS) : 'Needs your input') : '';
+    const fullLength = label.length + 1 + answer.length;
 
     useEffect(() => {
         if (!isReady) return;
-        if (batch >= totalBatches) {
-            router.push(PAGE_ROUTES.COMPANY_OVERVIEW);
-            return;
+        if (!current) {
+            const timer = setTimeout(() => router.push(PAGE_ROUTES.DNA), 800);
+            return () => clearTimeout(timer);
         }
-        const timer = setTimeout(() => setBatch((value) => value + 1), BATCH_MS);
+        const timer =
+            typed < fullLength
+                ? setTimeout(() => setTyped((n) => n + CHARS_PER_TICK), TYPE_TICK_MS)
+                : setTimeout(() => {
+                      setDone((n) => n + 1);
+                      setTyped(0);
+                  }, LINE_PAUSE_MS);
         return () => clearTimeout(timer);
-    }, [isReady, batch, totalBatches, router]);
+    }, [isReady, current, typed, fullLength, router]);
 
     const step = intake?.step ?? 'queued';
+    // Analysis fills the first 60% of the bar, typing out the questions fills the rest.
     const progress = isReady
-        ? (Math.min(batch + 1, totalBatches) / Math.max(totalBatches, 1)) * 100
-        : ((STEP_KEYS.indexOf(step) + 1) / STEP_KEYS.length) * 100;
-    const visibleBatch = Math.min(batch, totalBatches - 1);
-    const preview = isReady ? questions.slice(visibleBatch * BATCH_SIZE, (visibleBatch + 1) * BATCH_SIZE) : [];
-    const shownCount = Math.min((visibleBatch + 1) * BATCH_SIZE, questions.length);
+        ? 60 + (done / Math.max(questions.length, 1)) * 40
+        : ((STEP_KEYS.indexOf(step) + 1) / STEP_KEYS.length) * 60;
+    const answered = isReady ? questions.slice(Math.max(0, done - VISIBLE_LINES), done) : [];
 
     return (
         <div className="relative min-h-screen w-full overflow-hidden bg-white">
@@ -93,45 +106,68 @@ export default function CompanyDetail() {
                     </p>
                 )}
 
-                {/* Progress */}
-                <div
-                    role="progressbar"
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={Math.round(progress)}
-                    className="mt-6 h-1.5 w-full max-w-sm overflow-hidden rounded-full bg-[#E6E9FB]"
-                >
-                    <div
-                        className="h-full rounded-full bg-linear-to-r from-[#5B5BD6] to-[#7B7BF0] transition-[width] duration-1000 ease-linear"
-                        style={{ width: `${progress}%` }}
-                    />
-                </div>
-
-                {/* Company card */}
-                <div className="mt-6 w-full max-w-[340px] rounded-3xl border border-[#E6E8F5] bg-white p-4 shadow-[0_8px_30px_rgba(91,91,214,0.08)]">
+                {/* Live report */}
+                <div className="mt-8 w-full max-w-md rounded-3xl border border-[#E6E8F5] bg-white/90 p-6 shadow-[0_20px_50px_-24px_rgba(79,70,229,0.45)] backdrop-blur">
                     <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
                         <div className="size-10 rounded-xl bg-linear-to-br from-[#5B5BD6] to-[#8B8BF5]" />
                         <div>
-                            <p className="text-sm font-semibold text-gray-900">Your company</p>
-                            <p className="text-xs text-gray-500">
-                                {isReady ? `Generating questions ${shownCount}/${questions.length}` : STEPS[step]}
+                            <p className="font-semibold text-gray-900">Your company — report</p>
+                            <p className="flex items-center gap-1.5 text-xs text-gray-500">
+                                <span className="size-1.5 animate-pulse rounded-full bg-[#22C55E]" />
+                                {isReady ? 'Building live...' : STEPS[step]}
                             </p>
                         </div>
                     </div>
 
-                    <dl key={visibleBatch} className="space-y-3 pt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                        {preview.map((item) => (
-                            <div key={item.question_id} className="text-xs leading-relaxed">
-                                <dt className="inline font-semibold text-gray-900">{truncateWords(item.question, PREVIEW_WORDS)}</dt>{' '}
-                                <dd className="inline text-gray-500">{item.answer ? truncateWords(item.answer, PREVIEW_WORDS) : 'Needs your input'}</dd>
+                    <dl className="min-h-56 space-y-3 pt-4 text-sm leading-6">
+                        {answered.map((item) => (
+                            <div key={item.question_id} className="animate-in fade-in duration-300">
+                                <dt className="inline font-semibold text-gray-900">{item.question}:</dt>{' '}
+                                <dd className="inline text-gray-500">
+                                    {item.answer ? truncateWords(item.answer, ANSWER_WORDS) : 'Needs your input'}
+                                </dd>
                             </div>
                         ))}
-                    </dl>
 
-                    {/* Loading placeholders */}
-                    <div className="space-y-1.5 pb-6 pt-3">
-                        <div className="h-1 w-2/5 animate-pulse rounded-full bg-[#C5CBF7]" />
-                        <div className="h-1 w-3/5 animate-pulse rounded-full bg-[#A9B1F3]" />
+                        {current ? (
+                            <div>
+                                <dt className="inline font-semibold text-gray-900">
+                                    {label.slice(0, typed)}
+                                    {typed > label.length ? ':' : ''}
+                                </dt>{' '}
+                                <dd className="inline text-gray-500">{answer.slice(0, Math.max(0, typed - label.length - 1))}</dd>
+                                <span className="ml-0.5 inline-block h-4 w-0.5 translate-y-0.5 animate-pulse bg-[#5B5BD6]" />
+                            </div>
+                        ) : null}
+
+                        {/* placeholder bars for what's still coming */}
+                        {['w-3/5', 'w-4/5', 'w-1/2', 'w-3/5'].map((width, index) => (
+                            <div key={index} className={`h-2.5 animate-pulse rounded-full bg-[#EEF0F8] ${width}`} />
+                        ))}
+                    </dl>
+                </div>
+
+                {/* Progress */}
+                <div className="mt-8 w-full max-w-md">
+                    <div className="flex items-baseline gap-3">
+                        <span className="bg-linear-to-r from-[#5B5BD6] to-[#8B5CF6] bg-clip-text text-4xl font-bold text-transparent">
+                            {Math.round(progress)}%
+                        </span>
+                        <span className="text-sm text-gray-500">
+                            {isReady ? `${done} / ${questions.length} questions answered` : STEPS[step]}
+                        </span>
+                    </div>
+                    <div
+                        role="progressbar"
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={Math.round(progress)}
+                        className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#E6E9FB]"
+                    >
+                        <div
+                            className="h-full rounded-full bg-linear-to-r from-[#5B5BD6] to-[#8B5CF6] transition-[width] duration-500 ease-out"
+                            style={{ width: `${Math.max(progress, 3)}%` }}
+                        />
                     </div>
                 </div>
             </main>

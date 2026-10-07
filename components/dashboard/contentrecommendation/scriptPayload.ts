@@ -1,3 +1,4 @@
+import type { ContentIdea } from "@/types/bussiness/content-recommendation-type";
 import type {
   ContentSuggestion,
   ScriptGenerationRequest,
@@ -9,32 +10,14 @@ function asString(value: unknown, fallback = ""): string {
   return fallback;
 }
 
-function asStringArray(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value
-      .filter((item) => typeof item === "string" || typeof item === "number")
-      .map(String);
-  }
-  if (typeof value === "string" && value.trim()) return [value];
-  return [];
-}
-
-function asSlides(value: unknown): ContentSuggestion["slides"] {
+function asStringArray(value?: string[] | null): string[] {
   if (!Array.isArray(value)) return [];
-  return value
-    .filter((slide): slide is Record<string, unknown> => Boolean(slide) && typeof slide === "object")
-    .map((slide, index) => ({
-      slide_number:
-        typeof slide.slide_number === "number" ? slide.slide_number : index + 1,
-      headline: asString(slide.headline ?? slide.title, `Slide ${index + 1}`),
-      body: asString(slide.body ?? slide.text ?? slide.content),
-      image_prompt: asString(slide.image_prompt ?? slide.visual_prompt),
-    }));
+  return value.filter((item): item is string => typeof item === "string" && Boolean(item));
 }
 
 export function ideaToScriptRequest(
   companyId: string,
-  item: Record<string, unknown>,
+  item: ContentIdea,
 ): ScriptGenerationRequest {
   const title = asString(
     item.title ?? item.name ?? item.idea ?? item.topic ?? item.headline ?? item.theme,
@@ -48,8 +31,8 @@ export function ideaToScriptRequest(
     item.script_brief ?? item.brief ?? item.angle ?? caption,
     title,
   );
-  const style = asString(item.style, "modern");
-  const contentType = asString(item.content_type, "image");
+  const style = asString(item.style ?? item.visual_style, "modern");
+  const contentType = asString(item.content_type ?? item.media_type, "image");
   const durationSeconds =
     typeof item.duration_seconds === "number" && item.duration_seconds > 0
       ? item.duration_seconds
@@ -63,13 +46,18 @@ export function ideaToScriptRequest(
     title,
     caption,
     cta: asString(item.cta ?? item.call_to_action, "Learn more"),
-    format: asString(item.format ?? item.post_type ?? item.content_format, "post"),
+    format: asString(item.format ?? item.post_type, "post"),
     hook,
     image_prompt: asString(item.image_prompt ?? item.visual_prompt ?? item.visual),
-    key_points: asStringArray(item.key_points ?? item.points ?? item.bullets ?? item.hashtags),
+    key_points: asStringArray(item.key_points ?? item.hashtags),
     platform: asString(item.platform ?? item.channel, "instagram"),
     script_brief: scriptBrief,
-    slides: asSlides(item.slides),
+    slides: (item.slides ?? []).map((slide, index) => ({
+      slide_number: slide.slide_number ?? index + 1,
+      headline: asString(slide.headline, `Slide ${index + 1}`),
+      body: asString(slide.body),
+      image_prompt: asString(slide.image_prompt),
+    })),
     content_type: contentType,
     duration_seconds: durationSeconds,
     style,
