@@ -135,15 +135,20 @@ function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
     // Background: soft lavender on the left fading to white (as in the design screenshot).
     <article
       data-card
-      className="flex h-[400px] w-[90vw] max-w-[800px] shrink-0 snap-start gap-3 rounded-[30px] border border-[#E9ECFF] bg-[linear-gradient(100deg,#efeeff_0%,#ffffff_58%)] p-[10px] shadow-[0_4px_30px_rgba(99,102,241,0.08)]"
+      className="flex h-auto w-[90vw] max-w-[800px] shrink-0 snap-start flex-col rounded-[30px] border border-[#E9ECFF] bg-[linear-gradient(100deg,#efeeff_0%,#ffffff_58%)] p-[10px] shadow-[0_4px_30px_rgba(99,102,241,0.08)] md:h-[400px] md:flex-row md:gap-3"
     >
+      {/* Image side: full width on mobile (top), right side on desktop */}
+      <div className="relative h-[180px] w-full shrink-0 overflow-hidden rounded-[20px] md:h-auto md:w-[350px] md:rounded-[30px]">
+        <CardImage src={item.image} alt={item.company} index={index} />
+      </div>
+
       {/* Text side */}
-      <div className="flex min-w-0 flex-1 flex-col justify-between py-5 pl-3 pr-2">
+      <div className="flex min-w-0 flex-1 flex-col justify-between py-4 pl-3 pr-2 md:py-5">
         <div>
           <Logo company={item.company} src={item.logo} />
           {/* max width makes the title wrap into 3 short lines, like the design */}
           {/* Title: 500, 22px / 32px (a bit smaller on phones so it fits) */}
-          <h3 className="mt-7 max-w-[340px] font-display text-[18px] font-medium leading-[26px] tracking-normal text-slate-900 md:text-[22px] md:leading-[32px]">
+          <h3 className="mt-4 max-w-[340px] font-display text-[18px] font-medium leading-[26px] tracking-normal text-slate-900 md:mt-7 md:text-[22px] md:leading-[32px]">
             {item.title}
           </h3>
         </div>
@@ -167,16 +172,11 @@ function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
           <a
             href={item.href ?? "#"}
             draggable={false}
-            className="mt-6 inline-flex h-[42px] w-[182px] items-center justify-center gap-[10px] whitespace-nowrap rounded-[50px] bg-[linear-gradient(95.57deg,#3659FF_-37.81%,#4F60FF_45.96%,#8157F7_115.03%)] px-7 py-[10px] text-[16px] font-medium leading-[22px] text-white transition hover:opacity-90"
+            className="mt-4 inline-flex h-[42px] w-[182px] items-center justify-center gap-[10px] whitespace-nowrap rounded-[50px] bg-[linear-gradient(95.57deg,#3659FF_-37.81%,#4F60FF_45.96%,#8157F7_115.03%)] px-7 py-[10px] text-[16px] font-medium leading-[22px] text-white transition hover:opacity-90 md:mt-6"
           >
             Read Case Study
           </a>
         </div>
-      </div>
-
-      {/* Image side: 350 x 380, radius 30 ("relative" is needed for the image) */}
-      <div className="relative w-[46%] shrink-0 overflow-hidden rounded-[30px] md:w-[350px]">
-        <CardImage src={item.image} alt={item.company} index={index} />
       </div>
     </article>
   );
