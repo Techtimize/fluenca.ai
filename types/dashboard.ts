@@ -23,6 +23,7 @@ export type Competitor = {
   linkedinUrl?: string | null;
   instagramImageUrl?: string | null;
   linkedinImageUrl?: string | null;
+  whyCompetitor?: string | null;
 };
 
 export type Company = {
@@ -78,7 +79,13 @@ export type GrowthOpportunity = {
 };
 
 export type AnalyticsCharts = {
-  strengthsWeaknesses: { group: string; strengths: number; weaknesses: number }[];
+  strengthsWeaknesses: {
+    group: string;
+    strengths: number;
+    weaknesses: number;
+    strengthPoints?: string[];
+    weaknessPoints?: string[];
+  }[];
   opportunitiesByPriority: { priority: string; count: number }[];
   opportunities?: GrowthOpportunity[];
   actions: { title: string; impact: string; effort: string; priority: number | null }[];
