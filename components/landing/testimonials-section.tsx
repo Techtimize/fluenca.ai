@@ -79,10 +79,10 @@ function QuoteIcon() {
 function Avatar({ name, src }: { name: string; src?: string }) {
   if (src) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={name} className="h-9 w-9 shrink-0 rounded-full object-cover" />;
+    return <img src={src} alt={name} className="h-[46px] w-[46px] shrink-0 rounded-full object-cover" />;
   }
   return (
-    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-xs font-semibold text-white">
+    <span className="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-base font-semibold text-white">
       {name.charAt(0)}
     </span>
   );
@@ -90,18 +90,18 @@ function Avatar({ name, src }: { name: string; src?: string }) {
 
 function TestimonialCard({ item }: { item: Testimonial }) {
   return (
-    <figure className="mr-4 flex w-[300px] shrink-0 flex-col justify-between rounded-3xl bg-indigo-50/80 p-5 md:w-[340px]">
+    <figure className="mr-5 flex w-[300px] shrink-0 flex-col justify-between rounded-[24px] bg-[#EFF2FF] p-5 font-body md:h-[258px] md:w-[420px] md:rounded-[30px] md:px-[30px] md:py-[27px]">
       <div>
         <QuoteIcon />
-        <blockquote className="mt-3 text-xs leading-relaxed text-slate-600">
+        <blockquote className="mt-3 text-[16px] font-normal leading-[24px] tracking-normal text-slate-600">
           {item.quote}
         </blockquote>
       </div>
-      <figcaption className="mt-5 flex items-center gap-3">
+      <figcaption className="mt-5 flex items-center gap-4">
         <Avatar name={item.name} src={item.avatar} />
         <div>
-          <p className="text-xs font-semibold text-slate-900">{item.name}</p>
-          <p className="text-[11px] text-slate-500">{item.role}</p>
+          <p className="text-[16px] font-semibold leading-[24px] tracking-normal text-[#1C1C1E]">{item.name}</p>
+          <p className="text-[14px] font-normal leading-[22px] tracking-normal text-slate-500">{item.role}</p>
         </div>
       </figcaption>
     </figure>
@@ -147,7 +147,13 @@ export default function TestimonialsSection({
   const bottomRow = items.slice(half).length ? items.slice(half) : items;
 
   return (
-    <section id="testimonials" className="w-full overflow-hidden bg-white py-16 md:py-20">
+    // Rounded top corners. The section overlaps the bottom of the FAQ by exactly the corner
+    // radius area (-mt-10 / -mt-14), so the FAQ's lavender glow shows behind the curve.
+    // That overlap is added back as bottom padding in faq-section.tsx, so the visible gap stays the same.
+    <section
+      id="testimonials"
+      className="relative z-10 -mt-10 w-full overflow-hidden rounded-t-[40px] bg-white py-16 font-body md:-mt-14 md:rounded-t-[56px] md:py-20"
+    >
       {/* keyframes + hover pause + reduced motion */}
       <style>{`
         @keyframes fl-marquee-left  { from { transform: translateX(0); }    to { transform: translateX(-50%); } }
@@ -157,13 +163,13 @@ export default function TestimonialsSection({
       `}</style>
 
       {/* Header */}
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="grid items-start gap-6 md:grid-cols-[3fr_2fr] md:gap-10">
+      <div className="mx-auto max-w-[1440px] px-6 md:px-[72px]">
+        <div className="grid items-start gap-6 lg:grid-cols-[1fr_520px] lg:gap-10 xl:grid-cols-[auto_1fr]">
           <div>
-            <span className="inline-block rounded-full bg-indigo-50 px-3 py-1 text-[11px] font-normal text-indigo-500">
+            <span className="inline-flex h-[34px] w-[305px] max-w-full items-center justify-center gap-[10px] whitespace-nowrap rounded-[40px] bg-[#F5F7FF] px-5 py-1 text-[16px] font-normal leading-[26px] text-indigo-500">
               What Businesses Say About Fluenca
             </span>
-            <h2 className="mt-3 text-3xl font-medium leading-[1.15] tracking-tight text-slate-900 md:text-[40px]">
+            <h2 className="mt-3 w-[595px] max-w-full font-display text-3xl font-medium leading-[1.15] tracking-normal text-[#1C1C1E] md:text-[50px] md:leading-[60px] xl:w-auto xl:whitespace-nowrap">
               Real experiences from
               <br />
               businesses{" "}
@@ -171,7 +177,7 @@ export default function TestimonialsSection({
             </h2>
           </div>
 
-          <p className="max-w-sm text-[13px] leading-relaxed text-slate-600 md:ml-auto md:mt-6">
+          <p className="max-w-full text-[17px] font-normal leading-[28px] tracking-normal text-[#62625F] lg:ml-auto lg:mt-6 lg:max-w-[520px]">
             Fluenca gave us a much clearer picture of our business and where our
             marketing opportunities are. It saved us hours of research and helped
             us turn insights into content much faster.
@@ -180,8 +186,8 @@ export default function TestimonialsSection({
       </div>
 
       {/* Rows */}
-      <div className="mt-12 flex flex-col gap-4">
-        <MarqueeRow items={topRow} direction="left-to-right" duration={45} />
+      <div className="mt-12 flex flex-col gap-5">
+        <MarqueeRow items={topRow} direction="left-to-right" duration={50} />
         <MarqueeRow items={bottomRow} direction="right-to-left" duration={50} />
       </div>
     </section>

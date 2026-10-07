@@ -102,7 +102,8 @@ function Logo({ company, src }: { company: string; src?: string }) {
         />
         <path d="M12 8.2 16 10.5v3L12 15.8 8 13.5v-3l4-2.3Z" fill="#F59E0B" />
       </svg>
-      <span className="font-mono text-[15px] font-medium tracking-[0.08em] text-slate-800">
+      {/* Logo text: IBM Plex Mono 500, 18px / 32px */}
+      <span className="font-mono text-[18px] font-medium leading-[32px] tracking-normal text-slate-800">
         {company}
       </span>
     </div>
@@ -120,7 +121,7 @@ function CardImage({ src, alt, index }: { src?: string; alt: string; index: numb
       src={src}
       alt={alt}
       fill
-      sizes="(max-width: 640px) 45vw, 295px"
+      sizes="(max-width: 640px) 45vw, 350px"
       draggable={false}
       onError={() => setFailed(true)}
       className="object-cover"
@@ -130,41 +131,51 @@ function CardImage({ src, alt, index }: { src?: string; alt: string; index: numb
 
 function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
   return (
+    // Card: 800 x 400, 1px border, radius 30, padding 10.
+    // Background: soft lavender on the left fading to white (as in the design screenshot).
     <article
       data-card
-      className="flex h-[326px] w-[90vw] max-w-[640px] shrink-0 snap-start gap-3 rounded-[28px] border border-white bg-[linear-gradient(100deg,#efeeff_0%,#ffffff_58%)] p-2 shadow-[0_4px_30px_rgba(99,102,241,0.08)]"
+      className="flex h-[400px] w-[90vw] max-w-[800px] shrink-0 snap-start gap-3 rounded-[30px] border border-[#E9ECFF] bg-[linear-gradient(100deg,#efeeff_0%,#ffffff_58%)] p-[10px] shadow-[0_4px_30px_rgba(99,102,241,0.08)]"
     >
       {/* Text side */}
-      <div className="flex min-w-0 flex-1 flex-col justify-between py-4 pl-5 pr-2">
+      <div className="flex min-w-0 flex-1 flex-col justify-between py-5 pl-3 pr-2">
         <div>
           <Logo company={item.company} src={item.logo} />
           {/* max width makes the title wrap into 3 short lines, like the design */}
-          <h3 className="mt-7 max-w-[250px] text-[17px] font-medium leading-[1.45] text-slate-900">
+          {/* Title: 500, 22px / 32px (a bit smaller on phones so it fits) */}
+          <h3 className="mt-7 max-w-[340px] font-display text-[18px] font-medium leading-[26px] tracking-normal text-slate-900 md:text-[22px] md:leading-[32px]">
             {item.title}
           </h3>
         </div>
 
         <div>
-          <div className="flex gap-10">
+          <div className="flex gap-6 md:gap-[72px]">
             {item.stats.slice(0, 2).map((s) => (
               <div key={s.label}>
-                <p className="text-[16px] font-medium text-slate-900">{s.value}</p>
-                <p className="mt-1 text-[12.5px] text-slate-500">{s.label}</p>
+                {/* Value: 500, 22px / 32px */}
+                <p className="font-display text-[18px] font-medium leading-[28px] tracking-normal text-slate-900 md:text-[22px] md:leading-[32px]">
+                  {s.value}
+                </p>
+                {/* Label: 400, 14px / 24px, #62625F */}
+                <p className="mt-1 text-[14px] font-normal leading-[24px] tracking-normal text-[#62625F]">
+                  {s.label}
+                </p>
               </div>
             ))}
           </div>
+          {/* Button: 182 x 42, radius 50, padding 10/28, gap 10, gradient */}
           <a
             href={item.href ?? "#"}
             draggable={false}
-            className="mt-6 inline-flex h-10 items-center rounded-full bg-[#5B5BF0] px-6 text-[13px] font-medium text-white transition hover:bg-[#4a4ae0]"
+            className="mt-6 inline-flex h-[42px] w-[182px] items-center justify-center gap-[10px] whitespace-nowrap rounded-[50px] bg-[linear-gradient(95.57deg,#3659FF_-37.81%,#4F60FF_45.96%,#8157F7_115.03%)] px-7 py-[10px] text-[16px] font-medium leading-[22px] text-white transition hover:opacity-90"
           >
             Read Case Study
           </a>
         </div>
       </div>
 
-      {/* Image side: tall, rounded, almost full height ("relative" is needed for the image) */}
-      <div className="relative w-[46%] shrink-0 overflow-hidden rounded-[22px]">
+      {/* Image side: 350 x 380, radius 30 ("relative" is needed for the image) */}
+      <div className="relative w-[46%] shrink-0 overflow-hidden rounded-[30px] md:w-[350px]">
         <CardImage src={item.image} alt={item.company} index={index} />
       </div>
     </article>
@@ -182,8 +193,8 @@ export default function CaseStudiesSection({
   const drag = useRef({ active: false, startX: 0, startScroll: 0, moved: false });
   const [dragging, setDragging] = useState(false);
 
-  // left padding that lines up with the page container (max-w-6xl = 1152px)
-  const sidePad = "max(24px, calc((100vw - 1152px) / 2 + 24px))";
+  // left padding: 80px at 1440px wide (first card starts at left 80 in Figma), scales down on smaller screens
+  const sidePad = "max(24px, min(5.5556vw, 80px), calc((100vw - 1440px) / 2 + 80px))";
 
   const cardStep = () => {
     const card = trackRef.current?.querySelector<HTMLElement>("[data-card]");
@@ -226,16 +237,22 @@ export default function CaseStudiesSection({
   };
 
   return (
+    // Rounded top corners, same method as the FAQ. No overlap needed.
+    // Background: your original three glows (top-left, right, bottom), plus ONE extra layer on top:
+    // a soft white fade in the very top-left corner, so the left curve blends into the white section above
+    // (the right corner already blends because it has no glow).
     <section
       id="case-studies"
-      className="relative w-full overflow-hidden bg-white py-16 md:py-20 bg-[radial-gradient(ellipse_at_12%_0%,rgba(199,206,255,0.85)_0%,rgba(255,255,255,0)_38%),radial-gradient(ellipse_at_100%_30%,rgba(226,222,255,0.7)_0%,rgba(255,255,255,0)_35%),radial-gradient(ellipse_at_50%_100%,rgba(208,214,255,0.7)_0%,rgba(255,255,255,0)_40%)]"
+      className="relative z-10 w-full overflow-hidden rounded-t-[40px] bg-white py-16 font-body md:rounded-t-[56px] md:py-20 bg-[radial-gradient(circle_140px_at_0%_0%,#ffffff_0%,#ffffff_40%,rgba(255,255,255,0)_100%),radial-gradient(ellipse_at_12%_0%,rgba(199,206,255,0.85)_0%,rgba(255,255,255,0)_38%),radial-gradient(ellipse_at_100%_30%,rgba(226,222,255,0.7)_0%,rgba(255,255,255,0)_35%),radial-gradient(ellipse_at_50%_100%,rgba(208,214,255,0.7)_0%,rgba(255,255,255,0)_40%)]"
     >
       {/* Heading */}
       <div className="mx-auto flex max-w-6xl flex-col items-center px-6 text-center">
-        <span className="rounded-full border border-indigo-100 bg-white/70 px-3 py-1 text-[11px] text-indigo-500">
+        {/* Pill: 156 x 34, radius 40, padding 4/20, gap 10, bg #F0F3FF */}
+        <span className="inline-flex h-[34px] w-[156px] max-w-full items-center justify-center gap-[10px] whitespace-nowrap rounded-[40px] bg-[#F0F3FF] px-5 py-1 text-[16px] font-normal leading-[26px] text-indigo-500">
           Our Case study
         </span>
-        <h2 className="mt-3 text-3xl font-medium tracking-tight text-slate-900 md:text-[40px]">
+        {/* H2: 565 x 60, 500, 50px / 60px, centered (a bit smaller on phones so it fits) */}
+        <h2 className="mt-3 w-[565px] max-w-full font-display text-[36px] font-medium leading-[44px] tracking-normal text-[#1C1C1E] md:whitespace-nowrap md:text-[50px] md:leading-[60px]">
           Insights Into Real Results
         </h2>
       </div>
