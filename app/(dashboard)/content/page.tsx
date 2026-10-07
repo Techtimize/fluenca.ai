@@ -1,19 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { Loader2, Sparkles } from "lucide-react";
-import {
-  ContentResultsGrid,
-} from "@/components/dashboard/content/contentImageGrid";
+import { Loader2 } from "lucide-react";
+import { ContentResultsGrid } from "@/components/dashboard/content/contentResultGrid";
 import { normalizeCompanyContent } from "@/components/dashboard/content/utils";
 import TopBar from "@/components/dashboard/topBar";
 import ApiNotFoundCard from "@/components/notfound";
 import Card from "@/components/shared/card";
-import { PAGE_ROUTES } from "@/constant/page-routes";
 import { getApiErrorMessage, isApiNotFoundError } from "@/errors/error-utils";
 import { CompanyImageGenerationResultsQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
-import { FOCUS_RING } from "@/utils/ui-classes";
 
 export default function ContentPage() {
   const companyId = useAuthStore((s) => s.company_id);
@@ -28,21 +23,10 @@ export default function ContentPage() {
   return (
     <main className="min-w-0 space-y-3 pb-4">
       <TopBar user={{ name: companyName || "User" }} placeholder="Search content..." />
-      <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">Content</h1>
-          <p className="text-[13px] text-neutral-500">
-            Image generation runs for your company, fetched by company ID.
-          </p>
+          <h1 className="text-lg font-semibold text-neutral-900">Generated Content</h1>
         </div>
-        <Link
-          href={PAGE_ROUTES.SCRIPT}
-          className={`inline-flex h-9 items-center gap-2 rounded-full bg-[#5B57E6] px-3.5 text-sm font-medium text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
-        >
-          <Sparkles className="size-4" aria-hidden="true" />
-          Generate from scripts
-        </Link>
-      </div>
+   
 
       {companyId && (isLoading || isFetching) && !hasResults && !notFound ? (
         <Card className="flex items-center justify-center gap-3 p-8 text-neutral-500">
