@@ -1,0 +1,231 @@
+"use client";
+
+import { Suspense, useEffect, useMemo, useRef } from "react";
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { CheckCircle2, Loader2, Plug, Unplug } from "lucide-react";
+import { toast } from "sonner";
+import TopBar from "@/components/dashboard/topBar";
+import Card from "@/components/shared/card";
+import { Button } from "@/components/ui/button";
+import { PAGE_ROUTES } from "@/constant/page-routes";
+import { getApiErrorMessage } from "@/errors/error-utils";
+import {
+  InstagramConnectMutation,
+  SocialAccountDisconnectMutation,
+} from "@/routes/bussiness/Bussiness-Mutation";
+import { SocialAccountsQuery } from "@/routes/bussiness/Bussiness-Query";
+import useAuthStore from "@/store/AuthsStore";
+import {
+  findSocialAccount,
+  isSocialAccountConnected,
+  normalizeSocialAccounts,
+} from "@/types/bussiness/social-accounts-type";
+
+function decodeConnectError(value: string | null) {
+  if (!value) return null;
+  try {
+    return decodeURIComponent(value.replace(/\+/g, " "));
+  } catch {
+    return value;
+  }
+}
+
+function IntegrationsPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const companyName = useAuthStore((s) => s.company_name);
+  const handledReturn = useRef(false);
+
+  const {
+    data: accountsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = SocialAccountsQuery();
+
+  const { mutate: connectInstagram, isPending: isConnecting } =
+    InstagramConnectMutation();
+  const { mutate: disconnectAccount, isPending: isDisconnecting } =
+    SocialAccountDisconnectMutation();
+
+  const accounts = useMemo(
+    () => normalizeSocialAccounts(accountsData),
+    [accountsData],
+  );
+  const instagramAccount = findSocialAccount(accounts, "instagram");
+  const instagramConnected = isSocialAccountConnected(instagramAccount);
+
+  useEffect(() => {
+    if (handledReturn.current) return;
+
+    const connected = searchParams.get("connected");
+    const connectError = decodeConnectError(searchParams.get("connect_error"));
+
+    if (!connected && !connectError) return;
+    handledReturn.current = true;
+
+    if (connectError) {
+      toast.error(connectError);
+    } else if (connected === "instagram") {
+      toast.success("Instagram connected");
+      void refetch();
+    } else if (connected) {
+      toast.success(`${connected} connected`);
+      void refetch();
+    }
+
+    router.replace(PAGE_ROUTES.INTEGRATIONS);
+  }, [refetch, router, searchParams]);
+
+  const handleConnectInstagram = () => {
+    connectInstagram();
+  };
+
+  const handleDisconnectInstagram = () => {
+    disconnectAccount("instagram");
+  };
+
+  return (
+    <main className="min-w-0 space-y-4 pb-6">
+      <TopBar
+        user={{ name: companyName || "User" }}
+        placeholder="Search integrations..."
+      />
+
+      <section className="rounded-[28px] border border-[#E6E8F5] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] p-5 sm:p-7">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5B57E6] ring-1 ring-[#E6E8F5]">
+              <Plug className="size-3.5" aria-hidden="true" />
+              Integrations
+            </p>
+            <h1 className="mt-3 text-2xl font-semibold tracking-tight text-neutral-900">
+              Connect your social accounts
+            </h1>
+            <p className="mt-2 max-w-2xl text-[14px] leading-6 text-neutral-600">
+              Link Instagram so Fluenca can pull account insights and keep your
+              competitor and content workflows in sync.
+            </p>
+          </div>
+          {isFetching && !isLoading ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[12px] text-neutral-500 ring-1 ring-[#E6E8F5]">
+              <Loader2 className="size-3.5 animate-spin text-[#5B57E6]" />
+              Updating…
+            </span>
+          ) : null}
+        </div>
+      </section>
+
+      {isError ? (
+        <Card className="border-rose-200 bg-rose-50/80 p-4">
+          <p className="text-sm text-rose-800">
+            {getApiErrorMessage(error, "Failed to load social accounts")}
+          </p>
+        </Card>
+      ) : null}
+
+      <Card className="p-5 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex min-w-0 items-start gap-3">
+            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#F6F7FD] ring-1 ring-[#E6E8F5]">
+              <Image
+                src="/assets/insta.png"
+                alt=""
+                width={28}
+                height={28}
+                className="size-7 object-contain"
+              />
+            </span>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-[16px] font-semibold text-neutral-900">
+                  Instagram
+                </h2>
+                {isLoading ? (
+                  <span className="rounded-full bg-[#F0F1F8] px-2.5 py-0.5 text-[11px] font-medium text-neutral-500">
+                    Checking…
+                  </span>
+                ) : instagramConnected ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#E6F7F4] px-2.5 py-0.5 text-[11px] font-medium text-[#0F766E]">
+                    <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                    Connected
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-[#F6F7FD] px-2.5 py-0.5 text-[11px] font-medium text-neutral-500">
+                    Not connected
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-[13px] leading-5 text-neutral-500">
+                Authorize Instagram via Meta OAuth. After you approve, you’ll return
+                here with your account linked.
+              </p>
+              {instagramConnected &&
+              (instagramAccount?.username ||
+                instagramAccount?.account_name ||
+                instagramAccount?.display_name) ? (
+                <p className="mt-2 text-[13px] font-medium text-neutral-800">
+                  @
+                  {String(
+                    instagramAccount?.username ||
+                      instagramAccount?.account_name ||
+                      instagramAccount?.display_name,
+                  ).replace(/^@/, "")}
+                </p>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {instagramConnected ? (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isDisconnecting}
+                onClick={handleDisconnectInstagram}
+                className="h-11 gap-2 rounded-full px-4"
+              >
+                {isDisconnecting ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Unplug className="size-4" />
+                )}
+                Disconnect
+              </Button>
+            ) : null}
+            <Button
+              type="button"
+              disabled={isConnecting || isLoading}
+              onClick={handleConnectInstagram}
+              className="h-11 gap-2 rounded-full bg-[#5B57E6] px-5 text-white hover:bg-[#4A46D0]"
+            >
+              {isConnecting ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Image
+                  src="/assets/insta.png"
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="size-4 object-contain"
+                />
+              )}
+              {instagramConnected ? "Reconnect Instagram" : "Connect Instagram"}
+            </Button>
+          </div>
+        </div>
+      </Card>
+    </main>
+  );
+}
+
+export default function IntegrationsPage() {
+  return (
+    <Suspense fallback={null}>
+      <IntegrationsPageContent />
+    </Suspense>
+  );
+}

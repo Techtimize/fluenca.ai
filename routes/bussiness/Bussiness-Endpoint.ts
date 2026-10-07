@@ -43,8 +43,6 @@ export const BUSSINESSENDPOINT = {
     COMPETITOR_ANALYSIS_HASHTAGS: (company_id: string) => `/competitorAnalysis/hashtags/${company_id}`,
     },
 
-
-    
     TRENDS:{
     GOOGLE_TRENDS_NOW: '/google-trends/now',
     GOOGLE_TRENDS_TRENDING: '/google-trends/trending',
@@ -84,6 +82,13 @@ export const BUSSINESSENDPOINT = {
 
     BLOG_POST: '/blog-posts',
     BLOG_POST_DETAILS: (blog_post_id: string) => `/blog-posts/${blog_post_id}`,
+
+    CONNECTORS:{
+        INSTAGRAM_LOGIN: '/connector/instagram/login',
+        SOCIAL_ACCOUNTS: '/social-accounts',
+        SOCIAL_ACCOUNTS_CONNECT: (platform: string) => `/social-accounts/${platform}/connect`,
+        SOCIAL_ACCOUNTS_DISCONNECT: (platform: string) => `/social-accounts/${platform}/disconnect`,
+    }
 }
 
 

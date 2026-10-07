@@ -19,6 +19,7 @@ import {
   Layers,
   LayoutGrid,
   Megaphone,
+  Plug,
   Search,
   TrendingUp,
   Zap,
@@ -48,6 +49,8 @@ const ICONS: Record<string, LucideIcon> = {
   dna: Dna,
   calendar: CalendarDays,
   lightbulb: Lightbulb,
+  plug: Plug,
+  integrations: Plug,
 };
 
 export function getIcon(name?: string): LucideIcon {
