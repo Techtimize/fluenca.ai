@@ -6,7 +6,7 @@ import AnalyticsSection from "@/components/dashboard/cards/analyticsSection";
 import ChatInput from "@/components/dashboard/chat/chatInput";
 import ChatPanel from "@/components/dashboard/chat/chatPanel";
 import CompanyCard from "@/components/dashboard/cards/companyCard";
-import DashboardSkeleton from "@/components/dashboard/dashboardSkeleton";
+import { DashboardSkeleton } from "@/components/shared/skeletons";
 import DocumentationCard from "@/components/dashboard/documentationCard";
 import TopBar from "@/components/dashboard/topBar";
 import { mapDashboard } from "@/lib/dashboard/map-dashboard";
