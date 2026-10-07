@@ -34,7 +34,7 @@ export function DeleteImageControls({
           {isPending ? (
             <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
           ) : (
-            <Trash2 className="size-3.5" aria-hidden="true" />
+            <Trash2 className="size-3.5 text-rose-500 cursor-pointer" aria-hidden="true" />
           )}
         </button>
       </div>
