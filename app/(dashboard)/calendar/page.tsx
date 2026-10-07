@@ -165,7 +165,7 @@ export default function CalendarPage() {
               calendar.
             </p>
             <Link
-              href={PAGE_ROUTES.VERIFY_DNA}
+              href={PAGE_ROUTES.DNA}
               className={`mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-[#5B57E6] px-5 text-sm font-medium text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
             >
               <Sparkles className="size-4" />

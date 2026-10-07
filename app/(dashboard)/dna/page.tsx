@@ -1,11 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Bell, Check, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { AnswerQuestionMutation, CompleteIntakeMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import { toast } from "sonner";
+import { PAGE_ROUTES } from "@/constant/page-routes";
+import {
+  AnswerQuestionMutation,
+  IntelligenceRunMutation,
+} from "@/routes/bussiness/Bussiness-Mutation";
+import useAuthStore from "@/store/AuthsStore";
 import { IntakeSection } from "@/types/company-details-type";
 import { IntakeQuery } from "@/routes/bussiness/Bussiness-Query";
+
+const DEFAULT_PLATFORMS = ["instagram", "linkedin"];
+const DEFAULT_SCRIPT_COUNT = 5;
 
 type CompanyField = {
   id: string;
@@ -279,7 +289,31 @@ function TopBar() {
 export default function CompanyOverviewPage() {
   const t = useTranslations("overview");
   const { data: intake, isLoading } = IntakeQuery();
-  const { mutate: completeIntake, isPending: isSaving } = CompleteIntakeMutation();
+  const router = useRouter();
+  const companyId = useAuthStore((s) => s.company_id);
+  const { mutate: intelligenceRun, isPending: isBusy } = IntelligenceRunMutation();
+
+  const handleComplete = () => {
+    if (!companyId) {
+      toast.error("Company ID is missing. Please complete onboarding again.");
+      return;
+    }
+    router.prefetch(`${PAGE_ROUTES.VERIFY_DNA}/progress/loading`);
+    intelligenceRun(
+      { company_id: companyId, platforms: DEFAULT_PLATFORMS, script_count: DEFAULT_SCRIPT_COUNT },
+      {
+        onSuccess: (response) => {
+          if (response?.success === false) return;
+          const jobId = response?.job_id?.trim();
+          if (!jobId) {
+            toast.error("We couldn't start building your workspace. Please try again.");
+            return;
+          }
+          router.push(`${PAGE_ROUTES.VERIFY_DNA}/progress/${encodeURIComponent(jobId)}`);
+        },
+      },
+    );
+  };
   const [activeId, setActiveId] = useState("");
 
   const sections = useMemo(
@@ -387,11 +421,11 @@ export default function CompanyOverviewPage() {
             <div className="flex justify-end pt-6">
               <button
                 type="button"
-                onClick={() => completeIntake()}
-                disabled={isSaving}
+                onClick={handleComplete}
+                disabled={isBusy}
                 className="h-9 rounded-full bg-[#5B57E6] px-6 text-sm font-semibold text-white hover:bg-[#4a46d4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B57E6]/40 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSaving ? t("completing") : t("complete")}
+                {isBusy ? t("completing") : t("complete")}
               </button>
             </div>
           )}
