@@ -36,6 +36,12 @@ const DEFAULT_NAV: NavItem[] = [
     href: PAGE_ROUTES.COMPETITOR_ANALYSIS,
   },
   { id: "calendar", label: "Calendar", icon: "calendar", href: PAGE_ROUTES.CALENDAR },
+  {
+    id: "integrations",
+    label: "Integrations",
+    icon: "plug",
+    href: PAGE_ROUTES.INTEGRATIONS,
+  },
 ];
 
 type Props = {

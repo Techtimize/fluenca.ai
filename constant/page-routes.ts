@@ -20,6 +20,7 @@ export const PAGE_ROUTES = {
 
     // Dashboard
     DASHBOARD: '/dashboard',
+    INTEGRATIONS: '/dashboard/integrations',
     COMPANY_OVERVIEW: '/company-overview',
     TRENDS: '/trends',
     COMPETITOR_ANALYSIS: '/competitor-analysis',

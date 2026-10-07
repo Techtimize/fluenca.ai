@@ -12,14 +12,21 @@ import TopBar from "@/components/dashboard/topBar";
 import { mapDashboard } from "@/lib/dashboard/map-dashboard";
 import { useChatbot } from "@/lib/chat/use-chatbot";
 import { AnalyzeCompanyDashboardQuery } from "@/routes/bussiness/Bussiness-Query";
-import { AnalyzeCompanyMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import {
+  AnalyzeCompanyMutation,
+  InstagramConnectMutation,
+} from "@/routes/bussiness/Bussiness-Mutation";
 import useAuthStore from "@/store/AuthsStore";
 import type { Device } from "@/types/dashboard";
+import { PAGE_ROUTES } from "@/constant/page-routes";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
+  const router = useRouter();
   const companyId = useAuthStore((s) => s.company_id);
   const companyName = useAuthStore((s) => s.company_name);
+  const { mutate: connectInstagram } = InstagramConnectMutation();
 
   const {
     data: dashboard,
@@ -148,6 +155,13 @@ export default function DashboardPage() {
               compact={chatOpen}
               onSourceChange={setSource}
               onDeviceChange={setDevice}
+              onConnectIntegration={(id) => {
+                if (id === "instagram") {
+                  connectInstagram();
+                  return;
+                }
+                router.push(PAGE_ROUTES.INTEGRATIONS);
+              }}
             />
           ) : null}
         </main>
