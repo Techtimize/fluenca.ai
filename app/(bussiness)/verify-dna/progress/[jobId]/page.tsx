@@ -7,15 +7,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   Building2,
   CalendarDays,
-  CheckCircle2,
-  Circle,
   Lightbulb,
-  Loader2,
   PenLine,
   Search,
   Sparkles,
   Users,
-  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import Mascot from "@/components/shared/mascot";
@@ -367,32 +363,6 @@ export default function IntelligenceProgressPage() {
                   : null}
               </ul>
             </section>
-
-            {/* Steps */}
-            <ol className="mt-6 grid gap-2 sm:grid-cols-2">
-              {STEPS.map(({ name, label }) => {
-                const s = job?.steps?.[name]?.status ?? "pending";
-                return (
-                  <li
-                    key={name}
-                    className="flex items-center gap-2.5 rounded-2xl border border-[#E6E8F5] bg-white px-3.5 py-2.5 text-[13px] text-neutral-800"
-                  >
-                    {s === "running" ? (
-                      <Loader2 className="size-4 animate-spin text-[#5452F6]" />
-                    ) : s === "completed" ? (
-                      <CheckCircle2 className="size-4 text-[#16A34A]" />
-                    ) : s === "failed" ? (
-                      <XCircle className="size-4 text-[#E11D48]" />
-                    ) : (
-                      <Circle className="size-4 text-neutral-300" />
-                    )}
-                    <span className={s === "pending" ? "text-neutral-400" : ""}>
-                      {label}
-                    </span>
-                  </li>
-                );
-              })}
-            </ol>
           </div>
         </div>
       </div>
