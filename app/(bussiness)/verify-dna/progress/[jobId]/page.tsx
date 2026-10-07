@@ -18,6 +18,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import Mascot from "@/components/shared/mascot";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { IntelligenceJobQuery } from "@/routes/bussiness/Bussiness-Query";
 import type { IntelligenceJobResponse } from "@/types/bussiness/intelligence-type";
@@ -186,6 +187,12 @@ export default function IntelligenceProgressPage() {
       <div className="pointer-events-none absolute -right-32 top-1/3 size-[26rem] rounded-full bg-[#E4D4FF]/50 blur-3xl" />
 
       <div className="relative mx-auto max-w-3xl">
+        <Mascot
+          src="/mascots/n_mascot_3.gif"
+          size={120}
+          priority
+          className="mx-auto mb-2 size-24 sm:size-30"
+        />
         <h1 className="text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
           Our AI agents are analyzing
           <br />
