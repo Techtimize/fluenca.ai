@@ -15,6 +15,7 @@ export type ImageGenerationPurpose =
 export interface ImageGenerationProject {
   name: string;
   tone: string;
+  company_id?: string;
 }
 
 export interface ImageGenerationScene {
@@ -43,36 +44,72 @@ export interface ImageGenerationRequest {
   style: string;
 }
 
+export interface ImageJob {
+  job_id?: string;
+  prompt?: string;
+  purpose?: ImageGenerationPurpose;
+  headline?: string;
+  platform?: ImageGenerationPlatform;
+  aspect_ratio?: string;
+  scene_number?: number;
+}
+
 export interface GeneratedImageAsset {
   id?: string;
+  job_id?: string;
   scene_number?: number;
   image_url?: string;
   url?: string;
+  s3_url?: string;
+  s3_key?: string;
+  s3_bucket?: string;
   thumbnail_url?: string;
   status?: string;
   prompt?: string;
   headline?: string;
   title?: string;
-  platform?: string;
-  purpose?: string;
-  created_at?: string;
-}
-
-export interface ImageGenerationResponse {
-  success?: boolean;
-  message?: string;
-  company_id?: string;
   platform?: ImageGenerationPlatform;
   purpose?: ImageGenerationPurpose;
+  aspect_ratio?: string;
+  filename?: string;
+  mime_type?: string;
+  model?: string;
+  bytes?: number;
+  company_id?: string;
+  created_at?: string;
+  images_id?: string;
+  run_created_at?: string;
+  run_platform?: ImageGenerationPlatform;
+  run_purpose?: ImageGenerationPurpose;
+}
+
+export interface ImageGenerationResult {
+  id?: string;
+  prompt_id?: string;
+  company_id?: string;
+  version?: number;
+  created_at?: string;
+  success?: boolean;
+  status?: string;
+  summary?: string | null;
+  platform?: ImageGenerationPlatform;
+  purpose?: ImageGenerationPurpose;
+  aspect_ratio?: string;
   style?: string;
+  images_count?: number;
+  jobs_count?: number;
+  duration_sec?: number;
   project?: ImageGenerationProject;
   script?: ImageGenerationScript;
+  image_jobs?: ImageJob[];
+  generated_images?: GeneratedImageAsset[];
+  /** Legacy shapes */
   scenes?: ImageGenerationScene[];
   images?: GeneratedImageAsset[];
   latest_image_url?: string;
   image_url?: string;
-  status?: string;
-  created_at?: string;
+  message?: string;
+  agent_type?: string;
   meta?: {
     company_id?: string;
     timestamp?: string;
@@ -81,17 +118,27 @@ export interface ImageGenerationResponse {
   };
 }
 
+/** @deprecated Prefer ImageGenerationResult — kept for older call sites. */
+export type ImageGenerationResponse = ImageGenerationResult;
+
+export interface CompanyImageGenerationListResponse {
+  success?: boolean;
+  company_id?: string;
+  count?: number;
+  images_count?: number;
+  results?: ImageGenerationResult[];
+  generated_images?: GeneratedImageAsset[];
+  images?: GeneratedImageAsset[];
+  data?: ImageGenerationResult | ImageGenerationResult[] | GeneratedImageAsset[];
+  items?: ImageGenerationResult[] | GeneratedImageAsset[];
+  [key: string]: unknown;
+}
+
 /** GET /generation/image-generation/{company_id} — may be a single item, list, or wrapped. */
 export type CompanyImageGenerationResponse =
-  | ImageGenerationResponse
-  | ImageGenerationResponse[]
-  | GeneratedImageAsset[]
-  | {
-      results?: ImageGenerationResponse[] | GeneratedImageAsset[];
-      images?: GeneratedImageAsset[];
-      data?: ImageGenerationResponse | ImageGenerationResponse[] | GeneratedImageAsset[];
-      items?: ImageGenerationResponse[] | GeneratedImageAsset[];
-      [key: string]: unknown;
-    };
+  | CompanyImageGenerationListResponse
+  | ImageGenerationResult
+  | ImageGenerationResult[]
+  | GeneratedImageAsset[];
 
-export type LatestGeneratedImageResponse = ImageGenerationResponse | GeneratedImageAsset;
+export type LatestGeneratedImageResponse = ImageGenerationResult | GeneratedImageAsset;

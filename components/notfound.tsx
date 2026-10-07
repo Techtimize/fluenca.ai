@@ -112,11 +112,11 @@ const RESOURCE_CONFIG: Record<NotFoundResource, ResourceConfig> = {
       "We couldn’t load your company DNA. Finish onboarding or regenerate DNA to continue.",
     guidance: [
       "Complete onboarding if you haven’t already",
-      "Open Verify DNA and wait for generation",
+      "Open your company DNA and wait for generation",
       "Retry DNA if the previous run failed",
     ],
-    actionLabel: "Verify DNA",
-    actionHref: PAGE_ROUTES.VERIFY_DNA,
+    actionLabel: "Open DNA",
+    actionHref: PAGE_ROUTES.DNA,
   },
   calendar: {
     icon: CalendarDays,

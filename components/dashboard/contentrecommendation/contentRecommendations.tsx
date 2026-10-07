@@ -1,22 +1,16 @@
 "use client";
+
 import { useMemo } from "react";
 import { toast } from "sonner";
+import { normalizeContentRecommendation } from "@/lib/dashboard/normalize-content-recommendation";
 import { ContentRecommendationMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import type { ContentRecommendationResultResponse } from "@/types/bussiness/content-recommendation-type";
-import Section from "./section";
+import CalendarSection from "./CalendarSection";
 import { EmptyState } from "./Emptystate";
-
-const HIDDEN_KEYS = new Set([
-  "meta",
-  "success",
-  "error",
-  "warnings",
-  "company_id",
-  "prompt_id",
-  "created_at",
-  "status",
-  "message",
-]);
+import IdeasSection from "./IdeasSection";
+import PlatformStrategySection from "./PlatformStrategySection";
+import StrategySection from "./StrategySection";
+import SharedCard from "@/components/shared/card";
 
 type Props = {
   data?: ContentRecommendationResultResponse | null;
@@ -24,21 +18,17 @@ type Props = {
   empty?: boolean;
 };
 
-export default function ContentRecommendations({ data, companyId, empty = false }: Props) {
+export default function ContentRecommendations({
+  data,
+  companyId,
+  empty = false,
+}: Props) {
   const { mutate: recommend, isPending } = ContentRecommendationMutation();
 
-  const entries = useMemo(() => {
-    if (!data) return [];
-    const content = (
-      data.result && typeof data.result === "object" ? data.result : data
-    ) as Record<string, unknown>;
-    return Object.entries(content).filter(([key, value]) => {
-      if (HIDDEN_KEYS.has(key)) return false;
-      if (value == null || value === "") return false;
-      if (Array.isArray(value) && !value.length) return false;
-      return true;
-    });
-  }, [data]);
+  const normalized = useMemo(
+    () => normalizeContentRecommendation(data),
+    [data],
+  );
 
   const handleGenerate = () => {
     if (!companyId) {
@@ -48,15 +38,14 @@ export default function ContentRecommendations({ data, companyId, empty = false 
     recommend({ company_id: companyId });
   };
 
-  if (empty || !entries.length) {
+  if (empty || !normalized.hasData) {
     return <EmptyState onGenerate={handleGenerate} isPending={isPending} />;
   }
 
   return (
     <div className="space-y-3">
-      {entries.map(([key, value]) => (
-        <Section key={key} label={key} value={value} companyId={companyId} />
-      ))}
+      <PlatformStrategySection platforms={normalized.platforms} />
+      <IdeasSection ideas={normalized.ideas} companyId={companyId} />
     </div>
   );
 }
