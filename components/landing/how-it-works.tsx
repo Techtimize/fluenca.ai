@@ -217,15 +217,15 @@ export default function HowItWorks() {
       className="relative z-10 -mt-10 w-full rounded-t-[40px] bg-white md:-mt-14 md:rounded-t-[56px]"
     >
       {/* Headings (normal scrolling) */}
-      <div className="mx-auto w-full max-w-360 px-6 pb-8 pt-20 md:px-12 md:pt-28 lg:px-20">
-        <div className="grid items-start gap-6 md:grid-cols-[1fr_590px] md:justify-between md:gap-16">
+      <div className="mx-auto w-full max-w-360 px-6 pb-8 pt-12 md:pt-20 lg:pt-28">
+        <div className="grid items-start gap-4 md:gap-6 md:grid-cols-[1fr_590px] md:justify-between md:gap-16">
           {/* Left heading: 334 x 96, 400, 36px / 48px, #1C1C1E */}
-          <h2 className="w-[334px] max-w-full font-display text-[36px] leading-[48px] font-normal tracking-normal text-[#1C1C1E]">
+          <h2 className="w-full font-display text-[28px] leading-[36px] md:text-[36px] md:leading-[48px] font-normal tracking-normal text-[#1C1C1E]">
             Let AI Understand Your Business First
           </h2>
 
           {/* Right heading: 590 x 124, 500, 50px / 62px, "Business Data" black, rest blue gradient */}
-          <h2 className="w-[590px] max-w-full font-display text-[50px] leading-[62px] font-medium tracking-normal">
+          <h2 className="w-full font-display text-[32px] leading-[40px] md:text-[50px] md:leading-[62px] font-medium tracking-normal">
             <span className={GRADIENT_TEXT}>From </span>
             <span className="text-[#1C1C1E]">Business Data</span>
             <br />
@@ -236,7 +236,7 @@ export default function HowItWorks() {
 
       {/* Tall scroll track: the pinned frame stays on screen while you scroll through it */}
       <div ref={trackRef} style={{ height: `${N * SCROLL_PER_STEP_VH}vh` }}>
-        <div className="sticky top-0 flex h-screen items-center pt-16">
+        <div className="sticky top-0 flex h-screen items-center pt-8 md:pt-16">
           <div className="mx-auto grid w-full max-w-360 items-center gap-6 px-6 md:grid-cols-[1fr_590px] md:justify-between md:gap-16 md:px-12 lg:px-20">
             {/* LEFT: logo icon + text that blends from one step to the next */}
             <div>
@@ -256,12 +256,12 @@ export default function HowItWorks() {
                 ))}
               </div>
 
-              <div className="relative mt-5 h-[230px] md:h-[240px]">
+              <div className="relative mt-5 h-[200px] md:h-[240px]">
                 {STEPS.map((step, i) => (
                   <div
                     key={step.title}
                     aria-hidden={i !== active}
-                    className={`absolute inset-x-0 top-0 w-[449px] max-w-full transition-[opacity,transform] duration-700 ease-out ${
+                    className={`absolute inset-x-0 top-0 w-full max-w-[449px] transition-[opacity,transform] duration-700 ease-out ${
                       i === active
                         ? "translate-y-0 opacity-100"
                         : i < active
@@ -270,11 +270,11 @@ export default function HowItWorks() {
                     }`}
                   >
                     {/* Title: 302 x 42, 500, 24px / 42px, #1C1C1E */}
-                    <h3 className="min-h-[42px] w-full max-w-[449px] font-display text-[24px] leading-[42px] font-medium tracking-normal text-[#1C1C1E]">
+                    <h3 className="min-h-[36px] w-full max-w-[449px] font-display text-[20px] leading-[32px] md:min-h-[42px] md:text-[24px] md:leading-[42px] font-medium tracking-normal text-[#1C1C1E]">
                       {step.title}
                     </h3>
                     {/* Body: 449 wide, 400, 17px / 28px, #62625F */}
-                    <p className="mt-2 w-[449px] max-w-full font-body text-[17px] leading-[28px] font-normal tracking-normal text-[#62625F]">
+                    <p className="mt-2 w-full max-w-[449px] font-body text-[15px] leading-[24px] md:text-[17px] md:leading-[28px] font-normal tracking-normal text-[#62625F]">
                       {step.text}
                     </p>
                   </div>
@@ -283,7 +283,7 @@ export default function HowItWorks() {
             </div>
 
             {/* RIGHT: blue card (590 x 450) + x marks + the 4 animations (one visible at a time) */}
-            <div className="relative aspect-[590/450] w-full max-w-[590px] overflow-hidden rounded-[32px] bg-[linear-gradient(95.57deg,#3659FF_-37.81%,#4F60FF_45.96%,#8157F7_115.03%)] shadow-[0_20px_60px_rgba(91,92,240,0.25)]">
+            <div className="relative aspect-[590/450] w-full max-w-[590px] overflow-hidden rounded-[24px] md:rounded-[32px] bg-[linear-gradient(95.57deg,#3659FF_-37.81%,#4F60FF_45.96%,#8157F7_115.03%)] shadow-[0_20px_60px_rgba(91,92,240,0.25)]">
               {/* soft light in the corner */}
               <div className="pointer-events-none absolute -left-16 -top-16 h-64 w-64 rounded-full bg-white/15 blur-3xl" />
 

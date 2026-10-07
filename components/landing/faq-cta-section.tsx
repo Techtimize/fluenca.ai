@@ -113,7 +113,7 @@ export default function FaqCtaSection({
 
           <form
             onSubmit={handleSubmit}
-            className="mt-7 flex w-full max-w-[460px] items-center gap-2 rounded-full border border-white/30 bg-white/10 p-1.5 backdrop-blur-sm"
+            className="mt-7 flex w-full max-w-[460px] flex-col items-stretch gap-2 rounded-2xl border border-white/30 bg-white/10 p-3 backdrop-blur-sm sm:flex-row sm:items-center sm:gap-2 sm:rounded-full sm:p-1.5"
           >
             <input
               type="email"
@@ -122,12 +122,12 @@ export default function FaqCtaSection({
               onChange={(e) => setEmail(e.target.value)}
               placeholder={placeholder}
               aria-label="Email address"
-              className="min-w-0 flex-1 bg-transparent px-4 text-sm text-white placeholder:text-white/70 focus:outline-none"
+              className="min-w-0 flex-1 rounded-xl bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/70 focus:outline-none sm:rounded-none sm:bg-transparent sm:py-0"
             />
             <button
               type="submit"
               disabled={loading}
-              className="shrink-0 rounded-full bg-white px-6 py-3 text-sm font-medium text-[#4A5FF0] transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:opacity-60"
+              className="shrink-0 rounded-xl bg-white px-6 py-3 text-sm font-medium text-[#4A5FF0] transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:opacity-60 sm:rounded-full"
             >
               {loading ? "Sending..." : buttonLabel}
             </button>
