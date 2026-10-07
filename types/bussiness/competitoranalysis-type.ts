@@ -759,13 +759,25 @@ export interface CompetitorStrategicInsights {
   };
 }
 
+export interface CompetitorPostingFrequencyStats {
+  post_count?: number | null;
+  posts_per_week?: number | null;
+  date_range_days?: number | null;
+  avg_days_between_posts?: number | null;
+}
+
+export type CompetitorPostingFrequency =
+  | string
+  | CompetitorPostingFrequencyStats
+  | null;
+
 export interface CompetitorMatchupCompany {
   name?: string;
   social?: {
     followers?: number | null;
     content_themes?: string[];
     primary_format?: string | null;
-    posting_frequency?: string | null;
+    posting_frequency?: CompetitorPostingFrequency;
     avg_engagement_rate?: number | null;
   };
   website?: string | null;
@@ -809,7 +821,7 @@ export interface CompetitorSocialSnapshot {
   followers?: number | null;
   content_themes?: string[];
   primary_format?: string | null;
-  posting_frequency?: string | null;
+  posting_frequency?: CompetitorPostingFrequency;
   avg_engagement_rate?: number | null;
 }
 
@@ -840,9 +852,9 @@ export interface CompetitorSocialComparison {
   company_themes?: string[];
   competitor_themes?: string[];
   primary_format?: string | null;
-  posting_frequency?: string | null;
-  company_posting_frequency?: string | null;
-  competitor_posting_frequency?: string | null;
+  posting_frequency?: CompetitorPostingFrequency;
+  company_posting_frequency?: CompetitorPostingFrequency;
+  competitor_posting_frequency?: CompetitorPostingFrequency;
 }
 
 export interface CompetitorContentComparison {
