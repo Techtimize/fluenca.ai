@@ -9,7 +9,7 @@ import {
 import Card from "@/components/shared/card";
 import type { ScriptGenerationResponse } from "@/types/bussiness/script-type";
 import { CharactersSection } from "./charactersection";
-import { Field, MetaChip } from "./primitives";
+import { Field, MetaChip, PlatformChip } from "./primitives";
 import { ProjectSection } from "./projectsection";
 import { ScenesSection } from "./scenesection";
 import { ScriptSection } from "./scriptSection";
@@ -92,7 +92,7 @@ export function ScriptResultCard({
           </div>
           <div className="flex flex-wrap gap-1.5">
             <MetaChip label="Status" value={item.meta?.status || "ready"} />
-            <MetaChip label="Platform" value={project?.platform} />
+            <PlatformChip platform={project?.platform} />
             <MetaChip label="Format" value={project?.format} />
             <MetaChip
               label="Scenes"
