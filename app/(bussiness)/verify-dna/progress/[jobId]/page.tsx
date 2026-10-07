@@ -9,7 +9,6 @@ import {
   CalendarDays,
   Lightbulb,
   PenLine,
-  Search,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -17,106 +16,54 @@ import { toast } from "sonner";
 import Mascot from "@/components/shared/mascot";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { IntelligenceJobQuery } from "@/routes/bussiness/Bussiness-Query";
+import FeedItemCard from "@/components/verify-dna/feedItemCard";
+import { buildFeed, humanize } from "@/lib/intelligence/progress-feed";
 import type { IntelligenceJobResponse } from "@/types/bussiness/intelligence-type";
 
-const STEPS: {
-  name: string;
-  label: string;
-  agent: string;
-  start: string;
-  Icon: LucideIcon;
-}[] = [
-  {
-    name: "analyze_company",
-    label: "Company analysis",
-    agent: "Research Agent",
-    start: "Reading your website and social profiles",
-    Icon: Building2,
-  },
-  {
-    name: "discover_competitors",
-    label: "Competitor discovery",
-    agent: "Discovery Agent",
-    start: "Looking for your competitors",
-    Icon: Search,
-  },
-  {
-    name: "competitor_analysis",
-    label: "Competitor analysis",
-    agent: "Market Agent",
-    start: "Comparing competitors' content and positioning",
-    Icon: Users,
-  },
-  {
-    name: "planner",
-    label: "Content strategy",
-    agent: "Strategy Agent",
-    start: "Planning your content strategy",
-    Icon: CalendarDays,
-  },
-  {
-    name: "content_recommendation",
-    label: "Content ideas",
-    agent: "Content Agent",
-    start: "Generating content ideas for your audience",
-    Icon: Lightbulb,
-  },
-  {
-    name: "script_generation",
-    label: "Scripts",
-    agent: "Script Agent",
-    start: "Writing ready-to-film scripts",
-    Icon: PenLine,
-  },
-];
+// Icon per step shown in the side timeline; unknown steps get a generic icon.
+const STEP_ICONS: Record<string, LucideIcon> = {
+  analyze_company: Building2,
+  competitor_analysis: Users,
+  planner: CalendarDays,
+  content_recommendation: Lightbulb,
+  script_generation: PenLine,
+};
+const DEFAULT_STEPS = Object.keys(STEP_ICONS);
 
-const VISIBLE_LINES = 6; // fully typed lines kept on the card, plus the one being typed
-const TYPE_SPEED_MS = 22; // per character tick
-const LINE_PAUSE_MS = 450; // pause after a line finishes typing
+// Backend sub-steps that are not in `pages`; they count towards the listed step.
+const SUB_STEPS: Record<string, string[]> = {
+  competitor_analysis: ["discover_competitors"],
+};
+
+type StepState = { status: string; seconds: number | null };
+
+function stepState(
+  job: IntelligenceJobResponse | undefined,
+  name: string,
+): StepState {
+  const parts = [...(SUB_STEPS[name] ?? []), name]
+    .map((n) => job?.steps?.[n])
+    .filter(Boolean);
+  const statuses = parts.map((p) => p!.status);
+  const status = statuses.includes("failed")
+    ? "failed"
+    : statuses.includes("running")
+      ? "running"
+      : statuses.length && statuses.every((st) => st === "completed")
+        ? "completed"
+        : statuses.includes("completed")
+          ? "running" // a sub-step finished, the main one is next
+          : "pending";
+  const seconds = parts.reduce((sum, p) => sum + (p!.duration_sec ?? 0), 0);
+  return { status, seconds: seconds ? Math.round(seconds) : null };
+}
+
+const VISIBLE_ITEMS = 14; // older items scroll off the top of the feed
+const REVEAL_MS = 750; // pace of the stream
+const REVEAL_FAST_MS = 300; // used when many items are waiting
 
 const RING_RADIUS = 24;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
-
-type Line = { id: string; label: string; value: string };
-
-const list = (value: unknown) =>
-  Array.isArray(value)
-    ? value.filter((v): v is string => typeof v === "string")
-    : [];
-
-// Append-only report built from the job; ids stay stable between polls.
-function buildReport(job?: IntelligenceJobResponse): Line[] {
-  const lines: Line[] = [];
-  for (const { name, label, start } of STEPS) {
-    const step = job?.steps?.[name];
-    if (!step || step.status === "pending") continue;
-    lines.push({
-      id: `${name}:start`,
-      label,
-      value: step.status === "completed" ? `${start} — done` : `${start}…`,
-    });
-
-    const company =
-      name === "analyze_company"
-        ? (step.result?.company as Record<string, unknown> | undefined)
-        : undefined;
-    if (!company) continue;
-    const facts: [string, unknown][] = [
-      ["Company name", company.name],
-      ["Industry", company.industry],
-      ["Market", company.region],
-      ["Target audience", list(company.target_audience).join(", ")],
-      ["Key services", list(company.flagship_services).join(", ")],
-      ["Pain points", list(company.pain_points).join("; ")],
-      ["Positioning", company.positioning],
-    ];
-    facts.forEach(([factLabel, value], i) => {
-      if (typeof value === "string" && value)
-        lines.push({ id: `${name}:fact:${i}`, label: factLabel, value });
-    });
-  }
-  return lines;
-}
 
 export default function IntelligenceProgressPage() {
   const router = useRouter();
@@ -126,30 +73,34 @@ export default function IntelligenceProgressPage() {
 
   const status = job?.status;
   const isFailed = isError || status === "failed";
-  const report = useMemo(() => buildReport(job), [job]);
+  const feed = useMemo(() => buildFeed(job), [job]);
 
-  // Typewriter: `done` lines are fully shown, the next one types out `typed` characters.
-  const [done, setDone] = useState(0);
-  const [typed, setTyped] = useState(0);
-  const current = report[done];
-  const currentText = current ? `${current.label}: ${current.value}` : "";
+  // Reveal one item at a time so results stream past; speed up when a big result lands.
+  const [revealed, setRevealed] = useState(0);
+  const shown = Math.min(revealed, feed.length);
   useEffect(() => {
-    if (!current?.id) return;
-    const timer =
-      typed < currentText.length
-        ? window.setTimeout(() => setTyped((n) => n + 2), TYPE_SPEED_MS)
-        : window.setTimeout(() => {
-            setDone((n) => n + 1);
-            setTyped(0);
-          }, LINE_PAUSE_MS);
+    if (shown >= feed.length) return;
+    const backlog = feed.length - shown;
+    const timer = window.setTimeout(
+      () => setRevealed(shown + 1),
+      backlog > 6 ? REVEAL_FAST_MS : REVEAL_MS,
+    );
     return () => window.clearTimeout(timer);
-  }, [current?.id, currentText.length, typed]);
+  }, [shown, feed.length]);
 
-  const isReady = status === "completed" && done >= report.length;
-  const doneCount = STEPS.filter(
-    (s) => job?.steps?.[s.name]?.status === "completed",
+  // Steps are the job's `pages`; before the first poll, show the usual five.
+  const stepNames = job?.pages ? Object.keys(job.pages) : DEFAULT_STEPS;
+  const states = Object.fromEntries(
+    stepNames.map((name) => [name, stepState(job, name)]),
+  );
+  const isReady = status === "completed" && shown >= feed.length;
+  const doneCount = stepNames.filter(
+    (name) => states[name].status === "completed",
   ).length;
-  const percent = Math.round((doneCount / STEPS.length) * 100);
+  const percent = Math.round((doneCount / stepNames.length) * 100);
+  const runningStep = stepNames.find(
+    (name) => states[name].status === "running",
+  );
 
   const handled = useRef(false);
   useEffect(() => {
@@ -158,6 +109,7 @@ export default function IntelligenceProgressPage() {
       handled.current = true;
       queryClient.invalidateQueries(); // pages refetch the freshly saved results
       toast.success("Your workspace is ready!");
+      // TODO: re-enable after the UI work on this page is done.
       router.replace(PAGE_ROUTES.DASHBOARD);
     } else if (isFailed) {
       handled.current = true;
@@ -174,7 +126,7 @@ export default function IntelligenceProgressPage() {
   }, [isReady, isFailed, error, queryClient, router]);
 
   const companyName = job?.company_name || "Your company";
-  const shownLines = report.slice(Math.max(0, done - VISIBLE_LINES), done);
+  const visibleItems = feed.slice(Math.max(0, shown - VISIBLE_ITEMS), shown);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#F7F8FF] px-4 py-12">
@@ -182,7 +134,7 @@ export default function IntelligenceProgressPage() {
       <div className="pointer-events-none absolute -left-32 -top-32 size-[28rem] rounded-full bg-[#C7CBFF]/50 blur-3xl" />
       <div className="pointer-events-none absolute -right-32 top-1/3 size-[26rem] rounded-full bg-[#E4D4FF]/50 blur-3xl" />
 
-      <div className="relative mx-auto max-w-3xl">
+      <div className="relative mx-auto max-w-4xl">
         <Mascot
           src="/mascots/n_mascot_3.gif"
           size={120}
@@ -197,21 +149,32 @@ export default function IntelligenceProgressPage() {
           </span>
         </h1>
         <p className="mt-3 text-center text-sm text-neutral-500 sm:text-base">
-          Six specialist agents are working through your report right now.
+          Working through {stepNames.length} steps of your report right now.
         </p>
 
-        <div className="mt-10 grid items-start gap-6 sm:grid-cols-[170px_minmax(0,1fr)]">
+        <div className="mt-10 grid items-start gap-6 sm:grid-cols-[190px_minmax(0,1fr)]">
           {/* Agents: vertical timeline on the left, horizontal strip on phones */}
           <ol className="relative flex gap-4 overflow-x-auto pb-1 sm:flex-col sm:gap-5 sm:overflow-visible sm:pb-0 sm:pt-2">
             <span className="absolute bottom-5 left-5 top-7 hidden w-0.5 rounded-full bg-[#E3E5F0] sm:block" />
             <span
               className="absolute left-5 top-7 hidden w-0.5 rounded-full bg-linear-to-b from-[#22C55E] to-[#5452F6] transition-[height] duration-700 sm:block"
               style={{
-                height: `calc((100% - 3rem) * ${doneCount / (STEPS.length - 1)})`,
+                height: `calc((100% - 3rem) * ${Math.min(1, doneCount / Math.max(1, stepNames.length - 1))})`,
               }}
             />
-            {STEPS.map(({ name, agent, Icon }) => {
-              const s = job?.steps?.[name]?.status ?? "pending";
+            {stepNames.map((name) => {
+              const { status: s, seconds } = states[name];
+              const Icon = STEP_ICONS[name] ?? Sparkles;
+              const sub =
+                s === "completed"
+                  ? seconds
+                    ? `Done · ${seconds}s`
+                    : "Done"
+                  : s === "running"
+                    ? "Working…"
+                    : s === "failed"
+                      ? "Failed"
+                      : "Queued";
               const ring =
                 s === "completed"
                   ? "border-[#22C55E] bg-[#ECFDF3] text-[#16A34A]"
@@ -242,7 +205,10 @@ export default function IntelligenceProgressPage() {
                           : "font-medium text-neutral-800"
                     }`}
                   >
-                    {agent}
+                    {humanize(name)}
+                    <span className="mt-0.5 hidden text-[11px] font-normal text-neutral-400 sm:block">
+                      {sub}
+                    </span>
                   </span>
                 </li>
               );
@@ -267,7 +233,7 @@ export default function IntelligenceProgressPage() {
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <p className="hidden text-right text-[11px] leading-tight text-neutral-500 sm:block">
-                    {doneCount} / {STEPS.length}
+                    {doneCount} / {stepNames.length}
                     <br />
                     steps
                   </p>
@@ -323,44 +289,35 @@ export default function IntelligenceProgressPage() {
               </div>
               <div className="h-px bg-[#EEF0F6]" />
 
+              {/* Live feed: newest at the bottom, older items drift up and fade out */}
               <ul
                 aria-live="polite"
-                className="min-h-64 space-y-3 p-6 text-sm leading-6"
+                className="flex h-[28rem] flex-col justify-end gap-3 overflow-hidden p-6 mask-[linear-gradient(to_bottom,transparent,black_18%)]"
               >
-                {shownLines.map((line) => (
+                {visibleItems.map((item) => (
                   <li
-                    key={line.id}
-                    className="animate-in text-neutral-600 duration-300 fade-in"
+                    key={item.id}
+                    className="shrink-0 animate-in duration-500 fade-in slide-in-from-bottom-4"
                   >
-                    <span className="font-semibold text-neutral-900">
-                      {line.label}:
-                    </span>{" "}
-                    {line.value}
+                    <FeedItemCard item={item} />
                   </li>
                 ))}
-
-                {current ? (
-                  <li className="text-neutral-600">
-                    <span className="font-semibold text-neutral-900">
-                      {currentText.slice(
-                        0,
-                        Math.min(typed, current.label.length + 1),
-                      )}
+                {!isReady ? (
+                  <li className="flex shrink-0 items-center gap-2 text-xs text-neutral-400">
+                    <span className="flex gap-1">
+                      {[0, 150, 300].map((delay) => (
+                        <span
+                          key={delay}
+                          className="size-1.5 animate-bounce rounded-full bg-[#8B5CF6]"
+                          style={{ animationDelay: `${delay}ms` }}
+                        />
+                      ))}
                     </span>
-                    {currentText.slice(current.label.length + 1, typed)}
-                    <span className="ml-0.5 inline-block h-4 w-0.5 translate-y-0.5 animate-pulse bg-[#5452F6]" />
+                    {runningStep
+                      ? `${humanize(runningStep)} in progress…`
+                      : "Connecting to our AI agents…"}
                   </li>
                 ) : null}
-
-                {/* placeholder bars for what's still coming */}
-                {!isReady
-                  ? ["w-3/4", "w-11/12", "w-2/3"].map((w) => (
-                      <li
-                        key={w}
-                        className={`h-3 animate-pulse rounded-full bg-[#EEF0F8] ${w}`}
-                      />
-                    ))
-                  : null}
               </ul>
             </section>
           </div>
