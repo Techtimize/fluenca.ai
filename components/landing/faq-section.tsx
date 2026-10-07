@@ -104,11 +104,11 @@ export default function FaqSection() {
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : i)}
                   aria-expanded={isOpen}
-                  className={`flex w-full items-center justify-between gap-4 px-[30px] text-left ${
-                    isOpen ? "pb-0 pt-5" : "py-5"
+                  className={`flex w-full items-center justify-between gap-4 px-5 text-left md:px-[30px] ${
+                    isOpen ? "pb-0 pt-4 md:pt-5" : "py-4 md:py-5"
                   }`}
                 >
-                  <span className="font-display text-[18px] leading-[42px] font-medium tracking-normal text-[#1C1C1E]">
+                  <span className="font-display text-[16px] leading-[32px] font-medium tracking-normal text-[#1C1C1E] md:text-[18px] md:leading-[42px]">
                     {item.question}
                   </span>
                   <PlusIcon open={isOpen} />
@@ -122,7 +122,7 @@ export default function FaqSection() {
                 >
                   <div className="overflow-hidden">
                     {/* Answer: 900 wide, 400, 16px / 27px, #62625F */}
-                    <p className="w-full max-w-[900px] px-[30px] pb-5 font-body text-[16px] leading-[27px] font-normal tracking-normal text-[#62625F]">
+                    <p className="w-full max-w-[900px] px-5 pb-4 font-body text-[15px] leading-[25px] font-normal tracking-normal text-[#62625F] md:px-[30px] md:pb-5 md:text-[16px] md:leading-[27px]">
                       {item.answer}
                     </p>
                   </div>
