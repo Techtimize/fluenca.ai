@@ -23,7 +23,7 @@ export default function HowFluencaThinks() {
             </span>
 
             {/* Heading: 595 x 120, 500, 50px / 60px */}
-            <h2 className="mt-3 w-[595px] max-w-full font-display text-[50px] leading-[60px] font-medium tracking-normal text-[#1C1C1E]">
+            <h2 className="mt-3 w-[595px] max-w-full font-display text-[36px] leading-[44px] md:text-[50px] md:leading-[60px] font-medium tracking-normal text-[#1C1C1E]">
               How Fluenca Thinks
               <br />
               About Your Business
@@ -31,7 +31,7 @@ export default function HowFluencaThinks() {
           </div>
 
           {/* Paragraph: 510 x 84, 400, 17px / 28px */}
-          <p className="w-[510px] max-w-full font-body text-[17px] leading-[28px] font-normal tracking-normal text-[#62625F] md:mt-[46px]">
+          <p className="w-[510px] max-w-full font-body text-[16px] leading-[26px] md:text-[17px] md:leading-[28px] font-normal tracking-normal text-[#62625F] md:mt-[46px]">
             Fluenca brings together your business data, AI research, market
             signals, competitors, SEO, and social insights to create one clear
             picture of your business.
