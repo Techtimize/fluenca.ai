@@ -73,7 +73,7 @@ export default function WhyFluenca() {
           </span>
 
           {/* H1: 590 x 120, 500, 50px / 60px, centered */}
-          <h2 className="mt-4 w-[590px] max-w-full font-display text-[50px] leading-[60px] font-medium tracking-normal text-slate-900">
+          <h2 className="mt-4 w-[590px] max-w-full font-display text-[36px] leading-[44px] md:text-[50px] md:leading-[60px] font-medium tracking-normal text-slate-900">
             Generic AI
             <br />
             guesses. <span className="text-indigo-500">Fluenca knows.</span>
@@ -85,10 +85,10 @@ export default function WhyFluenca() {
           </p>
         </div>
 
-        {/* Outer frame 1280 x 548, gap 20: left 494 + right 766 */}
-        <div className="mt-10 grid items-stretch gap-5 md:h-[548px] md:grid-cols-[494fr_766fr]">
+          {/* Outer frame 1280 x 548, gap 20: left 494 + right 766 */}
+          <div className="mt-10 flex flex-col gap-5 md:grid md:h-[548px] md:grid-cols-[494fr_766fr]">
           {/* Left: benefits (494 x 548) */}
-          <div className="flex flex-col justify-between rounded-[40px] border border-white/80 bg-[linear-gradient(150deg,#EFEEFF_0%,#F7F7FF_55%,#F3F2FF_100%)] p-[30px] shadow-[0_8px_30px_rgba(110,110,255,0.05)]">
+          <div className="flex flex-col justify-between rounded-[32px] md:rounded-[40px] border border-white/80 bg-[linear-gradient(150deg,#EFEEFF_0%,#F7F7FF_55%,#F3F2FF_100%)] p-5 md:p-[30px] shadow-[0_8px_30px_rgba(110,110,255,0.05)]">
             {benefits.map((b, i) => (
               <div
                 key={b.title}
@@ -108,14 +108,14 @@ export default function WhyFluenca() {
           </div>
 
           {/* Right: scorecard (766 x 548, radius 40, 30px padding so the 706 x 60 button fits) */}
-          <div className="flex flex-col rounded-[40px] border border-white/80 bg-[linear-gradient(69.59deg,rgba(255,255,255,0.05)_26.14%,rgba(79,96,255,0.07)_47.47%,rgba(129,87,247,0.09)_65.05%),linear-gradient(#fff,#fff)] p-[30px] shadow-[0_8px_30px_rgba(110,110,255,0.05)]">
+          <div className="flex flex-col rounded-[40px] border border-white/80 bg-[linear-gradient(69.59deg,rgba(255,255,255,0.05)_26.14%,rgba(79,96,255,0.07)_47.47%,rgba(129,87,247,0.09)_65.05%),linear-gradient(#fff,#fff)] p-5 md:p-[30px] shadow-[0_8px_30px_rgba(110,110,255,0.05)]">
             {/* header row */}
-            <div className="grid grid-cols-[1.15fr_1fr_0.45fr] items-center border-b border-dashed border-indigo-100 pb-4 font-body text-[16px] leading-[26px]">
+            <div className="grid grid-cols-[1.4fr_1fr_0.55fr] items-center border-b border-dashed border-indigo-100 pb-4 font-body text-[14px] leading-[22px] md:grid-cols-[1.15fr_1fr_0.45fr] md:text-[16px] md:leading-[26px]">
               <span className="text-[#1C1C1E]">The scorecard</span>
               <span className="text-center text-[#62625F]">Prompt-only tools</span>
               <span className="flex items-center justify-center gap-2 font-medium text-indigo-600">
                 <LogoIcon size={22} />
-                fluenca.ai
+                <span className="hidden sm:inline">fluenca.ai</span>
               </span>
             </div>
 
@@ -124,7 +124,7 @@ export default function WhyFluenca() {
               {scorecard.map((row) => (
                 <div
                   key={row}
-                  className="grid grid-cols-[1.15fr_1fr_0.45fr] items-center font-body text-[16px] leading-[26px] text-[#1C1C1E]"
+                  className="grid grid-cols-[1.4fr_1fr_0.55fr] items-center font-body text-[14px] leading-[22px] md:grid-cols-[1.15fr_1fr_0.45fr] md:text-[16px] md:leading-[26px] text-[#1C1C1E]"
                 >
                   <span>{row}</span>
                   <span className="text-center text-[#62625F]">--</span>
@@ -136,7 +136,7 @@ export default function WhyFluenca() {
             </div>
 
             {/* CTA bar: 706 x 60, radius 14, blue gradient; text 500, 22px / 30px, centered */}
-            <div className="mt-auto flex h-[60px] w-full items-center justify-center rounded-[14px] bg-[linear-gradient(95.57deg,#3659FF_-37.81%,#4F60FF_45.96%,#8157F7_115.03%)] px-4 text-center font-display text-[22px] leading-[30px] font-medium tracking-normal text-white shadow-md shadow-indigo-200">
+            <div className="mt-auto flex h-[48px] w-full items-center justify-center rounded-[14px] bg-[linear-gradient(95.57deg,#3659FF_-37.81%,#4F60FF_45.96%,#8157F7_115.03%)] px-4 text-center font-display text-[16px] leading-[22px] md:h-[60px] md:text-[22px] md:leading-[30px] font-medium tracking-normal text-white shadow-md shadow-indigo-200">
               Fluenca builds context before it creates.
             </div>
           </div>
