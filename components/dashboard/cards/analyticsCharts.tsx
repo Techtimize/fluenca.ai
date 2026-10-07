@@ -50,6 +50,22 @@ function StrengthsWeaknessesChart({ data }: { data: AnalyticsCharts["strengthsWe
               <Bar value={row.strengths} max={max} color={STRENGTH} label={`${row.group} strengths: ${row.strengths}`} />
               <Bar value={row.weaknesses} max={max} color={WEAKNESS} label={`${row.group} weaknesses: ${row.weaknesses}`} />
             </div>
+            {row.strengthPoints?.length || row.weaknessPoints?.length ? (
+              <ul className="mt-2.5 space-y-1 text-[11px] leading-4 text-neutral-600">
+                {row.strengthPoints?.map((point) => (
+                  <li key={`s-${point}`} className="flex items-start gap-1.5">
+                    <span className="mt-1 size-1.5 shrink-0 rounded-full" style={{ backgroundColor: STRENGTH }} />
+                    {point}
+                  </li>
+                ))}
+                {row.weaknessPoints?.map((point) => (
+                  <li key={`w-${point}`} className="flex items-start gap-1.5">
+                    <span className="mt-1 size-1.5 shrink-0 rounded-full" style={{ backgroundColor: WEAKNESS }} />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
         ))}
       </div>

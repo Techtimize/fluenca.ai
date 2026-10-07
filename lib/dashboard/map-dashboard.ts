@@ -115,6 +115,7 @@ function mapCompany(card: DashboardCompanyCard): Company {
       instagramUrl: c.instagram_url,
       linkedinUrl: c.linkedin_url,
       instagramImageUrl: c.instagram_image_url ?? null,
+      whyCompetitor: c.why_competitor ?? null,
       linkedinImageUrl: c.linkedin_image_url ?? null,
     })),
   };
@@ -152,6 +153,8 @@ function mapChannel(channel: DashboardChannel): AnalyticsData {
         group: g.label,
         strengths: g.strengths,
         weaknesses: g.weaknesses,
+        strengthPoints: g.strength_points ?? [],
+        weaknessPoints: g.weakness_points ?? [],
       })),
       opportunitiesByPriority: PRIORITIES.map((priority) => ({
         priority: priority.toUpperCase(),

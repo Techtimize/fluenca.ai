@@ -1,8 +1,17 @@
 import type { ComponentType, ReactNode } from "react";
-import { ExternalLink, Globe, RefreshCcw } from "lucide-react";
+import { ExternalLink, Globe, Info, RefreshCcw } from "lucide-react";
 import AssetImage from "@/components/shared/assetImage";
 import Card from "@/components/shared/card";
-import { FacebookIcon, InstagramIcon, LinkedInIcon } from "@/components/shared/brandIcons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  FacebookIcon,
+  InstagramIcon,
+  LinkedInIcon,
+} from "@/components/shared/brandIcons";
 import type { Company, CompanyProfile, Competitor } from "@/types/dashboard";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
@@ -26,7 +35,14 @@ const PLATFORM_ASSET_ICONS: Record<string, string> = {
   instagram: "/assets/insta.png",
 };
 
-const COMPETITOR_SWATCHES = ["#4F6BF6", "#3E9E1C", "#F5A70B", "#0E8F9B", "#E0457B", "#7C4FF0"];
+const COMPETITOR_SWATCHES = [
+  "#4F6BF6",
+  "#3E9E1C",
+  "#F5A70B",
+  "#0E8F9B",
+  "#E0457B",
+  "#7C4FF0",
+];
 
 const initials = (name: string) =>
   name
@@ -111,7 +127,8 @@ function CompetitorRow({
           <span
             className="grid size-8 place-items-center rounded-lg text-[11px] font-semibold text-white"
             style={{
-              backgroundColor: COMPETITOR_SWATCHES[index % COMPETITOR_SWATCHES.length],
+              backgroundColor:
+                COMPETITOR_SWATCHES[index % COMPETITOR_SWATCHES.length],
             }}
             aria-hidden="true"
           >
@@ -121,6 +138,24 @@ function CompetitorRow({
         <p className="min-w-0 truncate text-sm font-semibold text-neutral-900">
           {competitor.name}
         </p>
+        {competitor.whyCompetitor ? (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  aria-label={`Why ${competitor.name} is a competitor`}
+                  className={`ml-auto shrink-0  cursor-pointer rounded-full text-neutral-400 hover:text-[#5452F6] ${FOCUS_RING}`}
+                >
+                  <Info className="size-4" />
+                </button>
+              }
+            />
+            <TooltipContent className="max-w-64 text-xs leading-5">
+              {competitor.whyCompetitor}
+            </TooltipContent>
+          </Tooltip>
+        ) : null}
       </div>
 
       {links.length ? (
@@ -255,7 +290,9 @@ export default function CompanyCard({
                       <Icon className="size-4" />
                     )}
                   </span>
-                  <span className="group-hover:text-neutral-950">{link.label}</span>
+                  <span className="group-hover:text-neutral-950">
+                    {link.label}
+                  </span>
                 </a>
               </li>
             );
@@ -265,7 +302,9 @@ export default function CompanyCard({
 
       {company.competitors.length > 0 && (
         <div className="mt-5">
-          <h3 className="mb-2.5 text-sm font-semibold text-neutral-900">Competitors</h3>
+          <h3 className="mb-2.5 text-sm font-semibold text-neutral-900">
+            Competitors
+          </h3>
           <ul className="grid gap-2.5 sm:grid-cols-2">
             {company.competitors.map((competitor, index) => (
               <CompetitorRow
