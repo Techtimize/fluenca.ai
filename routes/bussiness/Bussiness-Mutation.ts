@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, CompleteIntakeApi, ContentRecommendationApi, DeleteImageApi, ImageGenerationApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentRecommendationApi, DeleteImageApi, ImageGenerationApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
@@ -96,23 +96,6 @@ export function AnalyzeCompanyMutation() {
         },
         onError: (error: unknown) => {
             toast.error(getApiErrorMessage(error, "Failed to analyze company"));
-        },
-    });
-}
-
-export function CompleteIntakeMutation() {
-    const router = useRouter();
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: () => CompleteIntakeApi(),
-        onSuccess: (response: IntakeResponseProps) => {
-            queryClient.setQueryData(['intake'], response);
-            setOnboardingCompletedProvider(true);
-            toast.success("Company overview saved successfully");
-            router.push(PAGE_ROUTES.VERIFY_DNA);
-        },
-        onError: (error) => {
-            toast.error(getApiErrorMessage(error, "Failed to save company overview"));
         },
     });
 }
