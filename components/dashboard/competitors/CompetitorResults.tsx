@@ -61,6 +61,28 @@ function toDisplayLabel(value: unknown): string {
   }
   if (typeof value === "object") {
     const record = value as Record<string, unknown>;
+    // API sometimes returns posting cadence as an object
+    if (
+      "posts_per_week" in record ||
+      "avg_days_between_posts" in record ||
+      ("post_count" in record && "date_range_days" in record)
+    ) {
+      const parts: string[] = [];
+      if (typeof record.posts_per_week === "number") {
+        parts.push(`${record.posts_per_week} posts/week`);
+      }
+      if (typeof record.avg_days_between_posts === "number") {
+        parts.push(`every ${record.avg_days_between_posts} days`);
+      }
+      if (typeof record.post_count === "number") {
+        if (typeof record.date_range_days === "number") {
+          parts.push(`${record.post_count} posts / ${record.date_range_days}d`);
+        } else if (!parts.length) {
+          parts.push(`${record.post_count} posts`);
+        }
+      }
+      if (parts.length) return parts.join(" · ");
+    }
     // API sometimes returns numeric ranges as { min, max }
     if ("min" in record || "max" in record) {
       const min = record.min;

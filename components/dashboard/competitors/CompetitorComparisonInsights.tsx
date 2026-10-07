@@ -38,6 +38,33 @@ function formatEngagement(value?: number | null) {
   return `${value.toFixed(2)}%`;
 }
 
+function formatPostingFrequency(value: unknown): string {
+  if (value == null) return "";
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  if (typeof value !== "object" || Array.isArray(value)) return "";
+
+  const record = value as Record<string, unknown>;
+  const parts: string[] = [];
+
+  if (typeof record.posts_per_week === "number") {
+    parts.push(`${record.posts_per_week} posts/week`);
+  }
+  if (typeof record.avg_days_between_posts === "number") {
+    parts.push(`every ${record.avg_days_between_posts} days`);
+  }
+  if (typeof record.post_count === "number") {
+    if (typeof record.date_range_days === "number") {
+      parts.push(`${record.post_count} posts / ${record.date_range_days}d`);
+    } else if (!parts.length) {
+      parts.push(`${record.post_count} posts`);
+    }
+  }
+
+  return parts.join(" · ");
+}
+
 function toDisplayLabel(value: unknown): string {
   if (value == null) return "";
   if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
@@ -48,6 +75,15 @@ function toDisplayLabel(value: unknown): string {
   }
   if (typeof value === "object") {
     const record = value as Record<string, unknown>;
+    // API sometimes returns posting cadence as an object
+    if (
+      "posts_per_week" in record ||
+      "avg_days_between_posts" in record ||
+      ("post_count" in record && "date_range_days" in record)
+    ) {
+      const formatted = formatPostingFrequency(record);
+      if (formatted) return formatted;
+    }
     // API sometimes returns numeric ranges as { min, max }
     if ("min" in record || "max" in record) {
       const min = record.min;
@@ -277,19 +313,21 @@ function SocialBlock({ block }: { block?: CompetitorSocialComparison | null }) {
     block.company?.primary_format ||
     block.competitor?.primary_format ||
     block.primary_format;
-  const postingFrequency =
+  const postingFrequency = formatPostingFrequency(
     block.company?.posting_frequency ||
-    block.competitor?.posting_frequency ||
-    block.posting_frequency ||
-    block.company_posting_frequency ||
-    block.competitor_posting_frequency;
+      block.competitor?.posting_frequency ||
+      block.posting_frequency ||
+      block.company_posting_frequency ||
+      block.competitor_posting_frequency,
+  );
+  const primaryFormatLabel = toDisplayLabel(primaryFormat);
 
   const hasMetrics =
     yourFollowers != null ||
     theirFollowers != null ||
     yourEngagement != null ||
     theirEngagement != null ||
-    primaryFormat ||
+    primaryFormatLabel ||
     postingFrequency ||
     themes.length ||
     block.summary ||
@@ -367,7 +405,7 @@ function SocialBlock({ block }: { block?: CompetitorSocialComparison | null }) {
         <div>
           <p className="mb-1.5 text-[11px] font-medium text-neutral-500">Format / cadence</p>
           <p className="text-[12px] text-neutral-700">
-            {[primaryFormat, postingFrequency].filter(Boolean).join(" · ") || "—"}
+            {[primaryFormatLabel, postingFrequency].filter(Boolean).join(" · ") || "—"}
           </p>
         </div>
         <div>
@@ -702,7 +740,7 @@ export default function CompetitorComparisonInsights({
                 <div className="rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] p-3">
                   <dt className="text-[11px] text-neutral-400">Posting frequency</dt>
                   <dd className="mt-1 text-[13px] font-semibold text-neutral-900">
-                    {company.social.posting_frequency || "—"}
+                    {formatPostingFrequency(company.social.posting_frequency) || "—"}
                   </dd>
                 </div>
               </dl>
