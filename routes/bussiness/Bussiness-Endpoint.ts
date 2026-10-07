@@ -85,3 +85,5 @@ export const BUSSINESSENDPOINT = {
     BLOG_POST: '/blog-posts',
     BLOG_POST_DETAILS: (blog_post_id: string) => `/blog-posts/${blog_post_id}`,
 }
+
+
