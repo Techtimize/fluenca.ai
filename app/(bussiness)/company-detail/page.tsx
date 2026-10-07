@@ -42,7 +42,7 @@ export default function CompanyDetail() {
     useEffect(() => {
         if (!isReady) return;
         if (!current) {
-            const timer = setTimeout(() => router.push(PAGE_ROUTES.COMPANY_OVERVIEW), 800);
+            const timer = setTimeout(() => router.push(PAGE_ROUTES.DNA), 800);
             return () => clearTimeout(timer);
         }
         const timer =

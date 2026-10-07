@@ -121,7 +121,7 @@ export default function IntelligenceProgressPage() {
           ? "We couldn't find this analysis. Please start again."
           : "Something went wrong. Please try again.",
       );
-      router.replace(PAGE_ROUTES.VERIFY_DNA);
+      router.replace(PAGE_ROUTES.DNA);
     }
   }, [isReady, isFailed, error, queryClient, router]);
 
