@@ -1,6 +1,6 @@
 import { ArrowUp } from "lucide-react";
 import type { Metric, Tone } from "@/types/dashboard";
-import { getIcon } from "@/utils/icon-utils";
+import { DynamicIcon } from "@/utils/icon-utils";
 
 const TONES: Record<Tone, { iconBg: string; text: string; bar: string }> = {
   green: { iconBg: "bg-[#EAF6E3]", text: "text-[#3E9E1C]", bar: "bg-[#3E9E1C]" },
@@ -13,7 +13,6 @@ const TONES: Record<Tone, { iconBg: string; text: string; bar: string }> = {
 
 // Renders an <li>, so use it inside a <ul>.
 export default function MetricCard({ metric }: { metric: Metric }) {
-  const Icon = getIcon(metric.icon);
   const t = TONES[metric.tone];
   const score = Math.max(0, Math.min(100, metric.score));
 
@@ -22,7 +21,7 @@ export default function MetricCard({ metric }: { metric: Metric }) {
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <span className={`grid size-10 place-items-center rounded-xl ${t.iconBg} ${t.text}`}>
-            <Icon className="size-5" aria-hidden="true" />
+            <DynamicIcon name={metric.icon} className="size-5" aria-hidden="true" />
           </span>
           <div>
             <p className="text-[13px] font-medium text-neutral-900">{metric.label}</p>
