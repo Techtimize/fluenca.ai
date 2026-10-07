@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   Building2,
   CalendarDays,
+  Dna,
   Lightbulb,
   PenLine,
   Sparkles,
@@ -22,6 +23,7 @@ import type { IntelligenceJobResponse } from "@/types/bussiness/intelligence-typ
 
 // Icon per step shown in the side timeline; unknown steps get a generic icon.
 const STEP_ICONS: Record<string, LucideIcon> = {
+  generate_dna: Dna,
   analyze_company: Building2,
   competitor_analysis: Users,
   planner: CalendarDays,

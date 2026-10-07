@@ -73,7 +73,8 @@ export default function CalendarPage() {
   const usingLatest = selectedVersion === LATEST_PLANNER_VERSION;
   const rawData = usingLatest ? latestData : specificData;
   const planner = unwrapPlannerResult(rawData);
-  const events = useMemo(() => buildPlannerEvents(planner), [planner]);
+  // No useMemo: React Compiler memoizes this, and a manual one can't be preserved here.
+  const events = buildPlannerEvents(planner);
   const summary = getPlannerSummary(planner);
   const hasPlan = events.length > 0;
 
