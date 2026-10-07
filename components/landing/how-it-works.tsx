@@ -7,13 +7,14 @@
 //  - every time you scroll down to the next step:
 //      * the left text blends into the next text (soft fade, NO blur)
 //      * the right side blends into the next animation (soft fade)
-//      * the blue layer of the icon moves to the next layer (1, 2, 3, 4)
+//      * the icon on the left switches to the next logo (1, 2, 3, 4)
 //  - each step is always fully sharp and clear when you stop scrolling
 //  - the "x" marks on the blue background pop + glow when the mouse touches them
 //
 // ⚠️ Do not put "overflow-hidden" on the <section> below, it would break "sticky".
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Lottie, { type LottieRefCurrentProps } from "lottie-react";
 
 import step1Animation from "@/animations/how-it-works-1.json";
@@ -27,29 +28,51 @@ import step4Animation from "@/animations/how-it-works-4.json";
 const STEPS = [
   {
     title: "Tell us about your company",
-    text: "Add your website, industry, products or services, and language. Fluenca.ai will research your business and build your Company DNA from streams you confirm.",
+    text: "Add your website, industry, products or services, and language. Fluenca.ai will research your business and build your Company DNA from answers you confirm.",
     animationData: step1Animation,
+    box: { left: 131, top: 78, width: 328, height: 370, lift: 0 },
   },
   {
     title: "Review Your Business Insights",
     text: "Our AI agents research your business and prepare key insights for review. Refine the information if needed, then unlock deeper analytics, recommendations, and personalized suggestions for your goals.",
     animationData: step2Animation,
+    box: { left: 31, top: 53, width: 527, height: 338, lift: 30 },
   },
   {
     title: "Turn Insights Into Marketing That Works",
     text: "Explore your analytics, set your goals, and let Fluenca's AI agents turn your business intelligence into action. Create blogs, case studies, social content, campaigns, and more all tailored to your business and goals.",
     animationData: step3Animation,
+    box: { left: 42, top: 61, width: 506, height: 329, lift: 30 },
   },
   {
     title: "From Your Goals to Great Content",
     text: "Get a personalized content plan based on your goals, then preview, schedule, and publish content that moves your business forward.",
     animationData: step4Animation,
+    box: { left: 40, top: 45, width: 524, height: 379, lift: 15 },
   },
 ];
 
+// The 4 logos exported from Figma (saved in public/assets/how-it-works/)
+const STEP_ICONS = [
+  "/assets/how-it-works/step-1-icon.svg",
+  "/assets/how-it-works/step-2-icon.svg",
+  "/assets/how-it-works/step-3-icon.svg",
+  "/assets/how-it-works/step-4-icon.svg",
+];
+
 const N = STEPS.length;
-const SCROLL_PER_STEP_VH = 90; // scrolling needed for each step (bigger = slower)
-const LAYER_GAP = 11; // distance between the layers of the icon
+const SCROLL_PER_STEP_VH = 130; // scrolling needed for each step (bigger = slower)
+// The blue card is 590 x 450. Each animation has its own size and position
+// inside it (taken from Figma, relative to the card's top-left corner).
+const CARD_W = 590;
+const CARD_H = 450;
+// Each step has a `lift`: extra pixels (of the 590 x 450 card) the animation is moved UP,
+// so it does not touch the bottom edge. 0 = exactly the Figma position.
+const STEP_DELAY_MS = 600; // minimum time between two steps, so steps never get skipped
+
+// Blue gradient used for text (angle + stops from the design)
+const GRADIENT_TEXT =
+  "bg-[linear-gradient(95.57deg,#3659FF_-37.81%,#4F60FF_45.96%,#8157F7_115.03%)] bg-clip-text text-transparent";
 
 /* ---------------------------------------------------------------
    The blue background with "x" marks that pop on hover
@@ -84,8 +107,19 @@ function XPattern() {
 
 /* ---------------------------------------------------------------
    One animation layer (all 4 are stacked, only the active one is visible)
+   Each animation is placed with its own Figma size/position (see `box` in STEPS).
 ---------------------------------------------------------------- */
-function AnimationLayer({ data, index, active }: { data: unknown; index: number; active: number }) {
+function AnimationLayer({
+  data,
+  box,
+  index,
+  active,
+}: {
+  data: unknown;
+  box: { left: number; top: number; width: number; height: number; lift: number };
+  index: number;
+  active: number;
+}) {
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const isActive = index === active;
 
@@ -103,16 +137,26 @@ function AnimationLayer({ data, index, active }: { data: unknown; index: number;
 
   return (
     <div
-      className={`pointer-events-none absolute inset-0 flex items-center justify-center p-6 transition-[opacity,transform] duration-700 ease-out ${position}`}
+      className={`pointer-events-none absolute inset-0 transition-[opacity,transform] duration-700 ease-out ${position}`}
     >
-      <Lottie
-        lottieRef={lottieRef}
-        animationData={data}
-        loop
-        autoplay={false}
-        rendererSettings={{ preserveAspectRatio: "xMidYMid meet" }}
-        className="h-full w-full"
-      />
+      <div
+        className="absolute"
+        style={{
+          left: `${(box.left / CARD_W) * 100}%`,
+          top: `${((box.top - box.lift) / CARD_H) * 100}%`,
+          width: `${(box.width / CARD_W) * 100}%`,
+          height: `${(box.height / CARD_H) * 100}%`,
+        }}
+      >
+        <Lottie
+          lottieRef={lottieRef}
+          animationData={data}
+          loop
+          autoplay={false}
+          rendererSettings={{ preserveAspectRatio: "xMidYMid meet" }}
+          className="h-full w-full"
+        />
+      </div>
     </div>
   );
 }
@@ -123,19 +167,31 @@ function AnimationLayer({ data, index, active }: { data: unknown; index: number;
 export default function HowItWorks() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
+  const activeRef = useRef(0); // the step currently shown
+  const targetRef = useRef(0); // the step the scroll position asks for
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // which step is active, based on how far we scrolled through the track
+  // which step is active, based on how far we scrolled through the track.
+  // The shown step moves ONE step at a time (1 -> 2 -> 3), even if you scroll fast.
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
     let raf = 0;
 
+    const stepTowardTarget = () => {
+      timerRef.current = null;
+      if (activeRef.current === targetRef.current) return;
+      activeRef.current += Math.sign(targetRef.current - activeRef.current);
+      setActive(activeRef.current);
+      timerRef.current = setTimeout(stepTowardTarget, STEP_DELAY_MS);
+    };
+
     const update = () => {
       const rect = el.getBoundingClientRect();
       const total = rect.height - window.innerHeight;
       const progress = total > 0 ? Math.min(1, Math.max(0, -rect.top / total)) : 0;
-      const idx = Math.min(N - 1, Math.floor(progress * N));
-      setActive((prev) => (prev === idx ? prev : idx));
+      targetRef.current = Math.min(N - 1, Math.floor(progress * N));
+      if (!timerRef.current) stepTowardTarget();
     };
     const onScroll = () => {
       cancelAnimationFrame(raf);
@@ -146,6 +202,8 @@ export default function HowItWorks() {
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = null;
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
@@ -153,17 +211,25 @@ export default function HowItWorks() {
   }, []);
 
   return (
-    <section id="how-it-works" className="w-full bg-white">
+    // Rounded top corners + pulled up over the hero so the hero glow shows behind the curve
+    <section
+      id="how-it-works"
+      className="relative z-10 -mt-10 w-full rounded-t-[40px] bg-white md:-mt-14 md:rounded-t-[56px]"
+    >
       {/* Headings (normal scrolling) */}
-      <div className="mx-auto max-w-6xl px-6 pb-8 pt-20 md:pt-28">
-        <div className="grid items-start gap-6 md:grid-cols-2 md:gap-16">
-          <h2 className="max-w-xs text-xl font-medium leading-snug text-slate-800 md:text-2xl">
+      <div className="mx-auto w-full max-w-360 px-6 pb-8 pt-20 md:px-12 md:pt-28 lg:px-20">
+        <div className="grid items-start gap-6 md:grid-cols-[1fr_590px] md:justify-between md:gap-16">
+          {/* Left heading: 334 x 96, 400, 36px / 48px, #1C1C1E */}
+          <h2 className="w-[334px] max-w-full font-display text-[36px] leading-[48px] font-normal tracking-normal text-[#1C1C1E]">
             Let AI Understand Your Business First
           </h2>
-          <h2 className="text-3xl font-semibold leading-tight text-indigo-500 md:text-4xl">
-            From <span className="text-slate-900">Business Data</span>
+
+          {/* Right heading: 590 x 124, 500, 50px / 62px, "Business Data" black, rest blue gradient */}
+          <h2 className="w-[590px] max-w-full font-display text-[50px] leading-[62px] font-medium tracking-normal">
+            <span className={GRADIENT_TEXT}>From </span>
+            <span className="text-[#1C1C1E]">Business Data</span>
             <br />
-            to <span className="text-slate-900">Marketing Intelligence</span>
+            <span className={GRADIENT_TEXT}>to Marketing Intelligence</span>
           </h2>
         </div>
       </div>
@@ -171,64 +237,31 @@ export default function HowItWorks() {
       {/* Tall scroll track: the pinned frame stays on screen while you scroll through it */}
       <div ref={trackRef} style={{ height: `${N * SCROLL_PER_STEP_VH}vh` }}>
         <div className="sticky top-0 flex h-screen items-center pt-16">
-          <div className="mx-auto grid w-full max-w-6xl items-center gap-6 px-6 md:grid-cols-2 md:gap-16">
-            {/* LEFT: layers icon + text that blends from one step to the next */}
+          <div className="mx-auto grid w-full max-w-360 items-center gap-6 px-6 md:grid-cols-[1fr_590px] md:justify-between md:gap-16 md:px-12 lg:px-20">
+            {/* LEFT: logo icon + text that blends from one step to the next */}
             <div>
-              {/* Layers icon: the blue layer is on layer 1, 2, 3 or 4 depending on the step */}
-              <svg viewBox="0 0 64 64" aria-hidden className="h-14 w-14 md:h-16 md:w-16">
-                <defs>
-                  <linearGradient id="hiw-blue" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stopColor="#4F46E5" />
-                    <stop offset="1" stopColor="#6D6BFF" />
-                  </linearGradient>
-                </defs>
-
-                {/* the 4 light layers (bottom one is drawn first) */}
-                {[3, 2, 1, 0].map((k) => (
-                  <rect
-                    key={k}
-                    x="-17"
-                    y="-17"
-                    width="34"
-                    height="34"
-                    rx="6"
-                    fill="#E4E7FF"
-                    stroke="#fff"
-                    strokeWidth="1.5"
-                    vectorEffect="non-scaling-stroke"
-                    transform={`translate(32 ${15 + k * LAYER_GAP}) scale(1 0.55) rotate(45)`}
+              {/* The 4 Figma logos, stacked: only the active one is visible */}
+              <div className="relative h-14 w-14 md:h-16 md:w-16" aria-hidden="true">
+                {STEP_ICONS.map((src, i) => (
+                  <Image
+                    key={src}
+                    src={src}
+                    alt=""
+                    fill
+                    sizes="64px"
+                    className={`object-contain transition-opacity duration-500 ease-out ${
+                      i === active ? "opacity-100" : "opacity-0"
+                    }`}
                   />
                 ))}
+              </div>
 
-                {/* the blue layer: glides to the layer of the current step */}
-                <g
-                  style={{
-                    transform: `translateY(${active * LAYER_GAP}px)`,
-                    transition: "transform 600ms cubic-bezier(0.4, 0, 0.2, 1)",
-                    filter: "drop-shadow(0 4px 6px rgba(79,70,229,0.35))",
-                  }}
-                >
-                  <rect
-                    x="-17"
-                    y="-17"
-                    width="34"
-                    height="34"
-                    rx="6"
-                    fill="url(#hiw-blue)"
-                    stroke="#fff"
-                    strokeWidth="1.5"
-                    vectorEffect="non-scaling-stroke"
-                    transform="translate(32 15) scale(1 0.55) rotate(45)"
-                  />
-                </g>
-              </svg>
-
-              <div className="relative mt-5 h-[220px] md:h-[230px]">
+              <div className="relative mt-5 h-[230px] md:h-[240px]">
                 {STEPS.map((step, i) => (
                   <div
                     key={step.title}
                     aria-hidden={i !== active}
-                    className={`absolute inset-x-0 top-0 max-w-sm transition-[opacity,transform] duration-700 ease-out ${
+                    className={`absolute inset-x-0 top-0 w-[449px] max-w-full transition-[opacity,transform] duration-700 ease-out ${
                       i === active
                         ? "translate-y-0 opacity-100"
                         : i < active
@@ -236,22 +269,28 @@ export default function HowItWorks() {
                           : "pointer-events-none translate-y-3 opacity-0"
                     }`}
                   >
-                    <h3 className="text-base font-semibold text-slate-900">{step.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-slate-500">{step.text}</p>
+                    {/* Title: 302 x 42, 500, 24px / 42px, #1C1C1E */}
+                    <h3 className="min-h-[42px] w-full max-w-[449px] font-display text-[24px] leading-[42px] font-medium tracking-normal text-[#1C1C1E]">
+                      {step.title}
+                    </h3>
+                    {/* Body: 449 wide, 400, 17px / 28px, #62625F */}
+                    <p className="mt-2 w-[449px] max-w-full font-body text-[17px] leading-[28px] font-normal tracking-normal text-[#62625F]">
+                      {step.text}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* RIGHT: blue card + x marks + the 4 animations (one visible at a time) */}
-            <div className="relative h-[300px] w-full overflow-hidden rounded-3xl bg-[linear-gradient(135deg,#4F62FF_0%,#6B5CF6_100%)] shadow-[0_20px_60px_rgba(91,92,240,0.25)] md:h-[min(540px,68vh)]">
+            {/* RIGHT: blue card (590 x 450) + x marks + the 4 animations (one visible at a time) */}
+            <div className="relative aspect-[590/450] w-full max-w-[590px] overflow-hidden rounded-[32px] bg-[linear-gradient(95.57deg,#3659FF_-37.81%,#4F60FF_45.96%,#8157F7_115.03%)] shadow-[0_20px_60px_rgba(91,92,240,0.25)]">
               {/* soft light in the corner */}
               <div className="pointer-events-none absolute -left-16 -top-16 h-64 w-64 rounded-full bg-white/15 blur-3xl" />
 
               <XPattern />
 
               {STEPS.map((step, i) => (
-                <AnimationLayer key={step.title} data={step.animationData} index={i} active={active} />
+                <AnimationLayer key={step.title} data={step.animationData} box={step.box} index={i} active={active} />
               ))}
             </div>
           </div>

@@ -39,12 +39,12 @@ const faqs = [
 function PlusIcon({ open }: { open: boolean }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="20"
+      height="20"
       viewBox="0 0 16 16"
       fill="none"
       aria-hidden
-      className={`shrink-0 text-slate-900 transition-transform duration-300 ${
+      className={`shrink-0 text-[#1C1C1E] transition-transform duration-300 ${
         open ? "rotate-45" : ""
       }`}
     >
@@ -58,50 +58,57 @@ export default function FaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
+    // Rounded top corners: the lavender glows start right at the top edge, so the curve shows against the white page above.
+    // Background: white centre, lavender glows at the top-right, left-middle and bottom corners (as in the design).
+    // Bottom padding includes the overlap (40px / 56px) taken by the testimonials section (-mt-10 / -mt-14),
+    // so the visible gap stays 64px on mobile and 80px on desktop.
     <section
       id="faq"
-      className="relative w-full overflow-hidden bg-white py-16 md:py-20 bg-[radial-gradient(ellipse_at_0%_60%,rgba(199,206,255,0.7)_0%,rgba(255,255,255,0)_32%),radial-gradient(ellipse_at_100%_0%,rgba(219,224,255,0.7)_0%,rgba(255,255,255,0)_32%),radial-gradient(ellipse_at_0%_100%,rgba(219,224,255,0.6)_0%,rgba(255,255,255,0)_30%)]"
+      className="relative z-10 w-full overflow-hidden rounded-t-[40px] bg-white pt-16 pb-26 md:rounded-t-[56px] md:pt-20 md:pb-34 bg-[radial-gradient(ellipse_30%_24%_at_100%_0%,rgba(214,222,255,0.95)_0%,rgba(255,255,255,0)_100%),radial-gradient(ellipse_22%_16%_at_0%_0%,rgba(226,230,255,0.55)_0%,rgba(255,255,255,0)_100%),radial-gradient(ellipse_16%_36%_at_0%_42%,rgba(214,222,255,0.9)_0%,rgba(255,255,255,0)_100%),radial-gradient(ellipse_480px_260px_at_0%_100%,rgba(214,222,255,0.95)_0%,rgba(255,255,255,0)_100%),radial-gradient(ellipse_420px_240px_at_100%_100%,rgba(214,222,255,0.8)_0%,rgba(255,255,255,0)_100%),radial-gradient(ellipse_14%_30%_at_100%_55%,rgba(226,230,255,0.4)_0%,rgba(255,255,255,0)_100%)]"
     >
-      <div className="mx-auto max-w-3xl px-6">
+      {/* max-w 1008 - 48px side padding = 960px content width (the outer frame) */}
+      <div className="mx-auto max-w-[1008px] px-6">
         {/* Heading */}
         <div className="flex flex-col items-center text-center">
-          <span className="rounded-full bg-indigo-50 px-3 py-1 text-[11px] font-normal text-indigo-500">
+          {/* Pill: 249 x 34, radius 40, padding 4/20, gap 10, bg #F0F3FF */}
+          <span className="inline-flex h-[34px] w-[249px] max-w-full items-center justify-center gap-[10px] whitespace-nowrap rounded-[40px] bg-[#F0F3FF] px-5 py-1 font-body text-[15px] font-normal text-indigo-500">
             Frequently Asked Questions
           </span>
-          <h2 className="mt-3 text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-[34px]">
+
+          {/* H2: 590 x 60, 500, 50px / 60px, centered (a bit smaller on phones so it fits) */}
+          <h2 className="mt-3 w-[590px] max-w-full font-display text-[36px] leading-[44px] font-medium tracking-normal text-[#1C1C1E] md:text-[50px] md:leading-[60px]">
             Curious About <span className="text-indigo-500">Fluenca.ai</span>
           </h2>
-          <p className="mt-3 text-xs text-slate-500">
+
+          {/* Subtitle: 615 x 28, 400, 17px / 28px, #62625F, centered */}
+          <p className="mt-3 w-[615px] max-w-full font-body text-[17px] leading-[28px] font-normal tracking-normal text-[#62625F]">
             Get answers about Fluenca, AI research, and marketing intelligence.
           </p>
         </div>
 
-        {/* Accordion */}
-        <div className="mt-8 flex flex-col gap-3">
+        {/* Accordion: 960 wide, 18px gap between items */}
+        <div className="mt-8 flex flex-col gap-[18px]">
           {faqs.map((item, i) => {
             const isOpen = openIndex === i;
             return (
               <div
                 key={item.question}
-                className={`rounded-2xl border border-indigo-100 transition-colors duration-300 ${
+                className={`rounded-[30px] border border-indigo-100 transition-colors duration-300 ${
                   isOpen
                     ? "bg-indigo-50/70 shadow-sm"
                     : "bg-gradient-to-r from-white to-indigo-50/40 hover:bg-indigo-50/50"
                 }`}
               >
+                {/* Question row: padding 20/30, title 500, 18px / 42px */}
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : i)}
                   aria-expanded={isOpen}
-                  className={`flex w-full items-center justify-between gap-4 text-left ${
-                    isOpen ? "px-5 pt-4" : "px-4 py-3"
+                  className={`flex w-full items-center justify-between gap-4 px-[30px] text-left ${
+                    isOpen ? "pb-0 pt-5" : "py-5"
                   }`}
                 >
-                  <span
-                    className={`text-[13px] ${
-                      isOpen ? "font-medium text-slate-900" : "font-normal text-slate-800"
-                    }`}
-                  >
+                  <span className="font-display text-[18px] leading-[42px] font-medium tracking-normal text-[#1C1C1E]">
                     {item.question}
                   </span>
                   <PlusIcon open={isOpen} />
@@ -114,7 +121,8 @@ export default function FaqSection() {
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <p className="max-w-[92%] px-5 pb-5 pt-1 text-xs leading-relaxed text-slate-500">
+                    {/* Answer: 900 wide, 400, 16px / 27px, #62625F */}
+                    <p className="w-full max-w-[900px] px-[30px] pb-5 font-body text-[16px] leading-[27px] font-normal tracking-normal text-[#62625F]">
                       {item.answer}
                     </p>
                   </div>
