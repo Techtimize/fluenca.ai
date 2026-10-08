@@ -113,14 +113,13 @@ export default function FooterSection({
           ))}
         </div>
 
-        {/* Big wordmark: gradient text that fades to white at the top */}
+        {/* Big wordmark */}
         <div className="relative pt-4 md:pt-10">
           <svg
             role="img"
             aria-label={wordmark}
             viewBox="0 0 1000 215"
-            className="block h-auto w-full select-none md:max-w-[1000px]"
-            style={{ maxHeight: '280px' }}
+            className="block h-auto w-full select-none"
           >
             <defs>
               {/* Left-to-right color: periwinkle blue to soft purple */}
