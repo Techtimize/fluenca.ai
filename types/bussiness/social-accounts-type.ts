@@ -11,6 +11,8 @@ export interface SocialAccount {
   platform?: SocialPlatform;
   provider?: string;
   username?: string | null;
+  external_account_id?: string | null;
+  external_account_name?: string | null;
   account_name?: string | null;
   display_name?: string | null;
   profile_url?: string | null;
