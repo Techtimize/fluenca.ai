@@ -4,6 +4,7 @@ import {
     AnalyzeCompanyResultsApi,
   AnalyzeCompanyDashboardApi,
   AnalyzeCompanyDashboardDocumentationApi,
+  UserProfileApi,
   GoogleTrendExploreApi,
   GoogleTrendFiltersApi,
   GoogleTrendNowApi,
@@ -85,6 +86,15 @@ export const AnalyzeCompanyDashboardQuery = (company_id: string) => {
     queryKey: ["analyze-company-dashboard", company_id],
     queryFn: () => AnalyzeCompanyDashboardApi(company_id),
     enabled: Boolean(company_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const UserProfileQuery = () => {
+  return useQuery({
+    queryKey: ["user-profile"],
+    queryFn: () => UserProfileApi(),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
