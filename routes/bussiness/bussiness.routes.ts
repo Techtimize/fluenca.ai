@@ -384,23 +384,32 @@ export const SocialAccountConnectApi = async (
 }
 
 export const SocialAccountDisconnectApi = async (platform: string) => {
-    const response = await api.post(
+    const response = await api.delete(
       BUSSINESSENDPOINT.CONNECTORS.SOCIAL_ACCOUNTS_DISCONNECT(platform),
     );
     return response.data;
 }
 
-export const InstagramLoginPostApi = async () => {
+export const InstagramLoginPostApi = async (): Promise<InstagramAuthorizeResponse> => {
   const response = await api.post(BUSSINESSENDPOINT.CONNECTORS.INSTAGRAM_LOGIN);
   return response.data;
 }
 
-export const SocialAccountsConnectApi = async (platform: string) => {
-  const response = await api.post(BUSSINESSENDPOINT.CONNECTORS.SOCIAL_ACCOUNTS_CONNECT(platform));
+export const SocialAccountsConnectApi = async (
+  platform: string,
+): Promise<InstagramAuthorizeResponse> => {
+  const response = await api.post(
+    BUSSINESSENDPOINT.CONNECTORS.SOCIAL_ACCOUNTS_CONNECT(platform),
+  );
   return response.data;
 }
 
-export const SocialAccountsDisconnectApi = async (platform: string) => {
-  const response = await api.post(BUSSINESSENDPOINT.CONNECTORS.SOCIAL_ACCOUNTS_DISCONNECT(platform));
+export const FacebookConnectApi = async (): Promise<InstagramAuthorizeResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.CONNECTORS.FACEBOOK_CONNECT);
+  return response.data;
+}
+
+export const FacebookConnectPostApi = async (): Promise<InstagramAuthorizeResponse> => {
+  const response = await api.post(BUSSINESSENDPOINT.CONNECTORS.FACEBOOK_CONNECT);
   return response.data;
 }
