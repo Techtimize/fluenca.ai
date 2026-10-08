@@ -3,6 +3,7 @@ import api from "../apiClient";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
 import type { DashboardResponse } from "@/types/bussiness/dashboard-type";
+import type { DashboardDocumentationResponse } from "@/types/bussiness/dashboard-documentation-type";
 import {
   CompetitorAnalysisJobResponse,
   CompetitorAnalysisManualRequest,
@@ -197,6 +198,13 @@ export const AnalyzeCompanyResultsApi = async (company_id: string) => {
 export const AnalyzeCompanyDashboardApi = async (company_id: string) => {
     const response = await api.get<DashboardResponse>(
       BUSSINESSENDPOINT.ANALYZE_COMPANY_DASHBOARD(company_id),
+    );
+    return response.data;
+}
+
+export const AnalyzeCompanyDashboardDocumentationApi = async (company_id: string) => {
+    const response = await api.get<DashboardDocumentationResponse>(
+      BUSSINESSENDPOINT.ANALYZE_COMPANY_DASHBOARD_DOCUMENTATION(company_id),
     );
     return response.data;
 }

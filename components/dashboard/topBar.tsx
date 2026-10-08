@@ -57,9 +57,9 @@ export default function TopBar({
           <Bell className="size-4" />
         </button> */}
         <Link
-          href={PAGE_ROUTES.COMPANY_OVERVIEW}
-          aria-label={`${user.name} · Company overview`}
-          title="Company overview"
+          href={PAGE_ROUTES.PROFILE}
+          aria-label={`${user.name} · Profile`}
+          title="Profile"
           className={`shrink-0 rounded-full transition-opacity hover:opacity-90 ${FOCUS_RING}`}
         >
           {user.avatarSrc ? (
