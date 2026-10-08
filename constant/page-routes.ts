@@ -2,7 +2,6 @@ export const PAGE_ROUTES = {
     HOME: '/',
     COMING_SOON: '/coming-soon',
 
-    // Auth
     LOGIN: '/login',
     SIGNUP: '/signup',
     FORGOT_PASSWORD: '/forgot-password',
@@ -10,7 +9,6 @@ export const PAGE_ROUTES = {
     VERIFY_EMAIL: '/verify-email',
     VERIFY_OTP: '/verify-otp',
 
-    // Onboarding
     ONBOARDING: '/onboarding',
     COMPANY_DETAIL: '/company-detail',
     QUESTIONS: '/questions',
@@ -18,7 +16,6 @@ export const PAGE_ROUTES = {
     VERIFY_DNA: '/verify-dna',
     DNA: '/dna',
 
-    // Dashboard
     DASHBOARD: '/dashboard',
     INTEGRATIONS: '/dashboard/integrations',
     COMPANY_OVERVIEW: '/company-overview',
@@ -34,8 +31,8 @@ export const PAGE_ROUTES = {
     SCRIPT_DETAIL: (id: string) => `/script/${id}`,
     CONTENT: '/content',
     BLOGS: '/blogs',
+    BLOG_DETAIL: (id: string) => `/blogs/${id}`,
 
-    // Super admin
     SUPERADMIN: '/superadmin',
     SUPERADMIN_USERS: '/superadmin',
 } as const;

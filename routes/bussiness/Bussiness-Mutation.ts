@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentRecommendationApi, DeleteImageApi, FacebookConnectApi, ImageGenerationApi, InstagramLoginApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, WaitlistApi } from "./bussiness.routes";
+import { RetryKeywordsApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi,CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentRecommendationApi, DeleteImageApi, FacebookConnectApi, ImageGenerationApi, InstagramLoginApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
@@ -341,17 +342,32 @@ export const IntelligenceRunMutation = () => {
 };
 
 
-export const BlogPostMutation = () => {
-  const router = useRouter();
+export const RetryKeywordsMutation = () => {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (brief_id: string) => BlogPostApi(brief_id),
+    mutationFn: () => RetryKeywordsApi(),
     onSuccess: (response) => {
-      toast.success("Blog post created successfully");
-      router.push(PAGE_ROUTES.BLOGS);
+      queryClient.setQueryData(["keywords"], response);
+      toast.success("Keyword research started again.");
     },
     onError: (error) => {
-      toast.error(getApiErrorMessage(error, "Failed to create blog post"));
-      },
+      toast.error(getApiErrorMessage(error, "Failed to start keyword research"));
+    },
+  });
+};
+
+export const BlogPostMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (brief_id: string) => BlogPostApi(brief_id),
+    onSuccess: (post) => {
+      toast.success("Writing your blog post. It is usually ready within a minute.");
+      queryClient.setQueryData(["blog-post", post.id], post);
+      void queryClient.invalidateQueries({ queryKey: ["blog-posts"] });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to start the blog post"));
+    },
   });
 };
 
