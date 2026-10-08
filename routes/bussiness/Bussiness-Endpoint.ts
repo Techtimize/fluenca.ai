@@ -16,6 +16,7 @@ export const BUSSINESSENDPOINT = {
     ANALYZE_COMPANY: '/analyzeCompany/analyzeCompany',
     ANALYZE_COMPANY_RESULTS:(company_id: string) => `/analyzeCompany/results/${company_id}`,
     ANALYZE_COMPANY_DASHBOARD:(company_id: string) => `/analyzeCompany/dashboard/${company_id}`,
+    ANALYZE_COMPANY_DASHBOARD_DOCUMENTATION:(company_id: string) => `/analyzeCompany/dashboard/${company_id}/documentation`,
     GROWTH: '/social-growth',
 
     ANALYSIS:{

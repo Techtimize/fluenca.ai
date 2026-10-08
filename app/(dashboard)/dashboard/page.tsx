@@ -8,6 +8,7 @@ import ChatPanel from "@/components/dashboard/chat/chatPanel";
 import CompanyCard from "@/components/dashboard/cards/companyCard";
 import { DashboardSkeleton } from "@/components/shared/skeletons";
 import DocumentationCard from "@/components/dashboard/documentationCard";
+import DocumentationSheet from "@/components/dashboard/documentation/documentationSheet";
 import TopBar from "@/components/dashboard/topBar";
 import { mapDashboard } from "@/lib/dashboard/map-dashboard";
 import { useChatbot } from "@/lib/chat/use-chatbot";
@@ -17,7 +18,7 @@ import {
   InstagramConnectMutation,
 } from "@/routes/bussiness/Bussiness-Mutation";
 import useAuthStore from "@/store/AuthsStore";
-import type { Device } from "@/types/dashboard";
+import type { Device, DocItem } from "@/types/dashboard";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { useRouter } from "next/navigation";
 
@@ -78,6 +79,7 @@ export default function DashboardPage() {
   const sourceLabel = sources.find((s) => s.id === source)?.label ?? source;
   const [device, setDevice] = useState<Device>("mobile");
   const [chatOpen, setChatOpen] = useState(false);
+  const [openDoc, setOpenDoc] = useState<DocItem | null>(null);
   const {
     messages,
     send,
@@ -141,6 +143,7 @@ export default function DashboardPage() {
                 <DocumentationCard
                   items={mapped.docs}
                   goalLabel={t("setYourGoal")}
+                  onSelect={setOpenDoc}
                 />
               ) : null}
             </div>
@@ -183,6 +186,12 @@ export default function DashboardPage() {
           />
         ) : null}
       </div>
+
+      <DocumentationSheet
+        companyId={companyId}
+        item={openDoc}
+        onClose={() => setOpenDoc(null)}
+      />
 
       {!chatOpen ? (
         <ChatInput

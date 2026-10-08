@@ -3,6 +3,7 @@ import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi
 import {
     AnalyzeCompanyResultsApi,
   AnalyzeCompanyDashboardApi,
+  AnalyzeCompanyDashboardDocumentationApi,
   GoogleTrendExploreApi,
   GoogleTrendFiltersApi,
   GoogleTrendNowApi,
@@ -89,7 +90,18 @@ export const AnalyzeCompanyDashboardQuery = (company_id: string) => {
   });
 };
 
-export const CompetitorAnalysisCompetitorQuery = (company_id: string) => {
+// Fetched only once the documentation sheet is opened.
+export const AnalyzeCompanyDashboardDocumentationQuery = (company_id: string, enabled = true) => {
+  return useQuery({
+    queryKey: ["analyze-company-dashboard-documentation", company_id],
+    queryFn: () => AnalyzeCompanyDashboardDocumentationApi(company_id),
+    enabled: enabled && Boolean(company_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const CompetitorAnalysisCompetitorQuery =(company_id: string) => {
   return useQuery({
     queryKey: ["competitor-analysis-competitor", company_id],
     queryFn: () => CompetitorAnalysisCompetitorApi(company_id),
