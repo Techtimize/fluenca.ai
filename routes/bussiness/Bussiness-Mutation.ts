@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentRecommendationApi, DeleteImageApi, FacebookConnectApi, ImageGenerationApi, InstagramLoginApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, SocialAccountDisconnectApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentRecommendationApi, DeleteImageApi, FacebookConnectApi, ImageGenerationApi, InstagramLoginApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
@@ -363,7 +363,6 @@ function getAuthorizeUrl(data: { authorize_url?: string } | null | undefined) {
   return url;
 }
 
-/** Starts Instagram OAuth: fetches authorize_url then redirects the browser. */
 export function InstagramConnectMutation() {
   return useMutation({
     mutationFn: async () => {
@@ -380,7 +379,6 @@ export function InstagramConnectMutation() {
   });
 }
 
-/** Starts Facebook OAuth: GET /integrations/facebook/connect → redirect to authorize_url. */
 export function FacebookConnectMutation() {
   return useMutation({
     mutationFn: async () => {
@@ -397,6 +395,22 @@ export function FacebookConnectMutation() {
   });
 }
 
+export function LinkedInConnectMutation() {
+  return useMutation({
+    mutationFn: async () => {
+      const response = await SocialAccountConnectApi("linkedin");
+      return getAuthorizeUrl(response);
+    },
+    onSuccess: (authorizeUrl) => {
+      toast.message("Redirecting to LinkedIn…");
+      window.location.assign(authorizeUrl);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to start LinkedIn connection"));
+    },
+  });
+}
+
 export function SocialAccountDisconnectMutation() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -405,6 +419,7 @@ export function SocialAccountDisconnectMutation() {
       const labels: Record<string, string> = {
         instagram: "Instagram disconnected",
         facebook: "Facebook disconnected",
+        linkedin: "LinkedIn disconnected",
       };
       toast.success(labels[platform] || `${platform} disconnected`);
       void queryClient.invalidateQueries({ queryKey: ["social-accounts"] });
