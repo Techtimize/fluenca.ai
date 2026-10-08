@@ -36,6 +36,10 @@ import type {
 import { IntelligenceJobResponse, IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 import { BuisnessNicheTrendResponse, NicheTrendsRequest } from "@/types/bussiness/neche_trends";
 import type { PlannerResultsResponse, PlannerVersionsResponse } from "@/types/bussiness/planner-type";
+import type {
+  InstagramAuthorizeResponse,
+  SocialAccountsResponse,
+} from "@/types/bussiness/social-accounts-type";
 
 function toQueryParams(params?: GoogleTrendQueryParams) {
   if (!params) return undefined;
@@ -360,3 +364,43 @@ export const BlogPostDetailsApi = async (blog_post_id: string) => {
     return response.data;
 }
 
+export const InstagramLoginApi = async (): Promise<InstagramAuthorizeResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.CONNECTORS.INSTAGRAM_LOGIN);
+    return response.data;
+}
+
+export const SocialAccountsApi = async (): Promise<SocialAccountsResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.CONNECTORS.SOCIAL_ACCOUNTS);
+    return response.data;
+}
+
+export const SocialAccountConnectApi = async (
+  platform: string,
+): Promise<InstagramAuthorizeResponse> => {
+    const response = await api.get(
+      BUSSINESSENDPOINT.CONNECTORS.SOCIAL_ACCOUNTS_CONNECT(platform),
+    );
+    return response.data;
+}
+
+export const SocialAccountDisconnectApi = async (platform: string) => {
+    const response = await api.post(
+      BUSSINESSENDPOINT.CONNECTORS.SOCIAL_ACCOUNTS_DISCONNECT(platform),
+    );
+    return response.data;
+}
+
+export const InstagramLoginPostApi = async () => {
+  const response = await api.post(BUSSINESSENDPOINT.CONNECTORS.INSTAGRAM_LOGIN);
+  return response.data;
+}
+
+export const SocialAccountsConnectApi = async (platform: string) => {
+  const response = await api.post(BUSSINESSENDPOINT.CONNECTORS.SOCIAL_ACCOUNTS_CONNECT(platform));
+  return response.data;
+}
+
+export const SocialAccountsDisconnectApi = async (platform: string) => {
+  const response = await api.post(BUSSINESSENDPOINT.CONNECTORS.SOCIAL_ACCOUNTS_DISCONNECT(platform));
+  return response.data;
+}

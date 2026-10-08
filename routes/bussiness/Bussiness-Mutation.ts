@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentRecommendationApi, DeleteImageApi, ImageGenerationApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentRecommendationApi, DeleteImageApi, ImageGenerationApi, InstagramLoginApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, SocialAccountDisconnectApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
@@ -328,7 +328,6 @@ export const IntelligenceRunMutation = () => {
   return useMutation({
     mutationFn: (data: IntelligenceRunRequest) => IntelligenceRunApi(data),
     onSuccess: (response: IntelligenceRunResponse) => {
-      // The backend message is meant for developers ("Poll GET /api/v1/..."), so show our own copy.
       if (response?.success === false) {
         toast.error("We couldn't start building your workspace. Please try again.");
         return;
@@ -355,3 +354,48 @@ export const BlogPostMutation = () => {
       },
   });
 };
+
+function getAuthorizeUrl(data: { authorize_url?: string } | null | undefined) {
+  const url = data?.authorize_url?.trim();
+  if (!url) {
+    throw new Error("No Instagram authorize URL returned");
+  }
+  return url;
+}
+
+/** Starts Instagram OAuth: fetches authorize_url then redirects the browser. */
+export function InstagramConnectMutation() {
+  return useMutation({
+    mutationFn: async () => {
+      const response = await InstagramLoginApi();
+      return getAuthorizeUrl(response);
+    },
+    onSuccess: (authorizeUrl) => {
+      toast.message("Redirecting to Instagram…");
+      window.location.assign(authorizeUrl);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to start Instagram connection"));
+    },
+  });
+}
+
+export function SocialAccountDisconnectMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (platform: string) => SocialAccountDisconnectApi(platform),
+    onSuccess: (_response, platform) => {
+      toast.success(
+        platform === "instagram"
+          ? "Instagram disconnected"
+          : `${platform} disconnected`,
+      );
+      void queryClient.invalidateQueries({ queryKey: ["social-accounts"] });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to disconnect account"));
+    },
+  });
+}
+
+

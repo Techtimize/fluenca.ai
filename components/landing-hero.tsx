@@ -115,14 +115,14 @@ export function LandingHero({
           </p>
 
           {/* H1: 449 x 159, Google Sans Flex, 500, 44px / 53px, letter spacing 0 */}
-          <h1 className="w-[449px] max-w-full font-display text-[44px] leading-[53px] font-medium tracking-normal text-ink">
+          <h1 className="w-[449px] max-w-full font-display text-[32px] leading-[40px] font-medium tracking-normal text-ink md:text-[44px] md:leading-[53px]">
             {titleLead}
             <span className="text-brand">{titleHighlight}</span>
             {titleTail}
           </h1>
 
           {/* Description: 449 x 78, 400, 16px / 26px, #1C1C1E */}
-          <p className="mt-4 w-[449px] max-w-full font-body text-[16px] leading-[26px] font-normal tracking-normal text-[#1C1C1E]">
+          <p className="mt-4 w-[449px] max-w-full font-body text-[15px] leading-[24px] font-normal tracking-normal text-[#1C1C1E] md:text-[16px] md:leading-[26px]">
             {description}
           </p>
 
