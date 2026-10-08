@@ -36,8 +36,13 @@ import type {
   LatestGeneratedImageResponse,
 } from "@/types/bussiness/imagegeneration-type";
 import { IntelligenceJobResponse, IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
-import { BuisnessNicheTrendResponse, NicheTrendsRequest } from "@/types/bussiness/neche_trends";
 import type { PlannerResultsResponse, PlannerVersionsResponse } from "@/types/bussiness/planner-type";
+import type {
+    BlogPost,
+    BlogPostListResponse,
+    BriefListResponse,
+    KeywordsStatusResponse,
+} from "@/types/bussiness/blog-type";
 import type {
   InstagramAuthorizeResponse,
   SocialAccountsResponse,
@@ -337,10 +342,6 @@ export const IntelligenceJobApi = async (
     return response.data;
 }
 
-// export const NicheTrendApi = async (data: NicheTrendsRequest) => {
-//     const response = await api.post<BuisnessNicheTrendResponse>(BUSSINESSENDPOINT.NICHE_TREND, data);
-//     return response.data;
-// }
 export const PlannerResultsApi = async (
   company_id: string,
 ): Promise<PlannerResultsResponse> => {
@@ -368,12 +369,32 @@ export const CompetitorAnalyticDashboardApi = async (company_id: string) => {
     return response.data;
 }
 
-export const BlogPostApi = async (brief_id: string) => {
-    const response = await api.post(BUSSINESSENDPOINT.BLOG_POST, { params: { brief_id: brief_id } });
+export const KeywordsApi = async (): Promise<KeywordsStatusResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.KEYWORDS);
     return response.data;
 }
 
-export const BlogPostDetailsApi = async (blog_post_id: string) => {
+export const RetryKeywordsApi = async (): Promise<KeywordsStatusResponse> => {
+    const response = await api.post(BUSSINESSENDPOINT.KEYWORDS_RETRY);
+    return response.data;
+}
+
+export const BriefsApi = async (): Promise<BriefListResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.BRIEFS);
+    return response.data;
+}
+
+export const BlogPostApi = async (brief_id: string): Promise<BlogPost> => {
+    const response = await api.post(BUSSINESSENDPOINT.BLOG_POST, { brief_id });
+    return response.data;
+}
+
+export const BlogPostsApi = async (): Promise<BlogPostListResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.BLOG_POST);
+    return response.data;
+}
+
+export const BlogPostDetailsApi = async (blog_post_id: string): Promise<BlogPost> => {
     const response = await api.get(BUSSINESSENDPOINT.BLOG_POST_DETAILS(blog_post_id));
     return response.data;
 }
