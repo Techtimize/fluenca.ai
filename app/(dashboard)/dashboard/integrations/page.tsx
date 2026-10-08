@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, type ComponentType } from "react";
+import { Suspense, useEffect, useRef, type ComponentType } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Clock3, Loader2, Plug, Unplug } from "lucide-react";
@@ -14,6 +14,7 @@ import { getApiErrorMessage } from "@/errors/error-utils";
 import {
   FacebookConnectMutation,
   InstagramConnectMutation,
+  LinkedInConnectMutation,
   SocialAccountDisconnectMutation,
 } from "@/routes/bussiness/Bussiness-Mutation";
 import { SocialAccountsQuery } from "@/routes/bussiness/Bussiness-Query";
@@ -57,9 +58,9 @@ const PLATFORMS: PlatformCardConfig[] = [
     id: "linkedin",
     title: "LinkedIn",
     description:
-      "Connect your company page to sync hiring signals, posts, and audience insights.",
+      "Sign in with LinkedIn to link your profile so Fluenca can share posts for you.",
     iconSrc: "/assets/linkedin.png",
-    ready: false,
+    ready: true,
   },
   {
     id: "x",
@@ -82,7 +83,11 @@ function decodeConnectError(value: string | null) {
 
 function accountHandle(account?: SocialAccount | null) {
   const value =
-    account?.username || account?.account_name || account?.display_name || null;
+    account?.username ||
+    account?.external_account_name ||
+    account?.account_name ||
+    account?.display_name ||
+    null;
   if (!value) return null;
   return String(value).replace(/^@/, "");
 }
@@ -132,6 +137,8 @@ function PlatformCard({
 }) {
   const connected = platform.ready && isSocialAccountConnected(account);
   const handle = accountHandle(account);
+  const handlePrefix =
+    platform.id === "instagram" || platform.id === "x" ? "@" : "";
 
   return (
     <Card className="p-5 sm:p-6">
@@ -170,7 +177,8 @@ function PlatformCard({
             </p>
             {connected && handle ? (
               <p className="mt-2 text-[13px] font-medium text-neutral-800">
-                @{handle}
+                {handlePrefix}
+                {handle}
               </p>
             ) : null}
           </div>
@@ -239,15 +247,19 @@ function IntegrationsPageContent() {
     InstagramConnectMutation();
   const { mutate: connectFacebook, isPending: isConnectingFacebook } =
     FacebookConnectMutation();
+  const { mutate: connectLinkedIn, isPending: isConnectingLinkedIn } =
+    LinkedInConnectMutation();
   const { mutate: disconnectAccount, isPending: isDisconnecting } =
     SocialAccountDisconnectMutation();
 
-  const accounts = useMemo(
-    () => normalizeSocialAccounts(accountsData),
-    [accountsData],
-  );
-  const instagramAccount = findSocialAccount(accounts, "instagram");
-  const facebookAccount = findSocialAccount(accounts, "facebook");
+  const accounts = normalizeSocialAccounts(accountsData);
+  const connectors: Partial<
+    Record<PlatformId, { connect: () => void; isPending: boolean }>
+  > = {
+    instagram: { connect: connectInstagram, isPending: isConnectingInstagram },
+    facebook: { connect: connectFacebook, isPending: isConnectingFacebook },
+    linkedin: { connect: connectLinkedIn, isPending: isConnectingLinkedIn },
+  };
 
   useEffect(() => {
     if (handledReturn.current) return;
@@ -260,14 +272,11 @@ function IntegrationsPageContent() {
 
     if (connectError) {
       toast.error(connectError);
-    } else if (connected === "instagram") {
-      toast.success("Instagram connected");
-      void refetch();
-    } else if (connected === "facebook") {
-      toast.success("Facebook connected");
-      void refetch();
     } else if (connected) {
-      toast.success(`${connected} connected`);
+      const title =
+        PLATFORMS.find((platform) => platform.id === connected)?.title ??
+        connected;
+      toast.success(`${title} connected`);
       void refetch();
     }
 
@@ -292,7 +301,7 @@ function IntegrationsPageContent() {
               Connect your social accounts
             </h1>
             <p className="mt-2 max-w-2xl text-[14px] leading-6 text-neutral-600">
-              Link Instagram and Facebook now. LinkedIn and X will open for
+              Link Instagram, Facebook, and LinkedIn now. X will open for
               connection soon.
             </p>
           </div>
@@ -315,46 +324,27 @@ function IntegrationsPageContent() {
 
       <div className="space-y-3">
         {PLATFORMS.map((platform) => {
-          const account =
-            platform.id === "instagram"
-              ? instagramAccount
-              : platform.id === "facebook"
-                ? facebookAccount
-                : null;
-          const isConnecting =
-            platform.id === "instagram"
-              ? isConnectingInstagram
-              : platform.id === "facebook"
-                ? isConnectingFacebook
-                : false;
+          const connector = connectors[platform.id];
 
           return (
             <PlatformCard
               key={platform.id}
               platform={platform}
-              account={account}
-              isLoading={platform.ready ? isLoading : false}
-              isConnecting={isConnecting}
-              isDisconnecting={
-                platform.id === "instagram" || platform.id === "facebook"
-                  ? isDisconnecting
-                  : false
+              account={
+                connector ? findSocialAccount(accounts, platform.id) : null
               }
+              isLoading={platform.ready ? isLoading : false}
+              isConnecting={connector?.isPending ?? false}
+              isDisconnecting={connector ? isDisconnecting : false}
               onConnect={() => {
-                if (platform.id === "instagram") {
-                  connectInstagram();
-                  return;
-                }
-                if (platform.id === "facebook") {
-                  connectFacebook();
+                if (connector) {
+                  connector.connect();
                   return;
                 }
                 toast.message(`${platform.title} connection is coming soon`);
               }}
               onDisconnect={
-                platform.id === "instagram" || platform.id === "facebook"
-                  ? () => disconnectAccount(platform.id)
-                  : undefined
+                connector ? () => disconnectAccount(platform.id) : undefined
               }
             />
           );
