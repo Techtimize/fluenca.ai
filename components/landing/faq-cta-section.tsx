@@ -2,12 +2,6 @@
 
 import Image from "next/image";
 import { useState, type FormEvent } from "react";
-import { Google_Sans_Flex } from "next/font/google";
-
-const googleSansFlex = Google_Sans_Flex({
-  subsets: ["latin"],
-  display: "swap",
-});
 
 // Enough cells to fill the grid at any width; extra cells are clipped by overflow-hidden
 const X_CELLS = 30 * 14;
@@ -50,7 +44,7 @@ export default function FaqCtaSection({
 
   return (
     <section
-      className={`${googleSansFlex.className} relative overflow-hidden bg-[radial-gradient(60%_50%_at_0%_0%,#E3E8FF_0%,#F6F7FF_55%,#FFFFFF_100%)]`}
+      className="relative overflow-hidden bg-[radial-gradient(60%_50%_at_0%_0%,#E3E8FF_0%,#F6F7FF_55%,#FFFFFF_100%)] font-[family-name:var(--font-google-sans-flex)]"
     >
       {/* Frame 240: 1440 wide, card 1280 -> 80px side gaps */}
       <div className="relative mx-auto max-w-[1440px] px-4 py-10 sm:px-6 md:px-20 md:py-16">

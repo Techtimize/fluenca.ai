@@ -1,11 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Google_Sans_Flex } from "next/font/google";
-
-const googleSansFlex = Google_Sans_Flex({
-  subsets: ["latin"],
-  display: "swap",
-});
 
 type FooterLink = { label: string; href: string };
 type FooterColumn = { title: string; links: FooterLink[] };
@@ -62,7 +56,7 @@ export default function FooterSection({
   return (
     // Plain white background (continues the FAQ section's white block).
     <footer
-      className={`${googleSansFlex.className} relative overflow-hidden bg-white`}
+      className="relative overflow-hidden bg-white font-[family-name:var(--font-google-sans-flex)]"
     >
       {/* Figma frame is 1440 wide with 80px side gaps */}
       <div className="mx-auto max-w-[1440px] px-6 md:px-20">

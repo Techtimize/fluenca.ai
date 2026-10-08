@@ -1,16 +1,27 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import { OnboardingFormSchema, OnboardingFormValidator } from '@/validator/Auth/onboarding-validator';
-import { Loader2 } from 'lucide-react';
+import { Check, ChevronsUpDown, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 import { OnboardingMutation } from '@/routes/bussiness/Bussiness-Mutation';
 import { Button } from '@/components/ui/button';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
 import OnboardingSide from '@/components/onboardingside';
 import {
@@ -37,6 +48,13 @@ const selectTriggerClass =
 
 export default function Onboarding() {
   const t = useTranslations('onboarding');
+  const industrySearchPlaceholder = t.has('industrySearchPlaceholder')
+    ? t('industrySearchPlaceholder')
+    : 'Search industry...';
+  const industryNotFound = t.has('industryNotFound')
+    ? t('industryNotFound')
+    : 'No industry found.';
+  const [industryOpen, setIndustryOpen] = useState(false);
   const { mutate: onboardingMutation, isPending } = OnboardingMutation();
   const form = useForm<OnboardingFormValidator>({
     resolver: zodResolver(OnboardingFormSchema),
@@ -122,28 +140,60 @@ export default function Onboarding() {
 
               {/* sm: stacked · md+: 2 columns */}
               <div className="grid grid-cols-1 gap-3 sm:gap-3.5 md:grid-cols-2 md:gap-3 lg:gap-2.5">
+                {/* Industry — searchable dropdown */}
                 <FormField
                   control={form.control}
                   name="industry"
                   render={({ field }) => (
                     <FormItem className="min-w-0 gap-1.5 lg:gap-1">
                       <FormLabel className={labelClass}>{t('industry')}</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Popover open={industryOpen} onOpenChange={setIndustryOpen}>
                         <FormControl>
-                          <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue placeholder={t('industryPlaceholder')} />
-                          </SelectTrigger>
+                          <PopoverTrigger
+                            className={cn(
+                              fieldControlClass,
+                              'flex cursor-pointer items-center justify-between border bg-transparent px-3 text-start font-normal outline-none',
+                              !field.value && 'text-slate-500'
+                            )}
+                          >
+                            <span className="truncate">
+                              {field.value || t('industryPlaceholder')}
+                            </span>
+                            <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+                          </PopoverTrigger>
                         </FormControl>
-                        <SelectContent>
-                          <SelectGroup>
-                            {INDUSTRY_LIST.map((item) => (
-                              <SelectItem key={item.id} value={item.name}>
-                                {item.name}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                        <PopoverContent
+                          align="start"
+                          className="w-[var(--anchor-width)] min-w-56 p-0"
+                        >
+                          <Command>
+                            <CommandInput placeholder={industrySearchPlaceholder} />
+                            <CommandList>
+                              <CommandEmpty>{industryNotFound}</CommandEmpty>
+                              <CommandGroup>
+                                {INDUSTRY_LIST.map((item) => (
+                                  <CommandItem
+                                    key={item.id}
+                                    value={item.name}
+                                    onSelect={() => {
+                                      field.onChange(item.name);
+                                      setIndustryOpen(false);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        'me-2 h-4 w-4',
+                                        field.value === item.name ? 'opacity-100' : 'opacity-0'
+                                      )}
+                                    />
+                                    {item.name}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage className={messageClass} />
                     </FormItem>
                   )}
@@ -158,7 +208,9 @@ export default function Onboarding() {
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue placeholder={t('languagePlaceholder')} />
+                            <SelectValue placeholder={t('languagePlaceholder')}>
+                              {LANGUAGE_LIST.find((l) => l.code === field.value)?.name}
+                            </SelectValue>
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -188,7 +240,9 @@ export default function Onboarding() {
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue placeholder={t('countryPlaceholder')} />
+                            <SelectValue placeholder={t('countryPlaceholder')}>
+                              {COUNTRY_LIST.find((c) => c.code === field.value)?.name}
+                            </SelectValue>
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -214,11 +268,19 @@ export default function Onboarding() {
                       <FormLabel className={labelClass}>{t('website')}</FormLabel>
                       <FormControl>
                         <Input
-                          type="url"
+                          type="text"
                           inputMode="url"
                           autoComplete="url"
-                          placeholder={t('websitePlaceholder')}
+                          placeholder="www.example.com"
                           {...field}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                .trim()
+                                .replace(/^https?:\/\//i, '')
+                                .replace(/\/+$/, '')
+                            )
+                          }
                           className={fieldControlClass}
                         />
                       </FormControl>
@@ -228,7 +290,7 @@ export default function Onboarding() {
                 />
               </div>
 
-              {/* sm: stacked · md+: Instagram + LinkedIn */}
+              {/* sm: stacked · md+: Instagram + LinkedIn (both optional) */}
               <div className="grid grid-cols-1 gap-3 sm:gap-3.5 md:grid-cols-2 md:gap-3 lg:gap-2.5">
                 <FormField
                   control={form.control}
@@ -240,7 +302,7 @@ export default function Onboarding() {
                         <Input
                           type="text"
                           autoComplete="username"
-                          placeholder={t('instagramPlaceholder')}
+                          placeholder="(optional)"
                           {...field}
                           className={fieldControlClass}
                         />
@@ -260,7 +322,7 @@ export default function Onboarding() {
                         <Input
                           type="url"
                           inputMode="url"
-                          placeholder={t('linkedinPlaceholder')}
+                          placeholder="(optional)"
                           {...field}
                           className={fieldControlClass}
                         />
