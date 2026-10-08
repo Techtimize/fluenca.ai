@@ -29,6 +29,7 @@ const DEFAULT_NAV: NavItem[] = [
   },
   { id: "script", label: "Script", icon: "file", href: PAGE_ROUTES.SCRIPT },
   { id: "content", label: "Content", icon: "layers", href: PAGE_ROUTES.CONTENT },
+  { id: "blogs", label: "Blogs", icon: "clipboard", href: PAGE_ROUTES.BLOGS },
   {
     id: "competitors",
     label: "Competitor analysis",

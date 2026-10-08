@@ -82,6 +82,9 @@ export const BUSSINESSENDPOINT = {
     conversation: (conversationId: string) => `/chatbot/conversations/${conversationId}`,
     conversationMessages: (conversationId: string) => `/chatbot/conversations/${conversationId}/messages`,
 
+    KEYWORDS: '/keywords',
+    KEYWORDS_RETRY: '/keywords/retry',
+    BRIEFS: '/briefs',
     BLOG_POST: '/blog-posts',
     BLOG_POST_DETAILS: (blog_post_id: string) => `/blog-posts/${blog_post_id}`,
 
