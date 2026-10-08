@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Loader2, PenLine, RotateCcw } from "lucide-react";
@@ -153,6 +154,16 @@ export default function BlogsPage() {
           <ul className="mt-3 divide-y divide-[#EEF0F8]">
             {allPosts.map((post) => (
               <li key={post.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                {post.hero_image_url ? (
+                  <Image
+                    src={post.hero_image_url}
+                    alt={post.hero_image_alt || post.title}
+                    width={112}
+                    height={63}
+                    unoptimized
+                    className="aspect-video w-28 shrink-0 rounded-lg object-cover"
+                  />
+                ) : null}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[14px] font-medium text-neutral-900">
                     {post.title || briefTitles.get(post.brief_id) || "Untitled post"}
