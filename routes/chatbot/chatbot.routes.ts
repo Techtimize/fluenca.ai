@@ -78,6 +78,7 @@ type SendMessageOptions = {
   screenContext?: string;
   imageUrl?: string;
   mode?: ChatMode;
+  pages?: Record<string, string>;
 };
 
 export const SendMessageApi = async (
@@ -100,6 +101,7 @@ export const SendMessageApi = async (
       screen_context: options.screenContext || undefined,
       image_url: options.imageUrl || undefined,
       mode: options.mode,
+      pages: options.pages,
     }),
   });
 
