@@ -60,10 +60,10 @@ export default function FooterSection({
     >
       {/* Figma frame is 1440 wide with 80px side gaps */}
       <div className="mx-auto max-w-[1440px] px-6 md:px-20">
-        {/* Top: logo + link columns */}
-        <div className="grid grid-cols-2 border-b border-slate-200/70 md:grid-cols-[255px_1fr_1fr_1fr]">
+          {/* Top: logo + link columns */}
+        <div className="grid grid-cols-1 border-b border-slate-200/70 sm:grid-cols-2 md:grid-cols-[255px_1fr_1fr_1fr]">
           {/* Logo: 116.67 x 125 */}
-          <div className="col-span-2 pb-6 pt-10 md:col-span-1 md:pb-16 md:pt-12">
+          <div className="col-span-1 pb-6 pt-10 sm:col-span-2 md:col-span-1 md:pb-16 md:pt-12">
             <Link href="/" aria-label="Fluenca home" className="inline-block md:ml-16">
               <Image
                 src={logoSrc}

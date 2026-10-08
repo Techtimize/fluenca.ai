@@ -9,6 +9,18 @@ export type Testimonial = {
   avatar?: string; // image url (optional). Falls back to initials
 };
 
+/* ------------------------------ MARQUEE SETTINGS ------------------------------
+   MIN_CARDS_PER_SET: every row repeats its cards until one "set" has at least this
+   many cards. One card is at most ~440px wide (420px + 20px margin), so 14 cards
+   is ~6,160px, which is wider than any normal, ultrawide or 4K viewport. That
+   guarantees no blank space, no matter how few testimonials you pass in.
+
+   SECONDS_PER_CARD: scroll speed. Duration scales with the set length, so the
+   speed stays the same no matter how many cards or repeats there are.
+   Higher number = slower.                                                          */
+const MIN_CARDS_PER_SET = 14;
+const SECONDS_PER_CARD = 12;
+
 /* ----------------------- TEMPORARY DATA (replace with API) -----------------------
    Later: fetch from your API in app/page.tsx and pass it like
    <TestimonialsSection items={data} />                                        */
@@ -61,6 +73,30 @@ const FALLBACK_ITEMS: Testimonial[] = [
     name: "James Foster",
     role: "COO, Brightline",
   },
+  {
+    quote:
+      "Planning our monthly content used to take days. With Fluenca we have a full calendar of on-brand ideas in an afternoon.",
+    name: "Hannah Brooks",
+    role: "Head of Marketing, Craftly",
+  },
+  {
+    quote:
+      "The competitor insights alone paid for the subscription. We spotted gaps in our market that we had been missing for years.",
+    name: "Liam Anderson",
+    role: "CEO, Stackwise",
+  },
+  {
+    quote:
+      "Our whole team now works from the same strategy. Briefs are faster, campaigns are sharper, and approvals take half the time.",
+    name: "Priya Sharma",
+    role: "Marketing Director, Clearpath",
+  },
+  {
+    quote:
+      "As a solo founder I could never keep up with content. Fluenca gives me a clear plan every week and I actually stick to it.",
+    name: "Noah Williams",
+    role: "Founder, Keystone Studio",
+  },
 ];
 
 /* ------------------------------ PARTS ------------------------------ */
@@ -108,27 +144,45 @@ function TestimonialCard({ item }: { item: Testimonial }) {
   );
 }
 
-/** One row of cards. The list is rendered twice so the loop never shows a gap. */
+/**
+ * One row of cards.
+ * 1. The items are repeated until one "set" is wider than any screen.
+ * 2. That set is rendered twice, and the track slides exactly one set (-50%),
+ *    then restarts. Because both halves are identical, the restart is invisible.
+ */
 function MarqueeRow({
   items,
   direction,
-  duration,
 }: {
   items: Testimonial[];
   direction: "left-to-right" | "right-to-left";
-  duration: number; // seconds for one full loop
 }) {
   const animation =
     direction === "left-to-right" ? "fl-marquee-right" : "fl-marquee-left";
 
+  // Repeat the items enough times to fill any screen width.
+  const repeats = Math.max(1, Math.ceil(MIN_CARDS_PER_SET / items.length));
+  const set = Array.from({ length: repeats }, () => items).flat();
+
+  // Keep the same visual speed regardless of how many cards are in the set.
+  const duration = set.length * SECONDS_PER_CARD;
+
   return (
     <div className="fl-marquee group flex w-full overflow-hidden">
       <div
-        className="fl-track flex w-max"
+        className="fl-track flex w-max will-change-transform"
         style={{ animation: `${animation} ${duration}s linear infinite` }}
       >
-        {[...items, ...items].map((item, i) => (
-          <TestimonialCard key={`${item.name}-${i}`} item={item} />
+        {[0, 1].map((copy) => (
+          <div
+            key={copy}
+            className="flex shrink-0"
+            aria-hidden={copy === 1 ? true : undefined}
+          >
+            {set.map((item, i) => (
+              <TestimonialCard key={`${copy}-${item.name}-${i}`} item={item} />
+            ))}
+          </div>
         ))}
       </div>
     </div>
@@ -187,8 +241,8 @@ export default function TestimonialsSection({
 
       {/* Rows */}
       <div className="mt-8 flex flex-col gap-5 md:mt-12">
-        <MarqueeRow items={topRow} direction="left-to-right" duration={50} />
-        <MarqueeRow items={bottomRow} direction="right-to-left" duration={50} />
+        <MarqueeRow items={topRow} direction="left-to-right" />
+        <MarqueeRow items={bottomRow} direction="right-to-left" />
       </div>
     </section>
   );

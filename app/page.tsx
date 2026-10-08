@@ -8,7 +8,6 @@ import FaqSection from "@/components/landing/faq-section";
 import TestimonialsSection from "@/components/landing/testimonials-section";
 import CaseStudiesSection from "@/components/landing/case-studies-section";
 import FaqCtaSection from "@/components/landing/faq-cta-section";
-<FaqCtaSection arcsSrc="/assets/faq-arcs.svg" />
 import FooterSection from "@/components/landing/footer-section";
 
 const navigationItems = [
@@ -21,7 +20,7 @@ const navigationItems = [
 export default function Home() {
   return (
     // <ComingSoonPage />
-    <div className="flex min-h-screen flex-col bg-[radial-gradient(ellipse_at_15%_100%,rgba(219,224,255,0.7)_0%,rgba(255,255,255,0)_42%)]">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-[radial-gradient(ellipse_at_15%_100%,rgba(219,224,255,0.7)_0%,rgba(255,255,255,0)_42%)]">
       <SiteHeader
         navigationItems={navigationItems}
         signupHref="/signup"
