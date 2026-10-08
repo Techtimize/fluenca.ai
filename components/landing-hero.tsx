@@ -63,7 +63,7 @@ export function LandingHero({
           {/* Logo lockup: 138 x 40 */}
           <Link href="/" className="flex h-10 w-[138px] items-center gap-2">
             <Image
-              src="/assets/logo.svg"
+              src="/assets/Logo.svg"
               alt="fluenca.ai logo"
               width={28}
               height={28}

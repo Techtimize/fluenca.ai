@@ -172,8 +172,11 @@ function FieldCard({ field }: { field: CompanyField }) {
         <h3 className="text-[13px] font-semibold text-neutral-900">
           {field.label}
           {!field.filled ? (
-            <span className="ml-1 text-[#E11D48]" aria-label="Required or unanswered">
+            <span className="ml-1 text-[#E11D48]" aria-label={field.required ? "Required" : "Unanswered"}>
               *
+              {field.required ? (
+                <span className="ml-1 text-[11px] font-medium">Required</span>
+                ) : null}
             </span>
           ) : null}
         </h3>

@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi } from "./bussiness.routes";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   AnalyzeCompanyDashboardApi,
@@ -325,5 +325,15 @@ export const CompetitorAnalyticDashboardQuery = (company_id: string) => {
     enabled: Boolean(company_id),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+  });
+};
+
+export const SocialAccountsQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: ["social-accounts"],
+    queryFn: () => SocialAccountsApi(),
+    enabled,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 };
