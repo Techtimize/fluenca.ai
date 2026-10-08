@@ -50,7 +50,7 @@ export function LandingHero({
     waitlistMutation(email);
   }
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden">
+    <div className="relative flex min-h-[calc(100vh-4rem)] flex-col overflow-hidden md:min-h-screen">
       {/* Soft light-purple glow at the bottom of the hero */}
       <div
         aria-hidden="true"
@@ -59,8 +59,8 @@ export function LandingHero({
 
       {/* Header: fixed so it never disappears on scroll */}
       <header className="fixed inset-x-0 top-0 z-50 w-full bg-white/80 backdrop-blur-md">
-        <div className="mx-auto grid h-16 w-full max-w-360 grid-cols-[1fr_auto_1fr] items-center px-6 md:px-8 lg:px-10">
-          {/* Logo lockup: 138 x 40 */}
+        <div className="mx-auto grid h-16 w-full max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-6 md:px-8 lg:px-10">
+          {/* Logo lockup */}
           <Link href="/" className="flex h-10 w-[138px] items-center gap-2">
             <Image
               src="/assets/Logo.svg"
@@ -74,7 +74,6 @@ export function LandingHero({
           </Link>
 
           <nav className="hidden items-center gap-1 rounded-full bg-brand-50 p-1 md:flex">
-            {/* Agents: 113 x 40, radius 100, padding 7/20, gap 6, white */}
             <button
               type="button"
               className="inline-flex h-10 w-[113px] items-center justify-center gap-1.5 rounded-[100px] bg-white px-5 py-[7px] font-body text-caption font-medium text-ink shadow-sm"
@@ -96,7 +95,7 @@ export function LandingHero({
           <div className="flex justify-end">
             <Link
               href="/signup"
-              className="inline-flex h-10 items-center justify-center rounded-full bg-brand px-6 font-body text-caption font-medium text-white shadow-[0_3px_0_#bfc1ff] transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="inline-flex h-10 items-center justify-center rounded-full bg-brand px-5 font-body text-caption font-medium text-white shadow-[0_3px_0_#bfc1ff] transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:px-6"
             >
               Sign up
             </Link>
@@ -104,38 +103,39 @@ export function LandingHero({
         </div>
       </header>
 
-      {/* pt-8 -> pt-24 so content clears the fixed header (64px + your original 32px) */}
-      {/* pb-24: extra bottom space so the rounded 'How it works' section (which overlaps up to 56px) never covers the animation */}
-      <section className="mx-auto grid w-full max-w-360 flex-1 items-center gap-8 px-6 pb-24 pt-24 md:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12 lg:px-10 lg:pb-24 lg:pt-24">
-        <div className="flex flex-col items-start">
-          {/* Eyebrow: hug x 42, radius 40, border 1px #E3E8FF, padding 7/20, gap 10, white 20% */}
-          <p className="mb-4 inline-flex h-[42px] items-center gap-[10px] rounded-[40px] border border-[#E3E8FF] bg-white/20 px-5 py-[7px] font-body text-caption text-brand">
-            <Target aria-hidden="true" className="size-4" />
+      {/* Spacing at the END is exactly as in your original (flex-1 + pb-12 / md:pb-16 / lg:pb-16).
+          Small + medium screens: top padding clears the 64px fixed header. */}
+      <section className="mx-auto grid w-full max-w-[1440px] flex-1 items-center gap-6 px-4 pb-12 pt-[84px] sm:gap-8 sm:px-6 sm:pt-[92px] md:px-8 md:pb-16 md:pt-[96px] lg:grid-cols-[0.9fr_1.1fr] lg:gap-12 lg:px-10 lg:pb-16 lg:pt-16">
+        {/* lg: nudged up a little so the left text lines up with the diagram */}
+        <div className="relative flex flex-col items-start lg:-top-8">
+          {/* Eyebrow */}
+          <p className="mb-3 inline-flex h-[38px] items-center gap-[10px] rounded-[40px] border border-[#E3E8FF] bg-white/20 px-4 py-[7px] font-body text-[13px] text-brand sm:mb-4 sm:h-[42px] sm:px-5 sm:text-caption">
+            <Target aria-hidden="true" className="size-4 shrink-0" />
             {eyebrow}
           </p>
 
-          {/* H1: 449 x 159, Google Sans Flex, 500, 44px / 53px, letter spacing 0 */}
-          <h1 className="w-[449px] max-w-full font-display text-[32px] leading-[40px] font-medium tracking-normal text-ink md:text-[44px] md:leading-[53px]">
+          {/* H1: grows with the screen (28 -> 32 -> 40 -> 44px) */}
+          <h1 className="w-full font-display text-[28px] font-medium leading-[36px] tracking-normal text-ink sm:text-[32px] sm:leading-[40px] md:max-w-[520px] md:text-[40px] md:leading-[48px] lg:max-w-[449px] lg:text-[44px] lg:leading-[53px]">
             {titleLead}
             <span className="text-brand">{titleHighlight}</span>
             {titleTail}
           </h1>
 
-          {/* Description: 449 x 78, 400, 16px / 26px, #1C1C1E */}
-          <p className="mt-4 w-[449px] max-w-full font-body text-[15px] leading-[24px] font-normal tracking-normal text-[#1C1C1E] md:text-[16px] md:leading-[26px]">
+          {/* Description */}
+          <p className="mt-3 w-full font-body text-[15px] font-normal leading-[24px] tracking-normal text-[#1C1C1E] sm:mt-4 md:max-w-[520px] md:text-[16px] md:leading-[26px] lg:max-w-[449px]">
             {description}
           </p>
 
-          {/* Buttons row: hug (306), height 48, gap 12 */}
-          <div className="mt-6 flex h-12 w-fit flex-wrap items-center gap-3">
+          {/* Buttons row */}
+          <div className="mt-5 flex w-fit flex-wrap items-center gap-3 sm:mt-6">
             {actions.map(({ label, href, variant }) => (
               <Link
                 key={label}
                 href={href}
-                className={`inline-flex h-12 items-center justify-center gap-[10px] rounded-[50px] px-7 py-[14px] font-body text-caption font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+                className={`inline-flex h-12 min-w-[144px] items-center justify-center gap-[10px] rounded-[50px] px-5 py-[14px] font-body text-caption font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:w-[144px] sm:px-7 ${
                   variant === "primary"
-                    ? "w-[144px] bg-linear-to-r from-brand to-[#7B5CF5] text-white shadow-[0_3px_0_#bfc1ff] hover:opacity-90"
-                    : "w-[150px] border border-transparent text-brand [background:linear-gradient(#fff,#fff)_padding-box,linear-gradient(to_right,#4F60FF,#7B5CF5)_border-box] hover:text-brand-700"
+                    ? "bg-linear-to-r from-brand to-[#7B5CF5] text-white shadow-[0_3px_0_#bfc1ff] hover:opacity-90"
+                    : "border border-transparent text-brand [background:linear-gradient(#fff,#fff)_padding-box,linear-gradient(to_right,#4F60FF,#7B5CF5)_border-box] hover:text-brand-700 sm:w-[150px]"
                 }`}
               >
                 {label}
@@ -170,8 +170,10 @@ export function LandingHero({
           </div>
         </div>
 
-        {/* Diagram side: Lottie animation, 612 x 612 */}
-        <div className="relative mx-auto aspect-square w-full max-w-[612px]">
+        {/* Diagram side: Lottie animation (square). The animation file has empty space around the circles,
+            so on large screens the box is moved UP (lg:-top-12 / xl:-top-16). `top` only moves it visually:
+            it does not change the height of the section, so the spacing at the end stays the same. */}
+        <div className="relative mx-auto aspect-square w-full max-w-[380px] sm:max-w-[460px] md:max-w-[520px] lg:-top-12 lg:max-w-[560px] xl:-top-16 xl:max-w-[612px]">
           <Lottie
             animationData={heroAnimation}
             loop

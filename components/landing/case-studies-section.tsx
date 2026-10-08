@@ -20,11 +20,14 @@ export type CaseStudy = {
 
 /* Your images live in:  public/assets/
    In code the path starts AFTER "public", so it is "/assets/file-name"
-   You have 2 images for now. The 3rd card repeats image 1.
-   When you get a 3rd image, save it as case-study-3.jpeg and use it as IMAGE_3. */
+   You have 2 images for now, so cards 3-5 reuse them.
+   When you get more images, save them as case-study-3.jpg, case-study-4.jpg ...
+   and point IMAGE_3, IMAGE_4, IMAGE_5 at them. */
 const IMAGE_1 = "/assets/case-study-1.jpg";
 const IMAGE_2 = "/assets/case-study-2.jpg";
 const IMAGE_3 = IMAGE_1; // <- later change to "/assets/case-study-3.jpg"
+const IMAGE_4 = IMAGE_2; // <- later change to "/assets/case-study-4.jpg"
+const IMAGE_5 = IMAGE_1; // <- later change to "/assets/case-study-5.jpg"
 
 const CASE_STUDIES: CaseStudy[] = [
   {
@@ -59,6 +62,28 @@ const CASE_STUDIES: CaseStudy[] = [
     ],
     href: "#",
     image: IMAGE_3,
+  },
+  {
+    id: 4,
+    company: "BrightWorks",
+    title: "How BrightWorks Built a Content Calendar That Runs Itself",
+    stats: [
+      { value: "55%", label: "Time Saved" },
+      { value: "38%", label: "More Leads" },
+    ],
+    href: "#",
+    image: IMAGE_4,
+  },
+  {
+    id: 5,
+    company: "Orbit Labs",
+    title: "How Orbit Labs Matched a Full Agency With a Team of Three",
+    stats: [
+      { value: "4×", label: "Campaigns Launched" },
+      { value: "29%", label: "Lower Cost" },
+    ],
+    href: "#",
+    image: IMAGE_5,
   },
 ];
 
@@ -193,8 +218,10 @@ export default function CaseStudiesSection({
   const drag = useRef({ active: false, startX: 0, startScroll: 0, moved: false });
   const [dragging, setDragging] = useState(false);
 
-  // left padding: 80px at 1440px wide (first card starts at left 80 in Figma), scales down on smaller screens
-  const sidePad = "max(24px, min(5.5556vw, 80px), calc((100vw - 1440px) / 2 + 80px))";
+  // Same padding on the LEFT (the starting point) and the RIGHT (the end point):
+  // 80px on desktop, scaling down to 24px on phones. It does not grow on big screens,
+  // so the first card always starts near the left edge and the last card ends at the right edge.
+  const sidePad = "max(24px, min(5.5556vw, 80px))";
 
   const cardStep = () => {
     const card = trackRef.current?.querySelector<HTMLElement>("[data-card]");
@@ -223,9 +250,11 @@ export default function CaseStudiesSection({
     setDragging(false);
     const el = trackRef.current!;
     const step = cardStep();
-    const target = Math.round(el.scrollLeft / step) * step;
+    const max = el.scrollWidth - el.clientWidth;
+    // snap to the nearest card, but never past the last card (so no blank space at the end)
+    const target = Math.min(Math.round(el.scrollLeft / step) * step, max);
     el.style.scrollSnapType = "";
-    el.scrollTo({ left: target, behavior: "smooth" });
+    el.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
   };
 
   const onClickCapture = (e: React.MouseEvent) => {
@@ -260,7 +289,7 @@ export default function CaseStudiesSection({
         </h2>
       </div>
 
-      {/* Draggable track */}
+      {/* Draggable track: starts at the first card, ends at the last card */}
       <div
         ref={trackRef}
         onPointerDown={onPointerDown}
@@ -276,8 +305,6 @@ export default function CaseStudiesSection({
         {items.map((item, i) => (
           <CaseCard key={item.id} item={item} index={i} />
         ))}
-        {/* extra space at the end so the last card can reach the left edge */}
-        <div className="w-[8vw] shrink-0" aria-hidden />
       </div>
     </section>
   );
