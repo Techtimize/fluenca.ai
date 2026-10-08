@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi } from "./bussiness.routes";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentExecutionAgentModeApi, ContentExecutionItemsApi, ContentExecutionRunsApi, ContentExecutionSettingsApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   AnalyzeCompanyDashboardApi,
@@ -353,6 +353,52 @@ export const SocialAccountsQuery = (enabled = true) => {
   return useQuery({
     queryKey: ["social-accounts"],
     queryFn: () => SocialAccountsApi(),
+    enabled,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+  });
+};
+
+export const ContentExecutionSettingsQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: ["content-execution-settings"],
+    queryFn: () => ContentExecutionSettingsApi(),
+    enabled,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+  });
+};
+
+export const ContentExecutionAgentModeQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: ["content-execution-agent-mode"],
+    queryFn: () => ContentExecutionAgentModeApi(),
+    enabled,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+  });
+};
+
+export const ContentExecutionItemsQuery = (
+  params?: { date?: string; status?: string; platform?: string },
+  enabled = true,
+) => {
+  return useQuery({
+    queryKey: ["content-execution-items", params],
+    queryFn: () => ContentExecutionItemsApi(params),
+    enabled,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+  });
+};
+
+export const ContentExecutionRunsQuery = (
+  params?: { limit?: number; status?: string },
+  enabled = true,
+) => {
+  return useQuery({
+    queryKey: ["content-execution-runs", params],
+    queryFn: () => ContentExecutionRunsApi(params),
     enabled,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,

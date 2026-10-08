@@ -94,6 +94,20 @@ export const BUSSINESSENDPOINT = {
         X_CONNECT: '/connector/x/login',
     },
 
+    PUBLISH:{
+        INSTAGRAM_PUBLISH: '/connector/instagram/publish',
+        FACEBOOK_PUBLISH: '/connector/facebook/publish',
+    },
+
+    CONTENT_EXECUTION:{
+        SETTINGS: '/content-execution/settings',
+        AGENT_MODE: '/content-execution/agent-mode',
+        DAILY: '/content-execution/daily',
+        RUN: '/content-execution/run',
+        ITEMS: '/content-execution/items',
+        RUNS: '/content-execution/runs',
+    },
+
     PRIVACY:{
         FACEBOOK_DEAUTHORIZE: '/integrations/facebook/deauthorize',
         FACEBOOK_DATA_DELETION: '/integrations/facebook/data-deletion',
