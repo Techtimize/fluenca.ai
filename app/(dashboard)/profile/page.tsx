@@ -25,51 +25,14 @@ import {
 import TopBar from "@/components/dashboard/topBar";
 import AssetImage from "@/components/shared/assetImage";
 import Card from "@/components/shared/card";
+import { UserProfileQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
+import type {
+  UserProfileCompany,
+  UserProfileData,
+  UserProfileUser,
+} from "@/types/bussiness/user-profile-type";
 import { FOCUS_RING } from "@/utils/ui-classes";
-
-// Mock data in the shape the profile API will return; swap for the query once it's ready.
-const PROFILE = {
-  user: {
-    id: "b7c1e2a4-5f3d-4c8e-9a21-6d0f4e7b8c90",
-    full_name: "Sarah Ahmed",
-    email: "sarah.ahmed@ishout.ae",
-    phone: "+971 50 123 4567",
-    role: "Marketing Manager",
-    avatar_url: null as string | null,
-    location: "Dubai, AE",
-    language: "English",
-    joined_at: "2026-03-12T09:24:00Z",
-  },
-  company: {
-    id: "8f3aec51-bbf0-48fa-b807-9fe48814070b",
-    name: "ishout",
-    logo_url: null as string | null,
-    website: "https://app.ishout.ae",
-    industry: "Marketing",
-    region: "AE",
-    business_model: "B2B SaaS",
-    team_size: "11-50",
-  },
-  plan: {
-    name: "Growth",
-    status: "active",
-    billing_cycle: "monthly",
-    renews_at: "2026-11-05T00:00:00Z",
-    usage: [
-      { id: "company_analysis", label: "Company Analysis", used: 7, limit: 10 },
-      { id: "manual_competitor_analysis", label: "Manual Competitor Analysis", used: 3, limit: 10 },
-      { id: "ai_competitor_analysis", label: "AI Competitor Analysis", used: 5, limit: 10 },
-      { id: "script_generation", label: "Script Generation", used: 42, limit: 100 },
-      { id: "image_generation", label: "Image Generation", used: 18, limit: 50 },
-    ],
-  },
-  connected_accounts: [
-    { platform: "instagram", connected: true, handle: "ishout.ae", profile_url: "https://www.instagram.com/ishout.ae/" },
-    { platform: "linkedin", connected: false, handle: null, profile_url: null },
-    { platform: "x", connected: false, handle: null, profile_url: null },
-  ],
-};
 
 const USAGE_ICONS: Record<string, typeof BarChart3> = {
   company_analysis: BarChart3,
@@ -85,38 +48,88 @@ const PLATFORMS: Record<string, { label: string; iconSrc: string }> = {
   x: { label: "X", iconSrc: "/assets/x.png" },
 };
 
-function formatDate(value: string, opts: Intl.DateTimeFormatOptions) {
+function formatDate(value: string | null, opts: Intl.DateTimeFormatOptions) {
+  if (!value) return null;
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString("en-US", opts);
+  return Number.isNaN(date.getTime())
+    ? value
+    : date.toLocaleDateString("en-US", opts);
 }
 
 export default function ProfilePage() {
   const companyName = useAuthStore((s) => s.company_name);
-  const { user, company, plan, connected_accounts: accounts } = PROFILE;
-
-  const joined = formatDate(user.joined_at, { month: "long", year: "numeric" });
-  const renews = formatDate(plan.renews_at, { month: "short", day: "2-digit", year: "numeric" });
-  const connectedCount = accounts.filter((a) => a.connected).length;
-  const totalUsed = plan.usage.reduce((sum, u) => sum + u.used, 0);
-  const totalLimit = plan.usage.reduce((sum, u) => sum + u.limit, 0);
+  const { data, isLoading, isError, error, refetch } = UserProfileQuery();
+  const profile = data?.data;
 
   return (
     <main className="min-w-0 space-y-4">
-      <TopBar user={{ name: companyName || company.name }} />
+      <TopBar user={{ name: companyName || profile?.company?.name || "" }} />
 
+      {isLoading ? (
+        <ProfileSkeleton />
+      ) : isError || !profile ? (
+        <div className="flex flex-col items-start gap-3 rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+          {error instanceof Error
+            ? error.message
+            : "Could not load your profile."}
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className={`rounded-full border border-rose-300 bg-white px-4 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 ${FOCUS_RING}`}
+          >
+            Try again
+          </button>
+        </div>
+      ) : (
+        <ProfileView profile={profile} />
+      )}
+    </main>
+  );
+}
+
+function ProfileView({ profile }: { profile: UserProfileData }) {
+  const { plan } = profile;
+  // The API can send null for any of these, so every read below needs a fallback.
+  const user = profile.user ?? ({} as UserProfileUser);
+  const company = profile.company ?? ({} as UserProfileCompany);
+  const companyName = company.name || "Your company";
+  const displayName = user.full_name || user.email || companyName;
+  const accounts = profile.connected_accounts ?? [];
+  const usage = plan?.usage ?? [];
+
+  const joined = formatDate(user.joined_at, { month: "long", year: "numeric" });
+  const renews = formatDate(plan?.renews_at ?? null, {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
+  const connectedCount = accounts.filter((a) => a.connected).length;
+  const totalUsed = usage.reduce((sum, u) => sum + u.used, 0);
+  const totalLimit = usage.reduce((sum, u) => sum + u.limit, 0);
+
+  return (
+    <>
       {/* Hero */}
       <Card className="relative overflow-hidden">
         <div className="relative h-36 overflow-hidden bg-linear-to-br from-[#4338CA] via-[#5B57E6] to-[#9061F9]">
-          <span className="absolute -right-10 -top-16 size-56 rounded-full bg-white/10 blur-2xl" aria-hidden="true" />
-          <span className="absolute -bottom-20 left-1/3 size-64 rounded-full bg-[#C4B5FD]/25 blur-3xl" aria-hidden="true" />
+          <span
+            className="absolute -right-10 -top-16 size-56 rounded-full bg-white/10 blur-2xl"
+            aria-hidden="true"
+          />
+          <span
+            className="absolute -bottom-20 left-1/3 size-64 rounded-full bg-[#C4B5FD]/25 blur-3xl"
+            aria-hidden="true"
+          />
           <span
             className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] bg-size-[18px_18px]"
             aria-hidden="true"
           />
-          <span className="absolute right-5 top-4 flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur">
-            <Crown className="size-3.5" aria-hidden="true" />
-            {plan.name} Plan
-          </span>
+          {plan ? (
+            <span className="absolute right-5 top-4 flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+              <Crown className="size-3.5" aria-hidden="true" />
+              {plan.name} Plan
+            </span>
+          ) : null}
         </div>
 
         <div className="px-5 pb-5">
@@ -126,14 +139,14 @@ export default function ProfilePage() {
                 {user.avatar_url ? (
                   <AssetImage
                     src={user.avatar_url}
-                    alt={user.full_name}
+                    alt={displayName}
                     width={96}
                     height={96}
                     className="size-24 rounded-full border-4 border-white object-cover shadow-lg"
                   />
                 ) : (
                   <span className="grid size-24 place-items-center rounded-full border-4 border-white bg-linear-to-br from-[#5B57E6] to-[#8B5CF6] text-3xl font-semibold text-white shadow-lg">
-                    {user.full_name.charAt(0)}
+                    {displayName.charAt(0).toUpperCase()}
                   </span>
                 )}
                 <span
@@ -142,14 +155,23 @@ export default function ProfilePage() {
                 />
               </div>
               <div className="pb-1">
-                <h1 className="text-xl font-semibold text-neutral-900">{user.full_name}</h1>
+                <h1 className="text-xl font-semibold text-neutral-900">
+                  {displayName}
+                </h1>
                 <p className="text-sm text-neutral-500">
-                  {user.role} at <span className="font-medium text-neutral-700">{company.name}</span>
+                  {user.role ? `${user.role} at ` : null}
+                  <span className="font-medium text-neutral-700">
+                    {companyName}
+                  </span>
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  <Chip icon={<MapPin />}>{user.location}</Chip>
-                  <Chip icon={<CalendarDays />}>Joined {joined}</Chip>
-                  <Chip icon={<Mail />}>{user.email}</Chip>
+                  {user.location ? (
+                    <Chip icon={<MapPin />}>{user.location}</Chip>
+                  ) : null}
+                  {joined ? (
+                    <Chip icon={<CalendarDays />}>Joined {joined}</Chip>
+                  ) : null}
+                  {user.email ? <Chip icon={<Mail />}>{user.email}</Chip> : null}
                 </div>
               </div>
             </div>
@@ -163,7 +185,12 @@ export default function ProfilePage() {
           </div>
 
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Stat icon={<Crown />} label="Current Plan" value={plan.name} hint={`Renews ${renews}`} />
+            <Stat
+              icon={<Crown />}
+              label="Current Plan"
+              value={plan?.name ?? "No plan"}
+              hint={renews ? `Renews ${renews}` : "—"}
+            />
             <Stat
               icon={<Sparkles />}
               label="Credits Used"
@@ -174,7 +201,11 @@ export default function ProfilePage() {
               icon={<Link2 />}
               label="Connected Accounts"
               value={`${connectedCount}/${accounts.length}`}
-              hint={connectedCount === accounts.length ? "All connected" : "Connect more for better insights"}
+              hint={
+                connectedCount === accounts.length
+                  ? "All connected"
+                  : "Connect more for better insights"
+              }
             />
           </div>
         </div>
@@ -183,136 +214,195 @@ export default function ProfilePage() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,1fr)]">
         <div className="space-y-4">
           <Card className="p-5">
-            <SectionHeader icon={<User />} title="Personal Information" subtitle="Your account details" />
+            <SectionHeader
+              icon={<User />}
+              title="Personal Information"
+              subtitle="Your account details"
+            />
             <dl className="grid gap-3 sm:grid-cols-2">
               <Field icon={<User />} label="Full Name" value={user.full_name} />
               <Field icon={<ShieldCheck />} label="Role" value={user.role} />
               <Field icon={<Mail />} label="Email" value={user.email} />
               <Field icon={<Phone />} label="Phone" value={user.phone} />
               <Field icon={<MapPin />} label="Location" value={user.location} />
-              <Field icon={<Languages />} label="Language" value={user.language} />
+              <Field
+                icon={<Languages />}
+                label="Language"
+                value={user.language}
+              />
             </dl>
           </Card>
 
           <Card className="p-5">
-            <SectionHeader icon={<Building2 />} title="Company" subtitle="The business you're growing" />
+            <SectionHeader
+              icon={<Building2 />}
+              title="Company"
+              subtitle="The business you're growing"
+            />
             <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#E6E8F5] bg-linear-to-r from-[#F5F6FF] to-white p-3">
               {company.logo_url ? (
                 <AssetImage
                   src={company.logo_url}
-                  alt={company.name}
+                  alt={companyName}
                   width={48}
                   height={48}
                   className="size-12 rounded-xl border border-[#E6E8F5] bg-white object-contain"
                 />
               ) : (
                 <span className="grid size-12 place-items-center rounded-xl bg-[#EEF0FF] text-lg font-semibold text-[#5452F6]">
-                  {company.name.charAt(0).toUpperCase()}
+                  {companyName.charAt(0).toUpperCase()}
                 </span>
               )}
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-neutral-900">{company.name}</p>
-                <a
-                  href={company.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 truncate text-xs text-[#5452F6] hover:underline"
-                >
-                  <Globe className="size-3.5 shrink-0" aria-hidden="true" />
-                  {company.website.replace(/^https?:\/\//, "")}
-                </a>
+                <p className="text-sm font-semibold text-neutral-900">
+                  {companyName}
+                </p>
+                {company.website ? (
+                  <a
+                    href={company.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 truncate text-xs text-[#5452F6] hover:underline"
+                  >
+                    <Globe className="size-3.5 shrink-0" aria-hidden="true" />
+                    {company.website
+                      .replace(/^https?:\/\//, "")
+                      .replace(/\/$/, "")}
+                  </a>
+                ) : null}
               </div>
             </div>
             <dl className="grid gap-3 sm:grid-cols-2">
-              <Field icon={<Briefcase />} label="Industry" value={company.industry} />
+              <Field
+                icon={<Briefcase />}
+                label="Industry"
+                value={company.industry}
+              />
               <Field icon={<MapPin />} label="Region" value={company.region} />
-              <Field icon={<BarChart3 />} label="Business Model" value={company.business_model} />
-              <Field icon={<Users />} label="Team Size" value={company.team_size} />
+              <Field
+                icon={<BarChart3 />}
+                label="Business Model"
+                value={company.business_model}
+              />
+              <Field
+                icon={<Users />}
+                label="Team Size"
+                value={company.team_size}
+              />
             </dl>
           </Card>
         </div>
 
         <div className="space-y-4">
-          <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-[#312E81] via-[#4F46E5] to-[#7C3AED] p-5 text-white shadow-[0_16px_40px_-20px_rgba(79,70,229,0.7)]">
-            <span className="absolute -right-12 -top-12 size-44 rounded-full bg-white/10 blur-2xl" aria-hidden="true" />
-            <div className="relative">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs text-white/70">Current Plan</p>
-                  <p className="mt-0.5 flex items-center gap-2 text-2xl font-semibold">
-                    {plan.name}
-                    <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-[11px] font-medium capitalize text-emerald-200">
-                      {plan.status}
-                    </span>
-                  </p>
-                  <p className="mt-1 text-xs capitalize text-white/70">
-                    {plan.billing_cycle} · Renews {renews}
-                  </p>
+          {plan ? (
+            <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-[#312E81] via-[#4F46E5] to-[#7C3AED] p-5 text-white shadow-[0_16px_40px_-20px_rgba(79,70,229,0.7)]">
+              <span
+                className="absolute -right-12 -top-12 size-44 rounded-full bg-white/10 blur-2xl"
+                aria-hidden="true"
+              />
+              <div className="relative">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs text-white/70">Current Plan</p>
+                    <p className="mt-0.5 flex items-center gap-2 text-2xl font-semibold">
+                      {plan.name}
+                      <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-[11px] font-medium capitalize text-emerald-200">
+                        {plan.status}
+                      </span>
+                    </p>
+                    <p className="mt-1 text-xs capitalize text-white/70">
+                      {[plan.billing_cycle, renews ? `Renews ${renews}` : null]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  </div>
+                  <span className="grid size-10 place-items-center rounded-xl bg-white/15">
+                    <Crown className="size-5" aria-hidden="true" />
+                  </span>
                 </div>
-                <span className="grid size-10 place-items-center rounded-xl bg-white/15">
-                  <Crown className="size-5" aria-hidden="true" />
-                </span>
+
+                <ul className="mt-5 space-y-3.5">
+                  {usage.map((item) => {
+                    const Icon = USAGE_ICONS[item.id] ?? Sparkles;
+                    const pct = item.limit
+                      ? Math.min(100, (item.used / item.limit) * 100)
+                      : 0;
+                    return (
+                      <li key={item.id}>
+                        <div className="mb-1.5 flex items-center justify-between gap-2 text-xs">
+                          <span className="flex items-center gap-2 text-white/85">
+                            <Icon className="size-3.5" aria-hidden="true" />
+                            {item.label}
+                          </span>
+                          <span className="font-semibold tabular-nums">
+                            {item.used}
+                            <span className="text-white/60">/{item.limit}</span>
+                          </span>
+                        </div>
+                        <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
+                          <div
+                            className={`h-full rounded-full ${pct >= 80 ? "bg-amber-300" : "bg-white"}`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                <button
+                  type="button"
+                  className={`mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-white text-[15px] font-semibold text-[#4F46E5] transition-colors hover:bg-white/90 ${FOCUS_RING}`}
+                >
+                  <Sparkles className="size-4" aria-hidden="true" />
+                  Upgrade Plan
+                </button>
               </div>
-
-              <ul className="mt-5 space-y-3.5">
-                {plan.usage.map((item) => {
-                  const Icon = USAGE_ICONS[item.id] ?? Sparkles;
-                  const pct = item.limit ? Math.min(100, (item.used / item.limit) * 100) : 0;
-                  return (
-                    <li key={item.id}>
-                      <div className="mb-1.5 flex items-center justify-between gap-2 text-xs">
-                        <span className="flex items-center gap-2 text-white/85">
-                          <Icon className="size-3.5" aria-hidden="true" />
-                          {item.label}
-                        </span>
-                        <span className="font-semibold tabular-nums">
-                          {item.used}
-                          <span className="text-white/60">/{item.limit}</span>
-                        </span>
-                      </div>
-                      <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
-                        <div
-                          className={`h-full rounded-full ${pct >= 80 ? "bg-amber-300" : "bg-white"}`}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-
-              <button
-                type="button"
-                className={`mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-white text-[15px] font-semibold text-[#4F46E5] transition-colors hover:bg-white/90 ${FOCUS_RING}`}
-              >
-                <Sparkles className="size-4" aria-hidden="true" />
-                Upgrade Plan
-              </button>
-            </div>
-          </section>
+            </section>
+          ) : null}
 
           <Card className="p-5">
-            <SectionHeader icon={<Link2 />} title="Connected Accounts" subtitle={`${connectedCount} of ${accounts.length} connected`} />
+            <SectionHeader
+              icon={<Link2 />}
+              title="Connected Accounts"
+              subtitle={`${connectedCount} of ${accounts.length} connected`}
+            />
             <ul className="space-y-2">
               {accounts.map((account) => {
-                const platform = PLATFORMS[account.platform] ?? { label: account.platform, iconSrc: "/assets/globe.png" };
+                const platform = PLATFORMS[account.platform] ?? {
+                  label: account.platform,
+                  iconSrc: "/assets/globe.png",
+                };
                 return (
                   <li
                     key={account.platform}
                     className="flex items-center gap-3 rounded-2xl border border-[#ECEDF5] px-3 py-2.5 transition-colors hover:bg-[#F8F9FF]"
                   >
                     <span className="grid size-10 place-items-center rounded-xl bg-[#F5F6FF]">
-                      <AssetImage src={platform.iconSrc} alt="" width={22} height={22} className="size-5.5 object-contain" />
+                      <AssetImage
+                        src={platform.iconSrc}
+                        alt=""
+                        width={22}
+                        height={22}
+                        className="size-5.5 object-contain"
+                      />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-medium text-neutral-900">{platform.label}</span>
+                      <span className="block text-sm font-medium text-neutral-900">
+                        {platform.label}
+                      </span>
                       <span className="block truncate text-xs text-neutral-500">
-                        {account.connected && account.handle ? `@${account.handle}` : "Not connected"}
+                        {account.connected && account.handle
+                          ? `@${account.handle}`
+                          : "Not connected"}
                       </span>
                     </span>
                     {account.connected ? (
                       <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600">
-                        <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
+                        <span
+                          className="size-1.5 rounded-full bg-emerald-500"
+                          aria-hidden="true"
+                        />
                         Connected
                       </span>
                     ) : (
@@ -330,19 +420,56 @@ export default function ProfilePage() {
           </Card>
         </div>
       </div>
-    </main>
+    </>
   );
 }
 
-function SectionHeader({ icon, title, subtitle }: { icon: ReactNode; title: string; subtitle?: string }) {
+function ProfileSkeleton() {
+  return (
+    <div className="animate-pulse space-y-4" aria-busy="true">
+      <div className="overflow-hidden rounded-3xl border border-[#E6E8F5] bg-white">
+        <div className="h-36 bg-[#E4E6FB]" />
+        <div className="px-5 pb-5">
+          <div className="-mt-12 size-24 rounded-full border-4 border-white bg-neutral-200" />
+          <div className="mt-3 h-5 w-48 rounded bg-neutral-200" />
+          <div className="mt-2 h-3 w-64 rounded bg-neutral-100" />
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-19 rounded-2xl bg-[#F4F5FD]" />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,1fr)]">
+        <div className="h-72 rounded-3xl bg-white" />
+        <div className="h-72 rounded-3xl bg-[#E4E6FB]" />
+      </div>
+    </div>
+  );
+}
+
+function SectionHeader({
+  icon,
+  title,
+  subtitle,
+}: {
+  icon: ReactNode;
+  title: string;
+  subtitle?: string;
+}) {
   return (
     <div className="mb-4 flex items-center gap-3">
-      <span className="grid size-9 place-items-center rounded-xl bg-[#EEF0FF] text-[#5452F6] [&>svg]:size-4.5" aria-hidden="true">
+      <span
+        className="grid size-9 place-items-center rounded-xl bg-[#EEF0FF] text-[#5452F6] [&>svg]:size-4.5"
+        aria-hidden="true"
+      >
         {icon}
       </span>
       <div>
         <h2 className="text-sm font-semibold text-neutral-900">{title}</h2>
-        {subtitle ? <p className="text-xs text-neutral-500">{subtitle}</p> : null}
+        {subtitle ? (
+          <p className="text-xs text-neutral-500">{subtitle}</p>
+        ) : null}
       </div>
     </div>
   );
@@ -357,10 +484,23 @@ function Chip({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   );
 }
 
-function Stat({ icon, label, value, hint }: { icon: ReactNode; label: string; value: string; hint: string }) {
+function Stat({
+  icon,
+  label,
+  value,
+  hint,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  hint: string;
+}) {
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-[#E6E8F5] bg-linear-to-br from-[#F7F8FF] to-white p-3.5">
-      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-[#5452F6] shadow-sm [&>svg]:size-4.5" aria-hidden="true">
+      <span
+        className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-[#5452F6] shadow-sm [&>svg]:size-4.5"
+        aria-hidden="true"
+      >
         {icon}
       </span>
       <div className="min-w-0">
@@ -372,17 +512,30 @@ function Stat({ icon, label, value, hint }: { icon: ReactNode; label: string; va
   );
 }
 
-function Field({ icon, label, value }: { icon?: ReactNode; label: string; value: ReactNode }) {
+function Field({
+  icon,
+  label,
+  value,
+}: {
+  icon?: ReactNode;
+  label: string;
+  value: ReactNode;
+}) {
   return (
     <div className="flex items-center gap-3 rounded-xl bg-[#F6F7FE] px-3 py-2.5 transition-colors hover:bg-[#EEF0FF]">
       {icon ? (
-        <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-white text-[#5452F6] shadow-sm [&>svg]:size-4" aria-hidden="true">
+        <span
+          className="grid size-8 shrink-0 place-items-center rounded-lg bg-white text-[#5452F6] shadow-sm [&>svg]:size-4"
+          aria-hidden="true"
+        >
           {icon}
         </span>
       ) : null}
       <div className="min-w-0">
         <dt className="text-xs text-neutral-500">{label}</dt>
-        <dd className="mt-0.5 truncate text-sm font-semibold text-neutral-900">{value}</dd>
+        <dd className="mt-0.5 truncate text-sm font-semibold text-neutral-900">
+          {value || "—"}
+        </dd>
       </div>
     </div>
   );
