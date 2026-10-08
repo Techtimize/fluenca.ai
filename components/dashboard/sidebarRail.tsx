@@ -17,7 +17,7 @@ const STORAGE_KEY = "fluenca-sidebar-collapsed";
 const COLLAPSED_PAD = "5.5rem";
 const EXPANDED_PAD = "15.5rem";
 
-export const DEFAULT_NAV: NavItem[] = [
+const DEFAULT_NAV: NavItem[] = [
   { id: "home", label: "Home", icon: "home", href: PAGE_ROUTES.DASHBOARD },
   { id: "trends", label: "Trends", icon: "trending", href: PAGE_ROUTES.TRENDS },
   { id: "dna", label: "Company DNA", icon: "dna", href: PAGE_ROUTES.DNA },
