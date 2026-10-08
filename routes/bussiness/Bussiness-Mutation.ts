@@ -380,7 +380,7 @@ export function InstagramConnectMutation() {
   });
 }
 
-/** Starts Facebook OAuth: GET /integrations/facebook/connect → redirect to authorize_url. */
+/** Starts Facebook OAuth → Meta → /connector/facebook/callback → /dashboard/integrations. */
 export function FacebookConnectMutation() {
   return useMutation({
     mutationFn: async () => {

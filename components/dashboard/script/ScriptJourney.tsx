@@ -102,9 +102,6 @@ export default function ScriptJourney({
                   aria-hidden="true"
                 />
                 Start from an idea
-                <span className="grid size-7 place-items-center rounded-full bg-white/15 transition-transform group-hover:translate-x-0.5">
-                  →
-                </span>
               </Link>
               <p className="text-[12px] text-neutral-500">
                 Scripts appear here after you generate from an idea.
