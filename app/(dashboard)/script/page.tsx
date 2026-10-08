@@ -57,9 +57,7 @@ export default function ScriptPage() {
         scriptCount={hasResults ? libraryCount : 0}
         showCta={Boolean(companyId)}
       />
-
       {showLoading ? <ScriptLibrarySkeleton /> : null}
-
       {companyId && notFound ? (
         <ApiNotFoundCard
           resource="scripts"
