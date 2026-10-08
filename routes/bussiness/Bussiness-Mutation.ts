@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentRecommendationApi, DeleteImageApi, ImageGenerationApi, InstagramLoginApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, SocialAccountDisconnectApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentRecommendationApi, DeleteImageApi, FacebookConnectApi, ImageGenerationApi, InstagramLoginApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, SocialAccountDisconnectApi, WaitlistApi } from "./bussiness.routes";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
@@ -358,7 +358,7 @@ export const BlogPostMutation = () => {
 function getAuthorizeUrl(data: { authorize_url?: string } | null | undefined) {
   const url = data?.authorize_url?.trim();
   if (!url) {
-    throw new Error("No Instagram authorize URL returned");
+    throw new Error("No authorize URL returned");
   }
   return url;
 }
@@ -380,16 +380,33 @@ export function InstagramConnectMutation() {
   });
 }
 
+/** Starts Facebook OAuth: GET /integrations/facebook/connect → redirect to authorize_url. */
+export function FacebookConnectMutation() {
+  return useMutation({
+    mutationFn: async () => {
+      const response = await FacebookConnectApi();
+      return getAuthorizeUrl(response);
+    },
+    onSuccess: (authorizeUrl) => {
+      toast.message("Redirecting to Facebook…");
+      window.location.assign(authorizeUrl);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to start Facebook connection"));
+    },
+  });
+}
+
 export function SocialAccountDisconnectMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (platform: string) => SocialAccountDisconnectApi(platform),
     onSuccess: (_response, platform) => {
-      toast.success(
-        platform === "instagram"
-          ? "Instagram disconnected"
-          : `${platform} disconnected`,
-      );
+      const labels: Record<string, string> = {
+        instagram: "Instagram disconnected",
+        facebook: "Facebook disconnected",
+      };
+      toast.success(labels[platform] || `${platform} disconnected`);
       void queryClient.invalidateQueries({ queryKey: ["social-accounts"] });
     },
     onError: (error) => {
@@ -397,5 +414,3 @@ export function SocialAccountDisconnectMutation() {
     },
   });
 }
-
-
