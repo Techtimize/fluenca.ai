@@ -1,9 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AtSign, Link2, Loader2, Plus, Trash2, Users } from "lucide-react";
+import { AtSign, Globe, Link2, Loader2, Plus, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
-import CompetitorResults from "@/components/dashboard/competitors/CompetitorResults";
 import CompetitorVersionSelect from "@/components/dashboard/competitors/CompetitorVersionSelect";
 import {
   asCompetitorsListResponse,
@@ -22,6 +21,26 @@ import {
 } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
 import { FOCUS_RING } from "@/utils/ui-classes";
+import ManualCompetitorResults from "@/components/dashboard/competitors/CompetitorResults";
+
+type CompetitorRow = {
+  id: string;
+  instagram: string;
+  linkedin: string;
+  website: string;
+};
+
+function createEmptyRow(): CompetitorRow {
+  return {
+    id:
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `row-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    instagram: "",
+    linkedin: "",
+    website: "",
+  };
+}
 
 function normalizeInstagram(value: string) {
   const trimmed = value.trim().replace(/^@+/, "");
@@ -33,16 +52,68 @@ function normalizeLinkedIn(value: string) {
   return value.trim();
 }
 
+function normalizeWebsite(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 function isLikelyLinkedIn(value: string) {
-  return /linkedin\.com/i.test(value) || value.startsWith("http");
+  return /linkedin\.com/i.test(value);
+}
+
+function isLikelyWebsite(value: string) {
+  try {
+    const url = new URL(value);
+    return Boolean(url.hostname.includes("."));
+  } catch {
+    return false;
+  }
+}
+
+function collectCompetitorValues(rows: CompetitorRow[]) {
+  const values: string[] = [];
+  const seen = new Set<string>();
+
+  for (const row of rows) {
+    const entries: Array<{ kind: "instagram" | "linkedin" | "website"; value: string }> = [
+      { kind: "instagram", value: normalizeInstagram(row.instagram) },
+      { kind: "linkedin", value: normalizeLinkedIn(row.linkedin) },
+      { kind: "website", value: normalizeWebsite(row.website) },
+    ];
+
+    for (const entry of entries) {
+      if (!entry.value) continue;
+
+      if (entry.kind === "linkedin" && !isLikelyLinkedIn(entry.value)) {
+        return {
+          values: [] as string[],
+          error: "Enter a valid LinkedIn URL (linkedin.com/…)",
+        };
+      }
+
+      if (entry.kind === "website" && !isLikelyWebsite(entry.value)) {
+        return {
+          values: [] as string[],
+          error: "Enter a valid website URL",
+        };
+      }
+
+      const key = entry.value.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      values.push(entry.value);
+    }
+  }
+
+  return { values, error: null as string | null };
 }
 
 export default function CompetitorAnalysisManualPage() {
   const companyId = useAuthStore((s) => s.company_id);
   const [selectedVersion, setSelectedVersion] = useState(LATEST_VERSION_VALUE);
-  const [instagramInput, setInstagramInput] = useState("");
-  const [linkedinInput, setLinkedinInput] = useState("");
-  const [competitors, setCompetitors] = useState<string[]>([]);
+  const [rows, setRows] = useState<CompetitorRow[]>(() => [createEmptyRow()]);
 
   const {
     data: versionsData,
@@ -88,49 +159,59 @@ export default function CompetitorAnalysisManualPage() {
   const isRefetching = usingLatest ? isLatestRefetching : isSpecificRefetching;
   const notFound = isError && isApiNotFoundError(error);
 
-  const addCompetitor = (raw: string, kind: "instagram" | "linkedin") => {
-    const value =
-      kind === "instagram" ? normalizeInstagram(raw) : normalizeLinkedIn(raw);
+  const filledFieldCount = useMemo(
+    () =>
+      rows.reduce((count, row) => {
+        return (
+          count +
+          [row.instagram, row.linkedin, row.website].filter((value) => value.trim()).length
+        );
+      }, 0),
+    [rows],
+  );
 
-    if (!value) {
-      toast.error(
-        kind === "instagram"
-          ? "Enter an Instagram username"
-          : "Enter a LinkedIn URL",
-      );
-      return;
-    }
-
-    if (kind === "linkedin" && !isLikelyLinkedIn(value)) {
-      toast.error("Enter a valid LinkedIn URL");
-      return;
-    }
-
-    if (competitors.some((item) => item.toLowerCase() === value.toLowerCase())) {
-      toast.error("This competitor is already added");
-      return;
-    }
-
-    setCompetitors((prev) => [...prev, value]);
-    if (kind === "instagram") setInstagramInput("");
-    else setLinkedinInput("");
+  const updateRow = (
+    id: string,
+    field: "instagram" | "linkedin" | "website",
+    value: string,
+  ) => {
+    setRows((prev) =>
+      prev.map((row) => (row.id === id ? { ...row, [field]: value } : row)),
+    );
   };
 
-  const removeCompetitor = (value: string) => {
-    setCompetitors((prev) => prev.filter((item) => item !== value));
+  const addRow = () => {
+    setRows((prev) => [...prev, createEmptyRow()]);
+  };
+
+  const removeRow = (id: string) => {
+    setRows((prev) => {
+      if (prev.length <= 1) {
+        return [createEmptyRow()];
+      }
+      return prev.filter((row) => row.id !== id);
+    });
   };
 
   const handleRun = () => {
     if (!companyId) return;
-    if (!competitors.length) {
-      toast.error("Add at least one Instagram username or LinkedIn URL");
+
+    const { values, error: validationError } = collectCompetitorValues(rows);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+    if (!values.length) {
+      toast.error(
+        "Fill at least one Instagram username, LinkedIn URL, or website",
+      );
       return;
     }
 
     runManualAnalysis(
       {
         company_id: companyId,
-        competitors,
+        competitors: values,
       },
       {
         onSuccess: () => {
@@ -178,103 +259,107 @@ export default function CompetitorAnalysisManualPage() {
       ) : null}
 
       <Card className="p-5 sm:p-6">
-        <h3 className="text-[15px] font-semibold text-neutral-900">Add competitors</h3>
-        <p className="mt-1 text-[13px] text-neutral-500">
-          Provide Instagram usernames and LinkedIn company URLs, then run analysis.
-        </p>
-
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
-              <AtSign className="size-4 text-[#5B57E6]" />
-              Instagram username
-            </label>
-            <div className="flex gap-2">
-              <Input
-                value={instagramInput}
-                onChange={(e) => setInstagramInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addCompetitor(instagramInput, "instagram");
-                  }
-                }}
-                placeholder="@username"
-                className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => addCompetitor(instagramInput, "instagram")}
-                className="h-11 shrink-0 rounded-full px-4"
-              >
-                <Plus className="size-4" />
-                Add
-              </Button>
-            </div>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-[15px] font-semibold text-neutral-900">
+              Add competitors
+            </h3>
+            <p className="mt-1 text-[13px] text-neutral-500">
+              Each row is one competitor. Fill Instagram, LinkedIn, and/or website,
+              then use + to add another.
+            </p>
           </div>
-
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
-              <Link2 className="size-4 text-[#5B57E6]" />
-              LinkedIn URL
-            </label>
-            <div className="flex gap-2">
-              <Input
-                value={linkedinInput}
-                onChange={(e) => setLinkedinInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addCompetitor(linkedinInput, "linkedin");
-                  }
-                }}
-                placeholder="https://www.linkedin.com/company"
-                className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => addCompetitor(linkedinInput, "linkedin")}
-                className="h-11 shrink-0 rounded-full px-4"
-              >
-                <Plus className="size-4" />
-                Add
-              </Button>
-            </div>
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={addRow}
+            className="h-10 shrink-0 gap-1.5 rounded-full px-4"
+          >
+            <Plus className="size-4" />
+            Add competitor
+          </Button>
         </div>
 
-        {competitors.length ? (
-          <ul className="mt-4 flex flex-wrap gap-2">
-            {competitors.map((item) => (
-              <li
-                key={item}
-                className="inline-flex items-center gap-2 rounded-full border border-[#E6E8F5] bg-[#F8F9FF] px-3 py-1.5 text-[13px] text-neutral-700"
-              >
-                <span className="max-w-[240px] truncate">{item}</span>
+        <div className="mt-4 space-y-3">
+          {rows.map((row, index) => (
+            <div
+              key={row.id}
+              className="rounded-2xl border border-[#E6E8F5] bg-[#FBFBFF] p-3.5 sm:p-4"
+            >
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+                  Competitor {String(index + 1).padStart(2, "0")}
+                </p>
                 <button
                   type="button"
-                  aria-label={`Remove ${item}`}
-                  onClick={() => removeCompetitor(item)}
-                  className={`rounded-full p-0.5 text-neutral-500 hover:bg-white hover:text-rose-600 ${FOCUS_RING}`}
+                  aria-label={`Remove competitor ${index + 1}`}
+                  onClick={() => removeRow(row.id)}
+                  disabled={rows.length === 1 && filledFieldCount === 0}
+                  className={`inline-flex size-8 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-white hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`}
                 >
                   <Trash2 className="size-3.5" />
                 </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-4 text-[13px] text-neutral-500">
-            No competitors added yet. Example: @confiz or a LinkedIn company URL.
-          </p>
-        )}
+              </div>
 
-        <div className="mt-5 flex justify-end">
+              <div className="grid gap-3 lg:grid-cols-3">
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
+                    <AtSign className="size-4 text-[#5B57E6]" />
+                    Instagram username
+                  </label>
+                  <Input
+                    value={row.instagram}
+                    onChange={(e) => updateRow(row.id, "instagram", e.target.value)}
+                    placeholder="@username"
+                    className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
+                    <Link2 className="size-4 text-[#5B57E6]" />
+                    LinkedIn URL
+                  </label>
+                  <Input
+                    value={row.linkedin}
+                    onChange={(e) => updateRow(row.id, "linkedin", e.target.value)}
+                    placeholder="https://www.linkedin.com/company/…"
+                    className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
+                    <Globe className="size-4 text-[#5B57E6]" />
+                    Website URL
+                  </label>
+                  <Input
+                    value={row.website}
+                    onChange={(e) => updateRow(row.id, "website", e.target.value)}
+                    placeholder="https://www.example.com"
+                    className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={addRow}
+            className="h-10 gap-1.5 rounded-full px-3 text-[#5B57E6] hover:bg-[#ECEBFF] hover:text-[#4A46D0]"
+          >
+            <Plus className="size-4" />
+            Add another competitor
+          </Button>
+
           <Button
             type="button"
             onClick={handleRun}
-            disabled={!companyId || isPending || competitors.length === 0}
+            disabled={!companyId || isPending || filledFieldCount === 0}
             className="h-11 gap-2 rounded-full bg-[#5B57E6] px-5 text-white hover:bg-[#4A46D0]"
           >
             {isPending ? (
@@ -292,7 +377,7 @@ export default function CompetitorAnalysisManualPage() {
         </div>
       </Card>
 
-      <CompetitorResults
+      <ManualCompetitorResults
         data={competitorResults}
         isLoading={Boolean(companyId) && isLoading && !competitorResults}
         isError={isError && !notFound}
