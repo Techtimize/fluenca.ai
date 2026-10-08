@@ -33,6 +33,7 @@ export function proxy(request: NextRequest) {
             path.startsWith('/dna') ||
             path.startsWith('/trends') ||
             path.startsWith('/company-overview') ||
+            path.startsWith('/profile') ||
             path.startsWith('/superadmin')
         ) {
             return NextResponse.redirect(new URL('/login', request.url));
@@ -55,6 +56,7 @@ export const config = {
         '/dna/:path*',
         '/trends/:path*',
         '/company-overview/:path*',
+        '/profile/:path*',
         '/superadmin/:path*',
     ],
 };
