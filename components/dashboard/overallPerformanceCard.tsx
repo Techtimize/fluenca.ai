@@ -2,10 +2,9 @@ import { useId } from "react";
 import { Monitor, Smartphone } from "lucide-react";
 import type { OverallPerformance } from "@/types/dashboard";
 
-// The gauge is drawn in code because it changes with the score.
-// Each segment is a rounded block pointing at the centre, shaded blue (outer) to purple (inner).
+
 const BARS = 13;
-const SWEEP = 200; // degrees; a little past a half circle so the ends dip below the baseline
+const SWEEP = 200; 
 const CX = 140,
   CY = 140,
   R_INNER = 84,
