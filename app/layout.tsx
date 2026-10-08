@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Noto_Sans_Arabic, Plus_Jakarta_Sans } from "next/font/google";
+import { Geist, Geist_Mono, Google_Sans_Flex, Noto_Sans_Arabic, Plus_Jakarta_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
@@ -28,6 +28,12 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+});
+
+const googleSansFlex = Google_Sans_Flex({
+  variable: "--font-google-sans-flex",
+  subsets: ["latin"],
+  adjustFontFallback: false,
 });
 
 const googleSansCode = localFont({
@@ -93,7 +99,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang={locale}
       dir={isArabic ? "rtl" : "ltr"}
-      className={`${geistSans.variable} ${geistMono.variable} ${googleSansCode.variable} ${plusJakartaSans.variable} ${notoSansArabic.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${googleSansCode.variable} ${googleSansFlex.variable} ${plusJakartaSans.variable} ${notoSansArabic.variable} h-full antialiased`}
     >
       <body
         className={`flex min-h-full flex-col ${isArabic ? "font-[family-name:var(--font-noto-arabic)]" : ""}`}
