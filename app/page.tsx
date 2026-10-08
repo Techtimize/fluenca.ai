@@ -24,8 +24,8 @@ export default function Home() {
     <div className="flex min-h-screen flex-col bg-[radial-gradient(ellipse_at_15%_100%,rgba(219,224,255,0.7)_0%,rgba(255,255,255,0)_42%)]">
       <SiteHeader
         navigationItems={navigationItems}
-        // signupHref="/signup"
-        // signupLabel="Sign up"
+        signupHref="/signup"
+        signupLabel="Sign up"
       />
       <main className="flex flex-1 flex-col">
         <LandingHero

@@ -982,13 +982,17 @@ export interface CompetitorAnalysisResult {
   recommendations?: CompetitorRecommendedAction[];
   company_analysis?: {
     instagram?: Record<string, unknown>;
+    linkedin?: Record<string, unknown>;
     is_hiring?: boolean | null;
     company_dna?: CompetitorDna;
     company_size?: string | null;
     job_openings?: string[];
     linkedin_url?: string | null;
+    user_instagram?: Record<string, unknown>;
+    user_linkedin?: Record<string, unknown>;
     social_handles?: Record<string, unknown>;
     linkedin_content_themes?: string[];
+    instagram_posts?: unknown[];
   };
   competitive_gaps?: CompetitiveBriefGapItem[] | Record<string, unknown> | null;
   competitor_count?: number;

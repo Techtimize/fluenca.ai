@@ -1,5 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Google_Sans_Flex } from "next/font/google";
+
+const googleSansFlex = Google_Sans_Flex({
+  subsets: ["latin"],
+  display: "swap",
+});
 
 type FooterLink = { label: string; href: string };
 type FooterColumn = { title: string; links: FooterLink[] };
@@ -54,46 +60,49 @@ export default function FooterSection({
   termsHref = "/terms-of-service",
 }: FooterSectionProps) {
   return (
-    <footer className="relative overflow-hidden bg-white">
-      <div className="mx-auto max-w-[1280px] px-6 md:px-10">
+    // Plain white background (continues the FAQ section's white block).
+    <footer
+      className={`${googleSansFlex.className} relative overflow-hidden bg-white`}
+    >
+      {/* Figma frame is 1440 wide with 80px side gaps */}
+      <div className="mx-auto max-w-[1440px] px-6 md:px-20">
         {/* Top: logo + link columns */}
-        <div className="grid grid-cols-2 border-b border-slate-200/70 md:grid-cols-4">
-          {/* Logo */}
+        <div className="grid grid-cols-2 border-b border-slate-200/70 md:grid-cols-[255px_1fr_1fr_1fr]">
+          {/* Logo: 116.67 x 125 */}
           <div className="col-span-2 pb-6 pt-10 md:col-span-1 md:pb-16 md:pt-12">
-            <Link href="/" aria-label="Fluenca home" className="inline-block md:ml-10">
+            <Link href="/" aria-label="Fluenca home" className="inline-block md:ml-16">
               <Image
                 src={logoSrc}
                 alt="Fluenca"
-                width={96}
-                height={96}
+                width={117}
+                height={125}
                 priority
-                className="w-16 md:w-20 lg:w-24"
-                style={{ height: 'auto' }}
+                className="h-auto w-20 md:w-[117px]"
               />
             </Link>
           </div>
 
-          {/* Link columns */}
+          {/* Link columns: title 16/26 semibold, 14px gap, links 16/26 with 10px gap */}
           {columns.map((col) => (
             <nav
               key={col.title}
               aria-label={col.title}
-              className="relative pb-10 pt-6 md:pb-16 md:pl-12 md:pt-12 lg:pl-16"
+              className="relative pb-10 pt-6 md:pb-16 md:pl-10 md:pt-12 lg:pl-[105px]"
             >
               {/* Faint vertical divider that fades at both ends */}
               <span
                 aria-hidden
                 className="absolute left-0 top-0 hidden h-full w-px bg-gradient-to-b from-transparent via-slate-200/80 to-transparent md:block"
               />
-              <h3 className="text-sm font-medium text-[#3D5AF1]">
+              <h3 className="text-[15px] font-semibold leading-[26px] text-[#3D5AF1] md:text-[16px]">
                 {col.title}
               </h3>
-              <ul className="mt-4 space-y-3">
+              <ul className="mt-[14px] flex flex-col gap-[10px]">
                 {col.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-slate-900 transition-colors hover:text-[#3D5AF1]"
+                      className="text-[15px] font-normal leading-[26px] text-[#1C1C1E] transition-colors hover:text-[#3D5AF1] md:text-[16px]"
                     >
                       {link.label}
                     </Link>
@@ -120,16 +129,6 @@ export default function FooterSection({
                 <stop offset="0.55" stopColor="#8E94FF" />
                 <stop offset="1" stopColor="#A78BFA" />
               </linearGradient>
-              {/* Top-to-bottom white layer: text is hidden at the top, fully visible at the bottom */}
-              <linearGradient id="fl-fade" x1="0" y1="0" x2="0" y2="215" gradientUnits="userSpaceOnUse">
-                <stop offset="0" stopColor="#000" />
-                <stop offset="0.15" stopColor="#1a1a1a" />
-                <stop offset="0.6" stopColor="#fff" />
-                <stop offset="1" stopColor="#fff" />
-              </linearGradient>
-              <mask id="fl-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="215">
-                <rect width="1000" height="215" fill="url(#fl-fade)" />
-              </mask>
             </defs>
             <text
               x="0"
@@ -139,21 +138,31 @@ export default function FooterSection({
               textLength="1000"
               lengthAdjust="spacingAndGlyphs"
               fill="url(#fl-color)"
-              mask="url(#fl-mask)"
               style={{ fontFamily: "inherit" }}
             >
               {wordmark}
             </text>
           </svg>
 
+          {/* Rectangle 141: 1306 x 240 overlay, linear-gradient(180deg, #fff 11.67%, rgba(255,255,255,0.3) 100%).
+              Fades the wordmark in from the top. 1306 wide on a 1280 container = 13px past each side. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 top-0 md:-inset-x-[13px]"
+            style={{
+              background:
+                "linear-gradient(180deg, #FFFFFF 11.67%, rgba(255, 255, 255, 0.3) 100%)",
+            }}
+          />
+
           {/* Soft glow under the wordmark */}
           <div className="pointer-events-none absolute inset-x-[20%] bottom-0 h-8 rounded-full bg-indigo-200/30 blur-2xl" />
         </div>
 
-        {/* Bottom bar */}
-        <div className="flex flex-col items-start justify-between gap-3 border-t border-slate-200/70 py-6 text-xs text-slate-900 sm:flex-row sm:items-center">
+        {/* Bottom bar: copyright 16/26 #1C1C1E, links 40px apart */}
+        <div className="flex flex-col items-start justify-between gap-3 border-t border-slate-200/70 py-6 text-[14px] font-normal leading-[26px] text-[#1C1C1E] sm:flex-row sm:items-center md:text-[16px]">
           <p>{copyright}</p>
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-10">
             <Link href={privacyHref} className="transition-colors hover:text-[#3D5AF1]">
               Privacy Policy
             </Link>

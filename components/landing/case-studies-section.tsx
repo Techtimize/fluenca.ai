@@ -238,12 +238,15 @@ export default function CaseStudiesSection({
 
   return (
     // Rounded top corners, same method as the FAQ. No overlap needed.
-    // Background: your original three glows (top-left, right, bottom), plus ONE extra layer on top:
-    // a soft white fade in the very top-left corner, so the left curve blends into the white section above
-    // (the right corner already blends because it has no glow).
+    // Background layers (top to bottom):
+    //  1. white fade in the top-left corner (blends the left curve into the section above)
+    //  2. top-left lavender glow
+    //  3. right-side lavender glow
+    //  4. BOTTOM-LEFT glow copied from the FAQ section's top gradient (#E3E8FF -> #F6F7FF -> transparent),
+    //     so the end of this section and the start of the FAQ section read as one continuous background.
     <section
       id="case-studies"
-      className="relative z-10 w-full overflow-hidden rounded-t-[40px] bg-white py-16 font-body md:rounded-t-[56px] md:py-20 bg-[radial-gradient(circle_140px_at_0%_0%,#ffffff_0%,#ffffff_40%,rgba(255,255,255,0)_100%),radial-gradient(ellipse_at_12%_0%,rgba(199,206,255,0.85)_0%,rgba(255,255,255,0)_38%),radial-gradient(ellipse_at_100%_30%,rgba(226,222,255,0.7)_0%,rgba(255,255,255,0)_35%),radial-gradient(ellipse_at_50%_100%,rgba(208,214,255,0.7)_0%,rgba(255,255,255,0)_40%)]"
+      className="relative z-10 w-full overflow-hidden rounded-t-[40px] bg-white py-16 font-body md:rounded-t-[56px] md:py-20 bg-[radial-gradient(circle_140px_at_0%_0%,#ffffff_0%,#ffffff_40%,rgba(255,255,255,0)_100%),radial-gradient(ellipse_at_12%_0%,rgba(199,206,255,0.85)_0%,rgba(255,255,255,0)_38%),radial-gradient(ellipse_at_100%_30%,rgba(226,222,255,0.7)_0%,rgba(255,255,255,0)_35%),radial-gradient(60%_50%_at_0%_100%,#E3E8FF_0%,#F6F7FF_55%,rgba(255,255,255,0)_100%)]"
     >
       {/* Heading */}
       <div className="mx-auto flex max-w-6xl flex-col items-center px-6 text-center">
