@@ -87,7 +87,14 @@ export const BUSSINESSENDPOINT = {
         INSTAGRAM_LOGIN: '/connector/instagram/login',
         SOCIAL_ACCOUNTS: '/social-accounts',
         SOCIAL_ACCOUNTS_CONNECT: (platform: string) => `/social-accounts/${platform}/connect`,
-        SOCIAL_ACCOUNTS_DISCONNECT: (platform: string) => `/social-accounts/${platform}/disconnect`,
+        SOCIAL_ACCOUNTS_DISCONNECT: (platform: string) => `/social-accounts/${platform}`,
+        FACEBOOK_CONNECT: '/integrations/facebook/connect',
+        FACEBOOK_CALLBACK: '/integrations/facebook/callback',
+    },
+
+    PRIVACY:{
+        FACEBOOK_DEAUTHORIZE: '/integrations/facebook/deauthorize',
+        FACEBOOK_DATA_DELETION: '/integrations/facebook/data-deletion',
     }
 }
 
