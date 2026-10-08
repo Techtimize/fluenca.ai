@@ -1,7 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentRecommendationApi, DeleteImageApi, FacebookConnectApi, ImageGenerationApi, InstagramLoginApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi } from "./bussiness.routes";
+import type {
+  FacebookPublishRequest,
+  InstagramPublishRequest,
+} from "@/types/bussiness/social-accounts-type";
+import type {
+  ContentExecutionAgentModeRequest,
+  ContentExecutionRunRequest,
+  ContentExecutionSettingsRequest,
+} from "@/types/bussiness/content-execution-type";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
@@ -426,6 +435,176 @@ export function SocialAccountDisconnectMutation() {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to disconnect account"));
+    },
+  });
+}
+
+
+export function InstagramPublishMutation() {
+  return useMutation({
+    mutationFn: (data: InstagramPublishRequest) => InstagramPublishApi(data),
+    onSuccess: (response) => {
+      if (response?.success === false) {
+        toast.error(
+          response.error || response.message || "Failed to publish to Instagram",
+        );
+        return;
+      }
+      toast.success(response?.message || "Published to Instagram");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to publish to Instagram"));
+    },
+  });
+}
+
+export function FacebookPublishMutation() {
+  return useMutation({
+    mutationFn: (data: FacebookPublishRequest) => FacebookPublishApi(data),
+    onSuccess: (response) => {
+      if (response?.success === false) {
+        toast.error(
+          response.error || response.message || "Failed to publish to Facebook",
+        );
+        return;
+      }
+      toast.success(response?.message || "Published to Facebook");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to publish to Facebook"));
+    },
+  });
+}
+
+export function UpdateContentExecutionSettingsMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ContentExecutionSettingsRequest) =>
+      UpdateContentExecutionSettingsApi(data),
+    onSuccess: (response, variables) => {
+      if (response?.success === false) {
+        toast.error(
+          response.error ||
+            response.message ||
+            "Failed to update content execution settings",
+        );
+        return;
+      }
+
+      if (typeof variables.agent_mode_enabled === "boolean") {
+        const agentOn =
+          response?.settings?.agent_mode_enabled ??
+          response?.agent_mode_enabled ??
+          variables.agent_mode_enabled;
+        toast.success(agentOn ? "Agent mode enabled" : "Agent mode disabled");
+      } else if (typeof variables.auto_publish_enabled === "boolean") {
+        const autoOn =
+          response?.settings?.auto_publish_enabled ??
+          response?.auto_publish_enabled ??
+          variables.auto_publish_enabled;
+        toast.success(autoOn ? "Auto-publish enabled" : "Auto-publish disabled");
+      } else {
+        toast.success(response?.message || "Settings updated");
+      }
+
+      void queryClient.invalidateQueries({
+        queryKey: ["content-execution-settings"],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["content-execution-agent-mode"],
+      });
+    },
+    onError: (error) => {
+      toast.error(
+        getApiErrorMessage(error, "Failed to update content execution settings"),
+      );
+    },
+  });
+}
+
+/** Agent mode toggle. ON → orchestrator can run; OFF → company skipped. */
+export function UpdateContentExecutionAgentModeMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ContentExecutionAgentModeRequest) =>
+      UpdateContentExecutionAgentModeApi(data),
+    onSuccess: (response, variables) => {
+      if (response?.success === false) {
+        toast.error(
+          response.error || response.message || "Failed to update agent mode",
+        );
+        return;
+      }
+      const enabled =
+        response?.enabled ??
+        response?.agent_mode_enabled ??
+        response?.settings?.agent_mode_enabled ??
+        variables.enabled;
+      toast.success(enabled ? "Agent mode enabled" : "Agent mode disabled");
+      void queryClient.invalidateQueries({
+        queryKey: ["content-execution-agent-mode"],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["content-execution-settings"],
+      });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to update agent mode"));
+    },
+  });
+}
+
+export function ContentExecutionRunMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data?: ContentExecutionRunRequest) =>
+      ContentExecutionRunApi(data),
+    onSuccess: (response) => {
+      if (response?.success === false) {
+        toast.error(
+          response.error ||
+            response.message ||
+            "Failed to queue content execution",
+        );
+        return;
+      }
+      toast.success(response?.message || "Content execution queued");
+      void queryClient.invalidateQueries({
+        queryKey: ["content-execution-items"],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["content-execution-runs"],
+      });
+    },
+    onError: (error) => {
+      toast.error(
+        getApiErrorMessage(error, "Failed to queue content execution"),
+      );
+    },
+  });
+}
+
+export function ContentExecutionDailyMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => ContentExecutionDailyApi(),
+    onSuccess: (response) => {
+      if (response?.success === false) {
+        toast.error(
+          response.error || response.message || "Failed to start daily sweep",
+        );
+        return;
+      }
+      toast.success(response?.message || "Daily content sweep queued");
+      void queryClient.invalidateQueries({
+        queryKey: ["content-execution-runs"],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["content-execution-items"],
+      });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to start daily sweep"));
     },
   });
 }
