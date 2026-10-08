@@ -7,6 +7,7 @@ export const BUSSINESSENDPOINT = {
     INTELLIGENCE_JOB: (job_id: string) => `/intelligence/jobs/${job_id}`,
 
     ONBOARDING_DETAILS: '/onboarding/details',
+    USER_PROFILE: '/user-profile',
 
     INTAKE: '/intake',
     INTAKE_QUESTION: (questionId: string) => `/intake/questions/${questionId}`,
