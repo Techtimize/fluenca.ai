@@ -57,7 +57,8 @@ export const ApproveTopicalMapMutation = () => {
     mutationFn: () => ApproveTopicalMapApi(),
     onSuccess: (response) => {
       queryClient.setQueryData(TOPICAL_MAP_KEY, response);
-      toast.success("Topical map approved");
+      void queryClient.invalidateQueries({ queryKey: ["keywords"] });
+      toast.success("Topical map approved. Keyword research has started; your blog briefs will be ready in a few minutes.");
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to approve topical map"));
