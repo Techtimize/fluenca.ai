@@ -50,15 +50,6 @@ export default function ScriptDetailPage() {
         <ScriptJourney scriptCount={items.length} showCta={Boolean(companyId)} />
       ) : null}
 
-      {!companyId ? (
-        <Card className="border-amber-200 bg-amber-50/80 p-4">
-          <p className="text-sm text-amber-800">
-            Company ID is missing. Complete company analysis first, then return
-            here.
-          </p>
-        </Card>
-      ) : null}
-
       {showLoading ? (
         <Card className="flex items-center gap-3 p-6 text-neutral-500">
           <Loader2 className="size-5 animate-spin text-[#5B57E6]" />
