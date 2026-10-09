@@ -304,9 +304,9 @@ export default function ChatPanel({
                 </span>
               ) : null}
               {m.status === "running" && m.toolName ? (
-                <span className="mt-1 block text-xs text-neutral-500">Running {m.toolName}…</span>
+                <span className="mt-1 block text-xs text-neutral-500">Running {m.toolName.replaceAll("_", " ")}</span>
               ) : null}
-              {m.toolName === "navigate_to_page" && typeof m.toolResult?.path === "string" ? (
+              {typeof m.toolResult?.path === "string" && m.toolResult.path.startsWith("/") ? (
                 <button
                   type="button"
                   onClick={() => router.push(m.toolResult!.path as string)}

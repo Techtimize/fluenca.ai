@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, LogOut, Menu, X } from "lucide-react";
@@ -20,7 +20,6 @@ const EXPANDED_PAD = "15.5rem";
 const DEFAULT_NAV: NavItem[] = [
   { id: "home", label: "Home", icon: "home", href: PAGE_ROUTES.DASHBOARD },
   { id: "trends", label: "Trends", icon: "trending", href: PAGE_ROUTES.TRENDS },
-  { id: "dna", label: "Company DNA", icon: "dna", href: PAGE_ROUTES.DNA },
   {
     id: "content-recommendation",
     label: "Content recommendation",
@@ -28,7 +27,12 @@ const DEFAULT_NAV: NavItem[] = [
     href: PAGE_ROUTES.CONTENT_RECOMMENDATION,
   },
   { id: "script", label: "Script", icon: "file", href: PAGE_ROUTES.SCRIPT },
-  { id: "content", label: "Content", icon: "layers", href: PAGE_ROUTES.CONTENT },
+  {
+    id: "content",
+    label: "Content",
+    icon: "layers",
+    href: PAGE_ROUTES.CONTENT,
+  },
   { id: "blogs", label: "Blogs", icon: "clipboard", href: PAGE_ROUTES.BLOGS },
   {
     id: "competitors",
@@ -36,7 +40,12 @@ const DEFAULT_NAV: NavItem[] = [
     icon: "chart",
     href: PAGE_ROUTES.COMPETITOR_ANALYSIS,
   },
-  { id: "calendar", label: "Calendar", icon: "calendar", href: PAGE_ROUTES.CALENDAR },
+  {
+    id: "calendar",
+    label: "Calendar",
+    icon: "calendar",
+    href: PAGE_ROUTES.CALENDAR,
+  },
   {
     id: "controls",
     label: "Controls",
@@ -67,61 +76,74 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function setContentPad(collapsed: boolean) {
-  if (typeof document === "undefined") return;
-  document.documentElement.style.setProperty(
-    "--sidebar-content-pad",
-    collapsed ? COLLAPSED_PAD : EXPANDED_PAD,
-  );
+// The collapsed flag lives in localStorage; reading it through useSyncExternalStore
+// avoids setting state inside an effect and keeps SSR (always collapsed) in sync.
+const COLLAPSED_EVENT = "fluenca-sidebar-collapsed-change";
+
+function readCollapsed() {
+  try {
+    return localStorage.getItem(STORAGE_KEY) !== "false";
+  } catch {
+    return true;
+  }
+}
+
+function subscribeCollapsed(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  window.addEventListener(COLLAPSED_EVENT, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(COLLAPSED_EVENT, onChange);
+  };
+}
+
+function writeCollapsed(collapsed: boolean) {
+  try {
+    localStorage.setItem(STORAGE_KEY, String(collapsed));
+  } catch {
+    console.error("Error saving sidebar collapsed state");
+  }
+  window.dispatchEvent(new Event(COLLAPSED_EVENT));
 }
 
 export const DASHBOARD_CONTENT_OFFSET =
   "px-4 pb-10 pt-16 sm:px-6 md:pt-4 md:ps-[var(--sidebar-content-pad,5.5rem)] lg:pe-8 transition-[padding] duration-200";
 
-export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Logo.svg" }: Props) {
+export default function SidebarRail({
+  items = DEFAULT_NAV,
+  logoSrc = "/assets/Logo.svg",
+}: Props) {
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations("common");
   const tNav = useTranslations("nav");
-  const [collapsed, setCollapsed] = useState(true);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const collapsed = useSyncExternalStore(
+    subscribeCollapsed,
+    readCollapsed,
+    () => true,
+  );
+  // The mobile menu remembers the page it was opened on, so it closes on navigation
+  // without an effect.
+  const [mobileOpenedAt, setMobileOpenedAt] = useState<string | null>(null);
+  const mobileOpen = mobileOpenedAt === pathname;
+  const setMobileOpen = (open: boolean) =>
+    setMobileOpenedAt(open ? pathname : null);
   const isRtl = locale === "ar";
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const nextCollapsed = stored === null ? true : stored === "true";
-      setCollapsed(nextCollapsed);
-      setContentPad(nextCollapsed);
-    } catch {
-      setContentPad(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    setContentPad(collapsed);
-    try {
-      localStorage.setItem(STORAGE_KEY, String(collapsed));
-    } catch {
-      console.error("Error saving sidebar collapsed state");
-    }
-  }, [collapsed]);
-
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
 
   const handleLogout = () => {
     clearAuthTokenProvider();
     window.location.replace(PAGE_ROUTES.LOGIN);
   };
 
-  const toggleCollapsed = () => setCollapsed((prev) => !prev);
+  const toggleCollapsed = () => writeCollapsed(!collapsed);
 
   const resolveLabel = (item: NavItem) =>
     tNav.has(item.id) ? tNav(item.id as "home") : item.label;
 
-  const renderLinks = (opts: { showLabels: boolean; onNavigate?: () => void }) =>
+  const renderLinks = (opts: {
+    showLabels: boolean;
+    onNavigate?: () => void;
+  }) =>
     items.map((item) => {
       const Icon = getIcon(item.icon);
       const active = isActivePath(pathname, item.href);
@@ -156,6 +178,8 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
 
   return (
     <>
+      {/* Page content reads this padding to sit beside the rail. */}
+      <style>{`:root{--sidebar-content-pad:${collapsed ? COLLAPSED_PAD : EXPANDED_PAD}}`}</style>
       <button
         type="button"
         aria-label={t("openNav")}
@@ -179,8 +203,15 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
           >
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <AssetImage src={logoSrc} alt={t("brand")} width={28} height={28} />
-                <span className="text-sm font-semibold text-neutral-900">{t("brand")}</span>
+                <AssetImage
+                  src={logoSrc}
+                  alt={t("brand")}
+                  width={28}
+                  height={28}
+                />
+                <span className="text-sm font-semibold text-neutral-900">
+                  {t("brand")}
+                </span>
               </div>
               <button
                 type="button"
@@ -192,7 +223,10 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
               </button>
             </div>
             <ul className="flex-1 space-y-1.5 overflow-y-auto">
-              {renderLinks({ showLabels: true, onNavigate: () => setMobileOpen(false) })}
+              {renderLinks({
+                showLabels: true,
+                onNavigate: () => setMobileOpen(false),
+              })}
             </ul>
             <button
               type="button"
@@ -209,21 +243,31 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
       <nav
         aria-label="Main"
         className={`fixed bottom-4 start-4 top-4 z-20 hidden flex-col border border-[#E6E8F5] bg-white py-4 transition-[width,border-radius,padding] duration-200 md:flex ${
-          collapsed ? "w-14 items-center rounded-full px-0" : "w-56 rounded-3xl px-3"
+          collapsed
+            ? "w-14 items-center rounded-full px-0"
+            : "w-56 rounded-3xl px-3"
         }`}
       >
-        <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3 px-1"}`}>
+        <div
+          className={`flex items-center ${collapsed ? "justify-center" : "gap-3 px-1"}`}
+        >
           <AssetImage src={logoSrc} alt={t("brand")} width={28} height={28} />
           {!collapsed ? (
-            <span className="truncate text-sm font-semibold text-neutral-900">{t("brand")}</span>
+            <span className="truncate text-sm font-semibold text-neutral-900">
+              {t("brand")}
+            </span>
           ) : null}
         </div>
 
-        <ul className={`mt-8 flex-1 space-y-1.5 overflow-y-auto ${collapsed ? "" : "w-full"}`}>
+        <ul
+          className={`mt-8 flex-1 space-y-1.5 overflow-y-auto ${collapsed ? "" : "w-full"}`}
+        >
           {renderLinks({ showLabels: !collapsed })}
         </ul>
 
-        <div className={`mt-auto flex gap-2 ${collapsed ? "flex-col items-center" : "w-full flex-col"}`}>
+        <div
+          className={`mt-auto flex gap-2 ${collapsed ? "flex-col items-center" : "w-full flex-col"}`}
+        >
           <button
             type="button"
             aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
@@ -234,7 +278,11 @@ export default function SidebarRail({ items = DEFAULT_NAV, logoSrc = "/assets/Lo
                 : "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100"
             }`}
           >
-            {collapsed ? <ExpandIcon className="size-4" /> : <CollapseIcon className="size-[18px]" />}
+            {collapsed ? (
+              <ExpandIcon className="size-4" />
+            ) : (
+              <CollapseIcon className="size-[18px]" />
+            )}
             {!collapsed ? <span>{t("collapse")}</span> : null}
           </button>
 
