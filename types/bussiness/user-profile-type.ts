@@ -58,3 +58,31 @@ export interface UserProfileResponse {
   success: boolean;
   data: UserProfileData;
 }
+
+
+export interface EditProfileCompany {
+  name?: string;
+  logo_url?: string;
+  website?: string;
+  industry?: string;
+  region?: string;
+  business_model?: string;
+}
+
+export interface EditProfileUser {
+  full_name?: string;
+  phone?: string;
+  location?: string;
+  language?: string;
+}
+
+export interface EditProfileRequest {
+  company?: EditProfileCompany;
+  user?: EditProfileUser;
+}
+
+export interface EditProfileResponse {
+  success?: boolean;
+  message?: string;
+  data?: UserProfileData;
+}
