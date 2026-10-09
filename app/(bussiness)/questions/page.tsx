@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, Check, Pencil } from "lucide-react";
+import { ArrowLeft, Check, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { AnswerQuestionMutation } from "@/routes/bussiness/Bussiness-Mutation";
@@ -25,7 +25,6 @@ type CompanySection = {
   answered: number;
   total: number;
 };
-
 
 const toCompanySections = (sections: IntakeSection[]): CompanySection[] =>
   sections.map((section) => {
@@ -65,7 +64,14 @@ function ProgressRing({ value, total }: { value: number; total: number }) {
         role="img"
         aria-label={`${value} of ${total} questions answered`}
       >
-        <circle cx="26" cy="26" r={r} fill="none" stroke="#DCDDF5" strokeWidth="6" />
+        <circle
+          cx="26"
+          cy="26"
+          r={r}
+          fill="none"
+          stroke="#DCDDF5"
+          strokeWidth="6"
+        />
         <circle
           cx="26"
           cy="26"
@@ -106,8 +112,16 @@ function SectionProgressCircle({
   const pct = total === 0 ? 0 : Math.min(value / total, 1);
 
   return (
-    <span className="relative grid size-7 place-items-center" aria-hidden="true">
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0">
+    <span
+      className="relative grid size-7 place-items-center"
+      aria-hidden="true"
+    >
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        className="absolute inset-0"
+      >
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -148,7 +162,10 @@ function FieldCard({ field }: { field: CompanyField }) {
   const { mutate: saveAnswer, isPending } = AnswerQuestionMutation();
 
   const save = (answer: string) =>
-    saveAnswer({ question_id: field.id, answer }, { onSuccess: () => setEditing(false) });
+    saveAnswer(
+      { question_id: field.id, answer },
+      { onSuccess: () => setEditing(false) },
+    );
 
   return (
     <div
@@ -164,11 +181,14 @@ function FieldCard({ field }: { field: CompanyField }) {
         <h3 className="text-[13px] font-semibold text-neutral-900">
           {field.label}
           {!field.filled ? (
-            <span className="ml-1 text-[#E11D48]" aria-label={field.required ? "Required" : "Unanswered"}>
+            <span
+              className="ml-1 text-[#E11D48]"
+              aria-label={field.required ? "Required" : "Unanswered"}
+            >
               *
               {field.required ? (
                 <span className="ml-1 text-[11px] font-medium">Required</span>
-                ) : null}
+              ) : null}
             </span>
           ) : null}
         </h3>
@@ -246,37 +266,37 @@ function FieldCard({ field }: { field: CompanyField }) {
 
 /* ---------- Top bar ---------- */
 function TopBar() {
-  const user = { name: "User", avatarUrl: "" };
+  const router = useRouter();
+
+  // Opened directly (no history), there is nothing to go back to, so fall back to the dashboard.
+  const goBack = () => {
+    if (window.history.length > 1) router.back();
+    else router.push(PAGE_ROUTES.DASHBOARD);
+  };
 
   return (
-    <header className="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-10">
+    <header className="py-5">
       <div className="flex items-center gap-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/assets/Logo.svg" alt="" className="size-7" />
-        <span className="text-lg font-semibold tracking-wide text-neutral-900">FLUENCA</span>
+        <span className="text-lg font-semibold tracking-wide text-neutral-900">
+          FLUENCA
+        </span>
       </div>
 
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="grid size-10 place-items-center rounded-full border border-[#E6E8F5] bg-white text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B57E6]/40"
-        >
-          <Bell className="size-4" />
-        </button>
-
-        {user.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={user.avatarUrl} alt={user.name} className="size-10 rounded-full object-cover" />
-        ) : (
-          <div
-            aria-label={user.name}
-            className="grid size-10 place-items-center rounded-full bg-[#5B57E6] text-sm font-semibold text-white"
-          >
-            {user.name.charAt(0).toUpperCase()}
-          </div>
-        )}
-      </div>
+      <button
+        type="button"
+        onClick={goBack}
+        className="group mt-5 inline-flex items-center gap-2 rounded-full py-1 pe-3 text-sm font-medium text-neutral-600 transition-colors hover:text-[#5B57E6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B57E6]/40"
+      >
+        <span className="grid size-8 place-items-center rounded-full border border-[#E6E8F5] bg-white shadow-sm transition-colors group-hover:border-[#D7D5FF] group-hover:bg-[#F3F2FF]">
+          <ArrowLeft
+            className="size-4 transition-transform group-hover:-translate-x-0.5"
+            aria-hidden="true"
+          />
+        </span>
+        Back
+      </button>
     </header>
   );
 }
@@ -326,16 +346,20 @@ export default function QuestionsPage() {
 
   const scrollTo = (id: string) => {
     setActiveId(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById(id)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
-    <main className="min-w-0">
+    <main className="mx-auto w-full max-w-7xl min-w-0 px-4 pb-10 sm:px-6 lg:px-10">
       <TopBar />
 
       <div className="grid w-full gap-4 lg:grid-cols-[340px_1fr]">
         <aside className="rounded-3xl border border-[#E6E8F5] bg-white/80 p-5 backdrop-blur lg:sticky lg:top-6 lg:self-start">
-          <h1 className="text-base font-semibold text-neutral-900">{t("title")}</h1>
+          <h1 className="text-base font-semibold text-neutral-900">
+            {t("title")}
+          </h1>
           <p className="mb-4 mt-1 text-xs leading-5 text-neutral-500">
             {t("subtitle")}
           </p>
@@ -381,11 +405,17 @@ export default function QuestionsPage() {
           ref={observeSections}
           className="min-w-0 rounded-3xl border border-[#E6E8F5] bg-white/80 p-5 backdrop-blur sm:p-8"
         >
-          {isLoading && <p className="text-sm text-neutral-500">{t("loading")}</p>}
+          {isLoading && (
+            <p className="text-sm text-neutral-500">{t("loading")}</p>
+          )}
           {sections
             .filter((s) => s.fields.length > 0)
             .map((s) => (
-              <section key={s.id} id={s.id} className="scroll-mt-8 pb-8 last:pb-0">
+              <section
+                key={s.id}
+                id={s.id}
+                className="scroll-mt-8 pb-8 last:pb-0"
+              >
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <h2 className="text-sm text-neutral-800">{s.title}</h2>
                   <p className="text-xs text-neutral-500">
