@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentExecutionAgentModeApi, ContentExecutionItemsApi, ContentExecutionRunsApi, ContentExecutionSettingsApi, ContentRecommendationResultApi, DnaApi, IntakeApi, IntelligenceJobApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi } from "./bussiness.routes";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentExecutionAgentModeApi, ContentExecutionItemsApi, ContentExecutionRunsApi, ContentExecutionSettingsApi, ContentRecommendationResultApi, DnaApi, FacebookProfileContentApi, IntakeApi, IntelligenceJobApi, InstagramProfileIdApi, InstagramProfileInfoApi, LinkedInProfileContentApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi, InstagramProfileContentApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   AnalyzeCompanyDashboardApi,
@@ -404,6 +404,28 @@ export const SocialAccountsQuery = (enabled = true) => {
   });
 };
 
+export const InstagramProfileIdQuery = (username?: string | null) => {
+  const value = username?.trim() || "";
+  return useQuery({
+    queryKey: ["instagram-profile-id", value],
+    queryFn: () => InstagramProfileIdApi({ username: value }),
+    enabled: Boolean(value),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const InstagramProfileInfoQuery = (username?: string | null) => {
+  const value = username?.trim() || "";
+  return useQuery({
+    queryKey: ["instagram-profile-info", value],
+    queryFn: () => InstagramProfileInfoApi({ username: value }),
+    enabled: Boolean(value),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
 export const ContentExecutionSettingsQuery = (enabled = true) => {
   return useQuery({
     queryKey: ["content-execution-settings"],
@@ -447,5 +469,41 @@ export const ContentExecutionRunsQuery = (
     enabled,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+  });
+};
+
+export const InstagramProfileContentQuery = (username?: string | null) => {
+  return useQuery({
+    queryKey: ["instagram-profile-content", username],
+    queryFn: () => InstagramProfileContentApi({ username: username as string }),
+    enabled: Boolean(username),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const FacebookProfileContentQuery = (
+  enabled = true,
+  mediaLimit = 25,
+) => {
+  return useQuery({
+    queryKey: ["facebook-profile-content", mediaLimit],
+    queryFn: () => FacebookProfileContentApi({ media_limit: mediaLimit }),
+    enabled,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const LinkedInProfileContentQuery = (
+  enabled = true,
+  mediaLimit = 25,
+) => {
+  return useQuery({
+    queryKey: ["linkedin-profile-content", mediaLimit],
+    queryFn: () => LinkedInProfileContentApi({ media_limit: mediaLimit }),
+    enabled,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 };

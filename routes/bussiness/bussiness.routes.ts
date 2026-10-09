@@ -41,6 +41,7 @@ import type {
 import { IntelligenceJobResponse, IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 import type { PlannerResultsResponse, PlannerVersionsResponse } from "@/types/bussiness/planner-type";
 import type {
+    BlogImageRequest,
     BlogPost,
     BlogPostListResponse,
     BriefListResponse,
@@ -52,6 +53,8 @@ import type {
   InstagramAuthorizeResponse,
   InstagramPublishRequest,
   InstagramPublishResponse,
+  LinkedInPublishRequest,
+  LinkedInPublishResponse,
   SocialAccountsResponse,
 } from "@/types/bussiness/social-accounts-type";
 import type {
@@ -65,6 +68,20 @@ import type {
   ContentExecutionSettingsRequest,
   ContentExecutionSettingsResponse,
 } from "@/types/bussiness/content-execution-type";
+import type {
+  InstagramPostEngagementRequest,
+  InstagramPostEngagementResponse,
+  InstagramProfileContentRequest,
+  InstagramProfileContentResponse,
+  InstagramProfileIdRequest,
+  InstagramProfileIdResponse,
+  InstagramProfileInfoRequest,
+  InstagramProfileInfoResponse,
+} from "@/types/bussiness/instagram-type";
+import type {
+  SocialProfileContentRequest,
+  SocialProfileContentResponse,
+} from "@/types/bussiness/social-profile-content-type";
 
 function toQueryParams(params?: GoogleTrendQueryParams) {
   if (!params) return undefined;
@@ -422,6 +439,11 @@ export const BlogPostDetailsApi = async (blog_post_id: string): Promise<BlogPost
     return response.data;
 }
 
+export const BlogImageApi = async (blog_post_id: string, body: BlogImageRequest): Promise<BlogPost> => {
+    const response = await api.post(BUSSINESSENDPOINT.BLOG_POST_IMAGES(blog_post_id), body);
+    return response.data;
+}
+
 export const InstagramLoginApi = async (): Promise<InstagramAuthorizeResponse> => {
     const response = await api.get(BUSSINESSENDPOINT.CONNECTORS.INSTAGRAM_LOGIN);
     return response.data;
@@ -486,6 +508,14 @@ export const FacebookPublishApi = async (
   return response.data;
 }
 
+/** LinkedIn post — text | link | image. Auth + company; LinkedIn must have w_member_social. */
+export const LinkedInPublishApi = async (
+  data: LinkedInPublishRequest,
+): Promise<LinkedInPublishResponse> => {
+  const response = await api.post(BUSSINESSENDPOINT.PUBLISH.LINKEDIN_PUBLISH, data);
+  return response.data;
+}
+
 export const ContentExecutionSettingsApi = async (): Promise<ContentExecutionSettingsResponse> => {
   const response = await api.get(BUSSINESSENDPOINT.CONTENT_EXECUTION.SETTINGS);
   return response.data;
@@ -525,7 +555,6 @@ export const ContentExecutionRunApi = async (
   return response.data;
 }
 
-/** Calendar / status feed. */
 export const ContentExecutionItemsApi = async (params?: {
   date?: string;
   status?: string;
@@ -537,7 +566,6 @@ export const ContentExecutionItemsApi = async (params?: {
   return response.data;
 }
 
-/** Run logs for dashboard. */
 export const ContentExecutionRunsApi = async (params?: {
   limit?: number;
   status?: string;
@@ -547,3 +575,73 @@ export const ContentExecutionRunsApi = async (params?: {
   });
   return response.data;
 }
+
+export const InstagramProfileIdApi = async (
+  params: InstagramProfileIdRequest,
+): Promise<InstagramProfileIdResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.INSTAGRAM.PROFILE_ID, {
+    params: { username: params.username },
+  });
+  return response.data;
+}
+
+
+export const InstagramProfileInfoApi = async (
+  params: InstagramProfileInfoRequest,
+): Promise<InstagramProfileInfoResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.INSTAGRAM.PROFILE_INFO, {
+    params: { username: params.username },
+  });
+  return response.data;
+}
+
+
+export const InstagramPostEngagementApi = async (
+  params: InstagramPostEngagementRequest,
+): Promise<InstagramPostEngagementResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.INSTAGRAM.POST_ENGAGEMENT, {
+    params: {
+      username: params.username,
+      post_url: params.post_url,
+    },
+  });
+  return response.data;
+}
+
+
+/** GET /connector/instagram/profile-content?username= — uses connected Instagram handle. */
+export const InstagramProfileContentApi = async (
+  params: InstagramProfileContentRequest,
+): Promise<InstagramProfileContentResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.INSTAGRAM.PROFILE_CONTENT, {
+    params: {
+      username: params.username,
+    },
+  });
+  return response.data;
+};
+
+/** GET /connector/facebook/profile-content?media_limit= — connected Facebook page content. */
+export const FacebookProfileContentApi = async (
+  params: SocialProfileContentRequest = {},
+): Promise<SocialProfileContentResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.FACEBOOK.PROFILE_CONTENT, {
+    params: {
+      media_limit: params.media_limit ?? 25,
+    },
+  });
+  return response.data;
+};
+
+/** GET /connector/linkedin/profile-content?media_limit= — connected LinkedIn profile content. */
+export const LinkedInProfileContentApi = async (
+  params: SocialProfileContentRequest = {},
+): Promise<SocialProfileContentResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN.PROFILE_CONTENT, {
+    params: {
+      media_limit: params.media_limit ?? 25,
+    },
+  });
+  return response.data;
+};
+

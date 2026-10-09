@@ -211,16 +211,20 @@ export default function SignUpPage() {
             src="/assets/signup-bg.png"
             alt=""
             fill
-            className="object-cover"
+            priority
+            className="object-cover object-center"
             sizes="50vw"
           />
-          <Image
-            src="/assets/signup-preview.svg"
-            alt="Dashboard preview"
-            width={900}
-            height={1100}
-            className="relative z-10 h-full w-full object-contain"
-          />
+          <div className="relative z-10 flex h-full w-full items-center justify-end ps-10 pe-0">
+            <Image
+              src="/assets/signup-preview.svg"
+              alt="Dashboard preview"
+              width={900}
+              height={1100}
+              priority
+              className="h-[92%] w-auto max-w-none translate-x-6 object-contain object-right drop-shadow-xl sm:translate-x-8 lg:translate-x-10 rtl:-translate-x-6 rtl:object-left sm:rtl:-translate-x-8 lg:rtl:-translate-x-10"
+            />
+          </div>
         </section>
       </div>
     </div>

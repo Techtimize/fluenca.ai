@@ -51,8 +51,8 @@ export default function FaqCtaSection({
         {/* White block behind the card (as in the design) */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 top-[35%] rounded-t-[40px] bg-white md:top-[calc(4rem+194px)]" />
 
-        {/* Rectangle 137: 1280 x 450, radius 40 */}
-        <div className="relative mx-auto w-full max-w-[1280px] overflow-hidden rounded-[28px] bg-[linear-gradient(100deg,#3659FF_0%,#4A62FA_50%,#7A6CF0_100%)] md:flex md:h-[450px] md:items-center md:rounded-[40px]">
+          {/* Rectangle 137: 1280 x 450, radius 40 */}
+          <div className="relative mx-auto min-h-[360px] w-full max-w-[1280px] overflow-hidden rounded-[28px] bg-[linear-gradient(100deg,#3659FF_0%,#4A62FA_50%,#7A6CF0_100%)] md:min-h-0 md:flex md:h-[450px] md:items-center md:rounded-[40px]">
           {/* Soft glow */}
           <div className="pointer-events-none absolute left-[35%] top-1/2 h-[420px] w-[520px] -translate-y-1/2 rounded-full bg-[#6C86FF]/40 blur-3xl" />
 

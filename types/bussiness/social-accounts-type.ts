@@ -25,6 +25,30 @@ export interface InstagramPublishResponse {
 export type FacebookPublishRequest = InstagramPublishRequest;
 export type FacebookPublishResponse = InstagramPublishResponse;
 
+/** LinkedIn publish (requires connected account with w_member_social). */
+export type LinkedInPublishTextRequest = {
+  text: string;
+};
+
+export type LinkedInPublishLinkRequest = {
+  text: string;
+  link: string;
+  title?: string;
+};
+
+export type LinkedInPublishImageRequest = {
+  text: string;
+  image_url: string;
+  title?: string;
+};
+
+export type LinkedInPublishRequest =
+  | LinkedInPublishTextRequest
+  | LinkedInPublishLinkRequest
+  | LinkedInPublishImageRequest;
+
+export type LinkedInPublishResponse = InstagramPublishResponse;
+
 export interface SocialAccount {
   id?: string;
   platform?: SocialPlatform;

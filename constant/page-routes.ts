@@ -18,6 +18,10 @@ export const PAGE_ROUTES = {
 
     DASHBOARD: '/dashboard',
     INTEGRATIONS: '/dashboard/integrations',
+    SOCIAL: '/social',
+    SOCIAL_INSTAGRAM: '/social/instagram',
+    SOCIAL_FACEBOOK: '/social/facebook',
+    SOCIAL_LINKEDIN: '/social/linkedin',
     COMPANY_OVERVIEW: '/company-overview',
     PROFILE: '/profile',
     TRENDS: '/trends',
@@ -26,6 +30,7 @@ export const PAGE_ROUTES = {
     COMPETITOR_ANALYSIS_MANUAL: '/competitor-analysis/mannual',
     COMPETITORS: '/competitors',
     CALENDAR: '/calendar',
+    CONTROLS: '/controls',
     CONTENT_RECOMMENDATION: '/content-recommendation',
     SCRIPT: '/script',
     SCRIPT_DETAIL: (id: string) => `/script/${id}`,

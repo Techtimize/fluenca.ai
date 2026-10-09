@@ -102,7 +102,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${googleSansCode.variable} ${googleSansFlex.variable} ${plusJakartaSans.variable} ${notoSansArabic.variable} h-full antialiased`}
     >
       <body
-        className={`flex min-h-full flex-col ${isArabic ? "font-[family-name:var(--font-noto-arabic)]" : ""}`}
+        className={`flex min-h-full flex-col overflow-x-hidden ${isArabic ? "font-[family-name:var(--font-noto-arabic)]" : ""}`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <QueryProvider>
