@@ -32,8 +32,8 @@ import type { EditProfileRequest } from "@/types/bussiness/user-profile-type";
 export function EditUserProfileMutation() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (data: EditProfileRequest) => {
-            const response = await EditUserProfileApi(data);
+        mutationFn: async ({ user_id, data }: { user_id: string; data: EditProfileRequest }) => {
+            const response = await EditUserProfileApi(user_id, data);
             if (response?.success === false) {
                 throw new Error(response?.message || "Failed to update profile");
             }

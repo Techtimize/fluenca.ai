@@ -231,8 +231,8 @@ export const UserProfileApi = async () => {
     return response.data;
 }
 
-export const EditUserProfileApi = async (data: EditProfileRequest) => {
-    const response = await api.patch<EditProfileResponse>(BUSSINESSENDPOINT.EDIT_USER_PROFILE, data);
+export const EditUserProfileApi = async (user_id: string, data: EditProfileRequest) => {
+    const response = await api.patch<EditProfileResponse>(BUSSINESSENDPOINT.EDIT_USER_PROFILE(user_id), data);
     return response.data;
 }
 
