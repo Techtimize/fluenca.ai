@@ -4,7 +4,11 @@ import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness
 import { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
 import type { DashboardResponse } from "@/types/bussiness/dashboard-type";
 import type { DashboardDocumentationResponse } from "@/types/bussiness/dashboard-documentation-type";
-import type { UserProfileResponse } from "@/types/bussiness/user-profile-type";
+import type {
+  EditProfileRequest,
+  EditProfileResponse,
+  UserProfileResponse,
+} from "@/types/bussiness/user-profile-type";
 import {
   CompetitorAnalysisJobResponse,
   CompetitorAnalysisManualRequest,
@@ -224,6 +228,11 @@ export const AnalyzeCompanyDashboardApi = async (company_id: string) => {
 
 export const UserProfileApi = async () => {
     const response = await api.get<UserProfileResponse>(BUSSINESSENDPOINT.USER_PROFILE);
+    return response.data;
+}
+
+export const EditUserProfileApi = async (data: EditProfileRequest) => {
+    const response = await api.patch<EditProfileResponse>(BUSSINESSENDPOINT.EDIT_USER_PROFILE, data);
     return response.data;
 }
 

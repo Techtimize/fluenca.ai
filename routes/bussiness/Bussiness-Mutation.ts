@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, EditUserProfileApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi } from "./bussiness.routes";
 import type {
   FacebookPublishRequest,
   InstagramPublishRequest,
@@ -27,6 +27,27 @@ import { ScriptGenerationRequest, ScriptGenerationResponse } from "@/types/bussi
 import { ImageGenerationRequest, ImageGenerationResponse } from "@/types/bussiness/imagegeneration-type";
 import { IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 import useAuthStore from "@/store/AuthsStore";
+import type { EditProfileRequest } from "@/types/bussiness/user-profile-type";
+
+export function EditUserProfileMutation() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (data: EditProfileRequest) => {
+            const response = await EditUserProfileApi(data);
+            if (response?.success === false) {
+                throw new Error(response?.message || "Failed to update profile");
+            }
+            return response;
+        },
+        onSuccess: (response) => {
+            toast.success(response?.message || "Profile updated successfully");
+            queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+        },
+        onError: (error: unknown) => {
+            toast.error(getApiErrorMessage(error, "Failed to update profile"));
+        },
+    });
+}
 
 
 export function WaitlistMutation() {
