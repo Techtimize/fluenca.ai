@@ -30,9 +30,9 @@ export interface LandingHeroProps {
 }
 
 const navLinks = [
-  { label: "Blog", href: "/blog" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Use case", href: "/use-case" },
+  { label: "Blogs", href: "/blog" },
+  { label: "Plans", href: "/plans" },
+  { label: "Use cases", href: "/use-case" },
 ] as const;
 
 export function LandingHero({
