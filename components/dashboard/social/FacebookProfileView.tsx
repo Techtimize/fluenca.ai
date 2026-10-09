@@ -16,6 +16,7 @@ import { SocialNotConnected } from "@/components/dashboard/social/SocialNotConne
 import {
   accountDisplayName,
   accountHandle,
+  formatCount,
   platformPosts,
 } from "@/components/dashboard/social/socialUtils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
@@ -79,7 +80,7 @@ export function FacebookProfileView({
   }
 
   return (
-    <div className="mx-auto max-w-[680px] overflow-hidden rounded-2xl border border-[#CCD0D5] bg-[#F0F2F5] shadow-sm">
+    <div className="w-full overflow-hidden rounded-2xl border border-[#CCD0D5] bg-[#F0F2F5] shadow-sm">
       <div className="bg-white">
         <div className="relative h-[160px] bg-gradient-to-br from-[#1877F2] via-[#4B92F7] to-[#8BB7F9] sm:h-[220px]">
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/25 to-transparent" />
@@ -208,6 +209,19 @@ export function FacebookProfileView({
                   className="max-h-[520px] w-full object-cover"
                 />
               ) : null}
+
+              <div className="flex items-center justify-between px-3 py-2.5 text-[13px] text-[#65676B]">
+                <div className="inline-flex items-center gap-1.5">
+                  <span className="grid size-4 place-items-center rounded-full bg-[#1877F2] text-white">
+                    <ThumbsUp className="size-2.5 fill-white" />
+                  </span>
+                  <span>{formatCount(0)}</span>
+                </div>
+                <div className="inline-flex items-center gap-3">
+                  <span>0 comments</span>
+                  <span>0 shares</span>
+                </div>
+              </div>
 
               <div className="grid grid-cols-3 border-t border-[#E4E6EB] text-[14px] font-semibold text-[#65676B]">
                 <button

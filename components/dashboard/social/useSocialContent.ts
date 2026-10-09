@@ -7,7 +7,7 @@ import useAuthStore from "@/store/AuthsStore";
 
 export function useSocialContent() {
   const companyId = useAuthStore((s) => s.company_id);
-  const { data, isLoading, isFetching } =
+  const { data, isLoading, isFetching, refetch } =
     CompanyImageGenerationResultsQuery(companyId || "");
 
   const content = useMemo(() => normalizeCompanyContent(data), [data]);
@@ -16,5 +16,7 @@ export function useSocialContent() {
     companyId,
     results: content.results,
     isLoading: Boolean(companyId) && (isLoading || isFetching),
+    isRefreshing: Boolean(companyId) && isFetching,
+    refetch,
   };
 }

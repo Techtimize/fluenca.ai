@@ -17,10 +17,10 @@ export default function InstagramSocialPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold text-neutral-900">
-            Instagram profile
+            Instagram
           </h1>
           <p className="mt-1 text-[13px] text-neutral-500">
-            Loads profile info and posts for your connected Instagram handle.
+            Profile insights and media for your connected Instagram handle.
           </p>
         </div>
         <SocialPlatformTabs />

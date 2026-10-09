@@ -74,6 +74,10 @@ import type {
   InstagramProfileInfoRequest,
   InstagramProfileInfoResponse,
 } from "@/types/bussiness/instagram-type";
+import type {
+  SocialProfileContentRequest,
+  SocialProfileContentResponse,
+} from "@/types/bussiness/social-profile-content-type";
 
 function toQueryParams(params?: GoogleTrendQueryParams) {
   if (!params) return undefined;
@@ -606,5 +610,29 @@ export const InstagramProfileContentApi = async (
     },
   });
   return response.data;
-}
+};
+
+/** GET /connector/facebook/profile-content?media_limit= — connected Facebook page content. */
+export const FacebookProfileContentApi = async (
+  params: SocialProfileContentRequest = {},
+): Promise<SocialProfileContentResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.FACEBOOK.PROFILE_CONTENT, {
+    params: {
+      media_limit: params.media_limit ?? 25,
+    },
+  });
+  return response.data;
+};
+
+/** GET /connector/linkedin/profile-content?media_limit= — connected LinkedIn profile content. */
+export const LinkedInProfileContentApi = async (
+  params: SocialProfileContentRequest = {},
+): Promise<SocialProfileContentResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN.PROFILE_CONTENT, {
+    params: {
+      media_limit: params.media_limit ?? 25,
+    },
+  });
+  return response.data;
+};
 
