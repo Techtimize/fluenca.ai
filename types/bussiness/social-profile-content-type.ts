@@ -31,10 +31,24 @@ export interface SocialProfileContentRequest {
   media_limit?: number;
 }
 
+export interface SocialProfileLocale {
+  country?: string | null;
+  language?: string | null;
+  [key: string]: unknown;
+}
+
 export interface SocialProfileContentResponse {
   success?: boolean;
   message?: string;
   error?: string | null;
+  platform?: string | null;
+  person_id?: string | number | null;
+  name?: string | null;
+  email?: string | null;
+  picture?: string | null;
+  locale?: SocialProfileLocale | null;
+  posts_count_returned?: number | null;
+  posts_unavailable_reason?: string | null;
   username?: string;
   media?: SocialProfileMediaItem[];
   posts?: SocialProfileMediaItem[];
@@ -49,6 +63,70 @@ export interface SocialProfileContentResponse {
       };
   count?: number;
   [key: string]: unknown;
+}
+
+export interface NormalizedLinkedInProfile {
+  personId: string | null;
+  name: string | null;
+  email: string | null;
+  picture: string | null;
+  country: string | null;
+  language: string | null;
+  postsCountReturned: number | null;
+  postsUnavailableReason: string | null;
+}
+
+function asTrimmedString(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+function asFiniteNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+export function normalizeLinkedInProfileContent(
+  data?: SocialProfileContentResponse | null,
+): NormalizedLinkedInProfile {
+  if (!data) {
+    return {
+      personId: null,
+      name: null,
+      email: null,
+      picture: null,
+      country: null,
+      language: null,
+      postsCountReturned: null,
+      postsUnavailableReason: null,
+    };
+  }
+
+  const nested =
+    data.data && typeof data.data === "object" && !Array.isArray(data.data)
+      ? (data.data as SocialProfileContentResponse)
+      : null;
+  const source = nested ? { ...data, ...nested } : data;
+  const locale =
+    source.locale && typeof source.locale === "object"
+      ? source.locale
+      : null;
+
+  return {
+    personId: asTrimmedString(source.person_id),
+    name: asTrimmedString(source.name),
+    email: asTrimmedString(source.email),
+    picture: asTrimmedString(source.picture),
+    country: asTrimmedString(locale?.country),
+    language: asTrimmedString(locale?.language),
+    postsCountReturned: asFiniteNumber(source.posts_count_returned),
+    postsUnavailableReason: asTrimmedString(source.posts_unavailable_reason),
+  };
 }
 
 export function normalizeSocialProfileContent(
