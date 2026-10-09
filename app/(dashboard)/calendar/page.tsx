@@ -11,6 +11,7 @@ import {
   normalizePlannerVersions,
   unwrapPlannerResult,
 } from "@/components/dashboard/calendar/plannerUtils";
+import { AgentModeToggle } from "@/components/dashboard/content-execution/AgentModeToggle";
 import TopBar from "@/components/dashboard/topBar";
 import ApiNotFoundCard from "@/components/notfound";
 import Card from "@/components/shared/card";
@@ -117,6 +118,18 @@ export default function CalendarPage() {
   return (
     <main className="min-w-0 space-y-4 pb-4">
       <TopBar user={{ name: companyName || "User" }} placeholder="Search calendar..." />
+
+      {companyId ? (
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-lg font-semibold text-neutral-900">Calendar</h1>
+            <p className="mt-1 text-[13px] text-neutral-500">
+              Turn on agent mode to let Fluenca run today’s planned posts.
+            </p>
+          </div>
+          <AgentModeToggle className="w-full max-w-md sm:w-auto sm:min-w-[320px]" />
+        </div>
+      ) : null}
 
       {companyId && (isLoading || isFetching) && !hasPlan && !notFound ? (
         <Card className="flex items-center justify-center gap-3 p-12 text-neutral-500">

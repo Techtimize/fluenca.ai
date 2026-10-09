@@ -9,7 +9,6 @@ import {
   CompetitorAnalysisJobResponse,
   CompetitorAnalysisManualRequest,
   CompetitorAnalysisRequest,
-  CompetitorAnalysisResponse,
   CompetitorAnalysisVersionsResponse,
   CompetitorsListResponse,
 } from "@/types/bussiness/competitoranalysis-type";
@@ -38,6 +37,8 @@ import type {
 import { IntelligenceJobResponse, IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 import type { PlannerResultsResponse, PlannerVersionsResponse } from "@/types/bussiness/planner-type";
 import type {
+  FacebookPublishRequest,
+  FacebookPublishResponse,
     BlogPost,
     BlogPostListResponse,
     BriefListResponse,
@@ -45,8 +46,21 @@ import type {
 } from "@/types/bussiness/blog-type";
 import type {
   InstagramAuthorizeResponse,
+  InstagramPublishRequest,
+  InstagramPublishResponse,
   SocialAccountsResponse,
 } from "@/types/bussiness/social-accounts-type";
+import type {
+  ContentExecutionAgentModeRequest,
+  ContentExecutionAgentModeResponse,
+  ContentExecutionDailyResponse,
+  ContentExecutionItemsResponse,
+  ContentExecutionRunRequest,
+  ContentExecutionRunResponse,
+  ContentExecutionRunsResponse,
+  ContentExecutionSettingsRequest,
+  ContentExecutionSettingsResponse,
+} from "@/types/bussiness/content-execution-type";
 
 function toQueryParams(params?: GoogleTrendQueryParams) {
   if (!params) return undefined;
@@ -446,5 +460,81 @@ export const FacebookConnectApi = async (): Promise<InstagramAuthorizeResponse> 
 
 export const FacebookConnectPostApi = async (): Promise<InstagramAuthorizeResponse> => {
   const response = await api.post(BUSSINESSENDPOINT.CONNECTORS.FACEBOOK_CONNECT);
+  return response.data;
+}
+
+export const InstagramPublishApi = async (
+  data: InstagramPublishRequest,
+): Promise<InstagramPublishResponse> => {
+  const response = await api.post(BUSSINESSENDPOINT.PUBLISH.INSTAGRAM_PUBLISH, data);
+  return response.data;
+}
+
+export const FacebookPublishApi = async (
+  data: FacebookPublishRequest,
+): Promise<FacebookPublishResponse> => {
+  const response = await api.post(BUSSINESSENDPOINT.PUBLISH.FACEBOOK_PUBLISH, data);
+  return response.data;
+}
+
+export const ContentExecutionSettingsApi = async (): Promise<ContentExecutionSettingsResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.CONTENT_EXECUTION.SETTINGS);
+  return response.data;
+}
+
+export const UpdateContentExecutionSettingsApi = async (
+  data: ContentExecutionSettingsRequest,
+): Promise<ContentExecutionSettingsResponse> => {
+  const response = await api.put(BUSSINESSENDPOINT.CONTENT_EXECUTION.SETTINGS, data);
+  return response.data;
+}
+
+/** Agent mode toggle — gates the content orchestrator. */
+export const ContentExecutionAgentModeApi = async (): Promise<ContentExecutionAgentModeResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.CONTENT_EXECUTION.AGENT_MODE);
+  return response.data;
+}
+
+export const UpdateContentExecutionAgentModeApi = async (
+  data: ContentExecutionAgentModeRequest,
+): Promise<ContentExecutionAgentModeResponse> => {
+  const response = await api.put(BUSSINESSENDPOINT.CONTENT_EXECUTION.AGENT_MODE, data);
+  return response.data;
+}
+
+/** Cron: queue sweep for all auto-publish companies. */
+export const ContentExecutionDailyApi = async (): Promise<ContentExecutionDailyResponse> => {
+  const response = await api.post(BUSSINESSENDPOINT.CONTENT_EXECUTION.DAILY);
+  return response.data;
+}
+
+/** Queue content execution for this company. */
+export const ContentExecutionRunApi = async (
+  data?: ContentExecutionRunRequest,
+): Promise<ContentExecutionRunResponse> => {
+  const response = await api.post(BUSSINESSENDPOINT.CONTENT_EXECUTION.RUN, data ?? {});
+  return response.data;
+}
+
+/** Calendar / status feed. */
+export const ContentExecutionItemsApi = async (params?: {
+  date?: string;
+  status?: string;
+  platform?: string;
+}): Promise<ContentExecutionItemsResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.CONTENT_EXECUTION.ITEMS, {
+    params,
+  });
+  return response.data;
+}
+
+/** Run logs for dashboard. */
+export const ContentExecutionRunsApi = async (params?: {
+  limit?: number;
+  status?: string;
+}): Promise<ContentExecutionRunsResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.CONTENT_EXECUTION.RUNS, {
+    params,
+  });
   return response.data;
 }

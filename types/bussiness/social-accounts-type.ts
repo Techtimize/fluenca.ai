@@ -6,6 +6,25 @@ export interface InstagramAuthorizeResponse {
   message?: string;
 }
 
+export interface InstagramPublishRequest {
+  image_url: string;
+  caption?: string;
+  image_urls?: string[];
+}
+
+export interface InstagramPublishResponse {
+  success?: boolean;
+  message?: string;
+  error?: string | null;
+  post_id?: string | null;
+  media_id?: string | null;
+  permalink?: string | null;
+  [key: string]: unknown;
+}
+
+export type FacebookPublishRequest = InstagramPublishRequest;
+export type FacebookPublishResponse = InstagramPublishResponse;
+
 export interface SocialAccount {
   id?: string;
   platform?: SocialPlatform;
