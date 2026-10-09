@@ -2,16 +2,13 @@
 
 // components/landing/how-it-works.tsx
 //
-// Scroll section:
-//  - the blue card stays pinned (sticky) on the right
-//  - every time you scroll down to the next step:
-//      * the left text blends into the next text (soft fade, NO blur)
-//      * the right side blends into the next animation (soft fade)
-//      * the icon on the left switches to the next logo (1, 2, 3, 4)
-//  - each step is always fully sharp and clear when you stop scrolling
-//  - the "x" marks on the blue background pop + glow when the mouse touches them
+// Scroll section (pinned card on the right, text + logo on the left).
+// - The active step is calculated DIRECTLY from scroll position (no timers),
+//   so scrolling is predictable: the same scroll distance = the same step.
+// - Headings live inside the pinned frame, so there is no empty white gap.
+// - Fully responsive: stacked layout below `lg`, two columns from `lg` up.
 //
-// ⚠️ Do not put "overflow-hidden" on the <section> below, it would break "sticky".
+// ⚠️ Do not put "overflow-hidden" on the <section>, it would break "sticky".
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -22,9 +19,6 @@ import step2Animation from "@/animations/how-it-works-2.json";
 import step3Animation from "@/animations/how-it-works-3.json";
 import step4Animation from "@/animations/how-it-works-4.json";
 
-/* ---------------------------------------------------------------
-   THE 4 STEPS  (text + which animation belongs to each step)
----------------------------------------------------------------- */
 const STEPS = [
   {
     title: "Tell us about your company",
@@ -52,7 +46,6 @@ const STEPS = [
   },
 ];
 
-// The 4 logos exported from Figma (saved in public/assets/how-it-works/)
 const STEP_ICONS = [
   "/assets/how-it-works/step-1-icon.svg",
   "/assets/how-it-works/step-2-icon.svg",
@@ -61,21 +54,19 @@ const STEP_ICONS = [
 ];
 
 const N = STEPS.length;
-const SCROLL_PER_STEP_VH = 130; // scrolling needed for each step (bigger = slower)
-// The blue card is 590 x 450. Each animation has its own size and position
-// inside it (taken from Figma, relative to the card's top-left corner).
+
+// Scroll distance for ONE step = 70% of the screen height, but never less than 480px.
+// (Written in CSS so the browser does the sizing: no JavaScript measuring, no layout jumps.)
+const STEP_CSS = "max(480px, 70svh)";
+
 const CARD_W = 590;
 const CARD_H = 450;
-// Each step has a `lift`: extra pixels (of the 590 x 450 card) the animation is moved UP,
-// so it does not touch the bottom edge. 0 = exactly the Figma position.
-const STEP_DELAY_MS = 600; // minimum time between two steps, so steps never get skipped
 
-// Blue gradient used for text (angle + stops from the design)
 const GRADIENT_TEXT =
   "bg-[linear-gradient(95.57deg,#3659FF_-37.81%,#4F60FF_45.96%,#8157F7_115.03%)] bg-clip-text text-transparent";
 
 /* ---------------------------------------------------------------
-   The blue background with "x" marks that pop on hover
+   Blue background with "x" marks that pop on hover
 ---------------------------------------------------------------- */
 const COLS = 14;
 const ROWS = 12;
@@ -95,7 +86,7 @@ function XPattern() {
             viewBox="0 0 10 10"
             fill="none"
             aria-hidden
-            className="h-2.5 w-2.5 text-white/25 transition-all duration-700 ease-out will-change-transform group-hover:scale-[2.2] group-hover:text-white group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.95)] group-hover:duration-150"
+            className="h-2 w-2 text-white/25 transition-all duration-700 ease-out will-change-transform group-hover:scale-[2.2] group-hover:text-white group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.95)] group-hover:duration-150 sm:h-2.5 sm:w-2.5"
           >
             <path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
           </svg>
@@ -106,8 +97,7 @@ function XPattern() {
 }
 
 /* ---------------------------------------------------------------
-   One animation layer (all 4 are stacked, only the active one is visible)
-   Each animation is placed with its own Figma size/position (see `box` in STEPS).
+   One animation layer (all 4 stacked, only the active one visible)
 ---------------------------------------------------------------- */
 function AnimationLayer({
   data,
@@ -123,7 +113,6 @@ function AnimationLayer({
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const isActive = index === active;
 
-  // restart the animation every time this step becomes active
   useEffect(() => {
     const id = requestAnimationFrame(() => {
       if (isActive) lottieRef.current?.goToAndPlay(0, true);
@@ -132,12 +121,15 @@ function AnimationLayer({
     return () => cancelAnimationFrame(id);
   }, [isActive]);
 
-  // old step leaves upward, next step waits below
-  const position = isActive ? "translate-y-0 opacity-100" : index < active ? "-translate-y-4 opacity-0" : "translate-y-4 opacity-0";
+  const position = isActive
+    ? "translate-y-0 opacity-100"
+    : index < active
+      ? "-translate-y-4 opacity-0"
+      : "translate-y-4 opacity-0";
 
   return (
     <div
-      className={`pointer-events-none absolute inset-0 transition-[opacity,transform] duration-700 ease-out ${position}`}
+      className={`pointer-events-none absolute inset-0 transition-[opacity,transform] duration-500 ease-out ${position}`}
     >
       <div
         className="absolute"
@@ -166,82 +158,116 @@ function AnimationLayer({
 ---------------------------------------------------------------- */
 export default function HowItWorks() {
   const trackRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const spacerRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-  const activeRef = useRef(0); // the step currently shown
-  const targetRef = useRef(0); // the step the scroll position asks for
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeRef = useRef(0);
 
-  // which step is active, based on how far we scrolled through the track.
-  // The shown step moves ONE step at a time (1 -> 2 -> 3), even if you scroll fast.
+  // Active step comes straight from how far we scrolled while the frame is pinned.
   useEffect(() => {
     const el = trackRef.current;
-    if (!el) return;
+    const frame = frameRef.current;
+    const spacer = spacerRef.current;
+    if (!el || !frame || !spacer) return;
     let raf = 0;
 
-    const stepTowardTarget = () => {
-      timerRef.current = null;
-      if (activeRef.current === targetRef.current) return;
-      activeRef.current += Math.sign(targetRef.current - activeRef.current);
-      setActive(activeRef.current);
-      timerRef.current = setTimeout(stepTowardTarget, STEP_DELAY_MS);
-    };
+    // "position: sticky" silently stops working if ANY parent has overflow hidden/auto/scroll.
+    // That is what leaves a big empty white gap (the pinned frame scrolls away, the spacer stays).
+    // Switch such parents to "overflow: clip": same visual clipping, but sticky works again.
+    const fixed: { node: HTMLElement; prev: string }[] = [];
+    const htmlOverflow = getComputedStyle(document.documentElement).overflow;
+    for (let node = frame.parentElement; node && node !== document.documentElement; node = node.parentElement) {
+      if (node === document.body && htmlOverflow === "visible") break; // body overflow goes to the viewport, fine
+      const cs = getComputedStyle(node);
+      const bad = (v: string) => v !== "visible" && v !== "clip";
+      if (bad(cs.overflowX) || bad(cs.overflowY)) {
+        fixed.push({ node, prev: node.style.overflow });
+        node.style.overflow = "clip";
+      }
+    }
+
+    // The frame's own height -> CSS variable, so CSS can centre it exactly on screen.
+    // (No React state, and the screen height is not measured, so the phone address bar can't cause jumps.)
+    const setFrameHeight = () => frame.style.setProperty("--frame-h", `${frame.offsetHeight}px`);
+    setFrameHeight();
+    const ro = new ResizeObserver(() => {
+      setFrameHeight();
+      onScroll();
+    });
+    ro.observe(frame);
 
     const update = () => {
-      const rect = el.getBoundingClientRect();
-      const total = rect.height - window.innerHeight;
-      const progress = total > 0 ? Math.min(1, Math.max(0, -rect.top / total)) : 0;
-      targetRef.current = Math.min(N - 1, Math.floor(progress * N));
-      if (!timerRef.current) stepTowardTarget();
+      raf = 0;
+      const total = spacer.offsetHeight; // how far the frame can travel while it is pinned
+      if (total <= 0) return;
+
+      // How far the frame has been "carried" down inside its track by sticky = how far we scrolled while pinned.
+      // (Measured from real positions, so it does not depend on the sticky `top` value or the screen size.)
+      const carried = frame.getBoundingClientRect().top - el.getBoundingClientRect().top;
+      const scrolled = Math.min(total, Math.max(0, carried));
+
+      // The pinned distance is split into N equal parts, one per step.
+      const f = (scrolled / total) * N; // 0 .. N
+      const GAP = 0.06; // small dead zone at every boundary, so it never flickers between two steps
+
+      let next = activeRef.current;
+      while (next < N - 1 && f >= next + 1 + GAP) next++;
+      while (next > 0 && f <= next - GAP) next--;
+      if (next !== activeRef.current) {
+        activeRef.current = next;
+        setActive(next);
+      }
     };
+
     const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(update);
+      if (!raf) raf = requestAnimationFrame(update);
     };
 
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = null;
-      cancelAnimationFrame(raf);
+      fixed.forEach(({ node, prev }) => (node.style.overflow = prev));
+      ro.disconnect();
+      if (raf) cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
   }, []);
 
   return (
-    // Rounded top corners + pulled up over the hero so the hero glow shows behind the curve
     <section
       id="how-it-works"
-      className="relative z-10 -mt-10 w-full rounded-t-[40px] bg-white md:-mt-14 md:rounded-t-[56px]"
+      className="relative z-10 -mt-10 w-full rounded-t-[32px] bg-white md:-mt-14 md:rounded-t-[56px]"
     >
-      {/* Headings (normal scrolling) */}
-      <div className="mx-auto w-full max-w-360 px-6 pb-8 pt-12 md:pt-20 lg:pt-28">
-        <div className="grid items-start gap-4 md:gap-6 md:grid-cols-[1fr_590px] md:justify-between md:gap-16">
-          {/* Left heading: 334 x 96, 400, 36px / 48px, #1C1C1E */}
-          <h2 className="w-full font-display text-[28px] leading-[36px] md:text-[36px] md:leading-[48px] font-normal tracking-normal text-[#1C1C1E]">
-            Let AI Understand Your Business First
-          </h2>
+      {/* Track = the pinned frame + an invisible spacer that gives the scroll distance for steps 2, 3 and 4.
+          The frame is only as tall as its content, so the section ends right after it (no extra gap below). */}
+      <div ref={trackRef}>
+        <div
+          ref={frameRef}
+          /* pinned just BELOW the navbar, centred in the space that is left */
+          style={{ top: "calc(var(--nav-h) + max(0px, (100svh - var(--nav-h) - var(--frame-h, 560px)) / 2))" }}
+          className="sticky flex flex-col gap-4 px-4 py-5 [--nav-h:64px] sm:gap-6 sm:px-8 sm:py-6 md:[--nav-h:80px] md:gap-8 md:px-12 md:py-8 lg:gap-8 lg:px-20 lg:py-8"
+        >
+          {/* Headings */}
+          <div className="mx-auto grid w-full max-w-360 items-start gap-1 sm:gap-2 lg:grid-cols-[1fr_590px] lg:gap-16">
+            <h2 className="font-display text-[16px] font-normal leading-[24px] text-[#1C1C1E] sm:text-[20px] sm:leading-[28px] md:text-[26px] md:leading-[36px] lg:text-[36px] lg:leading-[48px]">
+              Let AI Understand Your Business First
+            </h2>
 
-          {/* Right heading: 590 x 124, 500, 50px / 62px, "Business Data" black, rest blue gradient */}
-          <h2 className="w-full font-display text-[32px] leading-[40px] md:text-[50px] md:leading-[62px] font-medium tracking-normal">
-            <span className={GRADIENT_TEXT}>From </span>
-            <span className="text-[#1C1C1E]">Business Data</span>
-            <br />
-            <span className={GRADIENT_TEXT}>to Marketing Intelligence</span>
-          </h2>
-        </div>
-      </div>
+            <h2 className="font-display text-[24px] font-medium leading-[31px] sm:text-[28px] sm:leading-[36px] md:text-[38px] md:leading-[48px] lg:text-[50px] lg:leading-[62px]">
+              <span className={GRADIENT_TEXT}>From </span>
+              <span className="text-[#1C1C1E]">Business Data</span>
+              <br />
+              <span className={GRADIENT_TEXT}>to Marketing Intelligence</span>
+            </h2>
+          </div>
 
-      {/* Tall scroll track: the pinned frame stays on screen while you scroll through it */}
-      <div ref={trackRef} style={{ height: `${N * SCROLL_PER_STEP_VH}vh` }}>
-        <div className="sticky top-0 flex h-screen items-center pt-8 md:pt-16">
-          <div className="mx-auto grid w-full max-w-360 items-center gap-6 px-6 md:grid-cols-[1fr_590px] md:justify-between md:gap-16 md:px-12 lg:px-20">
-            {/* LEFT: logo icon + text that blends from one step to the next */}
-            <div>
-              {/* The 4 Figma logos, stacked: only the active one is visible */}
-              <div className="relative h-14 w-14 md:h-16 md:w-16" aria-hidden="true">
+          {/* Content: card first + text under it on small/medium, text left + card right on large */}
+          <div className="mx-auto grid w-full max-w-360 items-center gap-5 sm:gap-6 lg:grid-cols-[1fr_590px] lg:gap-16">
+            {/* LEFT: logo + text (under the card on small screens) */}
+            <div className="order-2 flex flex-row items-start gap-3 lg:order-1 lg:flex-col lg:gap-4">
+              <div className="relative mt-0.5 h-10 w-10 shrink-0 sm:h-11 sm:w-11 lg:mt-0 lg:h-16 lg:w-16" aria-hidden="true">
                 {STEP_ICONS.map((src, i) => (
                   <Image
                     key={src}
@@ -256,12 +282,13 @@ export default function HowItWorks() {
                 ))}
               </div>
 
-              <div className="relative mt-5 h-[200px] md:h-[240px]">
+              {/* All texts share ONE grid cell, so the height fits the tallest text (no fixed gap) */}
+              <div className="grid min-w-0 flex-1 lg:max-w-[449px]">
                 {STEPS.map((step, i) => (
                   <div
                     key={step.title}
                     aria-hidden={i !== active}
-                    className={`absolute inset-x-0 top-0 w-full max-w-[449px] transition-[opacity,transform] duration-700 ease-out ${
+                    className={`col-start-1 row-start-1 transition-[opacity,transform] duration-500 ease-out ${
                       i === active
                         ? "translate-y-0 opacity-100"
                         : i < active
@@ -269,12 +296,10 @@ export default function HowItWorks() {
                           : "pointer-events-none translate-y-3 opacity-0"
                     }`}
                   >
-                    {/* Title: 302 x 42, 500, 24px / 42px, #1C1C1E */}
-                    <h3 className="min-h-[36px] w-full max-w-[449px] font-display text-[20px] leading-[32px] md:min-h-[42px] md:text-[24px] md:leading-[42px] font-medium tracking-normal text-[#1C1C1E]">
+                    <h3 className="font-display text-[18px] font-medium leading-[25px] text-[#1C1C1E] sm:text-[19px] sm:leading-[28px] lg:text-[24px] lg:leading-[36px]">
                       {step.title}
                     </h3>
-                    {/* Body: 449 wide, 400, 17px / 28px, #62625F */}
-                    <p className="mt-2 w-full max-w-[449px] font-body text-[15px] leading-[24px] md:text-[17px] md:leading-[28px] font-normal tracking-normal text-[#62625F]">
+                    <p className="mt-1 font-body text-[14px] font-normal leading-[22px] text-[#62625F] sm:text-[15px] sm:leading-[23px] lg:mt-2 lg:text-[17px] lg:leading-[28px]">
                       {step.text}
                     </p>
                   </div>
@@ -282,19 +307,19 @@ export default function HowItWorks() {
               </div>
             </div>
 
-            {/* RIGHT: blue card (590 x 450) + x marks + the 4 animations (one visible at a time) */}
-            <div className="relative aspect-[590/450] w-full max-w-[590px] overflow-hidden rounded-[24px] md:rounded-[32px] bg-[linear-gradient(95.57deg,#3659FF_-37.81%,#4F60FF_45.96%,#8157F7_115.03%)] shadow-[0_20px_60px_rgba(91,92,240,0.25)]">
-              {/* soft light in the corner */}
+            {/* RIGHT: blue card. On phones its width also shrinks on short screens so everything fits on ONE screen */}
+            <div className="relative order-1 mx-auto aspect-[590/450] w-full max-w-[max(200px,min(340px,calc((100svh_-_400px)*1.311)))] overflow-hidden rounded-[20px] bg-[linear-gradient(95.57deg,#3659FF_-37.81%,#4F60FF_45.96%,#8157F7_115.03%)] shadow-[0_20px_60px_rgba(91,92,240,0.25)] sm:max-w-[max(240px,min(440px,calc((100svh_-_420px)*1.311)))] md:max-w-[max(280px,min(500px,calc((100svh_-_440px)*1.311)))] lg:order-2 lg:mx-0 lg:max-w-[590px] lg:rounded-[32px]">
               <div className="pointer-events-none absolute -left-16 -top-16 h-64 w-64 rounded-full bg-white/15 blur-3xl" />
-
               <XPattern />
-
               {STEPS.map((step, i) => (
                 <AnimationLayer key={step.title} data={step.animationData} box={step.box} index={i} active={active} />
               ))}
             </div>
           </div>
         </div>
+
+        {/* Invisible scroll distance (3 steps). While you scroll through it, the frame stays pinned. */}
+        <div ref={spacerRef} aria-hidden="true" style={{ height: `calc(${N - 1} * ${STEP_CSS})` }} />
       </div>
     </section>
   );
