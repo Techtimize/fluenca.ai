@@ -8,6 +8,7 @@ import { OnboardingFormSchema, OnboardingFormValidator } from '@/validator/Auth/
 import { Check, ChevronsUpDown, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 import { OnboardingMutation } from '@/routes/bussiness/Bussiness-Mutation';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,11 @@ import { INDUSTRY_LIST } from '@/constant/industry';
 import { LANGUAGE_LIST } from '@/constant/language';
 import { COUNTRY_LIST } from '@/constant/country';
 import { PAGE_ROUTES } from '@/constant/page-routes';
+// Lottie animation (install once: npm i lottie-react)
+// If your "@" alias points to /src, keep the path below as is and place the file at src/animations/hero-diagram.json
+import heroDiagram from '@/animations/hero-diagram.json';
+
+const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
 const labelClass = 'text-sm font-light tracking-[0.04em] text-black';
 const messageClass = 'text-xs text-red-400';
@@ -54,7 +60,14 @@ export default function Onboarding() {
   const industryNotFound = t.has('industryNotFound')
     ? t('industryNotFound')
     : 'No industry found.';
+  const countrySearchPlaceholder = t.has('countrySearchPlaceholder')
+    ? t('countrySearchPlaceholder')
+    : 'Search country...';
+  const countryNotFound = t.has('countryNotFound')
+    ? t('countryNotFound')
+    : 'No country found.';
   const [industryOpen, setIndustryOpen] = useState(false);
+  const [countryOpen, setCountryOpen] = useState(false);
   const { mutate: onboardingMutation, isPending } = OnboardingMutation();
   const form = useForm<OnboardingFormValidator>({
     resolver: zodResolver(OnboardingFormSchema),
@@ -74,7 +87,7 @@ export default function Onboarding() {
 
   return (
     <div className="grid min-h-dvh w-full grid-cols-1 bg-white lg:h-dvh lg:grid-cols-2 lg:overflow-hidden">
-      <div className="relative flex w-full justify-center overflow-y-auto overscroll-contain px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-8 md:px-10 md:py-10 lg:h-full lg:items-center lg:overflow-y-auto lg:px-10 lg:py-6 xl:px-14">
+      <div className="relative flex w-full justify-center overflow-y-auto overscroll-contain px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] [-ms-overflow-style:none] [scrollbar-width:none] sm:px-6 sm:py-8 md:px-10 md:py-10 lg:h-full lg:items-center lg:overflow-y-auto lg:px-10 lg:py-6 xl:px-14 [&::-webkit-scrollbar]:hidden">
         <div className="absolute end-4 top-4 z-10 sm:end-6 sm:top-6">
           <LanguageSwitcher variant="muted" />
         </div>
@@ -231,30 +244,61 @@ export default function Onboarding() {
 
               {/* sm: stacked · md+: country + website side by side */}
               <div className="grid grid-cols-1 gap-3 sm:gap-3.5 md:grid-cols-2 md:gap-3 lg:gap-2.5">
+                {/* Country — searchable dropdown */}
                 <FormField
                   control={form.control}
                   name="target_country"
                   render={({ field }) => (
                     <FormItem className="min-w-0 gap-1.5 lg:gap-1">
                       <FormLabel className={labelClass}>{t('country')}</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Popover open={countryOpen} onOpenChange={setCountryOpen}>
                         <FormControl>
-                          <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue placeholder={t('countryPlaceholder')}>
-                              {COUNTRY_LIST.find((c) => c.code === field.value)?.name}
-                            </SelectValue>
-                          </SelectTrigger>
+                          <PopoverTrigger
+                            className={cn(
+                              fieldControlClass,
+                              'flex cursor-pointer items-center justify-between border bg-transparent px-3 text-start font-normal outline-none',
+                              !field.value && 'text-slate-500'
+                            )}
+                          >
+                            <span className="truncate">
+                              {COUNTRY_LIST.find((c) => c.code === field.value)?.name ||
+                                t('countryPlaceholder')}
+                            </span>
+                            <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+                          </PopoverTrigger>
                         </FormControl>
-                        <SelectContent>
-                          <SelectGroup>
-                            {COUNTRY_LIST.map((item) => (
-                              <SelectItem key={item.id} value={item.code}>
-                                {item.name}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                        <PopoverContent
+                          align="start"
+                          className="w-[var(--anchor-width)] min-w-56 p-0"
+                        >
+                          <Command>
+                            <CommandInput placeholder={countrySearchPlaceholder} />
+                            <CommandList>
+                              <CommandEmpty>{countryNotFound}</CommandEmpty>
+                              <CommandGroup>
+                                {COUNTRY_LIST.map((item) => (
+                                  <CommandItem
+                                    key={item.id}
+                                    value={item.name}
+                                    onSelect={() => {
+                                      field.onChange(item.code);
+                                      setCountryOpen(false);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        'me-2 h-4 w-4',
+                                        field.value === item.code ? 'opacity-100' : 'opacity-0'
+                                      )}
+                                    />
+                                    {item.name}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage className={messageClass} />
                     </FormItem>
                   )}
@@ -350,8 +394,17 @@ export default function Onboarding() {
       </div>
 
       {/* Side panel — large screens only */}
-      <div className="hidden h-full min-h-0 overflow-hidden lg:block">
+      <div className="relative hidden h-full min-h-0 overflow-hidden lg:block">
         <OnboardingSide />
+        {/* Hero diagram animation on top of the blue background */}
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-8 xl:p-12">
+          <Lottie
+            animationData={heroDiagram}
+            loop
+            autoplay
+            className="h-full max-h-full w-full max-w-full"
+          />
+        </div>
       </div>
     </div>
   );
