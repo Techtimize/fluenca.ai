@@ -38,6 +38,9 @@
     "content": "Content",
     "competitors": "Competitor analysis",
     "calendar": "Calendar",
+    "controls": "Controls",
+    "integrations": "Integrations",
+    "blogs": "Blogs",
     "users": "Users"
   },
   "auth": {

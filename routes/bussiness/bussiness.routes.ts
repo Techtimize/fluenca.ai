@@ -49,6 +49,8 @@ import type {
   InstagramAuthorizeResponse,
   InstagramPublishRequest,
   InstagramPublishResponse,
+  LinkedInPublishRequest,
+  LinkedInPublishResponse,
   SocialAccountsResponse,
 } from "@/types/bussiness/social-accounts-type";
 import type {
@@ -480,6 +482,14 @@ export const FacebookPublishApi = async (
   data: FacebookPublishRequest,
 ): Promise<FacebookPublishResponse> => {
   const response = await api.post(BUSSINESSENDPOINT.PUBLISH.FACEBOOK_PUBLISH, data);
+  return response.data;
+}
+
+/** LinkedIn post — text | link | image. Auth + company; LinkedIn must have w_member_social. */
+export const LinkedInPublishApi = async (
+  data: LinkedInPublishRequest,
+): Promise<LinkedInPublishResponse> => {
+  const response = await api.post(BUSSINESSENDPOINT.PUBLISH.LINKEDIN_PUBLISH, data);
   return response.data;
 }
 

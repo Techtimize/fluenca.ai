@@ -26,6 +26,7 @@ export const PAGE_ROUTES = {
     COMPETITOR_ANALYSIS_MANUAL: '/competitor-analysis/mannual',
     COMPETITORS: '/competitors',
     CALENDAR: '/calendar',
+    CONTROLS: '/controls',
     CONTENT_RECOMMENDATION: '/content-recommendation',
     SCRIPT: '/script',
     SCRIPT_DETAIL: (id: string) => `/script/${id}`,
