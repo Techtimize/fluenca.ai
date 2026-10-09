@@ -37,14 +37,14 @@ import type {
 import { IntelligenceJobResponse, IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 import type { PlannerResultsResponse, PlannerVersionsResponse } from "@/types/bussiness/planner-type";
 import type {
-  FacebookPublishRequest,
-  FacebookPublishResponse,
     BlogPost,
     BlogPostListResponse,
     BriefListResponse,
     KeywordsStatusResponse,
 } from "@/types/bussiness/blog-type";
 import type {
+  FacebookPublishRequest,
+  FacebookPublishResponse,
   InstagramAuthorizeResponse,
   InstagramPublishRequest,
   InstagramPublishResponse,
