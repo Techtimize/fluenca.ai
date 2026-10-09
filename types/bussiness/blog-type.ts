@@ -1,5 +1,4 @@
 export type BlogPostStatus = 'queued' | 'writing' | 'ready' | 'failed';
-
 export type KeywordRunStatus = 'not_started' | 'researching' | 'ready' | 'failed';
 
 export type KeywordRunStep =
