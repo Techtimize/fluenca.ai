@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, LinkedInPublishApi, OnboardingApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi } from "./bussiness.routes";
 import type {
   FacebookPublishRequest,
   InstagramPublishRequest,
+  LinkedInPublishRequest,
 } from "@/types/bussiness/social-accounts-type";
 import type {
   ContentExecutionAgentModeRequest,
@@ -620,6 +621,25 @@ export function ContentExecutionDailyMutation() {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to start daily sweep"));
+    },
+  });
+}
+
+
+export function LinkedInPublishMutation() {
+  return useMutation({
+    mutationFn: (data: LinkedInPublishRequest) => LinkedInPublishApi(data),
+    onSuccess: (response) => {
+      if (response?.success === false) {
+        toast.error(
+          response.error || response.message || "Failed to publish to LinkedIn",
+        );
+        return;
+      }
+      toast.success(response?.message || "Published to LinkedIn");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to publish to LinkedIn"));
     },
   });
 }

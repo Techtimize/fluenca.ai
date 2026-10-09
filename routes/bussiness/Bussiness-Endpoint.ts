@@ -100,6 +100,8 @@ export const BUSSINESSENDPOINT = {
     PUBLISH:{
         INSTAGRAM_PUBLISH: '/connector/instagram/publish',
         FACEBOOK_PUBLISH: '/connector/facebook/publish',
+        LINKEDIN_PUBLISH: '/connector/linkedin/publish',
+        X_PUBLISH: '/connector/x/publish',
     },
 
     CONTENT_EXECUTION:{
