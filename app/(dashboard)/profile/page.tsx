@@ -227,26 +227,6 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
         <div className="space-y-4">
           <Card className="p-5">
             <SectionHeader
-              icon={<User />}
-              title="Personal Information"
-              subtitle="Your account details"
-            />
-            <dl className="grid gap-3 sm:grid-cols-2">
-              <Field icon={<User />} label="Full Name" value={user.full_name} />
-              <Field icon={<ShieldCheck />} label="Role" value={user.role} />
-              <Field icon={<Mail />} label="Email" value={user.email} />
-              <Field icon={<Phone />} label="Phone" value={user.phone} />
-              <Field icon={<MapPin />} label="Location" value={user.location} />
-              <Field
-                icon={<Languages />}
-                label="Language"
-                value={user.language}
-              />
-            </dl>
-          </Card>
-
-          <Card className="p-5">
-            <SectionHeader
               icon={<Building2 />}
               title="Company"
               subtitle="The business you're growing"
@@ -300,6 +280,26 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                 icon={<Users />}
                 label="Team Size"
                 value={company.team_size}
+              />
+            </dl>
+          </Card>
+
+          <Card className="p-5">
+            <SectionHeader
+              icon={<User />}
+              title="Personal Information"
+              subtitle="Your account details"
+            />
+            <dl className="grid gap-3 sm:grid-cols-2">
+              <Field icon={<User />} label="Full Name" value={user.full_name} />
+              <Field icon={<ShieldCheck />} label="Role" value={user.role} />
+              <Field icon={<Mail />} label="Email" value={user.email} />
+              <Field icon={<Phone />} label="Phone" value={user.phone} />
+              <Field icon={<MapPin />} label="Location" value={user.location} />
+              <Field
+                icon={<Languages />}
+                label="Language"
+                value={user.language}
               />
             </dl>
           </Card>
