@@ -1,37 +1,40 @@
 "use client";
 
 // components/landing/how-fluenca-thinks.tsx
+//
+// Responsive:
+//  - small  (< md):  everything stacked, animation scrolls sideways so it stays readable
+//  - medium (md):    stacked header (heading, then paragraph), full-width animation
+//  - large  (lg+):   heading left, paragraph right, full-width animation
 import Lottie from "lottie-react";
 import animationData from "@/animations/how-fluenca-thinks.json";
 
 export default function HowFluencaThinks() {
   return (
-    // Rounded top corners. The section overlaps the bottom of "Why Fluenca" by exactly the corner
-    // radius area (-mt-10 / -mt-14), so the lavender glow shows behind the curve.
-    // That overlap is added back as bottom padding in why-fluenca.tsx, so the visible gap stays the same.
+    // Rounded top corners. The section overlaps the bottom of "Why Fluenca" by the corner radius
+    // (-mt-10 / -mt-14), so the lavender glow shows behind the curve.
+    // That overlap is covered by the bottom padding in why-fluenca.tsx.
     <section
       id="how-fluenca-thinks"
-      className="relative z-10 -mt-10 w-full rounded-t-[40px] bg-white pb-10 pt-12 md:-mt-14 md:rounded-t-[56px] md:pb-16 md:pt-16"
+      className="relative z-10 -mt-10 w-full rounded-t-[32px] bg-white pb-8 pt-10 md:-mt-14 md:rounded-t-[56px] md:pb-14 md:pt-14"
     >
-      {/* Header row: heading on the left, paragraph on the right */}
-      <div className="mx-auto w-full max-w-360 px-6 md:px-12 lg:pl-20 lg:pr-[30px]">
-        <div className="grid items-start gap-6 md:grid-cols-[1fr_510px] md:gap-10">
+      {/* Header row */}
+      <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 md:px-12 lg:pl-20 lg:pr-[30px]">
+        <div className="grid items-start gap-4 md:gap-6 lg:grid-cols-[1fr_510px] lg:gap-10">
           <div>
-            {/* Pill: 274 x 34, radius 40, padding 4/20, gap 10, bg #F5F7FF */}
-            <span className="inline-flex h-[34px] w-[274px] max-w-full items-center justify-center gap-[10px] whitespace-nowrap rounded-[40px] bg-[#F5F7FF] px-5 py-1 font-body text-[15px] font-normal text-indigo-500">
+            {/* Pill (never wider than the screen) */}
+            <span className="inline-flex h-[30px] max-w-full items-center justify-center whitespace-nowrap rounded-[40px] bg-[#F5F7FF] px-4 py-1 font-body text-[13px] font-normal text-indigo-500 sm:h-[34px] sm:px-5 sm:text-[15px]">
               The Intelligence Behind Fluenca
             </span>
 
-            {/* Heading: 595 x 120, 500, 50px / 60px */}
-            <h2 className="mt-3 w-[595px] max-w-full font-display text-[36px] leading-[44px] md:text-[50px] md:leading-[60px] font-medium tracking-normal text-[#1C1C1E]">
+            <h2 className="mt-3 max-w-[595px] font-display text-[28px] font-medium leading-[36px] tracking-normal text-[#1C1C1E] sm:text-[36px] sm:leading-[44px] md:text-[44px] md:leading-[54px] lg:text-[50px] lg:leading-[60px]">
               How Fluenca Thinks
               <br />
               About Your Business
             </h2>
           </div>
 
-          {/* Paragraph: 510 x 84, 400, 17px / 28px */}
-          <p className="w-[510px] max-w-full font-body text-[16px] leading-[26px] md:text-[17px] md:leading-[28px] font-normal tracking-normal text-[#62625F] md:mt-[46px]">
+          <p className="max-w-[510px] font-body text-[15px] font-normal leading-[24px] tracking-normal text-[#62625F] sm:text-[16px] sm:leading-[26px] md:text-[17px] md:leading-[28px] lg:mt-[46px]">
             Fluenca brings together your business data, AI research, market
             signals, competitors, SEO, and social insights to create one clear
             picture of your business.
@@ -39,18 +42,20 @@ export default function HowFluencaThinks() {
         </div>
       </div>
 
-      {/* Animation (Lottie): up to 1417 wide, keeps the exact shape of your animation (1417 x 389) */}
-      {/* The box gets the same shape as your animation, so it always has a height */}
-      <div
-        className="mx-auto mt-4 w-full max-w-[1417.125px] md:mt-6"
-        style={{ aspectRatio: `${animationData.w} / ${animationData.h}` }}
-      >
-        <Lottie
-          animationData={animationData}
-          loop
-          autoplay
-          style={{ width: "100%", height: "100%" }}
-        />
+      {/* Animation. Keeps the exact shape of the animation (so it always has a height).
+          On small screens it would be tiny, so it gets a minimum width and scrolls sideways. */}
+      <div className="mx-auto mt-4 w-full max-w-[1417.125px] overflow-x-auto md:mt-6 md:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          className="min-w-[760px] md:min-w-0"
+          style={{ aspectRatio: `${animationData.w} / ${animationData.h}` }}
+        >
+          <Lottie
+            animationData={animationData}
+            loop
+            autoplay
+            style={{ width: "100%", height: "100%" }}
+          />
+        </div>
       </div>
     </section>
   );

@@ -17,7 +17,7 @@ export default function NotFound() {
 
   return (
     <div className="flex min-h-dvh flex-col overflow-hidden bg-[radial-gradient(ellipse_at_15%_100%,rgba(219,224,255,0.68)_0%,rgba(255,255,255,0)_46%)]">
-      <header className="mx-auto flex w-full max-w-360 items-center justify-between px-6 py-5 md:px-10">
+      <header className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-6 py-5 md:px-10">
         <Link href={PAGE_ROUTES.HOME} aria-label="FLUENCA home" className="flex items-center gap-2">
           <Image src="/assets/Logo.png" alt="" width={34} height={40} priority className="h-9 w-auto" />
           <span className="font-display text-2xl font-medium tracking-[0.04em] text-ink">FLUENCA</span>
@@ -30,7 +30,7 @@ export default function NotFound() {
         </Link>
       </header>
 
-      <main className="mx-auto grid w-full max-w-360 flex-1 items-center gap-8 px-6 pb-12 pt-6 md:px-10 lg:grid-cols-[0.88fr_1.12fr] lg:gap-12 lg:py-10">
+      <main className="mx-auto grid w-full max-w-[1440px] flex-1 items-center gap-8 px-6 pb-12 pt-6 md:px-10 lg:grid-cols-[0.88fr_1.12fr] lg:gap-12 lg:py-10">
         <section aria-labelledby="not-found-title" className="relative z-10 max-w-2xl">
           <p className="font-mono text-sm font-medium text-brand">ERROR / 404</p>
           <p aria-hidden="true" className="mt-3 font-display text-[6rem] leading-none font-semibold text-brand-100 sm:text-[8rem]">
