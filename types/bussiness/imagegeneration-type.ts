@@ -103,7 +103,6 @@ export interface ImageGenerationResult {
   script?: ImageGenerationScript;
   image_jobs?: ImageJob[];
   generated_images?: GeneratedImageAsset[];
-  /** Legacy shapes */
   scenes?: ImageGenerationScene[];
   images?: GeneratedImageAsset[];
   latest_image_url?: string;
@@ -118,7 +117,6 @@ export interface ImageGenerationResult {
   };
 }
 
-/** @deprecated Prefer ImageGenerationResult — kept for older call sites. */
 export type ImageGenerationResponse = ImageGenerationResult;
 
 export interface CompanyImageGenerationListResponse {
@@ -134,7 +132,6 @@ export interface CompanyImageGenerationListResponse {
   [key: string]: unknown;
 }
 
-/** GET /generation/image-generation/{company_id} — may be a single item, list, or wrapped. */
 export type CompanyImageGenerationResponse =
   | CompanyImageGenerationListResponse
   | ImageGenerationResult
