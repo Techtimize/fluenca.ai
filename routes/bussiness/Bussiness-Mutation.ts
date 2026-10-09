@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogImageApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, OnboardingApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogImageApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, LinkedInPublishApi, OnboardingApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi } from "./bussiness.routes";
 import type {
   FacebookPublishRequest,
   InstagramPublishRequest,
