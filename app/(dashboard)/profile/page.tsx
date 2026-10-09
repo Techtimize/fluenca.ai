@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import {
   BarChart3,
@@ -14,23 +14,30 @@ import {
   Globe,
   ImageIcon,
   Languages,
+  Loader2,
   Link2,
   Mail,
   MapPin,
   Pencil,
   Phone,
+  Save,
   ShieldCheck,
   Sparkles,
   User,
   Users,
+  X,
 } from "lucide-react";
 import TopBar from "@/components/dashboard/topBar";
 import AssetImage from "@/components/shared/assetImage";
 import Card from "@/components/shared/card";
 import { PAGE_ROUTES } from "@/constant/page-routes";
+import { EditUserProfileMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { UserProfileQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
 import type {
+  EditProfileCompany,
+  EditProfileRequest,
+  EditProfileUser,
   UserProfileCompany,
   UserProfileData,
   UserProfileUser,
@@ -90,11 +97,96 @@ export default function ProfilePage() {
   );
 }
 
+// Fields the edit-profile API accepts. Role, email and team size stay read-only.
+const USER_FIELDS = ["full_name", "phone", "location", "language"] as const;
+const COMPANY_FIELDS = [
+  "name",
+  "website",
+  "logo_url",
+  "industry",
+  "region",
+  "business_model",
+] as const;
+
+type Draft = {
+  user: Record<(typeof USER_FIELDS)[number], string>;
+  company: Record<(typeof COMPANY_FIELDS)[number], string>;
+};
+
+function toDraft(user: UserProfileUser, company: UserProfileCompany): Draft {
+  return {
+    user: Object.fromEntries(
+      USER_FIELDS.map((key) => [key, user[key] ?? ""]),
+    ) as Draft["user"],
+    company: Object.fromEntries(
+      COMPANY_FIELDS.map((key) => [key, company[key] ?? ""]),
+    ) as Draft["company"],
+  };
+}
+
+// Only fields that actually changed are sent, so the request may hold just one of them.
+function changedFields(
+  draft: Draft,
+  user: UserProfileUser,
+  company: UserProfileCompany,
+): EditProfileRequest {
+  const userChanges: EditProfileUser = {};
+  for (const key of USER_FIELDS) {
+    const value = draft.user[key].trim();
+    if (value !== (user[key] ?? "")) userChanges[key] = value;
+  }
+  const companyChanges: EditProfileCompany = {};
+  for (const key of COMPANY_FIELDS) {
+    const value = draft.company[key].trim();
+    if (value !== (company[key] ?? "")) companyChanges[key] = value;
+  }
+  return {
+    ...(Object.keys(userChanges).length ? { user: userChanges } : {}),
+    ...(Object.keys(companyChanges).length ? { company: companyChanges } : {}),
+  };
+}
+
 function ProfileView({ profile }: { profile: UserProfileData }) {
   const { plan } = profile;
   // The API can send null for any of these, so every read below needs a fallback.
   const user = profile.user ?? ({} as UserProfileUser);
   const company = profile.company ?? ({} as UserProfileCompany);
+
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const editing = draft !== null;
+  const { mutate: editProfile, isPending: isSaving } =
+    EditUserProfileMutation();
+
+  const startEditing = () => setDraft(toDraft(user, company));
+  const cancelEditing = () => setDraft(null);
+
+  const handleSave = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!draft || isSaving) return;
+    const changes = changedFields(draft, user, company);
+    if (!changes.user && !changes.company) {
+      setDraft(null);
+      return;
+    }
+    editProfile(changes, { onSuccess: () => setDraft(null) });
+  };
+
+  const userInput = (key: keyof Draft["user"]) =>
+    draft
+      ? {
+          value: draft.user[key],
+          onChange: (value: string) =>
+            setDraft({ ...draft, user: { ...draft.user, [key]: value } }),
+        }
+      : undefined;
+  const companyInput = (key: keyof Draft["company"]) =>
+    draft
+      ? {
+          value: draft.company[key],
+          onChange: (value: string) =>
+            setDraft({ ...draft, company: { ...draft.company, [key]: value } }),
+        }
+      : undefined;
   const companyName = company.name || "Your company";
   const displayName = user.full_name || user.email || companyName;
   const accounts = profile.connected_accounts ?? [];
@@ -111,7 +203,7 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
   const totalLimit = usage.reduce((sum, u) => sum + u.limit, 0);
 
   return (
-    <>
+    <form onSubmit={handleSave} className="space-y-4">
       {/* Hero */}
       <Card className="relative overflow-hidden">
         <div className="relative h-36 overflow-hidden bg-linear-to-br from-[#4338CA] via-[#5B57E6] to-[#9061F9]">
@@ -174,7 +266,9 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                   {joined ? (
                     <Chip icon={<CalendarDays />}>Joined {joined}</Chip>
                   ) : null}
-                  {user.email ? <Chip icon={<Mail />}>{user.email}</Chip> : null}
+                  {user.email ? (
+                    <Chip icon={<Mail />}>{user.email}</Chip>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -186,13 +280,43 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                 <ClipboardList className="size-4" aria-hidden="true" />
                 View Questions
               </Link>
-              <button
-                type="button"
-                className={`flex h-10 items-center justify-center gap-2 rounded-full bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] px-5 text-sm font-medium text-white shadow-[0_6px_16px_-6px_rgba(99,70,240,0.6)] transition-opacity hover:opacity-95 ${FOCUS_RING}`}
-              >
-                <Pencil className="size-4" aria-hidden="true" />
-                Edit Profile
-              </button>
+              {editing ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={cancelEditing}
+                    disabled={isSaving}
+                    className={`flex h-10 items-center justify-center gap-2 rounded-full border border-[#E6E8F5] bg-white px-5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-60 ${FOCUS_RING}`}
+                  >
+                    <X className="size-4" aria-hidden="true" />
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className={`flex h-10 items-center justify-center gap-2 rounded-full bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] px-5 text-sm font-medium text-white shadow-[0_6px_16px_-6px_rgba(99,70,240,0.6)] transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+                  >
+                    {isSaving ? (
+                      <Loader2
+                        className="size-4 animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <Save className="size-4" aria-hidden="true" />
+                    )}
+                    {isSaving ? "Saving..." : "Save Changes"}
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={startEditing}
+                  className={`flex h-10 items-center justify-center gap-2 rounded-full bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] px-5 text-sm font-medium text-white shadow-[0_6px_16px_-6px_rgba(99,70,240,0.6)] transition-opacity hover:opacity-95 ${FOCUS_RING}`}
+                >
+                  <Pencil className="size-4" aria-hidden="true" />
+                  Edit Profile
+                </button>
+              )}
             </div>
           </div>
 
@@ -265,16 +389,50 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
               </div>
             </div>
             <dl className="grid gap-3 sm:grid-cols-2">
+              {editing ? (
+                <>
+                  <Field
+                    icon={<Building2 />}
+                    label="Company Name"
+                    value={company.name}
+                    input={companyInput("name")}
+                  />
+                  <Field
+                    icon={<Globe />}
+                    label="Website"
+                    value={company.website}
+                    input={companyInput("website")}
+                    type="url"
+                    placeholder="https://"
+                  />
+                  <Field
+                    icon={<ImageIcon />}
+                    label="Logo URL"
+                    value={company.logo_url}
+                    input={companyInput("logo_url")}
+                    type="url"
+                    placeholder="https://"
+                    wide
+                  />
+                </>
+              ) : null}
               <Field
                 icon={<Briefcase />}
                 label="Industry"
                 value={company.industry}
+                input={companyInput("industry")}
               />
-              <Field icon={<MapPin />} label="Region" value={company.region} />
+              <Field
+                icon={<MapPin />}
+                label="Region"
+                value={company.region}
+                input={companyInput("region")}
+              />
               <Field
                 icon={<BarChart3 />}
                 label="Business Model"
                 value={company.business_model}
+                input={companyInput("business_model")}
               />
               <Field
                 icon={<Users />}
@@ -291,15 +449,32 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
               subtitle="Your account details"
             />
             <dl className="grid gap-3 sm:grid-cols-2">
-              <Field icon={<User />} label="Full Name" value={user.full_name} />
+              <Field
+                icon={<User />}
+                label="Full Name"
+                value={user.full_name}
+                input={userInput("full_name")}
+              />
               <Field icon={<ShieldCheck />} label="Role" value={user.role} />
               <Field icon={<Mail />} label="Email" value={user.email} />
-              <Field icon={<Phone />} label="Phone" value={user.phone} />
-              <Field icon={<MapPin />} label="Location" value={user.location} />
+              <Field
+                icon={<Phone />}
+                label="Phone"
+                value={user.phone}
+                input={userInput("phone")}
+                type="tel"
+              />
+              <Field
+                icon={<MapPin />}
+                label="Location"
+                value={user.location}
+                input={userInput("location")}
+              />
               <Field
                 icon={<Languages />}
                 label="Language"
                 value={user.language}
+                input={userInput("language")}
               />
             </dl>
           </Card>
@@ -432,7 +607,7 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
           </Card>
         </div>
       </div>
-    </>
+    </form>
   );
 }
 
@@ -524,17 +699,34 @@ function Stat({
   );
 }
 
+type FieldInput = { value: string; onChange: (value: string) => void };
+
 function Field({
   icon,
   label,
   value,
+  input,
+  type = "text",
+  placeholder,
+  wide,
 }: {
   icon?: ReactNode;
   label: string;
   value: ReactNode;
+  // When set, the field is in edit mode and shows a text input.
+  input?: FieldInput;
+  type?: "text" | "url" | "tel";
+  placeholder?: string;
+  wide?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-[#F6F7FE] px-3 py-2.5 transition-colors hover:bg-[#EEF0FF]">
+    <div
+      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+        input
+          ? "bg-white ring-1 ring-[#D9DCF7] focus-within:ring-2 focus-within:ring-[#5B57E6]/50"
+          : "bg-[#F6F7FE] hover:bg-[#EEF0FF]"
+      } ${wide ? "sm:col-span-2" : ""}`}
+    >
       {icon ? (
         <span
           className="grid size-8 shrink-0 place-items-center rounded-lg bg-white text-[#5452F6] shadow-sm [&>svg]:size-4"
@@ -543,10 +735,21 @@ function Field({
           {icon}
         </span>
       ) : null}
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <dt className="text-xs text-neutral-500">{label}</dt>
         <dd className="mt-0.5 truncate text-sm font-semibold text-neutral-900">
-          {value || "—"}
+          {input ? (
+            <input
+              type={type}
+              value={input.value}
+              onChange={(e) => input.onChange(e.target.value)}
+              placeholder={placeholder ?? `Add ${label.toLowerCase()}`}
+              aria-label={label}
+              className="w-full bg-transparent text-sm font-semibold text-neutral-900 outline-none placeholder:font-normal placeholder:text-neutral-400"
+            />
+          ) : (
+            value || "—"
+          )}
         </dd>
       </div>
     </div>

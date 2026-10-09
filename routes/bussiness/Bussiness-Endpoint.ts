@@ -8,6 +8,7 @@ export const BUSSINESSENDPOINT = {
 
     ONBOARDING_DETAILS: '/onboarding/details',
     USER_PROFILE: '/user-profile',
+    EDIT_USER_PROFILE: '/user-profile/editprofile',
 
     INTAKE: '/intake',
     INTAKE_QUESTION: (questionId: string) => `/intake/questions/${questionId}`,
