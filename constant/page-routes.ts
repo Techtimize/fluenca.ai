@@ -18,6 +18,10 @@ export const PAGE_ROUTES = {
 
     DASHBOARD: '/dashboard',
     INTEGRATIONS: '/dashboard/integrations',
+    SOCIAL: '/social',
+    SOCIAL_INSTAGRAM: '/social/instagram',
+    SOCIAL_FACEBOOK: '/social/facebook',
+    SOCIAL_LINKEDIN: '/social/linkedin',
     COMPANY_OVERVIEW: '/company-overview',
     PROFILE: '/profile',
     TRENDS: '/trends',
