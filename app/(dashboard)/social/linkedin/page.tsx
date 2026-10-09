@@ -2,13 +2,11 @@
 
 import { LinkedInProfileView } from "@/components/dashboard/social/LinkedInProfileView";
 import { SocialPlatformTabs } from "@/components/dashboard/social/SocialPlatformTabs";
-import { useSocialContent } from "@/components/dashboard/social/useSocialContent";
 import TopBar from "@/components/dashboard/topBar";
 import useAuthStore from "@/store/AuthsStore";
 
 export default function LinkedInSocialPage() {
   const companyName = useAuthStore((s) => s.company_name);
-  const { results, isLoading, isRefreshing, refetch } = useSocialContent();
 
   return (
     <main className="min-w-0 space-y-4 pb-6">
@@ -25,14 +23,7 @@ export default function LinkedInSocialPage() {
         </div>
         <SocialPlatformTabs />
       </div>
-      <LinkedInProfileView
-        results={results}
-        isContentLoading={isLoading}
-        onRefresh={() => {
-          void refetch();
-        }}
-        isRefreshing={isRefreshing}
-      />
+      <LinkedInProfileView />
     </main>
   );
 }
