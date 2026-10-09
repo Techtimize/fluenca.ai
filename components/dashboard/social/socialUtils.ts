@@ -1,5 +1,4 @@
 import type { ContentGenerationResultItem, ContentImageItem } from "@/components/dashboard/content/utils";
-import type { InstagramProfileInfoResponse } from "@/types/bussiness/instagram-type";
 import type { SocialAccount } from "@/types/bussiness/social-accounts-type";
 
 export type SocialPlatformId = "instagram" | "facebook" | "linkedin";
@@ -31,21 +30,6 @@ export function formatCount(value?: number | null) {
     notation: value >= 10000 ? "compact" : "standard",
     maximumFractionDigits: 1,
   }).format(value);
-}
-
-export function unwrapInstagramProfile(
-  data?: InstagramProfileInfoResponse | null,
-): InstagramProfileInfoResponse {
-  if (!data) return {};
-  const nested = data.data;
-  if (nested && typeof nested === "object" && !Array.isArray(nested)) {
-    return { ...data, ...(nested as InstagramProfileInfoResponse) };
-  }
-  const profile = data.profile;
-  if (profile && typeof profile === "object" && !Array.isArray(profile)) {
-    return { ...data, ...(profile as InstagramProfileInfoResponse) };
-  }
-  return data;
 }
 
 export function platformPosts(

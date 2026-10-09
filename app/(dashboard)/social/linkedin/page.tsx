@@ -8,7 +8,7 @@ import useAuthStore from "@/store/AuthsStore";
 
 export default function LinkedInSocialPage() {
   const companyName = useAuthStore((s) => s.company_name);
-  const { results, isLoading } = useSocialContent();
+  const { results, isLoading, isRefreshing, refetch } = useSocialContent();
 
   return (
     <main className="min-w-0 space-y-4 pb-6">
@@ -18,16 +18,21 @@ export default function LinkedInSocialPage() {
       />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">
-            LinkedIn profile
-          </h1>
+          <h1 className="text-lg font-semibold text-neutral-900">LinkedIn</h1>
           <p className="mt-1 text-[13px] text-neutral-500">
-            Professional profile and feed styled like LinkedIn.
+            Profile insights and media for your connected LinkedIn account.
           </p>
         </div>
         <SocialPlatformTabs />
       </div>
-      <LinkedInProfileView results={results} isContentLoading={isLoading} />
+      <LinkedInProfileView
+        results={results}
+        isContentLoading={isLoading}
+        onRefresh={() => {
+          void refetch();
+        }}
+        isRefreshing={isRefreshing}
+      />
     </main>
   );
 }
