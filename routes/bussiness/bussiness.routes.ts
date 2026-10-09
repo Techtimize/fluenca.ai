@@ -63,6 +63,16 @@ import type {
   ContentExecutionSettingsRequest,
   ContentExecutionSettingsResponse,
 } from "@/types/bussiness/content-execution-type";
+import type {
+  InstagramPostEngagementRequest,
+  InstagramPostEngagementResponse,
+  InstagramProfileContentRequest,
+  InstagramProfileContentResponse,
+  InstagramProfileIdRequest,
+  InstagramProfileIdResponse,
+  InstagramProfileInfoRequest,
+  InstagramProfileInfoResponse,
+} from "@/types/bussiness/instagram-type";
 
 function toQueryParams(params?: GoogleTrendQueryParams) {
   if (!params) return undefined;
@@ -526,7 +536,6 @@ export const ContentExecutionRunApi = async (
   return response.data;
 }
 
-/** Calendar / status feed. */
 export const ContentExecutionItemsApi = async (params?: {
   date?: string;
   status?: string;
@@ -538,7 +547,6 @@ export const ContentExecutionItemsApi = async (params?: {
   return response.data;
 }
 
-/** Run logs for dashboard. */
 export const ContentExecutionRunsApi = async (params?: {
   limit?: number;
   status?: string;
@@ -548,3 +556,49 @@ export const ContentExecutionRunsApi = async (params?: {
   });
   return response.data;
 }
+
+export const InstagramProfileIdApi = async (
+  params: InstagramProfileIdRequest,
+): Promise<InstagramProfileIdResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.INSTAGRAM.PROFILE_ID, {
+    params: { username: params.username },
+  });
+  return response.data;
+}
+
+
+export const InstagramProfileInfoApi = async (
+  params: InstagramProfileInfoRequest,
+): Promise<InstagramProfileInfoResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.INSTAGRAM.PROFILE_INFO, {
+    params: { username: params.username },
+  });
+  return response.data;
+}
+
+
+export const InstagramPostEngagementApi = async (
+  params: InstagramPostEngagementRequest,
+): Promise<InstagramPostEngagementResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.INSTAGRAM.POST_ENGAGEMENT, {
+    params: {
+      username: params.username,
+      post_url: params.post_url,
+    },
+  });
+  return response.data;
+}
+
+
+/** GET /connector/instagram/profile-content?username= — uses connected Instagram handle. */
+export const InstagramProfileContentApi = async (
+  params: InstagramProfileContentRequest,
+): Promise<InstagramProfileContentResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.INSTAGRAM.PROFILE_CONTENT, {
+    params: {
+      username: params.username,
+    },
+  });
+  return response.data;
+}
+
