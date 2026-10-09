@@ -24,6 +24,7 @@ import {
   Settings2,
   SlidersHorizontal,
   TrendingUp,
+  Users,
   Zap,
 } from "lucide-react";
 
@@ -56,6 +57,8 @@ const ICONS: Record<string, LucideIcon> = {
   controls: SlidersHorizontal,
   sliders: SlidersHorizontal,
   settings: Settings2,
+  social: Users,
+  users: Users,
 };
 
 export function getIcon(name?: string): LucideIcon {
