@@ -8,7 +8,7 @@ export const BUSSINESSENDPOINT = {
 
     ONBOARDING_DETAILS: '/onboarding/details',
     USER_PROFILE: '/user-profile',
-    EDIT_USER_PROFILE: '/user-profile/editprofile',
+    EDIT_USER_PROFILE: (user_id: string) => `/user-profile/editprofile/${user_id}`,
 
     INTAKE: '/intake',
     INTAKE_QUESTION: (questionId: string) => `/intake/questions/${questionId}`,

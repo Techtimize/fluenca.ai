@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   BarChart3,
   Bot,
@@ -168,7 +169,14 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
       setDraft(null);
       return;
     }
-    editProfile(changes, { onSuccess: () => setDraft(null) });
+    if (!user.id) {
+      toast.error("We couldn't find your account. Please reload and try again.");
+      return;
+    }
+    editProfile(
+      { user_id: user.id, data: changes },
+      { onSuccess: () => setDraft(null) },
+    );
   };
 
   const userInput = (key: keyof Draft["user"]) =>
