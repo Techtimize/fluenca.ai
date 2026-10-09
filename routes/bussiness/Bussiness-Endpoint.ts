@@ -87,6 +87,7 @@ export const BUSSINESSENDPOINT = {
     BRIEFS: '/briefs',
     BLOG_POST: '/blog-posts',
     BLOG_POST_DETAILS: (blog_post_id: string) => `/blog-posts/${blog_post_id}`,
+    BLOG_POST_IMAGES: (blog_post_id: string) => `/blog-posts/${blog_post_id}/images`,
 
     CONNECTORS:{
         INSTAGRAM_LOGIN: '/connector/instagram/login',

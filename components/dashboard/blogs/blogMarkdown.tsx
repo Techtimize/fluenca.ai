@@ -1,18 +1,22 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 type Block =
   | { kind: "heading"; level: 2 | 3; text: string }
   | { kind: "paragraph"; text: string }
-  | { kind: "list"; ordered: boolean; items: string[] };
+  | { kind: "list"; ordered: boolean; items: string[] }
+  | { kind: "image"; alt: string; src: string };
 
 type Props = {
   markdown: string;
   resolveHref?: (href: string) => string | null;
+  headingAction?: (heading: string) => ReactNode;
 };
 
+const IMAGE = /^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/;
 const INLINE = /\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)\s]+)\)/g;
 const BULLET = /^[-*]\s+/;
 const NUMBERED = /^\d+\.\s+/;
@@ -34,6 +38,12 @@ function parseBlocks(markdown: string): Block[] {
     const line = raw.trim();
     if (!line) {
       flush();
+      continue;
+    }
+    const image = IMAGE.exec(line);
+    if (image) {
+      flush();
+      blocks.push({ kind: "image", alt: image[1], src: image[2] });
       continue;
     }
     const heading = /^(#{1,3})\s+(.*)$/.exec(line);
@@ -100,20 +110,41 @@ function renderInline(text: string, resolveHref: Props["resolveHref"], keyPrefix
   return nodes;
 }
 
-export function BlogMarkdown({ markdown, resolveHref }: Props) {
+export function BlogMarkdown({ markdown, resolveHref, headingAction }: Props) {
   return (
     <div className="space-y-4 text-[15px] leading-7 text-neutral-700">
       {parseBlocks(markdown).map((block, index) => {
         const key = `block-${index}`;
+        if (block.kind === "image") {
+          return (
+            <Image
+              key={key}
+              src={block.src}
+              alt={block.alt}
+              width={1600}
+              height={900}
+              unoptimized
+              className="aspect-video w-full rounded-2xl object-cover"
+            />
+          );
+        }
         if (block.kind === "heading") {
           const Tag = block.level === 3 ? "h4" : "h3";
-          return (
+          const title = (
             <Tag
               key={key}
               className={`pt-2 font-semibold text-neutral-900 ${block.level === 3 ? "text-base" : "text-lg"}`}
             >
               {renderInline(block.text, resolveHref, key)}
             </Tag>
+          );
+          const action = block.level === 2 ? headingAction?.(block.text) : null;
+          if (!action) return title;
+          return (
+            <div key={key} className="flex flex-wrap items-end justify-between gap-2">
+              {title}
+              {action}
+            </div>
           );
         }
         if (block.kind === "list") {

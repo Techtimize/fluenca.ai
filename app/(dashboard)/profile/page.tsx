@@ -1,9 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 import {
   BarChart3,
   Bot,
+  ClipboardList,
   Briefcase,
   Building2,
   CalendarDays,
@@ -25,6 +27,7 @@ import {
 import TopBar from "@/components/dashboard/topBar";
 import AssetImage from "@/components/shared/assetImage";
 import Card from "@/components/shared/card";
+import { PAGE_ROUTES } from "@/constant/page-routes";
 import { UserProfileQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
 import type {
@@ -175,13 +178,22 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                 </div>
               </div>
             </div>
-            <button
-              type="button"
-              className={`flex h-10 items-center justify-center gap-2 self-start rounded-full bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] px-5 text-sm font-medium text-white shadow-[0_6px_16px_-6px_rgba(99,70,240,0.6)] transition-opacity hover:opacity-95 sm:self-auto ${FOCUS_RING}`}
-            >
-              <Pencil className="size-4" aria-hidden="true" />
-              Edit Profile
-            </button>
+            <div className="flex flex-wrap gap-2 self-start sm:self-auto">
+              <Link
+                href={PAGE_ROUTES.QUESTIONS}
+                className={`flex h-10 items-center justify-center gap-2 rounded-full border border-[#D9DCF7] bg-white px-5 text-sm font-medium text-[#5452F6] transition-colors hover:bg-[#EEF0FF] ${FOCUS_RING}`}
+              >
+                <ClipboardList className="size-4" aria-hidden="true" />
+                View Questions
+              </Link>
+              <button
+                type="button"
+                className={`flex h-10 items-center justify-center gap-2 rounded-full bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] px-5 text-sm font-medium text-white shadow-[0_6px_16px_-6px_rgba(99,70,240,0.6)] transition-opacity hover:opacity-95 ${FOCUS_RING}`}
+              >
+                <Pencil className="size-4" aria-hidden="true" />
+                Edit Profile
+              </button>
+            </div>
           </div>
 
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -213,26 +225,6 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,1fr)]">
         <div className="space-y-4">
-          <Card className="p-5">
-            <SectionHeader
-              icon={<User />}
-              title="Personal Information"
-              subtitle="Your account details"
-            />
-            <dl className="grid gap-3 sm:grid-cols-2">
-              <Field icon={<User />} label="Full Name" value={user.full_name} />
-              <Field icon={<ShieldCheck />} label="Role" value={user.role} />
-              <Field icon={<Mail />} label="Email" value={user.email} />
-              <Field icon={<Phone />} label="Phone" value={user.phone} />
-              <Field icon={<MapPin />} label="Location" value={user.location} />
-              <Field
-                icon={<Languages />}
-                label="Language"
-                value={user.language}
-              />
-            </dl>
-          </Card>
-
           <Card className="p-5">
             <SectionHeader
               icon={<Building2 />}
@@ -288,6 +280,26 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                 icon={<Users />}
                 label="Team Size"
                 value={company.team_size}
+              />
+            </dl>
+          </Card>
+
+          <Card className="p-5">
+            <SectionHeader
+              icon={<User />}
+              title="Personal Information"
+              subtitle="Your account details"
+            />
+            <dl className="grid gap-3 sm:grid-cols-2">
+              <Field icon={<User />} label="Full Name" value={user.full_name} />
+              <Field icon={<ShieldCheck />} label="Role" value={user.role} />
+              <Field icon={<Mail />} label="Email" value={user.email} />
+              <Field icon={<Phone />} label="Phone" value={user.phone} />
+              <Field icon={<MapPin />} label="Location" value={user.location} />
+              <Field
+                icon={<Languages />}
+                label="Language"
+                value={user.language}
               />
             </dl>
           </Card>
