@@ -12,6 +12,52 @@ import {
 } from "./bussiness.routes";
 import type { GoogleTrendQueryParams } from "@/types/bussiness/google-trends-type";
 import { ChatHistoryApi } from "../chatbot/chatbot.routes";
+import { BlogPostDetailsApi, BlogPostsApi, BriefsApi, KeywordsApi } from "./bussiness.routes";
+
+const BLOG_POLL_INTERVAL_MS = 3000;
+const isWriting = (status?: string) => status === "queued" || status === "writing";
+
+export const KEYWORDS_KEY = ["keywords"];
+
+export const KeywordsQuery = () => {
+  return useQuery({
+    queryKey: KEYWORDS_KEY,
+    queryFn: () => KeywordsApi(),
+    refetchInterval: (query) => (query.state.data?.status === "researching" ? BLOG_POLL_INTERVAL_MS : false),
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const BriefsQuery = (researchStatus?: string) => {
+  return useQuery({
+    queryKey: ["briefs", researchStatus],
+    queryFn: () => BriefsApi(),
+    enabled: Boolean(researchStatus),
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const BlogPostsQuery = () => {
+  return useQuery({
+    queryKey: ["blog-posts"],
+    queryFn: () => BlogPostsApi(),
+    refetchInterval: (query) =>
+      query.state.data?.blog_posts.some((post) => isWriting(post.status)) ? BLOG_POLL_INTERVAL_MS : false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const BlogPostDetailsQuery = (blogPostId: string) => {
+  return useQuery({
+    queryKey: ["blog-post", blogPostId],
+    queryFn: () => BlogPostDetailsApi(blogPostId),
+    enabled: Boolean(blogPostId),
+    retry: false,
+    refetchInterval: (query) => (isWriting(query.state.data?.status) ? BLOG_POLL_INTERVAL_MS : false),
+    refetchOnWindowFocus: false,
+  });
+};
 
 export const OnboardingDetailsQuery = () => {
   return useQuery({
@@ -100,7 +146,6 @@ export const UserProfileQuery = () => {
   });
 };
 
-// Fetched only once the documentation sheet is opened.
 export const AnalyzeCompanyDashboardDocumentationQuery = (company_id: string, enabled = true) => {
   return useQuery({
     queryKey: ["analyze-company-dashboard-documentation", company_id],
