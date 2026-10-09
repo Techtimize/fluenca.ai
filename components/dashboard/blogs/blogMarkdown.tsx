@@ -123,8 +123,8 @@ export function BlogMarkdown({ markdown, resolveHref, headingAction }: Props) {
               alt={block.alt}
               width={1600}
               height={900}
-              unoptimized
-              className="aspect-video w-full rounded-2xl object-cover"
+              sizes="(min-width: 1024px) 832px, 100vw"
+              className="h-auto max-h-96 w-full rounded-2xl object-cover"
             />
           );
         }
