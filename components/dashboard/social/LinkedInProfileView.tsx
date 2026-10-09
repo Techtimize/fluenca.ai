@@ -7,9 +7,11 @@ import {
   ExternalLink,
   FileText,
   Filter,
+  Globe2,
   Grid3X3,
   Image as ImageLucide,
   Loader2,
+  Mail,
   MessageCircle,
   RefreshCw,
   ThumbsUp,
@@ -34,6 +36,7 @@ import {
 } from "@/types/bussiness/social-accounts-type";
 import type { SocialProfileMediaItem } from "@/types/bussiness/social-profile-content-type";
 import {
+  normalizeLinkedInProfileContent,
   normalizeSocialProfileContent,
   socialMediaCaption,
   socialMediaComments,
@@ -70,27 +73,7 @@ export function LinkedInProfileView() {
     "linkedin",
   );
   const connected = isSocialAccountConnected(account);
-  const name = accountDisplayName(account) || "LinkedIn Member";
-  const handle = accountHandle(account);
-  const avatar =
-    typeof account?.profile_picture_url === "string"
-      ? account.profile_picture_url
-      : null;
-  const headline =
-    (typeof account?.headline === "string" && account.headline) ||
-    (typeof account?.title === "string" && account.title) ||
-    null;
-  const followers =
-    typeof account?.followers_count === "number"
-      ? account.followers_count
-      : typeof account?.connections_count === "number"
-        ? account.connections_count
-        : null;
-  const following =
-    typeof account?.follows_count === "number" ? account.follows_count : null;
-  const profileUrl =
-    (typeof account?.profile_url === "string" && account.profile_url) ||
-    (handle ? `https://www.linkedin.com/in/${handle}/` : null);
+  const accountHandleValue = accountHandle(account);
 
   const {
     data: contentRaw,
@@ -101,8 +84,30 @@ export function LinkedInProfileView() {
     isFetching,
   } = LinkedInProfileContentQuery(connected);
 
+  const profile = normalizeLinkedInProfileContent(contentRaw);
   const posts = normalizeSocialProfileContent(contentRaw);
-  const mediaCount = posts.length;
+
+  const name =
+    profile.name ||
+    accountDisplayName(account) ||
+    "LinkedIn Member";
+  const email = profile.email;
+  const personId = profile.personId;
+  const avatar =
+    profile.picture ||
+    (typeof account?.profile_picture_url === "string"
+      ? account.profile_picture_url
+      : null);
+  const localeLabel =
+    profile.country || profile.language
+      ? [profile.language, profile.country].filter(Boolean).join("-")
+      : null;
+  const profileUrl =
+    (typeof account?.profile_url === "string" && account.profile_url) ||
+    (accountHandleValue
+      ? `https://www.linkedin.com/in/${accountHandleValue}/`
+      : null);
+  const mediaCount = profile.postsCountReturned ?? posts.length;
 
   const filteredPosts =
     mediaFilter === "articles"
@@ -137,9 +142,10 @@ export function LinkedInProfileView() {
             <Image
               src={String(avatar)}
               alt={name}
-              className="aspect-square w-full rounded-full object-contain"
-              width={100}
-              height={100}
+              className="aspect-square w-full rounded-full object-cover"
+              width={320}
+              height={320}
+              unoptimized
             />
           ) : (
             <div className="grid aspect-square place-items-center rounded-full bg-neutral-100 text-neutral-400">
@@ -151,12 +157,26 @@ export function LinkedInProfileView() {
             <h1 className="truncate text-[22px] font-bold tracking-tight">
               {name}
             </h1>
-            {handle ? (
-              <p className="mt-0.5 text-[14px] text-neutral-500">@{handle}</p>
+            {accountHandleValue ? (
+              <p className="mt-0.5 text-[14px] text-neutral-500">
+                @{accountHandleValue}
+              </p>
             ) : null}
-            {headline ? (
-              <p className="mt-2 text-[13px] leading-5 text-neutral-600">
-                {headline}
+            {email ? (
+              <p className="mt-2 inline-flex min-w-0 items-center gap-1.5 text-[13px] text-neutral-600">
+                <Mail className="size-3.5 shrink-0" />
+                <span className="truncate">{email}</span>
+              </p>
+            ) : null}
+            {personId ? (
+              <p className="mt-1 truncate text-[11px] text-neutral-400">
+                ID {personId}
+              </p>
+            ) : null}
+            {localeLabel ? (
+              <p className="mt-1 inline-flex items-center gap-1.5 text-[12px] text-neutral-500">
+                <Globe2 className="size-3.5" />
+                {localeLabel}
               </p>
             ) : null}
           </div>
@@ -166,9 +186,7 @@ export function LinkedInProfileView() {
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
                 Followers
               </p>
-              <p className="mt-1 text-[18px] font-semibold">
-                {formatCount(followers)}
-              </p>
+              <p className="mt-1 text-[18px] font-semibold">—</p>
             </div>
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
@@ -178,10 +196,10 @@ export function LinkedInProfileView() {
             </div>
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
-                Following
+                Locale
               </p>
-              <p className="mt-1 text-[18px] font-semibold">
-                {formatCount(following)}
+              <p className="mt-1 truncate text-[16px] font-semibold">
+                {localeLabel || "—"}
               </p>
             </div>
             <div>
@@ -294,13 +312,13 @@ export function LinkedInProfileView() {
             )}
           </div>
         ) : filteredPosts.length === 0 ? (
-          <div className="py-16 text-center">
+          <div className="mx-auto max-w-md py-16 text-center">
             <p className="text-[18px] font-light text-neutral-900">
               No media yet
             </p>
             <p className="mt-2 text-[14px] text-neutral-500">
-              No {mediaFilter === "all" ? "posts" : mediaFilter} returned for
-              this LinkedIn account.
+              {profile.postsUnavailableReason ||
+                `No ${mediaFilter === "all" ? "posts" : mediaFilter} returned for this LinkedIn account.`}
             </p>
           </div>
         ) : (
