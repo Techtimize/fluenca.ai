@@ -26,6 +26,16 @@ export interface InstagramProfileInfoResponse {
   message?: string;
   error?: string | null;
   username?: string;
+  /** Connector API fields */
+  instagram_id?: string | number | null;
+  name?: string | null;
+  bio?: string | null;
+  website?: string | null;
+  followers?: number | null;
+  following?: number | null;
+  posts?: number | null;
+  profile_picture?: string | null;
+  /** Alternate / legacy field names */
   full_name?: string | null;
   biography?: string | null;
   profile_pic_url?: string | null;
@@ -34,8 +44,78 @@ export interface InstagramProfileInfoResponse {
   media_count?: number | null;
   is_business?: boolean | null;
   is_private?: boolean | null;
-  website?: string | null;
   [key: string]: unknown;
+}
+
+export interface NormalizedInstagramProfile {
+  instagramId: string | null;
+  username: string | null;
+  name: string | null;
+  bio: string | null;
+  website: string | null;
+  followers: number | null;
+  following: number | null;
+  posts: number | null;
+  profilePicture: string | null;
+}
+
+function asTrimmedString(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+function asFiniteNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+export function normalizeInstagramProfileInfo(
+  data?: InstagramProfileInfoResponse | null,
+): NormalizedInstagramProfile {
+  if (!data) {
+    return {
+      instagramId: null,
+      username: null,
+      name: null,
+      bio: null,
+      website: null,
+      followers: null,
+      following: null,
+      posts: null,
+      profilePicture: null,
+    };
+  }
+
+  const nested =
+    data.data && typeof data.data === "object" && !Array.isArray(data.data)
+      ? (data.data as InstagramProfileInfoResponse)
+      : data.profile &&
+          typeof data.profile === "object" &&
+          !Array.isArray(data.profile)
+        ? (data.profile as InstagramProfileInfoResponse)
+        : null;
+  const source = nested ? { ...data, ...nested } : data;
+
+  return {
+    instagramId: asTrimmedString(
+      source.instagram_id ?? source.profile_id ?? source.id ?? null,
+    ),
+    username: asTrimmedString(source.username),
+    name: asTrimmedString(source.name ?? source.full_name),
+    bio: asTrimmedString(source.bio ?? source.biography),
+    website: asTrimmedString(source.website),
+    followers: asFiniteNumber(source.followers ?? source.followers_count),
+    following: asFiniteNumber(source.following ?? source.follows_count),
+    posts: asFiniteNumber(source.posts ?? source.media_count),
+    profilePicture: asTrimmedString(
+      source.profile_picture ?? source.profile_pic_url,
+    ),
+  };
 }
 
 export interface InstagramPostEngagementResponse {

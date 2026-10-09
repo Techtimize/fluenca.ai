@@ -1,34 +1,53 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
-  Globe2,
+  Clapperboard,
+  ExternalLink,
+  Filter,
+  Grid3X3,
+  Image as ImageLucide,
   Loader2,
-  MoreHorizontal,
-  ThumbsUp,
   MessageCircle,
-  Share2,
+  RefreshCw,
+  ThumbsUp,
   UserRound,
 } from "lucide-react";
-import { FacebookIcon } from "@/components/shared/brandIcons";
-import type { ContentGenerationResultItem } from "@/components/dashboard/content/utils";
 import { SocialNotConnected } from "@/components/dashboard/social/SocialNotConnected";
 import {
   accountDisplayName,
   accountHandle,
-  platformPosts,
+  formatCount,
 } from "@/components/dashboard/social/socialUtils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
-import { SocialAccountsQuery } from "@/routes/bussiness/Bussiness-Query";
+import { getApiErrorMessage } from "@/errors/error-utils";
+import {
+  FacebookProfileContentQuery,
+  SocialAccountsQuery,
+} from "@/routes/bussiness/Bussiness-Query";
 import {
   findSocialAccount,
   isSocialAccountConnected,
   normalizeSocialAccounts,
 } from "@/types/bussiness/social-accounts-type";
+import type { SocialProfileMediaItem } from "@/types/bussiness/social-profile-content-type";
+import {
+  normalizeSocialProfileContent,
+  socialMediaCaption,
+  socialMediaComments,
+  socialMediaDate,
+  socialMediaHref,
+  socialMediaImageUrl,
+  socialMediaLikes,
+} from "@/types/bussiness/social-profile-content-type";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
-function formatDate(value?: string) {
-  if (!value) return "Just now";
+type MediaFilter = "all" | "posts" | "reels";
+
+function formatPostDate(value?: string | null) {
+  if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString(undefined, {
@@ -38,13 +57,15 @@ function formatDate(value?: string) {
   });
 }
 
-export function FacebookProfileView({
-  results = [],
-  isContentLoading = false,
-}: {
-  results?: ContentGenerationResultItem[];
-  isContentLoading?: boolean;
-}) {
+function isReel(item: SocialProfileMediaItem) {
+  const type = String(item.media_type || item.product_type || "")
+    .toLowerCase()
+    .trim();
+  return type.includes("reel") || type.includes("video") || type === "video";
+}
+
+export function FacebookProfileView() {
+  const [mediaFilter, setMediaFilter] = useState<MediaFilter>("all");
   const { data: accountsData, isLoading: isAccountsLoading } =
     SocialAccountsQuery();
   const account = findSocialAccount(
@@ -58,11 +79,38 @@ export function FacebookProfileView({
     typeof account?.profile_picture_url === "string"
       ? account.profile_picture_url
       : null;
-  const posts = platformPosts(results, "facebook");
+  const followers =
+    typeof account?.followers_count === "number"
+      ? account.followers_count
+      : null;
+  const following =
+    typeof account?.follows_count === "number" ? account.follows_count : null;
+  const profileUrl =
+    (typeof account?.profile_url === "string" && account.profile_url) ||
+    (handle ? `https://www.facebook.com/${handle}` : null);
+
+  const {
+    data: contentRaw,
+    isLoading: isContentLoading,
+    isError: isContentError,
+    error: contentError,
+    refetch,
+    isFetching,
+  } = FacebookProfileContentQuery(connected);
+
+  const posts = normalizeSocialProfileContent(contentRaw);
+  const mediaCount = posts.length;
+
+  const filteredPosts =
+    mediaFilter === "reels"
+      ? posts.filter(isReel)
+      : mediaFilter === "posts"
+        ? posts.filter((post) => !isReel(post))
+        : posts;
 
   if (isAccountsLoading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-20 text-sm text-neutral-500">
+      <div className="flex items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white py-20 text-sm text-neutral-500">
         <Loader2 className="size-5 animate-spin text-[#1877F2]" />
         Loading Facebook…
       </div>
@@ -79,160 +127,266 @@ export function FacebookProfileView({
   }
 
   return (
-    <div className="mx-auto max-w-[680px] overflow-hidden rounded-2xl border border-[#CCD0D5] bg-[#F0F2F5] shadow-sm">
-      <div className="bg-white">
-        <div className="relative h-[160px] bg-gradient-to-br from-[#1877F2] via-[#4B92F7] to-[#8BB7F9] sm:h-[220px]">
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/25 to-transparent" />
-        </div>
-        <div className="relative px-4 pb-4 sm:px-6">
-          <div className="-mt-12 flex flex-col gap-4 sm:-mt-16 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex items-end gap-3">
-              <div className="rounded-full bg-white p-1 shadow-md">
-                {avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={avatar}
-                    alt={name}
-                    className="size-[112px] rounded-full object-cover sm:size-[136px]"
-                  />
-                ) : (
-                  <div className="grid size-[112px] place-items-center rounded-full bg-[#E4E6EB] text-[#65676B] sm:size-[136px]">
-                    <UserRound className="size-14" />
-                  </div>
-                )}
-              </div>
-              <div className="pb-2">
-                <h1 className="text-[24px] font-bold leading-tight text-[#050505] sm:text-[28px]">
-                  {name}
-                </h1>
-                {handle ? (
-                  <p className="mt-0.5 text-[14px] text-[#65676B]">@{handle}</p>
-                ) : null}
-              </div>
+    <div className="grid w-full gap-4 text-neutral-900 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
+      <aside className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+        <div className="space-y-4 p-4">
+          {avatar ? (
+            <Image
+              src={String(avatar)}
+              alt={name}
+              className="aspect-square w-full rounded-full object-contain"
+              width={100}
+              height={100}
+            />
+          ) : (
+            <div className="grid aspect-square place-items-center rounded-full bg-neutral-100 text-neutral-400">
+              <UserRound className="size-16" />
             </div>
-            <div className="flex flex-wrap gap-2 pb-2">
-              <span className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[#E7F3FF] px-3 text-[14px] font-semibold text-[#1877F2]">
-                <FacebookIcon className="size-4" />
-                Connected
-              </span>
+          )}
+
+          <div>
+            <h1 className="truncate text-[22px] font-bold tracking-tight">
+              {name}
+            </h1>
+            {handle ? (
+              <p className="mt-0.5 text-[14px] text-neutral-500">@{handle}</p>
+            ) : null}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
+                Followers
+              </p>
+              <p className="mt-1 text-[18px] font-semibold">
+                {formatCount(followers)}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
+                Engagement
+              </p>
+              <p className="mt-1 text-[18px] font-semibold">—</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
+                Following
+              </p>
+              <p className="mt-1 text-[18px] font-semibold">
+                {formatCount(following)}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
+                Posts
+              </p>
+              <p className="mt-1 text-[18px] font-semibold">
+                {formatCount(mediaCount)}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2 pt-1">
+            {profileUrl ? (
+              <a
+                href={profileUrl}
+                target="_blank"
+                rel="noreferrer"
+                className={`inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white text-[13px] font-semibold text-neutral-900 hover:bg-neutral-50 ${FOCUS_RING}`}
+              >
+                <ExternalLink className="size-4" />
+                Open Facebook Profile
+              </a>
+            ) : (
               <Link
                 href={PAGE_ROUTES.INTEGRATIONS}
-                className={`inline-flex h-9 items-center rounded-md bg-[#E4E6EB] px-3 text-[14px] font-semibold text-[#050505] hover:bg-[#D8DADF] ${FOCUS_RING}`}
+                className={`inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white text-[13px] font-semibold text-neutral-900 hover:bg-neutral-50 ${FOCUS_RING}`}
               >
-                Manage
+                Manage connection
               </Link>
-            </div>
-          </div>
-
-          <div className="mt-4 flex gap-5 border-t border-[#CCD0D5] pt-1 text-[15px] font-semibold text-[#65676B]">
-            <span className="border-b-[3px] border-[#1877F2] px-1 py-3 text-[#1877F2]">
-              Posts
-            </span>
-            <span className="px-1 py-3">About</span>
-            <span className="px-1 py-3">Photos</span>
+            )}
           </div>
         </div>
-      </div>
+      </aside>
 
-      <div className="space-y-3 p-3 sm:p-4">
-        <div className="rounded-xl bg-white p-3 shadow-sm ring-1 ring-[#E4E6EB]">
-          <div className="flex items-center gap-2 text-[13px] text-[#65676B]">
-            <Globe2 className="size-4" />
-            Public · Fluenca generated Facebook content
+      <section className="min-w-0 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <h2 className="text-[22px] font-semibold tracking-tight">
+              Content (Media)
+            </h2>
+            <p className="mt-1 text-[13px] text-neutral-500">
+              {filteredPosts.length} of {posts.length} posts shown
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {(
+              [
+                { id: "all", label: "All" },
+                { id: "posts", label: "Posts" },
+                { id: "reels", label: "Reels" },
+              ] as const
+            ).map((tab) => {
+              const active = mediaFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setMediaFilter(tab.id)}
+                  className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition ${
+                    active
+                      ? "bg-[#1877F2] text-white"
+                      : "border border-neutral-200 text-neutral-700 hover:bg-neutral-50"
+                  } ${FOCUS_RING}`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              className={`inline-flex h-9 items-center gap-1.5 rounded-full border border-neutral-200 px-3 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50 ${FOCUS_RING}`}
+            >
+              <Filter className="size-3.5" />
+              Filter
+            </button>
+            <button
+              type="button"
+              className={`inline-flex h-9 items-center rounded-full border border-neutral-200 px-3 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50 ${FOCUS_RING}`}
+            >
+              Sort by: Newest
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void refetch();
+              }}
+              disabled={isFetching}
+              aria-label="Refresh media"
+              className={`grid size-9 place-items-center rounded-full border border-neutral-200 text-neutral-700 hover:bg-neutral-50 disabled:opacity-60 ${FOCUS_RING}`}
+            >
+              <RefreshCw
+                className={`size-3.5 ${isFetching ? "animate-spin" : ""}`}
+              />
+            </button>
           </div>
         </div>
 
         {isContentLoading ? (
-          <div className="flex items-center justify-center gap-2 rounded-xl bg-white py-14 text-sm text-[#65676B] shadow-sm">
+          <div className="flex items-center justify-center gap-2 py-20 text-sm text-neutral-500">
             <Loader2 className="size-5 animate-spin text-[#1877F2]" />
-            Loading posts…
+            Loading Facebook content…
           </div>
-        ) : posts.length === 0 ? (
-          <div className="rounded-xl bg-white px-5 py-12 text-center shadow-sm">
-            <p className="text-[17px] font-semibold text-[#050505]">
-              No posts to show
+        ) : isContentError ? (
+          <div className="py-16 text-center text-[14px] text-red-500">
+            {getApiErrorMessage(
+              contentError,
+              "Couldn’t load Facebook profile content",
+            )}
+          </div>
+        ) : filteredPosts.length === 0 ? (
+          <div className="py-16 text-center">
+            <p className="text-[18px] font-light text-neutral-900">
+              No media yet
             </p>
-            <p className="mt-1 text-[14px] text-[#65676B]">
-              Facebook-generated content will show up in this feed.
+            <p className="mt-2 text-[14px] text-neutral-500">
+              No {mediaFilter === "all" ? "posts" : mediaFilter} returned for
+              this Facebook page.
             </p>
-            <Link
-              href={PAGE_ROUTES.CONTENT}
-              className={`mt-4 inline-flex text-[14px] font-semibold text-[#1877F2] hover:underline ${FOCUS_RING}`}
-            >
-              Open Content
-            </Link>
           </div>
         ) : (
-          posts.map((post) => (
-            <article
-              key={post.id}
-              className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-[#E4E6EB]"
-            >
-              <div className="flex items-start justify-between gap-3 p-3">
-                <div className="flex items-center gap-2.5">
-                  {avatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={avatar}
-                      alt=""
-                      className="size-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="grid size-10 place-items-center rounded-full bg-[#E4E6EB] text-[#65676B]">
-                      <UserRound className="size-5" />
+          <ul className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            {filteredPosts.map((post, index) => {
+              const imageUrl = socialMediaImageUrl(post);
+              const caption = socialMediaCaption(post);
+              const likes = socialMediaLikes(post);
+              const comments = socialMediaComments(post);
+              const href = socialMediaHref(post);
+              const dateLabel = formatPostDate(socialMediaDate(post));
+              const reel = isReel(post);
+              const key = String(
+                post.id || post.media_id || imageUrl || index,
+              );
+
+              return (
+                <li
+                  key={key}
+                  className="flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm"
+                >
+                  <div className="relative aspect-[4/5] bg-neutral-100">
+                    {imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={imageUrl}
+                        alt={caption || `Facebook post ${index + 1}`}
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      <div className="grid size-full place-items-center text-neutral-400">
+                        <Grid3X3 className="size-8" />
+                      </div>
+                    )}
+                    <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-md bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+                      {reel ? (
+                        <Clapperboard className="size-3" />
+                      ) : (
+                        <ImageLucide className="size-3" />
+                      )}
+                      {reel ? "Reel" : "Post"}
                     </span>
-                  )}
-                  <div>
-                    <p className="text-[15px] font-semibold text-[#050505]">
-                      {name}
-                    </p>
-                    <p className="text-[12px] text-[#65676B]">
-                      {formatDate(post.createdAt)} · Public
-                    </p>
                   </div>
-                </div>
-                <MoreHorizontal className="size-5 text-[#65676B]" />
-              </div>
 
-              {(post.caption || post.title) && (
-                <p className="px-3 pb-3 text-[15px] leading-5 text-[#050505]">
-                  {post.caption || post.title}
-                </p>
-              )}
+                  <div className="flex flex-1 flex-col gap-3 p-3">
+                    <div className="min-h-[52px] space-y-1">
+                      <p className="line-clamp-2 text-[13px] leading-5 text-neutral-800">
+                        {caption || "No caption"}
+                      </p>
+                      {dateLabel ? (
+                        <p className="text-[12px] text-neutral-400">
+                          {dateLabel}
+                        </p>
+                      ) : null}
+                    </div>
 
-              {post.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={post.imageUrl}
-                  alt={post.title || "Facebook post"}
-                  className="max-h-[520px] w-full object-cover"
-                />
-              ) : null}
-
-              <div className="grid grid-cols-3 border-t border-[#E4E6EB] text-[14px] font-semibold text-[#65676B]">
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center gap-1.5 py-2.5 hover:bg-[#F0F2F5]"
-                >
-                  <ThumbsUp className="size-4" /> Like
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center gap-1.5 py-2.5 hover:bg-[#F0F2F5]"
-                >
-                  <MessageCircle className="size-4" /> Comment
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center gap-1.5 py-2.5 hover:bg-[#F0F2F5]"
-                >
-                  <Share2 className="size-4" /> Share
-                </button>
-              </div>
-            </article>
-          ))
+                    <div className="mt-auto flex items-center justify-between gap-2 border-t border-neutral-100 pt-2.5 text-[12px] text-neutral-500">
+                      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+                        <span className="inline-flex items-center gap-1">
+                          <ThumbsUp className="size-3.5 shrink-0" />
+                          <span className="truncate">
+                            {likes == null
+                              ? "— likes"
+                              : `${formatCount(likes)} likes`}
+                          </span>
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <MessageCircle className="size-3.5 shrink-0" />
+                          <span className="truncate">
+                            {comments == null
+                              ? "— comments"
+                              : `${formatCount(comments)} comments`}
+                          </span>
+                        </span>
+                      </div>
+                      {href ? (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label="Open on Facebook"
+                          className={`shrink-0 text-neutral-400 hover:text-neutral-900 ${FOCUS_RING}`}
+                        >
+                          <ExternalLink className="size-3.5" />
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         )}
-      </div>
+      </section>
     </div>
   );
 }
