@@ -1,17 +1,21 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useRef, type ComponentType } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle2, Clock3, Loader2, Plug, Unplug } from "lucide-react";
+import { CheckCircle2, Clock3, ExternalLink, Loader2, Plug, Unplug } from "lucide-react";
 import { toast } from "sonner";
 import TopBar from "@/components/dashboard/topBar";
+import { FacebookIcon } from "@/components/shared/brandIcons";
 import Card from "@/components/shared/card";
 import { Button } from "@/components/ui/button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import {
+  FacebookConnectMutation,
   InstagramConnectMutation,
+  LinkedInConnectMutation,
   SocialAccountDisconnectMutation,
 } from "@/routes/bussiness/Bussiness-Mutation";
 import { SocialAccountsQuery } from "@/routes/bussiness/Bussiness-Query";
@@ -23,14 +27,16 @@ import {
   type SocialAccount,
 } from "@/types/bussiness/social-accounts-type";
 
-type PlatformId = "instagram" | "linkedin" | "x";
+type PlatformId = "instagram" | "facebook" | "linkedin" | "x";
 
 type PlatformCardConfig = {
   id: PlatformId;
   title: string;
   description: string;
-  iconSrc: string;
+  iconSrc?: string;
+  Icon?: ComponentType<{ className?: string }>;
   ready: boolean;
+  profileHref?: string;
 };
 
 const PLATFORMS: PlatformCardConfig[] = [
@@ -41,14 +47,25 @@ const PLATFORMS: PlatformCardConfig[] = [
       "Authorize Instagram via Meta OAuth. After you approve, you’ll return here with your account linked.",
     iconSrc: "/assets/insta.png",
     ready: true,
+    profileHref: PAGE_ROUTES.SOCIAL_INSTAGRAM,
+  },
+  {
+    id: "facebook",
+    title: "Facebook",
+    description:
+      "Connect Facebook via Meta OAuth to sync Pages and account insights into Fluenca.",
+    Icon: FacebookIcon,
+    ready: true,
+    profileHref: PAGE_ROUTES.SOCIAL_FACEBOOK,
   },
   {
     id: "linkedin",
     title: "LinkedIn",
     description:
-      "Connect your company page to sync hiring signals, posts, and audience insights.",
+      "Sign in with LinkedIn to link your profile so Fluenca can share posts for you.",
     iconSrc: "/assets/linkedin.png",
-    ready: false,
+    ready: true,
+    profileHref: PAGE_ROUTES.SOCIAL_LINKEDIN,
   },
   {
     id: "x",
@@ -71,9 +88,39 @@ function decodeConnectError(value: string | null) {
 
 function accountHandle(account?: SocialAccount | null) {
   const value =
-    account?.username || account?.account_name || account?.display_name || null;
+    account?.username ||
+    account?.external_account_name ||
+    account?.account_name ||
+    account?.display_name ||
+    null;
   if (!value) return null;
   return String(value).replace(/^@/, "");
+}
+
+function PlatformGlyph({
+  platform,
+  className,
+}: {
+  platform: PlatformCardConfig;
+  className: string;
+}) {
+  if (platform.Icon) {
+    const Icon = platform.Icon;
+    return <Icon className={className} />;
+  }
+  if (platform.iconSrc) {
+    const size = className.includes("size-7") ? 28 : 16;
+    return (
+      <Image
+        src={platform.iconSrc}
+        alt=""
+        width={size}
+        height={size}
+        className={`${className} object-contain`}
+      />
+    );
+  }
+  return null;
 }
 
 function PlatformCard({
@@ -95,19 +142,15 @@ function PlatformCard({
 }) {
   const connected = platform.ready && isSocialAccountConnected(account);
   const handle = accountHandle(account);
+  const handlePrefix =
+    platform.id === "instagram" || platform.id === "x" ? "@" : "";
 
   return (
     <Card className="p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-3">
-          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#F6F7FD] ring-1 ring-[#E6E8F5]">
-            <Image
-              src={platform.iconSrc}
-              alt=""
-              width={28}
-              height={28}
-              className="size-7 object-contain"
-            />
+          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#F6F7FD] text-[#1877F2] ring-1 ring-[#E6E8F5]">
+            <PlatformGlyph platform={platform} className="size-7" />
           </span>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -139,13 +182,23 @@ function PlatformCard({
             </p>
             {connected && handle ? (
               <p className="mt-2 text-[13px] font-medium text-neutral-800">
-                @{handle}
+                {handlePrefix}
+                {handle}
               </p>
             ) : null}
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {connected && platform.profileHref ? (
+            <Link
+              href={platform.profileHref}
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-[#E6E8F5] bg-white px-4 text-sm font-medium text-neutral-800 hover:bg-[#F6F7FD]"
+            >
+              <ExternalLink className="size-4" />
+              View profile
+            </Link>
+          ) : null}
           {connected && onDisconnect ? (
             <Button
               type="button"
@@ -175,13 +228,7 @@ function PlatformCard({
             {isConnecting ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
-              <Image
-                src={platform.iconSrc}
-                alt=""
-                width={16}
-                height={16}
-                className="size-4 object-contain"
-              />
+              <PlatformGlyph platform={platform} className="size-4" />
             )}
             {!platform.ready
               ? "Soon"
@@ -210,16 +257,23 @@ function IntegrationsPageContent() {
     isFetching,
   } = SocialAccountsQuery();
 
-  const { mutate: connectInstagram, isPending: isConnecting } =
+  const { mutate: connectInstagram, isPending: isConnectingInstagram } =
     InstagramConnectMutation();
+  const { mutate: connectFacebook, isPending: isConnectingFacebook } =
+    FacebookConnectMutation();
+  const { mutate: connectLinkedIn, isPending: isConnectingLinkedIn } =
+    LinkedInConnectMutation();
   const { mutate: disconnectAccount, isPending: isDisconnecting } =
     SocialAccountDisconnectMutation();
 
-  const accounts = useMemo(
-    () => normalizeSocialAccounts(accountsData),
-    [accountsData],
-  );
-  const instagramAccount = findSocialAccount(accounts, "instagram");
+  const accounts = normalizeSocialAccounts(accountsData);
+  const connectors: Partial<
+    Record<PlatformId, { connect: () => void; isPending: boolean }>
+  > = {
+    instagram: { connect: connectInstagram, isPending: isConnectingInstagram },
+    facebook: { connect: connectFacebook, isPending: isConnectingFacebook },
+    linkedin: { connect: connectLinkedIn, isPending: isConnectingLinkedIn },
+  };
 
   useEffect(() => {
     if (handledReturn.current) return;
@@ -232,11 +286,11 @@ function IntegrationsPageContent() {
 
     if (connectError) {
       toast.error(connectError);
-    } else if (connected === "instagram") {
-      toast.success("Instagram connected");
-      void refetch();
     } else if (connected) {
-      toast.success(`${connected} connected`);
+      const title =
+        PLATFORMS.find((platform) => platform.id === connected)?.title ??
+        connected;
+      toast.success(`${title} connected`);
       void refetch();
     }
 
@@ -261,7 +315,7 @@ function IntegrationsPageContent() {
               Connect your social accounts
             </h1>
             <p className="mt-2 max-w-2xl text-[14px] leading-6 text-neutral-600">
-              Link Instagram now. LinkedIn and X are shown here and will open for
+              Link Instagram, Facebook, and LinkedIn now. X will open for
               connection soon.
             </p>
           </div>
@@ -283,30 +337,32 @@ function IntegrationsPageContent() {
       ) : null}
 
       <div className="space-y-3">
-        {PLATFORMS.map((platform) => (
-          <PlatformCard
-            key={platform.id}
-            platform={platform}
-            account={platform.id === "instagram" ? instagramAccount : null}
-            isLoading={platform.ready ? isLoading : false}
-            isConnecting={platform.id === "instagram" ? isConnecting : false}
-            isDisconnecting={
-              platform.id === "instagram" ? isDisconnecting : false
-            }
-            onConnect={() => {
-              if (platform.id === "instagram") {
-                connectInstagram();
-                return;
+        {PLATFORMS.map((platform) => {
+          const connector = connectors[platform.id];
+
+          return (
+            <PlatformCard
+              key={platform.id}
+              platform={platform}
+              account={
+                connector ? findSocialAccount(accounts, platform.id) : null
               }
-              toast.message(`${platform.title} connection is coming soon`);
-            }}
-            onDisconnect={
-              platform.id === "instagram"
-                ? () => disconnectAccount("instagram")
-                : undefined
-            }
-          />
-        ))}
+              isLoading={platform.ready ? isLoading : false}
+              isConnecting={connector?.isPending ?? false}
+              isDisconnecting={connector ? isDisconnecting : false}
+              onConnect={() => {
+                if (connector) {
+                  connector.connect();
+                  return;
+                }
+                toast.message(`${platform.title} connection is coming soon`);
+              }}
+              onDisconnect={
+                connector ? () => disconnectAccount(platform.id) : undefined
+              }
+            />
+          );
+        })}
       </div>
     </main>
   );

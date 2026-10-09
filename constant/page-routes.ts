@@ -2,7 +2,6 @@ export const PAGE_ROUTES = {
     HOME: '/',
     COMING_SOON: '/coming-soon',
 
-    // Auth
     LOGIN: '/login',
     SIGNUP: '/signup',
     FORGOT_PASSWORD: '/forgot-password',
@@ -10,7 +9,6 @@ export const PAGE_ROUTES = {
     VERIFY_EMAIL: '/verify-email',
     VERIFY_OTP: '/verify-otp',
 
-    // Onboarding
     ONBOARDING: '/onboarding',
     COMPANY_DETAIL: '/company-detail',
     QUESTIONS: '/questions',
@@ -18,23 +16,28 @@ export const PAGE_ROUTES = {
     VERIFY_DNA: '/verify-dna',
     DNA: '/dna',
 
-    // Dashboard
     DASHBOARD: '/dashboard',
     INTEGRATIONS: '/dashboard/integrations',
+    SOCIAL: '/social',
+    SOCIAL_INSTAGRAM: '/social/instagram',
+    SOCIAL_FACEBOOK: '/social/facebook',
+    SOCIAL_LINKEDIN: '/social/linkedin',
     COMPANY_OVERVIEW: '/company-overview',
+    PROFILE: '/profile',
     TRENDS: '/trends',
     COMPETITOR_ANALYSIS: '/competitor-analysis',
     COMPETITOR_ANALYSIS_AI: '/competitor-analysis/ai',
     COMPETITOR_ANALYSIS_MANUAL: '/competitor-analysis/mannual',
     COMPETITORS: '/competitors',
     CALENDAR: '/calendar',
+    CONTROLS: '/controls',
     CONTENT_RECOMMENDATION: '/content-recommendation',
     SCRIPT: '/script',
     SCRIPT_DETAIL: (id: string) => `/script/${id}`,
     CONTENT: '/content',
     BLOGS: '/blogs',
+    BLOG_DETAIL: (id: string) => `/blogs/${id}`,
 
-    // Super admin
     SUPERADMIN: '/superadmin',
     SUPERADMIN_USERS: '/superadmin',
 } as const;
