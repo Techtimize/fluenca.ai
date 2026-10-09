@@ -160,7 +160,7 @@ export default function BlogsPage() {
                     alt={post.hero_image_alt || post.title}
                     width={112}
                     height={63}
-                    unoptimized
+                    sizes="112px"
                     className="aspect-video w-28 shrink-0 rounded-lg object-cover"
                   />
                 ) : null}

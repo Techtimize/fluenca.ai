@@ -61,6 +61,10 @@ export interface BlogQualityCheck {
   detail: string;
 }
 
+export type BlogImageRequest =
+  | { kind: 'hero'; prompt?: string }
+  | { kind: 'section'; heading: string; prompt?: string };
+
 export interface BlogPost extends BlogPostListItem {
   content_markdown: string;
   key_takeaways: string[];

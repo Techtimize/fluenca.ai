@@ -21,7 +21,10 @@ import {
   Megaphone,
   Plug,
   Search,
+  Settings2,
+  SlidersHorizontal,
   TrendingUp,
+  Users,
   Zap,
 } from "lucide-react";
 
@@ -51,6 +54,11 @@ const ICONS: Record<string, LucideIcon> = {
   lightbulb: Lightbulb,
   plug: Plug,
   integrations: Plug,
+  controls: SlidersHorizontal,
+  sliders: SlidersHorizontal,
+  settings: Settings2,
+  social: Users,
+  users: Users,
 };
 
 export function getIcon(name?: string): LucideIcon {

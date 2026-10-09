@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Loader2, RotateCcw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, ImagePlus, Loader2, RotateCcw } from "lucide-react";
 import { BlogMarkdown } from "@/components/dashboard/blogs/blogMarkdown";
 import { BlogStatusChip } from "@/components/dashboard/blogs/blogStatusChip";
 import TopBar from "@/components/dashboard/topBar";
@@ -13,12 +14,14 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { getApiErrorMessage, isApiNotFoundError } from "@/errors/error-utils";
-import { BlogPostMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import { BlogImageMutation, BlogPostMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { BlogPostDetailsQuery, BlogPostsQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
 const BLOG_LINK_PREFIX = "/blog/";
+const IMAGE_BUTTON = "h-8 gap-1.5 rounded-full px-3 text-[12px]";
+const HERO_HEIGHT = "h-48 sm:h-60 lg:h-72";
 
 export default function BlogPostPage() {
   const params = useParams<{ id?: string }>();
@@ -27,6 +30,18 @@ export default function BlogPostPage() {
   const { data: post, isLoading, isError, error, refetch, isRefetching } = BlogPostDetailsQuery(postId);
   const { data: list } = BlogPostsQuery();
   const writePost = BlogPostMutation();
+  const makeImage = BlogImageMutation(postId);
+  const { mutate: requestImage } = makeImage;
+  const heroRequested = useRef(false);
+  const [heroExpanded, setHeroExpanded] = useState(false);
+  const pendingImage = makeImage.isPending ? makeImage.variables : undefined;
+  const pendingHeading = pendingImage?.kind === "section" ? pendingImage.heading : null;
+
+  useEffect(() => {
+    if (!post || post.status !== "ready" || post.hero_image_url || heroRequested.current) return;
+    heroRequested.current = true;
+    requestImage({ kind: "hero" });
+  }, [post, requestImage]);
 
   const readyIdsBySlug = new Map(
     (list?.blog_posts ?? []).filter((item) => item.status === "ready").map((item) => [item.slug, item.id]),
@@ -104,17 +119,30 @@ export default function BlogPostPage() {
       ) : null}
 
       {post && post.status === "ready" ? (
-        <article className="space-y-4">
+        <article className="mx-auto max-w-4xl space-y-4">
           <Card className="overflow-hidden">
             {post.hero_image_url ? (
-              <Image
-                src={post.hero_image_url}
-                alt={post.hero_image_alt || post.title}
-                width={1600}
-                height={900}
-                unoptimized
-                className="aspect-video w-full object-cover"
-              />
+              <button
+                type="button"
+                onClick={() => setHeroExpanded((expanded) => !expanded)}
+                aria-label={heroExpanded ? "Show a smaller hero image" : "Show the full hero image"}
+                className={`block w-full ${heroExpanded ? "cursor-zoom-out" : "cursor-zoom-in"}`}
+              >
+                <Image
+                  src={post.hero_image_url}
+                  alt={post.hero_image_alt || post.title}
+                  width={1600}
+                  height={900}
+                  sizes="(min-width: 1024px) 896px, 100vw"
+                  priority
+                  className={`w-full object-cover ${heroExpanded ? "aspect-video" : HERO_HEIGHT}`}
+                />
+              </button>
+            ) : pendingImage?.kind === "hero" ? (
+              <div className={`flex w-full items-center justify-center gap-2 bg-[#F4F5FB] text-[13px] text-neutral-500 ${HERO_HEIGHT}`}>
+                <Loader2 className="size-4 animate-spin text-[#5B57E6]" aria-hidden="true" />
+                Creating the image…
+              </div>
             ) : null}
             <div className="space-y-2 p-5 sm:p-6">
               <div className="flex flex-wrap items-center gap-2 text-[12px] text-neutral-500">
@@ -122,6 +150,17 @@ export default function BlogPostPage() {
                 <Badge>{`${post.word_count} words`}</Badge>
                 {post.quality_score !== null ? <Badge>{`Quality ${post.quality_score}/100`}</Badge> : null}
                 <Badge>{`/blog/${post.slug}`}</Badge>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={makeImage.isPending}
+                  onClick={() => requestImage({ kind: "hero" })}
+                  className={`ms-auto ${IMAGE_BUTTON}`}
+                >
+                  <ImagePlus className="size-3.5" aria-hidden="true" />
+                  {post.hero_image_url ? "New hero image" : "Create hero image"}
+                </Button>
               </div>
               <h1 className="text-2xl font-semibold leading-tight text-neutral-900">{post.title}</h1>
               {post.meta_description ? (
@@ -142,7 +181,28 @@ export default function BlogPostPage() {
           ) : null}
 
           <Card className="p-5 sm:p-6">
-            <BlogMarkdown markdown={post.content_markdown} resolveHref={resolveHref} />
+            <BlogMarkdown
+              markdown={post.content_markdown}
+              resolveHref={resolveHref}
+              headingAction={(heading) => (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={makeImage.isPending}
+                  onClick={() => requestImage({ kind: "section", heading })}
+                  aria-label={`Add image: ${heading}`}
+                  className={IMAGE_BUTTON}
+                >
+                  {pendingHeading === heading ? (
+                    <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <ImagePlus className="size-3.5" aria-hidden="true" />
+                  )}
+                  Add image
+                </Button>
+              )}
+            />
           </Card>
 
           {post.faq.length > 0 ? (

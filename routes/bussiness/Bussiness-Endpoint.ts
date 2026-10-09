@@ -88,6 +88,7 @@ export const BUSSINESSENDPOINT = {
     BRIEFS: '/briefs',
     BLOG_POST: '/blog-posts',
     BLOG_POST_DETAILS: (blog_post_id: string) => `/blog-posts/${blog_post_id}`,
+    BLOG_POST_IMAGES: (blog_post_id: string) => `/blog-posts/${blog_post_id}/images`,
 
     CONNECTORS:{
         INSTAGRAM_LOGIN: '/connector/instagram/login',
@@ -101,6 +102,24 @@ export const BUSSINESSENDPOINT = {
     PUBLISH:{
         INSTAGRAM_PUBLISH: '/connector/instagram/publish',
         FACEBOOK_PUBLISH: '/connector/facebook/publish',
+        LINKEDIN_PUBLISH: '/connector/linkedin/publish',
+        X_PUBLISH: '/connector/x/publish',
+    },
+
+    INSTAGRAM:{
+        PROFILE_ID: '/connector/instagram/profile-id',
+        PROFILE_INFO: '/connector/instagram/profile-info',
+        POST_ENGAGEMENT: '/connector/instagram/post-engagement',
+        POST_LIKE: '/connector/instagram/post-engagement',
+        PROFILE_CONTENT: '/connector/instagram/profile-content',
+    },
+
+    FACEBOOK:{
+        PROFILE_CONTENT: '/connector/facebook/profile-content',
+    },
+
+    LINKEDIN:{
+        PROFILE_CONTENT: '/connector/linkedin/profile-content',
     },
 
     CONTENT_EXECUTION:{

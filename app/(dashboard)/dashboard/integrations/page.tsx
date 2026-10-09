@@ -2,8 +2,9 @@
 
 import { Suspense, useEffect, useRef, type ComponentType } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle2, Clock3, Loader2, Plug, Unplug } from "lucide-react";
+import { CheckCircle2, Clock3, ExternalLink, Loader2, Plug, Unplug } from "lucide-react";
 import { toast } from "sonner";
 import TopBar from "@/components/dashboard/topBar";
 import { FacebookIcon } from "@/components/shared/brandIcons";
@@ -35,6 +36,7 @@ type PlatformCardConfig = {
   iconSrc?: string;
   Icon?: ComponentType<{ className?: string }>;
   ready: boolean;
+  profileHref?: string;
 };
 
 const PLATFORMS: PlatformCardConfig[] = [
@@ -45,6 +47,7 @@ const PLATFORMS: PlatformCardConfig[] = [
       "Authorize Instagram via Meta OAuth. After you approve, you’ll return here with your account linked.",
     iconSrc: "/assets/insta.png",
     ready: true,
+    profileHref: PAGE_ROUTES.SOCIAL_INSTAGRAM,
   },
   {
     id: "facebook",
@@ -53,6 +56,7 @@ const PLATFORMS: PlatformCardConfig[] = [
       "Connect Facebook via Meta OAuth to sync Pages and account insights into Fluenca.",
     Icon: FacebookIcon,
     ready: true,
+    profileHref: PAGE_ROUTES.SOCIAL_FACEBOOK,
   },
   {
     id: "linkedin",
@@ -61,6 +65,7 @@ const PLATFORMS: PlatformCardConfig[] = [
       "Sign in with LinkedIn to link your profile so Fluenca can share posts for you.",
     iconSrc: "/assets/linkedin.png",
     ready: true,
+    profileHref: PAGE_ROUTES.SOCIAL_LINKEDIN,
   },
   {
     id: "x",
@@ -185,6 +190,15 @@ function PlatformCard({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {connected && platform.profileHref ? (
+            <Link
+              href={platform.profileHref}
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-[#E6E8F5] bg-white px-4 text-sm font-medium text-neutral-800 hover:bg-[#F6F7FD]"
+            >
+              <ExternalLink className="size-4" />
+              View profile
+            </Link>
+          ) : null}
           {connected && onDisconnect ? (
             <Button
               type="button"

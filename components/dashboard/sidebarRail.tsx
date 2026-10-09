@@ -47,6 +47,18 @@ const DEFAULT_NAV: NavItem[] = [
     href: PAGE_ROUTES.CALENDAR,
   },
   {
+    id: "controls",
+    label: "Controls",
+    icon: "sliders",
+    href: PAGE_ROUTES.CONTROLS,
+  },
+  {
+    id: "social",
+    label: "Social profiles",
+    icon: "users",
+    href: PAGE_ROUTES.SOCIAL,
+  },
+  {
     id: "integrations",
     label: "Integrations",
     icon: "plug",
