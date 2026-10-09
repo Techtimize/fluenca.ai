@@ -37,6 +37,7 @@ import type {
 import { IntelligenceJobResponse, IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 import type { PlannerResultsResponse, PlannerVersionsResponse } from "@/types/bussiness/planner-type";
 import type {
+    BlogImageRequest,
     BlogPost,
     BlogPostListResponse,
     BriefListResponse,
@@ -412,6 +413,11 @@ export const BlogPostsApi = async (): Promise<BlogPostListResponse> => {
 
 export const BlogPostDetailsApi = async (blog_post_id: string): Promise<BlogPost> => {
     const response = await api.get(BUSSINESSENDPOINT.BLOG_POST_DETAILS(blog_post_id));
+    return response.data;
+}
+
+export const BlogImageApi = async (blog_post_id: string, body: BlogImageRequest): Promise<BlogPost> => {
+    const response = await api.post(BUSSINESSENDPOINT.BLOG_POST_IMAGES(blog_post_id), body);
     return response.data;
 }
 

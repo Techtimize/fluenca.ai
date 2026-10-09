@@ -50,7 +50,7 @@ export const useChatbot = (enabled = true) => {
     return live;
   }, [history, pendingUserText, pendingImageUrl, streamingText]);
 
-  const send = (text: string, screenContext?: string, imageUrl?: string) => {
+  const send = (text: string, screenContext?: string, imageUrl?: string, pages?: Record<string, string>) => {
     if (sendMessage.isPending) return;
 
     streamedRef.current = "";
@@ -65,6 +65,7 @@ export const useChatbot = (enabled = true) => {
         screenContext,
         imageUrl,
         mode,
+        pages,
         onChunk: (chunk) => {
           streamedRef.current += chunk;
           setStreamingText(streamedRef.current);
