@@ -113,6 +113,14 @@ export const BUSSINESSENDPOINT = {
         PROFILE_CONTENT: '/connector/instagram/profile-content',
     },
 
+    FACEBOOK:{
+        PROFILE_CONTENT: '/connector/facebook/profile-content',
+    },
+
+    LINKEDIN:{
+        PROFILE_CONTENT: '/connector/linkedin/profile-content',
+    },
+
     CONTENT_EXECUTION:{
         SETTINGS: '/content-execution/settings',
         AGENT_MODE: '/content-execution/agent-mode',
@@ -126,9 +134,6 @@ export const BUSSINESSENDPOINT = {
         FACEBOOK_DEAUTHORIZE: '/integrations/facebook/deauthorize',
         FACEBOOK_DATA_DELETION: '/integrations/facebook/data-deletion',
     }
-
-
-
 }
 
 
