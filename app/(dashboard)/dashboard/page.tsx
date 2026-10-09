@@ -3,21 +3,20 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import AnalyticsSection from "@/components/dashboard/cards/analyticsSection";
-import ChatInput from "@/components/dashboard/chat/chatInput";
-import ChatPanel from "@/components/dashboard/chat/chatPanel";
+import { useChatOpen } from "@/components/dashboard/chat/chatShell";
 import CompanyCard from "@/components/dashboard/cards/companyCard";
 import { DashboardSkeleton } from "@/components/shared/skeletons";
 import DocumentationCard from "@/components/dashboard/documentationCard";
+import DocumentationSheet from "@/components/dashboard/documentation/documentationSheet";
 import TopBar from "@/components/dashboard/topBar";
 import { mapDashboard } from "@/lib/dashboard/map-dashboard";
-import { useChatbot } from "@/lib/chat/use-chatbot";
 import { AnalyzeCompanyDashboardQuery } from "@/routes/bussiness/Bussiness-Query";
 import {
   AnalyzeCompanyMutation,
   InstagramConnectMutation,
 } from "@/routes/bussiness/Bussiness-Mutation";
 import useAuthStore from "@/store/AuthsStore";
-import type { Device } from "@/types/dashboard";
+import type { Device, DocItem } from "@/types/dashboard";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { useRouter } from "next/navigation";
 
@@ -75,122 +74,67 @@ export default function DashboardPage() {
   const source =
     selectedSource && channels[selectedSource] ? selectedSource : defaultSource;
   const analytics = channels[source];
-  const sourceLabel = sources.find((s) => s.id === source)?.label ?? source;
   const [device, setDevice] = useState<Device>("mobile");
-  const [chatOpen, setChatOpen] = useState(false);
-  const {
-    messages,
-    send,
-    isSending,
-    isAwaitingReply,
-    isToolRunning,
-    mode,
-    setMode,
-    conversations,
-    activeConversationId,
-    setActiveConversationId,
-    startNewConversation,
-  } = useChatbot();
-
-  const screenContext = [
-    `Page: Dashboard`,
-    `Company: ${mapped?.company.name ?? ""}`,
-    `Analytics source tab: ${sourceLabel} (${device})`,
-    analytics?.metrics.length
-      ? `Visible metric scores: ${analytics.metrics.map((m) => `${m.label} ${m.score}`).join(", ")}`
-      : "",
-  ]
-    .filter(Boolean)
-    .join(". ");
-
-  const handleSend = (text: string, imageUrl?: string) => {
-    send(text, screenContext, imageUrl);
-    setChatOpen(true);
-  };
+  const chatOpen = useChatOpen();
+  const [openDoc, setOpenDoc] = useState<DocItem | null>(null);
 
   return (
     <>
-      <div
-        className={
-          chatOpen
-            ? "pb-4 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-4"
-            : "pb-32"
-        }
-      >
-        <main className="min-w-0 space-y-4">
-          <TopBar user={user} />
-          {isError ? (
-            <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
-              {error instanceof Error ? error.message : t("error")}
-            </div>
-          ) : null}
+      <main className="min-w-0 space-y-4">
+        <TopBar user={user} />
+        {isError ? (
+          <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+            {error instanceof Error ? error.message : t("error")}
+          </div>
+        ) : null}
 
-          {isLoading ? <DashboardSkeleton compact={chatOpen} /> : null}
+        {isLoading ? <DashboardSkeleton compact={chatOpen} /> : null}
 
-          {!isLoading && mapped ? (
-            <div
-              className={`grid gap-4 ${chatOpen ? "" : "xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]"}`}
-            >
-              <CompanyCard
-                company={mapped.company}
-                profile={mapped.profile}
-                onRefresh={handleAnalyzeCompany}
-                isRefreshing={isPending}
-              />
-              {!chatOpen && mapped.docs.length ? (
-                <DocumentationCard
-                  items={mapped.docs}
-                  goalLabel={t("setYourGoal")}
-                />
-              ) : null}
-            </div>
-          ) : null}
-
-          {!isLoading && analytics ? (
-            <AnalyticsSection
-              data={analytics}
-              sources={sources}
-              source={source}
-              device={device}
-              compact={chatOpen}
-              onSourceChange={setSource}
-              onDeviceChange={setDevice}
-              onConnectIntegration={(id) => {
-                if (id === "instagram") {
-                  connectInstagram();
-                  return;
-                }
-                router.push(PAGE_ROUTES.INTEGRATIONS);
-              }}
+        {!isLoading && mapped ? (
+          <div
+            className={`grid gap-4 ${chatOpen ? "" : "xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]"}`}
+          >
+            <CompanyCard
+              company={mapped.company}
+              profile={mapped.profile}
+              onRefresh={handleAnalyzeCompany}
+              isRefreshing={isPending}
             />
-          ) : null}
-        </main>
+            {!chatOpen && mapped.docs.length ? (
+              <DocumentationCard
+                items={mapped.docs}
+                goalLabel={t("setYourGoal")}
+                onSelect={setOpenDoc}
+              />
+            ) : null}
+          </div>
+        ) : null}
 
-        {chatOpen ? (
-          <ChatPanel
-            messages={messages}
-            onSend={handleSend}
-            onClose={() => setChatOpen(false)}
-            isSending={isSending}
-            isAwaitingReply={isAwaitingReply}
-            isToolRunning={isToolRunning}
-            mode={mode}
-            onModeChange={setMode}
-            conversations={conversations}
-            activeConversationId={activeConversationId}
-            onSelectConversation={setActiveConversationId}
-            onReset={startNewConversation}
+        {!isLoading && analytics ? (
+          <AnalyticsSection
+            data={analytics}
+            sources={sources}
+            source={source}
+            device={device}
+            compact={chatOpen}
+            onSourceChange={setSource}
+            onDeviceChange={setDevice}
+            onConnectIntegration={(id) => {
+              if (id === "instagram") {
+                connectInstagram();
+                return;
+              }
+              router.push(PAGE_ROUTES.INTEGRATIONS);
+            }}
           />
         ) : null}
-      </div>
+      </main>
 
-      {!chatOpen ? (
-        <ChatInput
-          onOpen={() => setChatOpen(true)}
-          onSend={handleSend}
-          placeholder={t("chatPlaceholder")}
-        />
-      ) : null}
+      <DocumentationSheet
+        companyId={companyId}
+        item={openDoc}
+        onClose={() => setOpenDoc(null)}
+      />
     </>
   );
 }

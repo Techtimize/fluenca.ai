@@ -6,11 +6,56 @@ export interface InstagramAuthorizeResponse {
   message?: string;
 }
 
+export interface InstagramPublishRequest {
+  image_url: string;
+  caption?: string;
+  image_urls?: string[];
+}
+
+export interface InstagramPublishResponse {
+  success?: boolean;
+  message?: string;
+  error?: string | null;
+  post_id?: string | null;
+  media_id?: string | null;
+  permalink?: string | null;
+  [key: string]: unknown;
+}
+
+export type FacebookPublishRequest = InstagramPublishRequest;
+export type FacebookPublishResponse = InstagramPublishResponse;
+
+/** LinkedIn publish (requires connected account with w_member_social). */
+export type LinkedInPublishTextRequest = {
+  text: string;
+};
+
+export type LinkedInPublishLinkRequest = {
+  text: string;
+  link: string;
+  title?: string;
+};
+
+export type LinkedInPublishImageRequest = {
+  text: string;
+  image_url: string;
+  title?: string;
+};
+
+export type LinkedInPublishRequest =
+  | LinkedInPublishTextRequest
+  | LinkedInPublishLinkRequest
+  | LinkedInPublishImageRequest;
+
+export type LinkedInPublishResponse = InstagramPublishResponse;
+
 export interface SocialAccount {
   id?: string;
   platform?: SocialPlatform;
   provider?: string;
   username?: string | null;
+  external_account_id?: string | null;
+  external_account_name?: string | null;
   account_name?: string | null;
   display_name?: string | null;
   profile_url?: string | null;

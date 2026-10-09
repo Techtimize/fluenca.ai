@@ -2,11 +2,14 @@ import { useId } from "react";
 import { Monitor, Smartphone } from "lucide-react";
 import type { OverallPerformance } from "@/types/dashboard";
 
-// The gauge is drawn in code because it changes with the score.
-// Each segment is a rounded block pointing at the centre, shaded blue (outer) to purple (inner).
+
 const BARS = 13;
-const SWEEP = 200; // degrees; a little past a half circle so the ends dip below the baseline
-const CX = 140, CY = 140, R_INNER = 84, R_OUTER = 132, BAR_WIDTH = 24;
+const SWEEP = 200; 
+const CX = 140,
+  CY = 140,
+  R_INNER = 84,
+  R_OUTER = 132,
+  BAR_WIDTH = 24;
 const TRACK = "#EEF0FD";
 
 function ScoreGauge({ score }: { score: number }) {
@@ -15,7 +18,12 @@ function ScoreGauge({ score }: { score: number }) {
   const filledCount = Math.round(pct * (BARS - 1)) + (pct > 0 ? 1 : 0);
 
   return (
-    <svg viewBox="0 0 280 182" className="mx-auto w-full max-w-70" role="img" aria-label={`Overall score ${score}%`}>
+    <svg
+      viewBox="0 0 280 182"
+      className="mx-auto w-full max-w-70"
+      role="img"
+      aria-label={`Overall score ${score}%`}
+    >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#4A5DF9" />
@@ -37,28 +45,49 @@ function ScoreGauge({ score }: { score: number }) {
           />
         );
       })}
-      <text x={CX} y={CY + 2} textAnchor="middle" className="fill-neutral-900 text-[38px] font-semibold">
+      <text
+        x={CX}
+        y={CY + 2}
+        textAnchor="middle"
+        className="fill-neutral-900 text-[38px] font-semibold"
+      >
         {score}%
       </text>
-      <text x={CX} y={CY + 26} textAnchor="middle" className="fill-neutral-700 text-[15px]">
+      <text
+        x={CX}
+        y={CY + 26}
+        textAnchor="middle"
+        className="fill-neutral-700 text-[15px]"
+      >
         Overall Score
       </text>
     </svg>
   );
 }
 
-export default function OverallPerformanceCard({ data }: { data: OverallPerformance }) {
+export default function OverallPerformanceCard({
+  data,
+}: {
+  data: OverallPerformance;
+}) {
   return (
     <section className="flex flex-col rounded-2xl border border-[#E6E8F5] bg-white p-5">
-      <h3 className="text-[13px] font-semibold text-neutral-900">Overall Performance</h3>
+      <h3 className="text-[13px] font-semibold text-neutral-900">
+        Overall Performance
+      </h3>
       <p className="mb-6 mt-1 text-xs text-neutral-500">{data.summary}</p>
       <ScoreGauge score={data.score} />
       {data.stats?.length ? (
         <dl className="mt-auto grid grid-cols-2 gap-3 pt-5">
           {data.stats.map((stat) => (
-            <div key={stat.label} className="rounded-xl bg-[#F1F4FF] px-3 py-2.5">
+            <div
+              key={stat.label}
+              className="rounded-xl bg-[#F1F4FF] px-3 py-2.5"
+            >
               <dt className="text-xs text-neutral-600">{stat.label}</dt>
-              <dd className="mt-1 text-sm font-semibold text-neutral-900">{stat.value}</dd>
+              <dd className="mt-1 text-sm font-semibold text-neutral-900">
+                {stat.value}
+              </dd>
             </div>
           ))}
         </dl>
@@ -68,13 +97,17 @@ export default function OverallPerformanceCard({ data }: { data: OverallPerforma
             <dt className="flex items-center gap-1.5 text-xs text-neutral-600">
               <Smartphone className="size-3.5" aria-hidden="true" /> Mobile
             </dt>
-            <dd className="mt-1 text-sm font-semibold text-neutral-900">{data.mobile} %</dd>
+            <dd className="mt-1 text-sm font-semibold text-neutral-900">
+              {data.mobile} %
+            </dd>
           </div>
           <div className="rounded-xl bg-[#F1F4FF] px-3 py-2.5">
             <dt className="flex items-center gap-1.5 text-xs text-neutral-600">
               <Monitor className="size-3.5" aria-hidden="true" /> Desktop
             </dt>
-            <dd className="mt-1 text-sm font-semibold text-neutral-900">{data.desktop} %</dd>
+            <dd className="mt-1 text-sm font-semibold text-neutral-900">
+              {data.desktop} %
+            </dd>
           </div>
         </dl>
       ) : null}

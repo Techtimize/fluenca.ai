@@ -7,6 +7,7 @@ export const BUSSINESSENDPOINT = {
     INTELLIGENCE_JOB: (job_id: string) => `/intelligence/jobs/${job_id}`,
 
     ONBOARDING_DETAILS: '/onboarding/details',
+    USER_PROFILE: '/user-profile',
 
     INTAKE: '/intake',
     INTAKE_QUESTION: (questionId: string) => `/intake/questions/${questionId}`,
@@ -16,6 +17,7 @@ export const BUSSINESSENDPOINT = {
     ANALYZE_COMPANY: '/analyzeCompany/analyzeCompany',
     ANALYZE_COMPANY_RESULTS:(company_id: string) => `/analyzeCompany/results/${company_id}`,
     ANALYZE_COMPANY_DASHBOARD:(company_id: string) => `/analyzeCompany/dashboard/${company_id}`,
+    ANALYZE_COMPANY_DASHBOARD_DOCUMENTATION:(company_id: string) => `/analyzeCompany/dashboard/${company_id}/documentation`,
     GROWTH: '/social-growth',
 
     ANALYSIS:{
@@ -80,15 +82,53 @@ export const BUSSINESSENDPOINT = {
     conversation: (conversationId: string) => `/chatbot/conversations/${conversationId}`,
     conversationMessages: (conversationId: string) => `/chatbot/conversations/${conversationId}/messages`,
 
+    KEYWORDS: '/keywords',
+    KEYWORDS_RETRY: '/keywords/retry',
+    BRIEFS: '/briefs',
     BLOG_POST: '/blog-posts',
     BLOG_POST_DETAILS: (blog_post_id: string) => `/blog-posts/${blog_post_id}`,
+    BLOG_POST_IMAGES: (blog_post_id: string) => `/blog-posts/${blog_post_id}/images`,
 
     CONNECTORS:{
         INSTAGRAM_LOGIN: '/connector/instagram/login',
         SOCIAL_ACCOUNTS: '/social-accounts',
         SOCIAL_ACCOUNTS_CONNECT: (platform: string) => `/social-accounts/${platform}/connect`,
-        SOCIAL_ACCOUNTS_DISCONNECT: (platform: string) => `/social-accounts/${platform}/disconnect`,
+        SOCIAL_ACCOUNTS_DISCONNECT: (platform: string) => `/social-accounts/${platform}`,
+        FACEBOOK_CONNECT: '/connector/facebook/connect',
+        X_CONNECT: '/connector/x/login',
+    },
+
+    PUBLISH:{
+        INSTAGRAM_PUBLISH: '/connector/instagram/publish',
+        FACEBOOK_PUBLISH: '/connector/facebook/publish',
+        LINKEDIN_PUBLISH: '/connector/linkedin/publish',
+        X_PUBLISH: '/connector/x/publish',
+    },
+
+    INSTAGRAM:{
+        PROFILE_ID: '/connector/instagram/profile-id',
+        PROFILE_INFO: '/connector/instagram/profile-info',
+        POST_ENGAGEMENT: '/connector/instagram/post-engagement',
+        POST_LIKE: '/connector/instagram/post-engagement',
+        PROFILE_CONTENT: '/connector/instagram/profile-content',
+    },
+
+    CONTENT_EXECUTION:{
+        SETTINGS: '/content-execution/settings',
+        AGENT_MODE: '/content-execution/agent-mode',
+        DAILY: '/content-execution/daily',
+        RUN: '/content-execution/run',
+        ITEMS: '/content-execution/items',
+        RUNS: '/content-execution/runs',
+    },
+
+    PRIVACY:{
+        FACEBOOK_DEAUTHORIZE: '/integrations/facebook/deauthorize',
+        FACEBOOK_DATA_DELETION: '/integrations/facebook/data-deletion',
     }
+
+
+
 }
 
 
