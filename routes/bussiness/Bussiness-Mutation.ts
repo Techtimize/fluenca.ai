@@ -29,6 +29,27 @@ import { ScriptGenerationRequest, ScriptGenerationResponse } from "@/types/bussi
 import { ImageGenerationRequest, ImageGenerationResponse } from "@/types/bussiness/imagegeneration-type";
 import { IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 import useAuthStore from "@/store/AuthsStore";
+import type { EditProfileRequest } from "@/types/bussiness/user-profile-type";
+
+export function EditUserProfileMutation() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ user_id, data }: { user_id: string; data: EditProfileRequest }) => {
+            const response = await EditUserProfileApi(user_id, data);
+            if (response?.success === false) {
+                throw new Error(response?.message || "Failed to update profile");
+            }
+            return response;
+        },
+        onSuccess: (response) => {
+            toast.success(response?.message || "Profile updated successfully");
+            queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+        },
+        onError: (error: unknown) => {
+            toast.error(getApiErrorMessage(error, "Failed to update profile"));
+        },
+    });
+}
 
 
 export function WaitlistMutation() {
