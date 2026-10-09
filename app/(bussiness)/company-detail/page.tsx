@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Bell } from 'lucide-react';
+import { Bell, Sparkles } from 'lucide-react';
 import { PAGE_ROUTES } from '@/constant/page-routes';
 import { IntakeStep } from '@/types/company-details-type';
 import { truncateWords } from '@/utils/text-utils';
@@ -24,6 +24,8 @@ const CHARS_PER_TICK = 3;
 const TYPE_TICK_MS = 18;
 const LINE_PAUSE_MS = 260;
 const ANSWER_WORDS = 14;
+const RING_RADIUS = 24;
+const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
 
 export default function CompanyDetail() {
     const router = useRouter();
@@ -60,6 +62,7 @@ export default function CompanyDetail() {
     const progress = isReady
         ? 60 + (done / Math.max(questions.length, 1)) * 40
         : ((STEP_KEYS.indexOf(step) + 1) / STEP_KEYS.length) * 60;
+    const percent = Math.round(progress);
     const answered = isReady ? questions.slice(Math.max(0, done - VISIBLE_LINES), done) : [];
 
     return (
@@ -107,15 +110,59 @@ export default function CompanyDetail() {
                 )}
 
                 {/* Live report */}
-                <div className="mt-8 w-full max-w-md rounded-3xl border border-[#E6E8F5] bg-white/90 p-6 shadow-[0_20px_50px_-24px_rgba(79,70,229,0.45)] backdrop-blur">
+                <div className="mt-8 w-full max-w-2xl rounded-3xl border border-[#E6E8F5] bg-white/90 p-6 shadow-[0_20px_50px_-24px_rgba(79,70,229,0.45)] backdrop-blur sm:p-8">
                     <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-                        <div className="size-10 rounded-xl bg-linear-to-br from-[#5B5BD6] to-[#8B8BF5]" />
-                        <div>
-                            <p className="font-semibold text-gray-900">Your company — report</p>
+                        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-[#4F46E5] to-[#8B5CF6] text-white">
+                            <Sparkles className="size-5" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                            <p className="truncate font-semibold text-gray-900">Your company — report</p>
                             <p className="flex items-center gap-1.5 text-xs text-gray-500">
                                 <span className="size-1.5 animate-pulse rounded-full bg-[#22C55E]" />
                                 {isReady ? 'Building live...' : STEPS[step]}
                             </p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-3">
+                            {isReady ? (
+                                <p className="hidden text-right text-[11px] leading-tight text-gray-500 sm:block">
+                                    {done} / {questions.length}
+                                    <br />
+                                    questions
+                                </p>
+                            ) : null}
+                            {/* Circular progress ring, same as the analysis progress page */}
+                            <div
+                                className="relative size-14"
+                                role="progressbar"
+                                aria-valuenow={percent}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                            >
+                                <svg viewBox="0 0 56 56" className="size-full -rotate-90">
+                                    <defs>
+                                        <linearGradient id="intake-progress-ring" x1="0" y1="0" x2="1" y2="1">
+                                            <stop offset="0%" stopColor="#4F46E5" />
+                                            <stop offset="100%" stopColor="#8B5CF6" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="28" cy="28" r={RING_RADIUS} fill="none" stroke="#EEF0F6" strokeWidth="5" />
+                                    <circle
+                                        cx="28"
+                                        cy="28"
+                                        r={RING_RADIUS}
+                                        fill="none"
+                                        stroke="url(#intake-progress-ring)"
+                                        strokeWidth="5"
+                                        strokeLinecap="round"
+                                        strokeDasharray={RING_LENGTH}
+                                        strokeDashoffset={RING_LENGTH * (1 - Math.max(percent, 3) / 100)}
+                                        className="transition-[stroke-dashoffset] duration-700 ease-out"
+                                    />
+                                </svg>
+                                <span className="absolute inset-0 grid place-items-center text-[13px] font-bold text-gray-900">
+                                    {percent}%
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -145,30 +192,6 @@ export default function CompanyDetail() {
                             <div key={index} className={`h-2.5 animate-pulse rounded-full bg-[#EEF0F8] ${width}`} />
                         ))}
                     </dl>
-                </div>
-
-                {/* Progress */}
-                <div className="mt-8 w-full max-w-md">
-                    <div className="flex items-baseline gap-3">
-                        <span className="bg-linear-to-r from-[#5B5BD6] to-[#8B5CF6] bg-clip-text text-4xl font-bold text-transparent">
-                            {Math.round(progress)}%
-                        </span>
-                        <span className="text-sm text-gray-500">
-                            {isReady ? `${done} / ${questions.length} questions answered` : STEPS[step]}
-                        </span>
-                    </div>
-                    <div
-                        role="progressbar"
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={Math.round(progress)}
-                        className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#E6E9FB]"
-                    >
-                        <div
-                            className="h-full rounded-full bg-linear-to-r from-[#5B5BD6] to-[#8B5CF6] transition-[width] duration-500 ease-out"
-                            style={{ width: `${Math.max(progress, 3)}%` }}
-                        />
-                    </div>
                 </div>
             </main>
         </div>
