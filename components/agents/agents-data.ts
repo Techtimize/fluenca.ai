@@ -29,8 +29,7 @@ export const AGENTS: AgentStory[] = [
     badge: "Agent #02 · DNA Agent",
     entry: "agents/dna/dna_generator.py",
     accent: "amber",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDioTMTfciGARTKrMbUEQPMD1j1eY1Z5G6ziEGFTgdf-Xhy0VbkebDIVJmoic_dWQHB29P-ApCU_y7BxNEJIlOXibN_jegKlxkYpHWp55b-T12gFRfXFY8XbtgWg5jXYXQRpiO3ZePikuIum70osCFNwdy0Fdj6XQuZmuU8YwEyguReRStxaS8nBgLNMEYhOwEqIB3FJBDONIOKXmR5by15OB0E8jn23E4TGOnxeVy-v6-L7YQ1av9ndTbucN12qHwbrw",
+    image: "/assets/Avatars/raheel-mascot.png",
     title: "Guardian of Identity & Strategic Company DNA",
     summary:
       "Masrur listens to confirmed intake findings and distills them into the immutable Company DNA — the single source of truth used by topical maps, keyword engines, content writers, and chatbots.",
@@ -65,8 +64,7 @@ export const AGENTS: AgentStory[] = [
     badge: "Agent #01 · Intake Agent",
     entry: "agents/intake/intake_agent.py",
     accent: "indigo",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCFEjCBVpYcAMxK-leVpdlHox3-gkT015kxmLuktGzMXCHO4phmSXlCC_v_WyGQD0EgrqzQh8E3MODzTHRqgo6chUpkHzsmoKweLeRVtsLwy_aE7Uv6SLyswxcNAimkPxSglx16LBXXs4Cp25b5JG9ScK0FPyjIxTNjePE-e9DM2KRRWl09iWsnTb4CquBGvUAZ-xyAOAvfbZlpyoBj-KQXBsMZItyuBdgRpgoZBU0ORH6Ew2ZPmiUedMnXdVKfqOJFAw",
+    image: "/assets/Avatars/Hasnain-mascot.jpeg",
     title: "The Curious Web Scout & Evidence Inquisitor",
     summary:
       "Rayyan is first contact for every new company. He reads up to eight corporate pages and drafts up to twenty perceptive questions with verified quotes and source links — so founders never start from a blank form.",
@@ -105,8 +103,7 @@ export const AGENTS: AgentStory[] = [
     badge: "Agents #03 & #04 · Topical Map & Keywords",
     entry: "agents/topical_map & agents/keywords",
     accent: "emerald",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDtOMXvSMwB-6saowK-rehe2CvlGGK8SFCJJvR9NeItup5sRvZsbimq_22NUCcwMZJ6Cog5ZSlIoIad6e1xzJ7jExIB3cMldvPQpEoHfZkxQAm78Gsi8fTnd_0aQqE5GK2hiVkm4bb5bpl_FqjK9ny-WM7PQFqR5-kQ82L-6R6Lf0ji2nK88MFK2fItrpe8Y6OOJc4fe8nHhbr1xFlYZCRpZlupIdCzRElFJWBGcFly-hZqRcZVF7-1enA3nS8RNJiv-g",
+    image: "/assets/Avatars/Talha_mascot.jpeg",
     title: "The Mathematical Topical Cartographer",
     summary:
       "Talha turns Company DNA into a hierarchical SEO pyramid — service pillars, subcategories, and long-tail themes — paired with live SERP stats so spend never hits cannibalized queries.",
@@ -141,8 +138,7 @@ export const AGENTS: AgentStory[] = [
     badge: "Agents #15, #18 & #19 · Media Engine",
     entry: "agents/ContentGeneration & Script Generator",
     accent: "violet",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAe-AlaEPUE_WwfHeEO5bu5qnY3fDL3XV8IR2YsuFQC0xVQTcYE1vIyZG20BqNNO1q7NnZw3ZLyuRfI8PfZGgf0-F7JyxYVq1ARqlberO3nCQ_46aLViVvH-XeOjbBIGEmRVIeJj6lM7vVeJTuS39sMqwjLC__94tHwKUkb7pmcO2mrPuuEKM2cd_MmYqDbbomyFdriKAYuaM4B7WyFLEwIt9PpBaOgaX5kVD_47Q9UFd7ZzDnRN8yGKXEyWHoYcKmRIQ",
+    image: "/assets/Avatars/sayyam-mascot.png",
     title: "The Visionary Media Maestro & Script Virtuoso",
     summary:
       "Sayyam turns keyword briefs into high-conversion creative — LinkedIn thought leadership, Instagram carousels, and multi-scene video scripts with camera blocking and character continuity.",
