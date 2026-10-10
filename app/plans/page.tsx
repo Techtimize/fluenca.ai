@@ -109,7 +109,6 @@ export default async function PlansPage() {
   return (
     <>
       <SiteHeader />
-
       <main className="relative overflow-hidden bg-linear-to-b from-white via-[#FAF8FF] to-[#F1ECFF]">
         {/* Soft purple glows */}
         <div
