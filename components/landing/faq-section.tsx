@@ -2,37 +2,48 @@
 
 // components/landing/faq-section.tsx
 import { useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
+
+const ease = [0.22, 1, 0.36, 1] as const;
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease } },
+};
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06 } },
+};
 
 const faqs = [
   {
     question: "What is Fluenca.ai?",
     answer:
-      "Fluenca.ai is an AI-powered business and marketing intelligence platform that researches your business and turns the information into actionable marketing insights.",
+      "Fluenca.ai is an AI marketing office — specialist agent teams research your business, lock Company DNA, then plan, create, and prove content against your goals.",
   },
   {
     question: "How does Fluenca understand my business?",
     answer:
-      "Fluenca researches your website, SEO, competitors, market, performance, and social presence to build a clear understanding of your business.",
+      "Rayyan’s Intake team crawls your site; Ilsa maps rivals; Masrur locks DNA from answers you confirm. SEO, media, and analytics then work from that shared truth.",
   },
   {
     question: "Can I review the information Fluenca collects?",
     answer:
-      "Yes. Fluenca gives you AI-generated insights to review, edit, and confirm before using them for your marketing activities.",
+      "Yes. Fluenca gives you AI-generated insights to review, edit, and confirm before any later team uses them for marketing.",
   },
   {
     question: "What can I create with Fluenca?",
     answer:
-      "You can create SEO strategies, content plans, blog posts, social posts, case studies, marketing campaigns, and more based on your business insights.",
+      "Talha’s SEO and Sayyam’s Media teams turn DNA into topical plans, blog posts, social posts, case studies, campaigns, and more — all on-brand.",
   },
   {
     question: "Can Fluenca analyze my competitors?",
     answer:
-      "Yes. Fluenca can discover relevant competitors automatically and also lets you provide competitors you want it to analyze.",
+      "Yes. Ilsa’s Competitor team discovers relevant rivals automatically and also lets you add competitors you want analyzed.",
   },
   {
     question: "Can I set marketing goals?",
     answer:
-      "Yes. You can define your goals, and Fluenca uses your business intelligence to create relevant recommendations and content plans around them.",
+      "Yes. You define the goal (like the hub in the office), and every floor — research through analytics — executes and measures against it.",
   },
 ];
 
@@ -56,20 +67,26 @@ function PlusIcon({ open }: { open: boolean }) {
 export default function FaqSection() {
   // 0 = first question open by default. Use null to start with all closed.
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const reduceMotion = useReducedMotion();
 
   return (
     // Rounded top corners: the lavender glows start right at the top edge, so the curve shows against the white page above.
     // Background: white centre, lavender glows at the top-right, left-middle and bottom corners (as in the design).
-    // Bottom padding includes the overlap (40px / 56px) taken by the testimonials section (-mt-10 / -mt-14),
-    // so the visible gap stays 64px on mobile and 80px on desktop.
+    // Bottom padding includes the overlap (40px / 56px) taken by the next overlapping section.
     <section
       id="faq"
       className="relative z-10 w-full overflow-hidden rounded-t-[40px] bg-white pt-16 pb-26 md:rounded-t-[56px] md:pt-20 md:pb-34 bg-[radial-gradient(ellipse_30%_24%_at_100%_0%,rgba(214,222,255,0.95)_0%,rgba(255,255,255,0)_100%),radial-gradient(ellipse_22%_16%_at_0%_0%,rgba(226,230,255,0.55)_0%,rgba(255,255,255,0)_100%),radial-gradient(ellipse_16%_36%_at_0%_42%,rgba(214,222,255,0.9)_0%,rgba(255,255,255,0)_100%),radial-gradient(ellipse_480px_260px_at_0%_100%,rgba(214,222,255,0.95)_0%,rgba(255,255,255,0)_100%),radial-gradient(ellipse_420px_240px_at_100%_100%,rgba(214,222,255,0.8)_0%,rgba(255,255,255,0)_100%),radial-gradient(ellipse_14%_30%_at_100%_55%,rgba(226,230,255,0.4)_0%,rgba(255,255,255,0)_100%)]"
     >
       {/* max-w 1008 - 48px side padding = 960px content width (the outer frame) */}
-      <div className="mx-auto max-w-[1008px] px-6">
+      <motion.div
+        className="mx-auto max-w-[1008px] px-6"
+        initial={reduceMotion ? false : "hidden"}
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={stagger}
+      >
         {/* Heading */}
-        <div className="flex flex-col items-center text-center">
+        <motion.div variants={fadeUp} className="flex flex-col items-center text-center">
           {/* Pill: 249 x 34, radius 40, padding 4/20, gap 10, bg #F0F3FF */}
           <span className="inline-flex h-[34px] w-[249px] max-w-full items-center justify-center gap-[10px] whitespace-nowrap rounded-[40px] bg-[#F0F3FF] px-5 py-1 font-body text-[15px] font-normal text-indigo-500">
             Frequently Asked Questions
@@ -82,17 +99,18 @@ export default function FaqSection() {
 
           {/* Subtitle: 615 x 28, 400, 17px / 28px, #62625F, centered */}
           <p className="mt-3 w-[615px] max-w-full font-body text-[17px] leading-[28px] font-normal tracking-normal text-[#62625F]">
-            Get answers about Fluenca, AI research, and marketing intelligence.
+            Answers about the agent office, DNA, and how goals get done.
           </p>
-        </div>
+        </motion.div>
 
         {/* Accordion: 960 wide, 18px gap between items */}
         <div className="mt-8 flex flex-col gap-[18px]">
           {faqs.map((item, i) => {
             const isOpen = openIndex === i;
             return (
-              <div
+              <motion.div
                 key={item.question}
+                variants={fadeUp}
                 className={`rounded-[30px] border border-indigo-100 transition-colors duration-300 ${
                   isOpen
                     ? "bg-indigo-50/70 shadow-sm"
@@ -127,11 +145,11 @@ export default function FaqSection() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
