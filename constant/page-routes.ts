@@ -17,7 +17,8 @@ export const PAGE_ROUTES = {
     DNA: '/dna',
 
     DASHBOARD: '/dashboard',
-    INTEGRATIONS: '/dashboard/integrations',
+    GOALS: '/goals',
+    CONNECTORS: '/connectors',
     SOCIAL: '/social',
     SOCIAL_INSTAGRAM: '/social/instagram',
     SOCIAL_FACEBOOK: '/social/facebook',

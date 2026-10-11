@@ -32,12 +32,15 @@ export function proxy(request: NextRequest) {
             path.startsWith('/dashboard') ||
             path.startsWith('/dna') ||
             path.startsWith('/trends') ||
+            path.startsWith('/goals') ||
             path.startsWith('/company-overview') ||
             path.startsWith('/profile') ||
             path.startsWith('/controls') ||
             path.startsWith('/calendar') ||
             path.startsWith('/content') ||
             path.startsWith('/social') ||
+            path.startsWith('/connectors') ||
+            path.startsWith('/competitor-analysis') ||
             path.startsWith('/superadmin')
         ) {
             return NextResponse.redirect(new URL('/login', request.url));
@@ -59,12 +62,15 @@ export const config = {
         '/dashboard/:path*',
         '/dna/:path*',
         '/trends/:path*',
+        '/goals/:path*',
         '/company-overview/:path*',
         '/profile/:path*',
         '/controls/:path*',
         '/calendar/:path*',
         '/content/:path*',
         '/social/:path*',
+        '/connectors/:path*',
+        '/competitor-analysis/:path*',
         '/superadmin/:path*',
     ],
 };

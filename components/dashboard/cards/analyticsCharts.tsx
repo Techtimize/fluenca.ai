@@ -17,9 +17,9 @@ const PRIORITY_DOT: Record<string, string> = {
 
 function ChartCard({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col rounded-2xl border border-[#E6E8F5] bg-white p-5">
+    <section className="flex min-w-0 flex-col rounded-2xl border border-[#E6E8F5] bg-white p-4 sm:p-5">
       <h3 className="text-[13px] font-semibold text-neutral-900">{title}</h3>
-      <p className="mb-5 mt-1 text-xs text-neutral-500">{subtitle}</p>
+      <p className="mb-4 mt-1 text-xs text-neutral-500 sm:mb-5">{subtitle}</p>
       {children}
     </section>
   );

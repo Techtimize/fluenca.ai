@@ -110,8 +110,18 @@ export const BUSSINESSENDPOINT = {
         PROFILE_ID: '/connector/instagram/profile-id',
         PROFILE_INFO: '/connector/instagram/profile-info',
         POST_ENGAGEMENT: '/connector/instagram/post-engagement',
-        POST_LIKE: '/connector/instagram/post-engagement',
         PROFILE_CONTENT: '/connector/instagram/profile-content',
+        PROFILE_REACH: (account_id: string) => `/instagram/accounts/${account_id}/insights/reach`,
+        PROFILE_INTERACTIONS: (account_id: string) => `/instagram/accounts/${account_id}/insights/interactions`,
+        PROFILE_DEMOGRAPHICS: (
+          account_id: string,
+          audience: "followers" | "engaged-audience" = "followers",
+        ) => `/instagram/accounts/${account_id}/insights/demographics/${audience}`,
+        PROFILE_FOLLOWS: (account_id: string) => `/instagram/accounts/${account_id}/insights/follows`,
+        PROFILE_VIEWS: (account_id: string) => `/instagram/accounts/${account_id}/insights/views`,
+        PROFILE_ACTIONS: (account_id: string) => `/instagram/accounts/${account_id}/insights/profile-actions`,
+        PROFILE_STORIES: (account_id: string) => `/instagram/accounts/${account_id}/stories`,
+        LIVE_STREAM: (account_id: string) => `/instagram/accounts/${account_id}/live`,
     },
 
     FACEBOOK:{

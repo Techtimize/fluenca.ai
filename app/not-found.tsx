@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, House } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { BrandButton } from '@/components/ui/brand-button';
 import { PAGE_ROUTES } from '@/constant/page-routes';
 
 export default function NotFound() {
@@ -44,21 +45,14 @@ export default function NotFound() {
           </p>
 
           <div className="mt-7 flex flex-wrap items-center gap-3">
-            <Link
-              href={PAGE_ROUTES.HOME}
-              className="inline-flex h-11 items-center gap-2 rounded-full bg-brand px-5 font-body text-caption font-medium text-white shadow-[0_3px_0_#bfc1ff] transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-            >
+            <BrandButton href={PAGE_ROUTES.HOME}>
               <House aria-hidden="true" className="size-4" />
               Go to FLUENCA
-            </Link>
-            <button
-              type="button"
-              onClick={handleGoBack}
-              className="inline-flex h-11 items-center gap-2 rounded-full border border-brand-200 bg-white/70 px-5 font-body text-caption font-medium text-ink transition-colors hover:border-brand hover:bg-brand-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-            >
+            </BrandButton>
+            <BrandButton type="button" variant="outline" onClick={handleGoBack}>
               <ArrowLeft aria-hidden="true" className="size-4" />
               Go back
-            </button>
+            </BrandButton>
           </div>
         </section>
 

@@ -24,11 +24,11 @@ import {
   type TeamId,
 } from "@/components/herosection/office-data";
 
-/** Four scroll steps mapped onto the six-floor office pipeline */
+/** Four scroll steps mapped onto the eight-floor office pipeline */
 const STEPS = [
   {
-    title: "Rayyan researches your company",
-    text: "Share your website and basics. Intake crawls your site, drafts verified Q&A, and hands a clean brief to the next floor — no blank forms.",
+    title: "Rayyan intakes your brand.",
+    text: "Share your website and basics. Intake crawls your site and drafts verified Q&A — a clean brief, no blank forms.",
     animationData: step1Animation,
     box: { left: 131, top: 78, width: 328, height: 370, lift: 0 },
     leads: ["intake"] as TeamId[],
@@ -40,7 +40,7 @@ const STEPS = [
     animationData: step2Animation,
     box: { left: 31, top: 53, width: 527, height: 338, lift: 30 },
     leads: ["competitor", "dna"] as TeamId[],
-    pipelineThrough: 2,
+    pipelineThrough: 3,
   },
   {
     title: "Talha plans. Sayyam creates.",
@@ -48,15 +48,15 @@ const STEPS = [
     animationData: step3Animation,
     box: { left: 42, top: 61, width: 506, height: 329, lift: 30 },
     leads: ["seo", "media"] as TeamId[],
-    pipelineThrough: 4,
+    pipelineThrough: 5,
   },
   {
-    title: "Arslan proves it — then the loop tightens",
-    text: "Analytics closes the loop with attribution and performance packs. Insights feed the next crawl so research, content, and spend get sharper every cycle.",
+    title: "Arslan proves it. Hira hits the goal.",
+    text: "Analytics closes the loop with attribution packs. Goal Achiever keeps targets on track — then insights feed the next crawl so every cycle gets sharper.",
     animationData: step4Animation,
     box: { left: 40, top: 45, width: 524, height: 379, lift: 15 },
-    leads: ["analytics"] as TeamId[],
-    pipelineThrough: 5,
+    leads: ["analytics", "goals"] as TeamId[],
+    pipelineThrough: 7,
   },
 ];
 

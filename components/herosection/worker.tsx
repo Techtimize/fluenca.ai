@@ -11,6 +11,8 @@ interface WorkerProps {
   shirtColor?: string;
   phase?: number;
   isLead?: boolean;
+  /** Hide role Html when a meet panel is open */
+  hideLabel?: boolean;
 }
 
 /** Low-poly seated worker typing at a desk */
@@ -20,6 +22,7 @@ export function Worker({
   shirtColor = "#64748B",
   phase = 0,
   isLead = false,
+  hideLabel = false,
 }: WorkerProps) {
   const bodyRef = useRef<Group>(null);
   const headRef = useRef<Group>(null);
@@ -76,22 +79,24 @@ export function Worker({
         </mesh>
       </group>
 
-      <Html
-        position={[0, 1.15, 0]}
-        center
-        distanceFactor={14}
-        style={{ pointerEvents: "none", userSelect: "none" }}
-      >
-        <div
-          className={`whitespace-nowrap rounded-md px-2 py-0.5 text-[10px] font-semibold tracking-wide shadow-md ${
-            isLead
-              ? "bg-ink text-white"
-              : "bg-white/95 text-ink ring-1 ring-black/5"
-          }`}
+      {!hideLabel && (
+        <Html
+          position={[0, 1.15, 0]}
+          center
+          distanceFactor={14}
+          style={{ pointerEvents: "none", userSelect: "none" }}
         >
-          {isLead ? `★ ${role}` : role}
-        </div>
-      </Html>
+          <div
+            className={`whitespace-nowrap rounded-md px-2 py-0.5 text-[10px] font-semibold tracking-wide shadow-md ${
+              isLead
+                ? "bg-ink text-white"
+                : "bg-white/95 text-ink ring-1 ring-black/5"
+            }`}
+          >
+            {isLead ? `★ ${role}` : role}
+          </div>
+        </Html>
+      )}
     </group>
   );
 }

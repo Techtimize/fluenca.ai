@@ -18,8 +18,7 @@ import { BlogPostsQuery, BriefsQuery, KeywordsQuery } from "@/routes/bussiness/B
 import useAuthStore from "@/store/AuthsStore";
 import type { KeywordRunStep } from "@/types/bussiness/blog-type";
 
-const PRIMARY_BUTTON = "h-9 shrink-0 gap-1.5 rounded-full bg-[#5B57E6] px-3.5 text-white hover:bg-[#4A46D4]";
-const OPEN_LINK = cn(buttonVariants({ variant: "outline", size: "sm" }), "h-9 rounded-full px-3.5");
+const OPEN_LINK = cn(buttonVariants({ variant: "outline", size: "sm" }));
 const RESEARCH_STEPS: Record<KeywordRunStep, string> = {
   queued: "Starting",
   finding_keywords: "Finding the keywords people search",
@@ -107,7 +106,6 @@ export default function BlogsPage() {
           <Button
             type="button"
             size="sm"
-            className={PRIMARY_BUTTON}
             disabled={startResearch.isPending}
             onClick={() => startResearch.mutate()}
           >
@@ -130,7 +128,6 @@ export default function BlogsPage() {
             <Button
               type="button"
               size="sm"
-              className={PRIMARY_BUTTON}
               disabled={startResearch.isPending}
               onClick={() => startResearch.mutate()}
             >
@@ -182,7 +179,6 @@ export default function BlogsPage() {
                     <Button
                       type="button"
                       size="sm"
-                      className={PRIMARY_BUTTON}
                       disabled={pendingBriefId === post.brief_id}
                       onClick={() => write(post.brief_id)}
                     >
@@ -216,7 +212,6 @@ export default function BlogsPage() {
                 <Button
                   type="button"
                   size="sm"
-                  className={PRIMARY_BUTTON}
                   disabled={pendingBriefId === brief.brief_id}
                   onClick={() => write(brief.brief_id)}
                 >
