@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import {
   CalendarDays,
@@ -16,8 +15,8 @@ import {
   Users,
 } from "lucide-react";
 import Card from "@/components/shared/card";
+import { BrandButton } from "@/components/ui/brand-button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
-import { FOCUS_RING } from "@/utils/ui-classes";
 
 export type NotFoundResource =
   | "generic"
@@ -242,11 +241,12 @@ export default function ApiNotFoundCard({
 
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
           {onRetry ? (
-            <button
+            <BrandButton
               type="button"
+              variant="outline"
+              size="sm"
               onClick={onRetry}
               disabled={isRetrying}
-              className={`inline-flex h-9 items-center gap-2 rounded-full border border-[#E6E8F5] bg-white px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
             >
               {isRetrying ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -254,47 +254,38 @@ export default function ApiNotFoundCard({
                 <RefreshCw className="size-4" aria-hidden="true" />
               )}
               {isRetrying ? "Retrying…" : "Try again"}
-            </button>
+            </BrandButton>
           ) : null}
 
           {resolvedActionLabel && primaryIsButton ? (
-            <button
-              type="button"
-              onClick={onAction}
-              className={`inline-flex h-9 items-center gap-2 rounded-full bg-[#5B57E6] px-4 text-sm font-medium text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
-            >
+            <BrandButton type="button" size="sm" onClick={onAction}>
               <Sparkles className="size-4" aria-hidden="true" />
               {resolvedActionLabel}
-            </button>
+            </BrandButton>
           ) : null}
 
           {resolvedActionLabel && resolvedActionHref && !primaryIsButton ? (
-            <Link
-              href={resolvedActionHref}
-              className={`inline-flex h-9 items-center gap-2 rounded-full bg-[#5B57E6] px-4 text-sm font-medium text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
-            >
+            <BrandButton href={resolvedActionHref} size="sm">
               <Sparkles className="size-4" aria-hidden="true" />
               {resolvedActionLabel}
-            </Link>
+            </BrandButton>
           ) : null}
 
           {secondaryLabel && secondaryIsButton ? (
-            <button
+            <BrandButton
               type="button"
+              variant="outline"
+              size="sm"
               onClick={onSecondary}
-              className={`inline-flex h-9 items-center gap-2 rounded-full border border-[#E6E8F5] bg-white px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-50 ${FOCUS_RING}`}
             >
               {secondaryLabel}
-            </button>
+            </BrandButton>
           ) : null}
 
           {secondaryLabel && secondaryHref && !secondaryIsButton ? (
-            <Link
-              href={secondaryHref}
-              className={`inline-flex h-9 items-center gap-2 rounded-full border border-[#E6E8F5] bg-white px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-50 ${FOCUS_RING}`}
-            >
+            <BrandButton href={secondaryHref} variant="outline" size="sm">
               {secondaryLabel}
-            </Link>
+            </BrandButton>
           ) : null}
         </div>
       </div>

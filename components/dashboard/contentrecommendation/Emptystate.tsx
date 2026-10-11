@@ -1,5 +1,5 @@
 import SharedCard from "@/components/shared/card";
-import { FOCUS_RING } from "@/utils/ui-classes";
+import { BrandButton } from "@/components/ui/brand-button";
 import { Lightbulb, Loader2, Sparkles } from "lucide-react";
 
 export function EmptyState({
@@ -23,15 +23,16 @@ export function EmptyState({
         <p className="mt-1 max-w-md text-[13px] leading-5 text-neutral-500">
           Generate content ideas, themes, and post plans tailored to your company DNA.
         </p>
-        <button
+        <BrandButton
           type="button"
+          size="sm"
+          className="mt-4"
           onClick={onGenerate}
           disabled={isPending}
-          className={`mt-4 inline-flex h-9 items-center gap-2 rounded-full bg-[#5B57E6] px-4 text-sm font-medium text-white hover:bg-[#4A46D0] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
         >
           {isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
           {isPending ? "Generating…" : "Generate recommendations"}
-        </button>
+        </BrandButton>
       </div>
     </SharedCard>
   );

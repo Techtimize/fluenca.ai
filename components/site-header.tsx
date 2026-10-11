@@ -1,7 +1,13 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { BrandButton } from "@/components/ui/brand-button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
+import { clearAuthTokenProvider } from "@/provider/auth-provider";
+import useAuthStore from "@/store/AuthsStore";
 
 export interface SiteNavigationItem {
   label?: string;
@@ -13,7 +19,6 @@ export interface SiteHeaderProps {
   navigationItems?: readonly SiteNavigationItem[];
   signupHref?: string;
   signupLabel?: string;
-  /** Kept for call-site compatibility; navbar is always white */
   variant?: "light" | "dark";
 }
 
@@ -29,6 +34,22 @@ export function SiteHeader({
   signupHref = PAGE_ROUTES.SIGNUP,
   signupLabel = "Sign up",
 }: SiteHeaderProps) {
+  const accessToken = useAuthStore((s) => s.access_token);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const loggedIn =
+    mounted && (isAuthenticated || Boolean(accessToken?.trim()));
+
+  const handleLogout = () => {
+    clearAuthTokenProvider();
+    window.location.replace(PAGE_ROUTES.LOGIN);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full px-3 pt-3 sm:px-5 sm:pt-4 lg:px-8">
       <div className="mx-auto flex h-16 w-full max-w-[1280px] items-center justify-between gap-3 rounded-full border border-black/5 bg-white px-3 shadow-lg shadow-black/10 sm:h-[4.5rem] sm:gap-4 sm:px-4 lg:h-20 lg:px-5">
@@ -47,9 +68,9 @@ export function SiteHeader({
             className="h-9 w-auto sm:h-10 lg:h-11"
           />
           <span className="text-[17px] font-semibold tracking-tight">
-              Fluenca
-              <span className="text-[#5452F6]">.ai</span>
-            </span>
+            Fluenca
+            <span className="text-[#5452F6]">.ai</span>
+          </span>
         </Link>
 
         {/* Pages — center */}
@@ -74,13 +95,24 @@ export function SiteHeader({
           </ul>
         </nav>
 
-        {/* Sign up — end */}
-        <Link
-          href={signupHref}
-          className="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-brand px-4 font-body text-sm font-semibold text-white shadow-[0_3px_0_#bfc1ff] transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:h-11 sm:px-6 lg:px-7"
-        >
-          {signupLabel}
-        </Link>
+        {/* Auth actions — end */}
+        <div className="flex shrink-0 items-center gap-2">
+          {loggedIn ? (
+            <>
+              <BrandButton
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+              >
+                Logout
+              </BrandButton>
+              <BrandButton href={PAGE_ROUTES.DASHBOARD}>Dashboard</BrandButton>
+            </>
+          ) : (
+            <BrandButton href={signupHref}>{signupLabel}</BrandButton>
+          )}
+        </div>
       </div>
     </header>
   );

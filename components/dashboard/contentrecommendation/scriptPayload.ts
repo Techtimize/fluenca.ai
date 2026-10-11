@@ -23,24 +23,52 @@ export function ideaToScriptRequest(
     item.title ?? item.name ?? item.idea ?? item.topic ?? item.headline ?? item.theme,
     "Untitled idea",
   );
+  const pack = item.production_pack;
   const caption = asString(
-    item.caption ?? item.description ?? item.summary ?? item.body ?? item.content,
+    item.caption ??
+      item.description ??
+      item.summary ??
+      item.angle ??
+      item.body ??
+      item.content,
   );
-  const hook = asString(item.hook ?? item.headline, title);
-  const scriptBrief = asString(
-    item.script_brief ?? item.brief ?? item.angle ?? caption,
+  const hook = asString(
+    pack?.primary_hook ?? item.hook ?? item.ab_hooks?.[0] ?? item.headline,
     title,
   );
-  const style = asString(item.style ?? item.visual_style, "modern");
-  const contentType = asString(item.content_type ?? item.media_type, "image");
+  const scriptBrief = asString(
+    item.script_brief ?? item.brief ?? item.angle ?? item.reason ?? caption,
+    title,
+  );
+  const style = asString(
+    item.style ?? item.visual_style ?? pack?.tone_guide,
+    "modern",
+  );
+  const format = asString(item.format ?? item.post_type, "post").toLowerCase();
+  const contentType = asString(
+    item.content_type ?? item.media_type,
+    format.includes("reel") ? "video" : "image",
+  );
+  const reelDuration = (pack?.reel_shot_list || []).reduce(
+    (sum, shot) => sum + (typeof shot.duration_sec === "number" ? shot.duration_sec : 0),
+    0,
+  );
   const durationSeconds =
     typeof item.duration_seconds === "number" && item.duration_seconds > 0
       ? item.duration_seconds
-      : 15;
+      : reelDuration > 0
+        ? reelDuration
+        : 15;
   const userRequest = asString(
     item.user_request,
     `Generate a script for this content idea: ${title}`,
   );
+  const slidesSource =
+    item.slides?.length
+      ? item.slides
+      : pack?.carousel_slides?.length
+        ? pack.carousel_slides
+        : [];
 
   const content_suggestion: ContentSuggestion = {
     title,
@@ -52,7 +80,7 @@ export function ideaToScriptRequest(
     key_points: asStringArray(item.key_points ?? item.hashtags),
     platform: asString(item.platform ?? item.channel, "instagram"),
     script_brief: scriptBrief,
-    slides: (item.slides ?? []).map((slide, index) => ({
+    slides: slidesSource.map((slide, index) => ({
       slide_number: slide.slide_number ?? index + 1,
       headline: asString(slide.headline, `Slide ${index + 1}`),
       body: asString(slide.body),

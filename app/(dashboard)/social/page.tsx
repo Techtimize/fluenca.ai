@@ -116,7 +116,7 @@ export default function SocialHubPage() {
                     {platform.description}
                   </p>
                   <Link
-                    href={connected ? platform.href : PAGE_ROUTES.INTEGRATIONS}
+                    href={connected ? platform.href : PAGE_ROUTES.CONNECTORS}
                     className={`inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full text-[13px] font-semibold ${FOCUS_RING} ${
                       connected
                         ? "bg-[#5B57E6] text-white hover:bg-[#4A46D0]"

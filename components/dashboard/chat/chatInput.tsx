@@ -26,7 +26,7 @@ export default function ChatInput({ onSend, onOpen, placeholder = "Ask anything 
         onSend(text);
         setMessage("");
       }}
-      className="fixed bottom-4 left-1/2 z-30 flex w-[min(580px,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 rounded-full border border-[#E6E8F5] bg-white p-2 pl-4 shadow-lg md:translate-x-[calc(-50%+2.5rem)]"
+      className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex w-[min(580px,calc(100%-1.5rem))] -translate-x-1/2 items-center gap-1.5 rounded-full border border-[#E6E8F5] bg-white p-1.5 pl-3 shadow-lg sm:w-[min(580px,calc(100%-2rem))] sm:gap-2 sm:p-2 sm:pl-4 md:translate-x-[calc(-50%+2.5rem)]"
     >
       <button
         type="button"

@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { BrandButton } from "@/components/ui/brand-button";
 import { TopicalMapQuery } from "@/routes/topical-map/Topical-Map-Query";
 import {
   AddTopicMutation,
@@ -73,13 +74,13 @@ function AddTopicForm({
           className={`min-w-[160px] flex-1 rounded-full border border-[#E6E8F5] px-3 py-1.5 text-[13px] outline-none ${FOCUS_RING}`}
         />
       ) : null}
-      <button
+      <BrandButton
         type="submit"
+        size="xs"
         disabled={isPending || !name.trim()}
-        className="rounded-full bg-[#5B57E6] px-3 py-1.5 text-[12px] font-medium text-white hover:bg-[#4A46D0] disabled:opacity-50"
       >
         {isPending ? "Adding…" : "Add"}
-      </button>
+      </BrandButton>
       <button
         type="button"
         onClick={onCancel}
@@ -471,14 +472,14 @@ export default function TopicalMapSection({ dnaReady }: { dnaReady: boolean }) {
             The topical map couldn&apos;t be built
           </h3>
           <p className="text-[13px] text-rose-600">{data.error || "Something went wrong."}</p>
-          <button
+          <BrandButton
             type="button"
+            size="sm"
             onClick={() => retry.mutate()}
             disabled={retry.isPending}
-            className="h-9 rounded-full bg-[#5B57E6] px-5 text-[13px] font-semibold text-white hover:bg-[#4A46D0] disabled:opacity-60"
           >
             {retry.isPending ? "Retrying…" : "Try again"}
-          </button>
+          </BrandButton>
         </div>
       </SectionShell>
     );
@@ -506,14 +507,14 @@ export default function TopicalMapSection({ dnaReady }: { dnaReady: boolean }) {
             Approved
           </span>
         ) : (
-          <button
+          <BrandButton
             type="button"
+            size="sm"
             onClick={handleApprove}
             disabled={approve.isPending}
-            className="h-9 rounded-full bg-[#5B57E6] px-5 text-[13px] font-semibold text-white hover:bg-[#4A46D0] disabled:opacity-60"
           >
             {approve.isPending ? "Approving…" : "Approve topical map"}
-          </button>
+          </BrandButton>
         )}
       </div>
 

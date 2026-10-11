@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Image from "next/image";
@@ -120,7 +120,7 @@ export function LinkedInProfileView() {
     return (
       <div className="flex items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white py-20 text-sm text-neutral-500">
         <Loader2 className="size-5 animate-spin text-[#0A66C2]" />
-        Loading LinkedIn…
+        Loading LinkedInâ€¦
       </div>
     );
   }
@@ -186,20 +186,20 @@ export function LinkedInProfileView() {
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
                 Followers
               </p>
-              <p className="mt-1 text-[18px] font-semibold">—</p>
+              <p className="mt-1 text-[18px] font-semibold">â€”</p>
             </div>
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
                 Engagement
               </p>
-              <p className="mt-1 text-[18px] font-semibold">—</p>
+              <p className="mt-1 text-[18px] font-semibold">â€”</p>
             </div>
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
                 Locale
               </p>
               <p className="mt-1 truncate text-[16px] font-semibold">
-                {localeLabel || "—"}
+                {localeLabel || "â€”"}
               </p>
             </div>
             <div>
@@ -225,7 +225,7 @@ export function LinkedInProfileView() {
               </a>
             ) : (
               <Link
-                href={PAGE_ROUTES.INTEGRATIONS}
+                href={PAGE_ROUTES.CONNECTORS}
                 className={`inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white text-[13px] font-semibold text-neutral-900 hover:bg-neutral-50 ${FOCUS_RING}`}
               >
                 Manage connection
@@ -302,13 +302,13 @@ export function LinkedInProfileView() {
         {isContentLoading ? (
           <div className="flex items-center justify-center gap-2 py-20 text-sm text-neutral-500">
             <Loader2 className="size-5 animate-spin text-[#0A66C2]" />
-            Loading LinkedIn content…
+            Loading LinkedIn contentâ€¦
           </div>
         ) : isContentError ? (
           <div className="py-16 text-center text-[14px] text-red-500">
             {getApiErrorMessage(
               contentError,
-              "Couldn’t load LinkedIn profile content",
+              "Couldnâ€™t load LinkedIn profile content",
             )}
           </div>
         ) : filteredPosts.length === 0 ? (
@@ -381,7 +381,7 @@ export function LinkedInProfileView() {
                           <ThumbsUp className="size-3.5 shrink-0" />
                           <span className="truncate">
                             {likes == null
-                              ? "— likes"
+                              ? "â€” likes"
                               : `${formatCount(likes)} likes`}
                           </span>
                         </span>
@@ -389,7 +389,7 @@ export function LinkedInProfileView() {
                           <MessageCircle className="size-3.5 shrink-0" />
                           <span className="truncate">
                             {comments == null
-                              ? "— comments"
+                              ? "â€” comments"
                               : `${formatCount(comments)} comments`}
                           </span>
                         </span>

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   Clapperboard,
   FileText,
@@ -8,8 +7,8 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
+import { BrandButton } from "@/components/ui/brand-button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
-import { FOCUS_RING } from "@/utils/ui-classes";
 
 const STEPS: Array<{
   step: number;
@@ -93,16 +92,13 @@ export default function ScriptJourney({
 
           {showCta ? (
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Link
-                href={PAGE_ROUTES.CONTENT_RECOMMENDATION}
-                className={`group inline-flex h-11 items-center gap-2 rounded-full bg-[#5B57E6] px-5 text-sm font-medium text-white shadow-[0_10px_28px_rgba(91,87,230,0.28)] transition-[background-color,transform] hover:bg-[#4A46D0] active:scale-[0.98] ${FOCUS_RING}`}
-              >
+              <BrandButton href={PAGE_ROUTES.CONTENT_RECOMMENDATION}>
                 <Sparkles
                   className="size-4 animate-sparkle-glow"
                   aria-hidden="true"
                 />
                 Start from an idea
-              </Link>
+              </BrandButton>
               <p className="text-[12px] text-neutral-500">
                 Scripts appear here after you generate from an idea.
               </p>

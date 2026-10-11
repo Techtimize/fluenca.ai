@@ -18,7 +18,7 @@ export default function DocumentationCard({
   onSelect,
 }: Props) {
   return (
-    <Card as="aside" className="flex h-full flex-col p-5">
+    <Card as="aside" className="flex h-full min-w-0 flex-col p-4 sm:p-5">
       <h2 className="mb-2 text-sm font-semibold text-neutral-900">
         Documentation
       </h2>
@@ -30,7 +30,7 @@ export default function DocumentationCard({
               <button
                 type="button"
                 onClick={() => onSelect?.(item)}
-                className={`group flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left transition-colors hover:bg-[#F6F7FD] ${FOCUS_RING}`}
+                className={`group flex w-full items-center gap-2.5 rounded-xl px-1.5 py-2.5 text-left transition-colors hover:bg-[#F6F7FD] sm:gap-3 sm:px-2 ${FOCUS_RING}`}
               >
                 <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#EEF0FF] text-[#5452F6]">
                   <Icon className="size-4.5" aria-hidden="true" />
@@ -44,7 +44,7 @@ export default function DocumentationCard({
                   </span>
                 </span>
                 <ChevronRight
-                  className="size-4.5 text-neutral-700 transition-transform group-hover:translate-x-0.5"
+                  className="size-4.5 shrink-0 text-neutral-700 transition-transform group-hover:translate-x-0.5"
                   aria-hidden="true"
                 />
               </button>
@@ -55,10 +55,10 @@ export default function DocumentationCard({
       <button
         type="button"
         onClick={onSetGoal}
-        className={`mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] text-[15px] font-medium text-white shadow-[0_6px_16px_-6px_rgba(99,70,240,0.6)] transition-opacity hover:opacity-95 ${FOCUS_RING}`}
+        className={`mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] px-3 text-sm font-medium text-white shadow-[0_6px_16px_-6px_rgba(99,70,240,0.6)] transition-opacity hover:opacity-95 sm:text-[15px] ${FOCUS_RING}`}
       >
-        <Target className="size-4.5" aria-hidden="true" />
-        {goalLabel}
+        <Target className="size-4.5 shrink-0" aria-hidden="true" />
+        <span className="truncate">{goalLabel}</span>
       </button>
     </Card>
   );

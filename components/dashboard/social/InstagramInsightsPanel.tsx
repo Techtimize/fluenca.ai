@@ -1,0 +1,578 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import {
+  Activity,
+  Eye,
+  HeartHandshake,
+  Loader2,
+  MousePointerClick,
+  RefreshCw,
+  TrendingUp,
+  Users,
+  UserPlus,
+  UserMinus,
+} from "lucide-react";
+import { formatCount } from "@/components/dashboard/social/socialUtils";
+import { getApiErrorMessage } from "@/errors/error-utils";
+import {
+  latestSeriesValue,
+  metricTotal,
+  normalizeDemographics,
+  normalizeInsightMetrics,
+  pickMetric,
+  type DemographicBreakdown,
+  type InsightMetric,
+} from "@/types/bussiness/instagram-insights-type";
+import { FOCUS_RING } from "@/utils/ui-classes";
+
+type InsightBundle = {
+  reach?: unknown;
+  interactions?: unknown;
+  demographics?: unknown;
+  follows?: unknown;
+  views?: unknown;
+  actions?: unknown;
+};
+
+type LoadState = {
+  isLoading?: boolean;
+  isError?: boolean;
+  error?: unknown;
+  isFetching?: boolean;
+  refetch?: () => void;
+};
+
+type Props = {
+  accountId: string | null;
+  data: InsightBundle;
+  states: {
+    reach: LoadState;
+    interactions: LoadState;
+    demographics: LoadState;
+    follows: LoadState;
+    views: LoadState;
+    actions: LoadState;
+  };
+  onRefreshAll: () => void;
+  demographicsAudience: "followers" | "engaged-audience";
+  onDemographicsAudienceChange: (v: "followers" | "engaged-audience") => void;
+};
+
+type TabId = "overview" | "audience" | "growth" | "engagement" | "actions";
+
+const TABS: { id: TabId; label: string; hint: string }[] = [
+  { id: "overview", label: "Overview", hint: "What happened recently" },
+  { id: "audience", label: "Audience", hint: "Who follows you" },
+  { id: "growth", label: "Growth", hint: "Follows & unfollows" },
+  { id: "engagement", label: "Engagement", hint: "Likes, comments, saves" },
+  { id: "actions", label: "Profile actions", hint: "Clicks on your profile" },
+];
+
+function KpiCard({
+  label,
+  value,
+  hint,
+  icon: Icon,
+  loading,
+}: {
+  label: string;
+  value: string;
+  hint: string;
+  icon: typeof Eye;
+  loading?: boolean;
+}) {
+  return (
+    <div className="min-w-0 rounded-2xl border border-neutral-200 bg-white p-3.5 sm:p-4">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-400">
+            {label}
+          </p>
+          <p className="mt-1.5 truncate text-[22px] font-semibold tracking-tight text-neutral-900">
+            {loading ? "…" : value}
+          </p>
+          <p className="mt-1 text-[12px] leading-4 text-neutral-500">{hint}</p>
+        </div>
+        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#FFF0F5] text-[#E1306C]">
+          <Icon className="size-4" />
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function StatusPill({
+  label,
+  ok,
+  loading,
+  error,
+}: {
+  label: string;
+  ok: boolean;
+  loading?: boolean;
+  error?: boolean;
+}) {
+  const tone = error
+    ? "border-rose-200 bg-rose-50 text-rose-700"
+    : loading
+      ? "border-amber-200 bg-amber-50 text-amber-800"
+      : ok
+        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+        : "border-neutral-200 bg-neutral-50 text-neutral-500";
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${tone}`}
+    >
+      {loading ? <Loader2 className="size-3 animate-spin" /> : null}
+      {label}
+      {!loading && !error && ok ? " · ready" : null}
+      {error ? " · failed" : null}
+      {loading ? " · loading" : null}
+    </span>
+  );
+}
+
+function MiniBars({ series, accent = "#E1306C" }: { series: InsightMetric["series"]; accent?: string }) {
+  if (!series.length) {
+    return (
+      <p className="py-6 text-center text-[13px] text-neutral-400">No daily series yet</p>
+    );
+  }
+  const max = Math.max(1, ...series.map((p) => p.value));
+  const points = series.slice(-14);
+  return (
+    <div className="flex h-28 items-end gap-1.5">
+      {points.map((p) => (
+        <div key={`${p.label}-${p.endTime}`} className="flex min-w-0 flex-1 flex-col items-center gap-1">
+          <div
+            className="w-full rounded-t-md transition-all"
+            style={{
+              height: `${Math.max(6, (p.value / max) * 100)}%`,
+              backgroundColor: accent,
+              opacity: 0.75 + (p.value / max) * 0.25,
+            }}
+            title={`${p.label}: ${formatCount(p.value)}`}
+          />
+          <span className="truncate text-[9px] text-neutral-400">{p.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MetricList({ metrics }: { metrics: InsightMetric[] }) {
+  if (!metrics.length) {
+    return (
+      <p className="rounded-xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-8 text-center text-[13px] text-neutral-500">
+        No metrics in this response yet.
+      </p>
+    );
+  }
+  return (
+    <ul className="grid gap-2 sm:grid-cols-2">
+      {metrics.map((m) => (
+        <li
+          key={m.id}
+          className="rounded-xl border border-neutral-200 bg-neutral-50/80 px-3.5 py-3"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="truncate text-[13px] font-semibold text-neutral-900">
+                {m.title}
+              </p>
+              {m.description ? (
+                <p className="mt-0.5 line-clamp-2 text-[11px] text-neutral-500">
+                  {m.description}
+                </p>
+              ) : null}
+            </div>
+            <p className="shrink-0 text-[16px] font-semibold text-neutral-900">
+              {formatCount(m.total)}
+            </p>
+          </div>
+          {m.period ? (
+            <p className="mt-2 text-[10px] uppercase tracking-wide text-neutral-400">
+              Period · {m.period}
+            </p>
+          ) : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function DemographicBars({ breakdown }: { breakdown: DemographicBreakdown }) {
+  const max = Math.max(1, ...breakdown.buckets.map((b) => b.value));
+  const rows = breakdown.buckets.slice(0, 8);
+  return (
+    <div className="rounded-2xl border border-neutral-200 bg-white p-4">
+      <h4 className="text-[13px] font-semibold text-neutral-900">{breakdown.title}</h4>
+      <ul className="mt-3 space-y-2.5">
+        {rows.map((b) => (
+          <li key={b.key}>
+            <div className="mb-1 flex items-center justify-between gap-2 text-[12px]">
+              <span className="truncate font-medium text-neutral-700">{b.label}</span>
+              <span className="shrink-0 text-neutral-500">{formatCount(b.value)}</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#F58529] via-[#E1306C] to-[#C13584]"
+                style={{ width: `${(b.value / max) * 100}%` }}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SectionShell({
+  title,
+  subtitle,
+  loading,
+  error,
+  errorMessage,
+  children,
+  onRetry,
+}: {
+  title: string;
+  subtitle: string;
+  loading?: boolean;
+  error?: boolean;
+  errorMessage?: string;
+  children: React.ReactNode;
+  onRetry?: () => void;
+}) {
+  return (
+    <section className="rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h3 className="text-[16px] font-semibold text-neutral-900">{title}</h3>
+          <p className="mt-0.5 text-[13px] text-neutral-500">{subtitle}</p>
+        </div>
+        {onRetry ? (
+          <button
+            type="button"
+            onClick={onRetry}
+            className={`inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-[12px] font-medium text-neutral-700 hover:bg-neutral-50 ${FOCUS_RING}`}
+          >
+            <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+            Retry
+          </button>
+        ) : null}
+      </div>
+      {loading ? (
+        <div className="flex items-center justify-center gap-2 py-12 text-sm text-neutral-500">
+          <Loader2 className="size-5 animate-spin text-[#E1306C]" />
+          Loading insights…
+        </div>
+      ) : error ? (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-6 text-center text-[13px] text-rose-700">
+          {errorMessage || "Couldn’t load this insight."}
+        </div>
+      ) : (
+        children
+      )}
+    </section>
+  );
+}
+
+export function InstagramInsightsPanel({
+  accountId,
+  data,
+  states,
+  onRefreshAll,
+  demographicsAudience,
+  onDemographicsAudienceChange,
+}: Props) {
+  const [tab, setTab] = useState<TabId>("overview");
+
+  const reach = useMemo(() => normalizeInsightMetrics(data.reach), [data.reach]);
+  const interactions = useMemo(
+    () => normalizeInsightMetrics(data.interactions),
+    [data.interactions],
+  );
+  const follows = useMemo(
+    () => normalizeInsightMetrics(data.follows),
+    [data.follows],
+  );
+  const views = useMemo(() => normalizeInsightMetrics(data.views), [data.views]);
+  const actions = useMemo(
+    () => normalizeInsightMetrics(data.actions),
+    [data.actions],
+  );
+  const demographics = useMemo(
+    () => normalizeDemographics(data.demographics),
+    [data.demographics],
+  );
+
+  const reachMetric = pickMetric(reach, "reach", "accounts_reached");
+  const viewsMetric = pickMetric(views, "views", "profile_views", "impressions");
+  const followsIn = pickMetric(
+    follows,
+    "follows",
+    "follower_count",
+    "follows_and_unfollows",
+    "new_followers",
+  );
+  const unfollows = pickMetric(follows, "unfollows", "unfollowers");
+  const interactionsTotal =
+    metricTotal(interactions, "accounts_engaged", "total_interactions", "interactions") ??
+    (interactions.length
+      ? interactions.reduce((s, m) => s + (m.total ?? 0), 0)
+      : null);
+  const actionsTotal =
+    metricTotal(actions, "profile_links_taps", "profile_actions", "website_clicks") ??
+    (actions.length ? actions.reduce((s, m) => s + (m.total ?? 0), 0) : null);
+
+  const anyFetching = Object.values(states).some((s) => s.isFetching);
+  const waitingForId = !accountId;
+
+  if (waitingForId) {
+    return (
+      <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-10 text-center text-[13px] text-neutral-500">
+        Waiting for Instagram account id from profile info before loading insights…
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5">
+        {/* <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <button
+            type="button"
+            onClick={onRefreshAll}
+            disabled={anyFetching}
+            className={`inline-flex h-9 shrink-0 items-center gap-1.5 self-start rounded-full border border-neutral-200 px-3 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-60 ${FOCUS_RING}`}
+          >
+            <RefreshCw className={`size-3.5 ${anyFetching ? "animate-spin" : ""}`} />
+            Refresh insights
+          </button>
+        </div> */}
+        <div className="mt-4 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 xl:grid-cols-4">
+          <KpiCard
+            label="Reach"
+            value={formatCount(latestSeriesValue(reachMetric) ?? reachMetric?.total)}
+            hint="Unique accounts that saw you"
+            icon={TrendingUp}
+            loading={states.reach.isLoading}
+          />
+          <KpiCard
+            label="Profile views"
+            value={formatCount(latestSeriesValue(viewsMetric) ?? viewsMetric?.total)}
+            hint="People who opened your profile"
+            icon={Eye}
+            loading={states.views.isLoading}
+          />
+          <KpiCard
+            label="Interactions"
+            value={formatCount(interactionsTotal)}
+            hint="Likes, comments, saves & more"
+            icon={HeartHandshake}
+            loading={states.interactions.isLoading}
+          />
+          <KpiCard
+            label="Profile actions"
+            value={formatCount(actionsTotal)}
+            hint="Taps on buttons & links"
+            icon={MousePointerClick}
+            loading={states.actions.isLoading}
+          />
+        </div>
+      </div>
+
+      <div
+        role="tablist"
+        aria-label="Insight sections"
+        className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {TABS.map((t) => {
+          const active = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setTab(t.id)}
+              className={`shrink-0 rounded-full px-3.5 py-2 text-left transition ${FOCUS_RING} ${
+                active
+                  ? "bg-[#E1306C] text-white"
+                  : "border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+              }`}
+            >
+              <span className="block text-[13px] font-semibold">{t.label}</span>
+              <span className={`block text-[11px] ${active ? "text-white/80" : "text-neutral-400"}`}>
+                {t.hint}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {tab === "overview" ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <SectionShell
+            title="Reach over time"
+            subtitle="How many unique accounts saw your content"
+            loading={states.reach.isLoading}
+            error={states.reach.isError}
+            errorMessage={getApiErrorMessage(states.reach.error, "Reach unavailable")}
+            onRetry={states.reach.refetch}
+          >
+            <MiniBars series={reachMetric?.series ?? []} />
+            <div className="mt-4">
+              <MetricList metrics={reach} />
+            </div>
+          </SectionShell>
+
+          <SectionShell
+            title="Views over time"
+            subtitle="Profile and content views Instagram reported"
+            loading={states.views.isLoading}
+            error={states.views.isError}
+            errorMessage={getApiErrorMessage(states.views.error, "Views unavailable")}
+            onRetry={states.views.refetch}
+          >
+            <MiniBars series={viewsMetric?.series ?? []} accent="#C13584" />
+            <div className="mt-4">
+              <MetricList metrics={views} />
+            </div>
+          </SectionShell>
+        </div>
+      ) : null}
+
+      {tab === "audience" ? (
+        <SectionShell
+          title="Audience demographics"
+          subtitle="Age, gender, and location mix for your followers or engaged audience"
+          loading={states.demographics.isLoading}
+          error={states.demographics.isError}
+          errorMessage={getApiErrorMessage(
+            states.demographics.error,
+            "Demographics unavailable",
+          )}
+          onRetry={states.demographics.refetch}
+        >
+          <div className="mb-4 flex flex-wrap gap-2">
+            {(
+              [
+                { id: "followers" as const, label: "Followers" },
+                { id: "engaged-audience" as const, label: "Engaged audience" },
+              ]
+            ).map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => onDemographicsAudienceChange(opt.id)}
+                className={`rounded-full px-3 py-1.5 text-[12px] font-semibold ${FOCUS_RING} ${
+                  demographicsAudience === opt.id
+                    ? "bg-neutral-900 text-white"
+                    : "border border-neutral-200 text-neutral-700 hover:bg-neutral-50"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          {demographics.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-10 text-center text-[13px] text-neutral-500">
+              No demographic breakdown returned for this audience yet.
+            </p>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2">
+              {demographics.map((d) => (
+                <DemographicBars key={d.id} breakdown={d} />
+              ))}
+            </div>
+          )}
+        </SectionShell>
+      ) : null}
+
+      {tab === "growth" ? (
+        <SectionShell
+          title="Follower growth"
+          subtitle="Who joined and who left — net movement on your account"
+          loading={states.follows.isLoading}
+          error={states.follows.isError}
+          errorMessage={getApiErrorMessage(states.follows.error, "Follows unavailable")}
+          onRetry={states.follows.refetch}
+        >
+          <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
+              <span className="grid size-9 place-items-center rounded-full bg-white text-emerald-600">
+                <UserPlus className="size-4" />
+              </span>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700/80">
+                  New follows
+                </p>
+                <p className="text-[20px] font-semibold text-emerald-900">
+                  {formatCount(followsIn?.total ?? latestSeriesValue(followsIn))}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-xl border border-rose-100 bg-rose-50/70 px-4 py-3">
+              <span className="grid size-9 place-items-center rounded-full bg-white text-rose-600">
+                <UserMinus className="size-4" />
+              </span>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-rose-700/80">
+                  Unfollows
+                </p>
+                <p className="text-[20px] font-semibold text-rose-900">
+                  {formatCount(unfollows?.total ?? latestSeriesValue(unfollows))}
+                </p>
+              </div>
+            </div>
+          </div>
+          <MiniBars series={followsIn?.series ?? []} accent="#10B981" />
+          <div className="mt-4">
+            <MetricList metrics={follows} />
+          </div>
+        </SectionShell>
+      ) : null}
+
+      {tab === "engagement" ? (
+        <SectionShell
+          title="Interactions"
+          subtitle="How people engaged with your content (likes, comments, saves, shares)"
+          loading={states.interactions.isLoading}
+          error={states.interactions.isError}
+          errorMessage={getApiErrorMessage(
+            states.interactions.error,
+            "Interactions unavailable",
+          )}
+          onRetry={states.interactions.refetch}
+        >
+          <div className="mb-4 flex items-center gap-2 rounded-xl bg-[#FFF0F5] px-3 py-2.5 text-[13px] text-[#C13584]">
+            <Activity className="size-4 shrink-0" />
+            Total interactions in this window:{" "}
+            <strong className="text-neutral-900">{formatCount(interactionsTotal)}</strong>
+          </div>
+          <MetricList metrics={interactions} />
+        </SectionShell>
+      ) : null}
+
+      {tab === "actions" ? (
+        <SectionShell
+          title="Profile actions"
+          subtitle="Taps on website, email, call, and other profile buttons"
+          loading={states.actions.isLoading}
+          error={states.actions.isError}
+          errorMessage={getApiErrorMessage(states.actions.error, "Actions unavailable")}
+          onRetry={states.actions.refetch}
+        >
+          <div className="mb-4 flex items-center gap-2 rounded-xl bg-neutral-50 px-3 py-2.5 text-[13px] text-neutral-600">
+            <Users className="size-4 shrink-0 text-[#E1306C]" />
+            These are people who didn’t just watch — they took an action on your profile.
+          </div>
+          <MetricList metrics={actions} />
+        </SectionShell>
+      ) : null}
+    </div>
+  );
+}
