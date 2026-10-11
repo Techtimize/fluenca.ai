@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo } from "react";
 import Link from "next/link";
@@ -89,7 +89,7 @@ function statusTone(status?: string) {
 }
 
 function formatWhen(value?: string | null) {
-  if (!value) return "—";
+  if (!value) return "â€”";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString(undefined, {
@@ -140,7 +140,7 @@ function ItemRow({ item }: { item: ContentExecutionItem }) {
             {title}
           </p>
           <p className="mt-1 text-[11px] text-neutral-500">
-            {[item.platform, item.date, item.format].filter(Boolean).join(" · ") ||
+            {[item.platform, item.date, item.format].filter(Boolean).join(" Â· ") ||
               "No meta"}
           </p>
         </div>
@@ -168,12 +168,12 @@ function RunRow({ run }: { run: ContentExecutionRun }) {
         <div className="min-w-0">
           <p className="text-[13px] font-semibold text-neutral-900">
             {String(id).slice(0, 18)}
-            {String(id).length > 18 ? "…" : ""}
+            {String(id).length > 18 ? "â€¦" : ""}
           </p>
           <p className="mt-1 text-[11px] text-neutral-500">
             {[run.trigger, run.date, formatWhen(run.started_at || run.created_at)]
               .filter(Boolean)
-              .join(" · ")}
+              .join(" Â· ")}
           </p>
         </div>
         <span
@@ -186,10 +186,10 @@ function RunRow({ run }: { run: ContentExecutionRun }) {
         </span>
       </div>
       <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-neutral-500">
-        <span>Total {run.items_total ?? "—"}</span>
-        <span>Published {run.items_published ?? "—"}</span>
-        <span>Failed {run.items_failed ?? "—"}</span>
-        <span>Skipped {run.items_skipped ?? "—"}</span>
+        <span>Total {run.items_total ?? "â€”"}</span>
+        <span>Published {run.items_published ?? "â€”"}</span>
+        <span>Failed {run.items_failed ?? "â€”"}</span>
+        <span>Skipped {run.items_skipped ?? "â€”"}</span>
       </div>
       {run.error ? (
         <p className="mt-2 text-[12px] text-rose-600">{run.error}</p>
@@ -281,8 +281,8 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
               Controls
             </h1>
             <p className="mt-2 max-w-2xl text-[14px] leading-6 text-neutral-600">
-              Gate agent mode, auto-publish, and manually queue today’s calendar
-              pipeline: script → image → publish.
+              Gate agent mode, auto-publish, and manually queue todayâ€™s calendar
+              pipeline: script â†’ image â†’ publish.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -308,14 +308,14 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
               size="sm"
               disabled={isRunning}
               onClick={() => runNow({ date: today })}
-              className="rounded-full bg-[#5B57E6] text-white hover:bg-[#4A46D4]"
+              
             >
               {isRunning ? (
                 <Loader2 className="size-3.5 animate-spin" />
               ) : (
                 <Play className="size-3.5" data-icon="inline-start" />
               )}
-              {isRunning ? "Queuing…" : "Run today"}
+              {isRunning ? "Queuingâ€¦" : "Run today"}
             </Button>
           </div>
         </div>
@@ -328,7 +328,7 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
           </span>
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-neutral-400">
-              Today’s items
+              Todayâ€™s items
             </p>
             <p className="text-xl font-semibold text-neutral-900">{items.length}</p>
           </div>
@@ -373,7 +373,7 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
           {isSettingsLoading ? (
             <div className="flex items-center gap-2 text-sm text-neutral-500">
               <Loader2 className="size-4 animate-spin text-[#5B57E6]" />
-              Loading settings…
+              Loading settingsâ€¦
             </div>
           ) : null}
 
@@ -411,7 +411,7 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
                   How it runs
                 </p>
                 <p className="mt-1 text-[12px] leading-5 text-neutral-500">
-                  Agent mode must be ON. Daily cron and “Run today” queue this
+                  Agent mode must be ON. Daily cron and â€œRun todayâ€ queue this
                   company; OFF skips with <code>agent_mode_disabled</code>.
                 </p>
               </div>
@@ -434,7 +434,7 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
               Open content
             </Link>
             <Link
-              href={PAGE_ROUTES.INTEGRATIONS}
+              href={PAGE_ROUTES.CONNECTORS}
               className={`inline-flex h-8 items-center gap-1.5 rounded-full border border-[#E6E8F5] bg-white px-3 text-[12px] font-medium text-neutral-700 hover:bg-[#F6F7FD] ${FOCUS_RING}`}
             >
               Connected accounts
@@ -446,7 +446,7 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
           <Card className="space-y-3 p-5">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-[15px] font-semibold text-neutral-900">
-                Today’s queue
+                Todayâ€™s queue
               </h2>
               <span className="text-[11px] text-neutral-400">{today}</span>
             </div>
@@ -454,7 +454,7 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
             {isItemsLoading ? (
               <div className="flex items-center gap-2 py-6 text-sm text-neutral-500">
                 <Loader2 className="size-4 animate-spin text-[#5B57E6]" />
-                Loading items…
+                Loading itemsâ€¦
               </div>
             ) : null}
 
@@ -496,7 +496,7 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
             {isRunsLoading ? (
               <div className="flex items-center gap-2 py-6 text-sm text-neutral-500">
                 <Loader2 className="size-4 animate-spin text-[#5B57E6]" />
-                Loading runs…
+                Loading runsâ€¦
               </div>
             ) : null}
 
@@ -508,7 +508,7 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
 
             {!isRunsLoading && !isRunsError && runs.length === 0 ? (
               <p className="text-[13px] text-neutral-500">
-                No execution runs yet. Queue one with “Run today”.
+                No execution runs yet. Queue one with â€œRun todayâ€.
               </p>
             ) : null}
 

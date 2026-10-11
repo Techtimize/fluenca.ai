@@ -71,11 +71,11 @@ export default function OverallPerformanceCard({
   data: OverallPerformance;
 }) {
   return (
-    <section className="flex flex-col rounded-2xl border border-[#E6E8F5] bg-white p-5">
+    <section className="flex min-w-0 flex-col rounded-2xl border border-[#E6E8F5] bg-white p-4 sm:p-5">
       <h3 className="text-[13px] font-semibold text-neutral-900">
         Overall Performance
       </h3>
-      <p className="mb-6 mt-1 text-xs text-neutral-500">{data.summary}</p>
+      <p className="mb-4 mt-1 text-xs text-neutral-500 sm:mb-6">{data.summary}</p>
       <ScoreGauge score={data.score} />
       {data.stats?.length ? (
         <dl className="mt-auto grid grid-cols-2 gap-3 pt-5">

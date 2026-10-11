@@ -17,24 +17,28 @@ export default function MetricCard({ metric }: { metric: Metric }) {
   const score = Math.max(0, Math.min(100, metric.score));
 
   return (
-    <li className="rounded-2xl border border-[#E6E8F5] bg-white p-4">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <span className={`grid size-10 place-items-center rounded-xl ${t.iconBg} ${t.text}`}>
-            <DynamicIcon name={metric.icon} className="size-5" aria-hidden="true" />
+    <li className="min-w-0 rounded-2xl border border-[#E6E8F5] bg-white p-3 sm:p-4">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+          <span className={`grid size-9 shrink-0 place-items-center rounded-xl sm:size-10 ${t.iconBg} ${t.text}`}>
+            <DynamicIcon name={metric.icon} className="size-4.5 sm:size-5" aria-hidden="true" />
           </span>
-          <div>
-            <p className="text-[13px] font-medium text-neutral-900">{metric.label}</p>
+          <div className="min-w-0">
+            <p className="truncate text-[12px] font-medium text-neutral-900 sm:text-[13px]">
+              {metric.label}
+            </p>
             <p className={`flex items-center gap-0.5 text-[11px] ${t.text}`}>
-              <ArrowUp className="size-3" aria-hidden="true" />
-              {metric.change}
+              <ArrowUp className="size-3 shrink-0" aria-hidden="true" />
+              <span className="truncate">{metric.change}</span>
             </p>
           </div>
         </div>
-        <p className="text-2xl font-semibold text-neutral-900">{metric.score}</p>
+        <p className="shrink-0 text-xl font-semibold text-neutral-900 sm:text-2xl">
+          {metric.score}
+        </p>
       </div>
       <div
-        className="mt-4 h-2 overflow-hidden rounded-full bg-neutral-100"
+        className="mt-3 h-2 overflow-hidden rounded-full bg-neutral-100 sm:mt-4"
         role="progressbar"
         aria-label={metric.label}
         aria-valuenow={score}

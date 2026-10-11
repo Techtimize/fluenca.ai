@@ -146,7 +146,7 @@ export default function TrendsPage() {
             dateLabel={nowData.meta.dateLabel}
           />
 
-          <div className="mt-4 grid gap-4 xl:grid-cols-2">
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <TrendsListCard
               title={t("trendingNow")}
               subtitle={t("trendingNowSub")}
@@ -162,19 +162,14 @@ export default function TrendsPage() {
               showRising
               onSelect={handleSelectTrend}
             />
+            <TrendsListCard
+              title={t("topQueries")}
+              subtitle={t("topQueriesSub")}
+              items={nowData.topQueries.slice(0, 8)}
+              isLoading={nowQuery.isLoading}
+              onSelect={handleSelectTrend}
+            />
           </div>
-
-          {nowData.topQueries.length > 0 ? (
-            <div className="mt-4">
-              <TrendsListCard
-                title={t("topQueries")}
-                subtitle={t("topQueriesSub")}
-                items={nowData.topQueries.slice(0, 8)}
-                isLoading={nowQuery.isLoading}
-                onSelect={handleSelectTrend}
-              />
-            </div>
-          ) : null}
 
           {/* <div className="mt-4">
             <TrendsExploreCard

@@ -29,10 +29,10 @@ export function DepartmentFloor({
       >
         <meshStandardMaterial
           color={color}
-          roughness={0.45}
-          metalness={0.12}
+          roughness={0.55}
+          metalness={0.06}
           emissive={color}
-          emissiveIntensity={0.12}
+          emissiveIntensity={0.04}
         />
       </RoundedBox>
       {/* rim accent strip */}

@@ -16,8 +16,8 @@ const OfficeCanvas = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full min-h-[50vh] w-full items-center justify-center bg-[#0B0D1A]">
-        <div className="size-10 animate-spin rounded-full border-2 border-[#5452F6] border-t-transparent" />
+      <div className="flex h-full min-h-[50vh] w-full items-center justify-center bg-white">
+        <div className="size-10 animate-spin rounded-full border-2 border-[#5B57E6] border-t-transparent" />
       </div>
     ),
   },
@@ -42,17 +42,6 @@ export function OfficeHero() {
     [touring],
   );
 
-  const startTour = useCallback(() => {
-    setSelectedId(null);
-    setTourIndex(0);
-    setTouring(true);
-  }, []);
-
-  const stopTour = useCallback(() => {
-    setTouring(false);
-    setTourIndex(0);
-  }, []);
-
   useEffect(() => {
     if (!touring) return;
     if (tourIndex >= TOUR_ORDER.length) {
@@ -69,32 +58,22 @@ export function OfficeHero() {
   }, [touring, tourIndex]);
 
   const tourTeam = tourFocusId ? getTeam(tourFocusId) : null;
-  const liveLine = touring
-    ? TOUR_LINES[TOUR_ORDER[Math.min(tourIndex, TOUR_ORDER.length - 1)]]
-    : handoff
-      ? `${getTeam(handoff.from).leadName} → ${getTeam(handoff.to).leadName}: ${handoff.transfer.task}`
-      : "Click a floor to meet the lead";
 
   return (
-    <section className="relative h-full min-h-full w-full overflow-hidden bg-[#0B0D1A]">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(84,82,246,0.12)_0%,rgba(11,13,26,0.4)_50%,#05060F_100%)]"
-      />
-
+    <section className="relative h-full min-h-full w-full overflow-hidden bg-white">
       <div className="absolute inset-0 h-full w-full">
         <Suspense fallback={null}>
           <OfficeCanvas
             selectedTeamId={selectedId}
             tourFocusId={tourFocusId}
-            autoRotate={!touring && !selectedId}
+            suppressLabels={!!selectedTeam && !touring}
+            autoRotate={false}
             onSelectTeam={handleSelect}
             onTransferChange={setHandoff}
           />
         </Suspense>
       </div>
 
-      {/* Bottom controls only — no top overlay on floors */}
       <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex justify-center px-4">
         <div className="flex max-w-2xl flex-col items-center gap-2">
           {touring && tourTeam && (
@@ -110,8 +89,8 @@ export function OfficeHero() {
                       on
                         ? "text-white"
                         : done
-                          ? "bg-white/10 text-white/70"
-                          : "bg-white/5 text-white/35"
+                          ? "bg-[#ECEBFF] text-[#5B57E6]"
+                          : "bg-white text-neutral-400 ring-1 ring-[#E6E8F5]"
                     }`}
                     style={on ? { backgroundColor: t.color } : undefined}
                   >
@@ -121,7 +100,13 @@ export function OfficeHero() {
               })}
             </div>
           )}
-     </div>
+          {handoff && !touring ? (
+            <p className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-medium text-neutral-600 shadow-sm ring-1 ring-[#E6E8F5]">
+              {getTeam(handoff.from).leadName} → {getTeam(handoff.to).leadName}:{" "}
+              {handoff.transfer.task}
+            </p>
+          ) : null}
+        </div>
       </div>
 
       {selectedTeam && !touring && (
@@ -132,17 +117,19 @@ export function OfficeHero() {
       )}
 
       {touring && tourTeam && (
-        <div className="pointer-events-none absolute bottom-20 left-4 z-30 max-w-sm rounded-2xl border border-white/15 bg-[#12152A]/92 p-4 shadow-2xl backdrop-blur-xl sm:left-6 sm:bottom-24">
+        <div className="pointer-events-none absolute bottom-20 left-4 z-30 max-w-sm rounded-2xl border border-[#E6E8F5] bg-white/95 p-4 shadow-[0_12px_40px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:bottom-24 sm:left-6">
           <p
             className="text-[11px] font-bold uppercase tracking-wider"
-            style={{ color: tourTeam.accent }}
+            style={{ color: tourTeam.color }}
           >
             Step {tourIndex + 1} / {TOUR_ORDER.length} · {tourTeam.leadTitle}
           </p>
-          <p className="mt-1 font-display text-lg font-semibold text-white">
+          <p className="mt-1 font-display text-lg font-semibold text-neutral-900">
             {tourTeam.leadName}
           </p>
-          <p className="mt-1 text-sm text-white/75">{TOUR_LINES[tourTeam.id]}</p>
+          <p className="mt-1 text-sm text-neutral-600">
+            {TOUR_LINES[tourTeam.id]}
+          </p>
         </div>
       )}
     </section>

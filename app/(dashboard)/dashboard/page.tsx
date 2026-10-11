@@ -8,6 +8,7 @@ import CompanyCard from "@/components/dashboard/cards/companyCard";
 import { DashboardSkeleton } from "@/components/shared/skeletons";
 import DocumentationCard from "@/components/dashboard/documentationCard";
 import DocumentationSheet from "@/components/dashboard/documentation/documentationSheet";
+import GoalsDialog from "@/components/dashboard/goals/GoalsDialog";
 import TopBar from "@/components/dashboard/topBar";
 import { mapDashboard } from "@/lib/dashboard/map-dashboard";
 import { AnalyzeCompanyDashboardQuery } from "@/routes/bussiness/Bussiness-Query";
@@ -26,6 +27,7 @@ export default function DashboardPage() {
   const companyId = useAuthStore((s) => s.company_id);
   const companyName = useAuthStore((s) => s.company_name);
   const { mutate: connectInstagram } = InstagramConnectMutation();
+  const [goalsOpen, setGoalsOpen] = useState(false);
 
   const {
     data: dashboard,
@@ -80,10 +82,10 @@ export default function DashboardPage() {
 
   return (
     <>
-      <main className="min-w-0 space-y-4">
+      <main className="min-w-0 max-w-full space-y-3 overflow-x-clip sm:space-y-4">
         <TopBar user={user} />
         {isError ? (
-          <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 sm:rounded-3xl sm:px-5 sm:py-4">
             {error instanceof Error ? error.message : t("error")}
           </div>
         ) : null}
@@ -92,7 +94,9 @@ export default function DashboardPage() {
 
         {!isLoading && mapped ? (
           <div
-            className={`grid gap-4 ${chatOpen ? "" : "xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]"}`}
+            className={`grid grid-cols-1 gap-3 sm:gap-4 ${
+              chatOpen ? "" : "xl:grid-cols-[minmax(0,1.7fr)_minmax(260px,1fr)]"
+            }`}
           >
             <CompanyCard
               company={mapped.company}
@@ -105,6 +109,7 @@ export default function DashboardPage() {
                 items={mapped.docs}
                 goalLabel={t("setYourGoal")}
                 onSelect={setOpenDoc}
+                onSetGoal={() => setGoalsOpen(true)}
               />
             ) : null}
           </div>
@@ -124,7 +129,7 @@ export default function DashboardPage() {
                 connectInstagram();
                 return;
               }
-              router.push(PAGE_ROUTES.INTEGRATIONS);
+              router.push(PAGE_ROUTES.CONNECTORS);
             }}
           />
         ) : null}
@@ -135,6 +140,8 @@ export default function DashboardPage() {
         item={openDoc}
         onClose={() => setOpenDoc(null)}
       />
+
+      <GoalsDialog open={goalsOpen} onOpenChange={setGoalsOpen} />
     </>
   );
 }

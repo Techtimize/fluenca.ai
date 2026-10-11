@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Bell, Check, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { BrandButton } from "@/components/ui/brand-button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import {
   AnswerQuestionMutation,
@@ -228,14 +229,14 @@ function FieldCard({ field }: { field: CompanyField }) {
               >
                 Cancel
               </button>
-              <button
+              <BrandButton
                 type="button"
+                size="xs"
                 onClick={() => save(draft.trim())}
                 disabled={isPending}
-                className="h-7 rounded-full bg-[#5B57E6] px-4 text-xs font-semibold text-white hover:bg-[#4a46d4] disabled:opacity-60"
               >
                 {isPending ? "Saving..." : "Save"}
-              </button>
+              </BrandButton>
             </div>
           </div>
         ) : field.value ? (
@@ -422,14 +423,13 @@ export default function CompanyOverviewPage() {
 
           {!isLoading && (
             <div className="flex justify-end pt-6">
-              <button
+              <BrandButton
                 type="button"
                 onClick={handleComplete}
                 disabled={isBusy}
-                className="h-9 rounded-full bg-[#5B57E6] px-6 text-sm font-semibold text-white hover:bg-[#4a46d4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B57E6]/40 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isBusy ? t("completing") : t("complete")}
-              </button>
+              </BrandButton>
             </div>
           )}
         </div>

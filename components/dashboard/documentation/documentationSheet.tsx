@@ -31,9 +31,9 @@ export default function DocumentationSheet({ companyId, item, onClose }: Props) 
     <DialogPrimitive.Root open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/30 duration-150 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0" />
-        <DialogPrimitive.Popup className="fixed inset-y-3 right-3 z-50 flex w-[calc(100%-1.5rem)] max-w-md flex-col overflow-hidden rounded-3xl bg-white shadow-2xl outline-none duration-200 data-open:animate-in data-open:slide-in-from-right-10 data-open:fade-in-0 data-closed:animate-out data-closed:slide-out-to-right-10 data-closed:fade-out-0">
-          <header className="mx-5 flex items-center justify-between gap-3 border-b border-[#ECEDF5] py-4">
-            <DialogPrimitive.Title className="text-base font-semibold text-neutral-900">
+        <DialogPrimitive.Popup className="fixed inset-0 z-50 flex w-full max-w-none flex-col overflow-hidden rounded-none bg-white shadow-2xl outline-none duration-200 data-open:animate-in data-open:slide-in-from-right-10 data-open:fade-in-0 data-closed:animate-out data-closed:slide-out-to-right-10 data-closed:fade-out-0 sm:inset-y-3 sm:right-3 sm:left-auto sm:w-[calc(100%-1.5rem)] sm:max-w-md sm:rounded-3xl">
+          <header className="mx-4 flex items-center justify-between gap-3 border-b border-[#ECEDF5] py-4 sm:mx-5">
+            <DialogPrimitive.Title className="min-w-0 truncate text-base font-semibold text-neutral-900">
               {section?.title ?? item?.title}
             </DialogPrimitive.Title>
             <DialogPrimitive.Close
@@ -88,35 +88,7 @@ function CompanyDetails({ details }: { details: CompanyDocumentationDetails }) {
 
   return (
     <>
-      <Section title={details.name}>
-        {details.summary ? <Paragraph>{details.summary}</Paragraph> : null}
-      </Section>
-
-      {links.length ? (
-        <Section title="Social Links" small>
-          <div className="flex flex-wrap gap-x-4 gap-y-2">
-            {links.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`flex items-center gap-2 rounded-full text-xs text-neutral-800 hover:text-[#5452F6] ${FOCUS_RING}`}
-              >
-                <span className="grid size-7 place-items-center rounded-full bg-[#EEF0FF] text-[#5452F6]">{link.icon}</span>
-                {link.label}
-              </a>
-            ))}
-          </div>
-        </Section>
-      ) : null}
-
-      <Section title="What It Does">
-        {details.core_offering ? <Paragraph>{details.core_offering}</Paragraph> : null}
-        <Tags items={details.services} />
-      </Section>
-
-      <Fields
+          <Fields
         fields={[
           ["Industry", details.industry],
           ["Region", details.region],
@@ -124,10 +96,12 @@ function CompanyDetails({ details }: { details: CompanyDocumentationDetails }) {
           ["Maturity", details.business_maturity],
         ]}
       />
-
+      <Section title="What It Does">
+        {details.core_offering ? <Paragraph>{details.core_offering}</Paragraph> : null}
+        <Tags items={details.services} />
+      </Section>
       <TagSection title="Target Audience" items={details.target_audience} />
       <TagSection title="Industries Targeted" items={details.industries_targeted} />
-      <TagSection title="Technologies" items={details.technologies} />
     </>
   );
 }

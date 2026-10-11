@@ -10,8 +10,8 @@ import { getApiErrorMessage, isApiNotFoundError } from "@/errors/error-utils";
 import { normalizeContentRecommendation } from "@/lib/dashboard/normalize-content-recommendation";
 import { ContentRecommendationMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { ContentRecommendationResultQuery } from "@/routes/bussiness/Bussiness-Query";
+import { BrandButton } from "@/components/ui/brand-button";
 import useAuthStore from "@/store/AuthsStore";
-import { FOCUS_RING } from "@/utils/ui-classes";
 
 export default function ContentRecommendationPage() {
   const companyId = useAuthStore((s) => s.company_id);
@@ -50,11 +50,11 @@ export default function ContentRecommendationPage() {
         </div>
 
         {companyId ? (
-          <button
+          <BrandButton
             type="button"
+            size="sm"
             onClick={handleGenerate}
             disabled={isPending}
-            className={`inline-flex h-9 items-center gap-2 rounded-full bg-[#5B57E6] px-3.5 text-sm font-medium text-white hover:bg-[#4A46D0] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
             {isPending ? (
               <Loader2 className="size-4 animate-spin" />
@@ -62,7 +62,7 @@ export default function ContentRecommendationPage() {
               <Sparkles className="size-4" />
             )}
             {isPending ? "Generating…" : hasPayload ? "Regenerate" : "Generate"}
-          </button>
+          </BrandButton>
         ) : null}
       </div>
       {companyId && isLoading ? (

@@ -27,6 +27,8 @@ export interface TransferState {
 
 interface TaskRunnerFleetProps {
   onStatesChange?: (states: TransferState[]) => void;
+  /** Hide courier Html labels when meet panel is open */
+  hideLabels?: boolean;
 }
 
 function teamAnchor(id: TeamId): THREE.Vector3 {
@@ -54,6 +56,7 @@ interface SingleRunnerProps {
   /** Stagger so runners aren't in sync */
   timeOffset: number;
   lane: number;
+  hideLabel?: boolean;
   onPhaseChange: (state: TransferState) => void;
 }
 
@@ -61,6 +64,7 @@ function SingleRunner({
   transfer,
   timeOffset,
   lane,
+  hideLabel = false,
   onPhaseChange,
 }: SingleRunnerProps) {
   const groupRef = useRef<THREE.Group>(null);
@@ -144,19 +148,21 @@ function SingleRunner({
         </mesh>
       </group>
 
-      <Html
-        position={[0, 1.05, 0]}
-        center
-        distanceFactor={15}
-        style={{ pointerEvents: "none", userSelect: "none" }}
-      >
-        <div
-          className="whitespace-nowrap rounded-lg px-2 py-0.5 text-[9px] font-semibold text-white shadow-lg"
-          style={{ backgroundColor: fromColor }}
+      {!hideLabel && (
+        <Html
+          position={[0, 1.05, 0]}
+          center
+          distanceFactor={15}
+          style={{ pointerEvents: "none", userSelect: "none" }}
         >
-          {transfer.task}
-        </div>
-      </Html>
+          <div
+            className="whitespace-nowrap rounded-lg px-2 py-0.5 text-[9px] font-semibold text-white shadow-lg"
+            style={{ backgroundColor: fromColor }}
+          >
+            {transfer.task}
+          </div>
+        </Html>
+      )}
     </group>
   );
 }
@@ -170,7 +176,10 @@ const EXTRA_RUNNERS: { transferId: string; lane: number; offset: number }[] = [
 ];
 
 /** Fleet of couriers — one per pipeline edge, plus extras on busy routes */
-export function TaskRunner({ onStatesChange }: TaskRunnerFleetProps) {
+export function TaskRunner({
+  onStatesChange,
+  hideLabels = false,
+}: TaskRunnerFleetProps) {
   const statesRef = useRef<Map<string, TransferState>>(new Map());
 
   const publish = useMemo(() => {
@@ -212,6 +221,7 @@ export function TaskRunner({ onStatesChange }: TaskRunnerFleetProps) {
           transfer={r.transfer}
           timeOffset={r.timeOffset}
           lane={r.lane}
+          hideLabel={hideLabels}
           onPhaseChange={(state) => publish(r.key, state)}
         />
       ))}
