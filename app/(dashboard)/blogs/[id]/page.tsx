@@ -110,7 +110,7 @@ export default function BlogPostPage() {
             size="sm"
             disabled={writePost.isPending}
             onClick={() => writePost.mutate(post.brief_id)}
-            className="h-9 gap-1.5 rounded-full bg-[#5B57E6] px-3.5 text-white hover:bg-[#4A46D4]"
+            
           >
             <RotateCcw className="size-3.5" aria-hidden="true" />
             Try again

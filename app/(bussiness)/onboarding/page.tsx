@@ -379,7 +379,7 @@ export default function Onboarding() {
 
               <Button
                 type="submit"
-                className="mt-1 h-12 w-full cursor-pointer rounded-full bg-brand font-semibold text-white shadow-[0_3px_0_#bfc1ff] transition-all hover:bg-brand-700 hover:opacity-90 sm:mt-2 sm:h-11 md:h-11 lg:mt-1 lg:h-10"
+                size="full" className="mt-1 sm:mt-2 lg:mt-1"
                 disabled={isPending}
               >
                 {isPending ? (

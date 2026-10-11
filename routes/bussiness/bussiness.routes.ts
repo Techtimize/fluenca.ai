@@ -112,7 +112,9 @@ export const AnalyzeCompanyApi = async (data: AnalyzeCompanyRequest) => {
 }
 
 export const SocialGrowthApi = async (prompt: string) => {
-    const response = await api.post<SocialGrowthResponse>(BUSSINESSENDPOINT.GROWTH, { prompt: prompt });
+    const response = await api.post<SocialGrowthResponse>(BUSSINESSENDPOINT.GROWTH, {
+      prompt,
+    });
     return response.data;
 }
 
@@ -609,7 +611,6 @@ export const InstagramPostEngagementApi = async (
 }
 
 
-/** GET /connector/instagram/profile-content?username= — uses connected Instagram handle. */
 export const InstagramProfileContentApi = async (
   params: InstagramProfileContentRequest,
 ): Promise<InstagramProfileContentResponse> => {
@@ -621,7 +622,66 @@ export const InstagramProfileContentApi = async (
   return response.data;
 };
 
-/** GET /connector/facebook/profile-content?media_limit= — connected Facebook page content. */
+export const InstagramProfileReachApi = async (account_id: string) => {
+  const response = await api.get(
+    BUSSINESSENDPOINT.INSTAGRAM.PROFILE_REACH(account_id),
+  );
+  return response.data;
+};
+
+export const InstagramProfileInteractionsApi = async (account_id: string) => {
+  const response = await api.get(
+    BUSSINESSENDPOINT.INSTAGRAM.PROFILE_INTERACTIONS(account_id),
+  );
+  return response.data;
+};
+
+export const InstagramProfileDemographicsApi = async (
+  account_id: string,
+  audience: "followers" | "engaged-audience" = "followers",
+) => {
+  const response = await api.get(
+    BUSSINESSENDPOINT.INSTAGRAM.PROFILE_DEMOGRAPHICS(account_id, audience),
+  );
+  return response.data;
+};
+
+export const InstagramProfileFollowsApi = async (account_id: string) => {
+  const response = await api.get(
+    BUSSINESSENDPOINT.INSTAGRAM.PROFILE_FOLLOWS(account_id),
+  );
+  return response.data;
+};
+
+export const InstagramProfileViewsApi = async (account_id: string) => {
+  const response = await api.get(
+    BUSSINESSENDPOINT.INSTAGRAM.PROFILE_VIEWS(account_id),
+  );
+  return response.data;
+};
+
+export const InstagramProfileActionsApi = async (account_id: string) => {
+  const response = await api.get(
+    BUSSINESSENDPOINT.INSTAGRAM.PROFILE_ACTIONS(account_id),
+  );
+  return response.data;
+};
+
+export const InstagramProfileStoriesApi = async (account_id: string) => {
+  const response = await api.get(
+    BUSSINESSENDPOINT.INSTAGRAM.PROFILE_STORIES(account_id),
+  );
+  return response.data;
+};
+
+export const InstagramLiveStreamApi = async (account_id: string) => {
+  const response = await api.get(
+    BUSSINESSENDPOINT.INSTAGRAM.LIVE_STREAM(account_id),
+  );
+  return response.data;
+};  
+
+
 export const FacebookProfileContentApi = async (
   params: SocialProfileContentRequest = {},
 ): Promise<SocialProfileContentResponse> => {

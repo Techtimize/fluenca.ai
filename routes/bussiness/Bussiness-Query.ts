@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentExecutionAgentModeApi, ContentExecutionItemsApi, ContentExecutionRunsApi, ContentExecutionSettingsApi, ContentRecommendationResultApi, DnaApi, FacebookProfileContentApi, IntakeApi, IntelligenceJobApi, InstagramProfileIdApi, InstagramProfileInfoApi, LinkedInProfileContentApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi, InstagramProfileContentApi } from "./bussiness.routes";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentExecutionAgentModeApi, ContentExecutionItemsApi, ContentExecutionRunsApi, ContentExecutionSettingsApi, ContentRecommendationResultApi, DnaApi, FacebookProfileContentApi, IntakeApi, IntelligenceJobApi, InstagramProfileIdApi, InstagramProfileInfoApi, LinkedInProfileContentApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi, InstagramProfileContentApi, InstagramProfileReachApi, InstagramProfileInteractionsApi, InstagramProfileDemographicsApi, InstagramProfileFollowsApi, InstagramProfileViewsApi, InstagramProfileActionsApi, InstagramProfileStoriesApi, InstagramLiveStreamApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   AnalyzeCompanyDashboardApi,
@@ -482,6 +482,89 @@ export const InstagramProfileContentQuery = (username?: string | null) => {
   });
 };
 
+export const InstagramProfileReachQuery = (account_id?: string | null) => {
+  return useQuery({
+    queryKey: ["instagram-profile-reach", account_id],
+    queryFn: () => InstagramProfileReachApi(account_id as string),
+    enabled: Boolean(account_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const InstagramProfileInteractionsQuery = (account_id?: string | null) => {
+  return useQuery({
+    queryKey: ["instagram-profile-interactions", account_id],
+    queryFn: () => InstagramProfileInteractionsApi(account_id as string),
+    enabled: Boolean(account_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const InstagramProfileDemographicsQuery = (
+  account_id?: string | null,
+  audience: "followers" | "engaged-audience" = "followers",
+) => {
+  return useQuery({
+    queryKey: ["instagram-profile-demographics", account_id, audience],
+    queryFn: () =>
+      InstagramProfileDemographicsApi(account_id as string, audience),
+    enabled: Boolean(account_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const InstagramProfileFollowsQuery = (account_id?: string | null) => {
+  return useQuery({
+    queryKey: ["instagram-profile-follows", account_id],
+    queryFn: () => InstagramProfileFollowsApi(account_id as string),
+    enabled: Boolean(account_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const InstagramProfileViewsQuery = (account_id?: string | null) => {
+  return useQuery({
+    queryKey: ["instagram-profile-views", account_id],
+    queryFn: () => InstagramProfileViewsApi(account_id as string),
+    enabled: Boolean(account_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const InstagramProfileActionsQuery = (account_id?: string | null) => {
+  return useQuery({
+    queryKey: ["instagram-profile-actions", account_id],
+    queryFn: () => InstagramProfileActionsApi(account_id as string),
+    enabled: Boolean(account_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const InstagramProfileStoriesQuery = (account_id?: string | null) => {
+  return useQuery({
+    queryKey: ["instagram-profile-stories", account_id],
+    queryFn: () => InstagramProfileStoriesApi(account_id as string),
+    enabled: Boolean(account_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const InstagramLiveStreamQuery = (account_id?: string | null) => {
+  return useQuery({
+    queryKey: ["instagram-live-stream", account_id],
+    queryFn: () => InstagramLiveStreamApi(account_id as string),
+    enabled: Boolean(account_id),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+};
 export const FacebookProfileContentQuery = (
   enabled = true,
   mediaLimit = 25,

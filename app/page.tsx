@@ -19,12 +19,12 @@ const navigationItems = [
 
 export default function Home() {
   return (
-    <div className="flex min-h-dvh flex-col overflow-x-clip bg-[#0B0D1A]">
+    <div className="flex min-h-dvh flex-col overflow-x-clip bg-white">
       <SiteHeader
         navigationItems={navigationItems}
         signupHref="/signup"
         signupLabel="Sign up"
-        variant="dark"
+        variant="light"
       />
       <div className="relative h-[calc(100dvh-5.5rem)] min-h-[calc(100svh-5.5rem)] shrink-0 sm:h-[calc(100dvh-6rem)] sm:min-h-[calc(100svh-6rem)] lg:h-[calc(100dvh-6.5rem)] lg:min-h-[calc(100svh-6.5rem)]">
         <OfficeHero />

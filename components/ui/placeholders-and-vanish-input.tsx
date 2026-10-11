@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { BrandButton } from "@/components/ui/brand-button";
 import { cn } from "@/lib/utils";
 
 export function PlaceholdersAndVanishInput({
@@ -244,13 +245,13 @@ export function PlaceholdersAndVanishInput({
         )}
       />
 
-      <button
+      <BrandButton
         disabled={!value}
         type="submit"
-        className="!cursor-pointer disabled:cursor-not-allowed disabled:opacity-60 border-none absolute right-1.5 top-1/2 z-20 h-11 -translate-y-1/2 rounded-full px-5 bg-brand text-white shadow-[0_3px_0_#bfc1ff] hover:bg-brand-700"
+        className="absolute right-1.5 top-1/2 z-20 -translate-y-1/2"
       >
         Join Waitlist
-      </button>
+      </BrandButton>
 
       <div className="absolute inset-0 flex items-center rounded-full pointer-events-none">
         <AnimatePresence mode="wait">

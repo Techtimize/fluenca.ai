@@ -103,7 +103,7 @@ export default function MeetThePipeline() {
             <span className="text-indigo-500">through the office</span>
           </h2>
           <p className="mx-auto mt-3 max-w-[540px] font-body text-[15px] leading-[24px] text-[#62625F] md:text-[17px] md:leading-[28px]">
-            Six specialist leads hand work forward until the goal is proven —
+            Eight specialist leads hand work forward until the goal is proven —
             then the loop starts again with smarter research.
           </p>
         </motion.div>
@@ -138,7 +138,7 @@ export default function MeetThePipeline() {
 
         <motion.div
           variants={stagger}
-          className="mt-8 flex gap-3 overflow-x-auto pb-2 sm:gap-4 md:grid md:grid-cols-6 md:overflow-visible md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="mt-8 flex gap-3 overflow-x-auto pb-2 sm:gap-4 md:grid md:grid-cols-4 lg:grid-cols-8 md:overflow-visible md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {TOUR_ORDER.map((id, i) => (
             <PipelineChip key={id} teamId={id} index={i} />
