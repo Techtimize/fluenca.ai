@@ -175,7 +175,6 @@ export default function AgentsPage() {
               autonomous growth pipeline
             </span>
           </motion.h1>
-
           <motion.p
             initial={reduceMotion ? false : { opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}

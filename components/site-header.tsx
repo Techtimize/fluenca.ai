@@ -13,58 +13,75 @@ export interface SiteHeaderProps {
   navigationItems?: readonly SiteNavigationItem[];
   signupHref?: string;
   signupLabel?: string;
+  /** Kept for call-site compatibility; navbar is always white */
+  variant?: "light" | "dark";
 }
 
+const DEFAULT_NAV: readonly SiteNavigationItem[] = [
+  { label: "Agents", href: "/agents", hasMenu: true },
+  { label: "Blog", href: "/blog" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Use case", href: "/use-cases" },
+];
+
 export function SiteHeader({
-  navigationItems,
-  signupHref,
-  signupLabel,
+  navigationItems = DEFAULT_NAV,
+  signupHref = PAGE_ROUTES.SIGNUP,
+  signupLabel = "Sign up",
 }: SiteHeaderProps) {
   return (
-    <header className="mx-auto grid w-full max-w-[1440px] grid-cols-[1fr_auto] items-center gap-x-4 px-6 py-4 md:grid-cols-[1fr_auto_1fr] md:px-8 lg:px-10">
-      <Link
-        href={PAGE_ROUTES.HOME}
-        aria-label="Fluenca home"
-        className="flex w-fit items-center gap-2"
-      >
-        <Image
-          src="/assets/Logo.svg"
-          alt="Fluenca Logo"
-          width={34}
-          height={40}
-          priority
-          className="h-9 w-auto"
-        />
-        <span className="font-display text-2xl font-medium tracking-[0.04em] text-ink">
-        Fluenca.ai
-        </span>
-      </Link>
+    <header className="sticky top-0 z-50 w-full px-3 pt-3 sm:px-5 sm:pt-4 lg:px-8">
+      <div className="mx-auto flex h-16 w-full max-w-[1280px] items-center justify-between gap-3 rounded-full border border-black/5 bg-white px-3 shadow-lg shadow-black/10 sm:h-[4.5rem] sm:gap-4 sm:px-4 lg:h-20 lg:px-5">
+        {/* Logo — start */}
+        <Link
+          href={PAGE_ROUTES.HOME}
+          aria-label="Fluenca home"
+          className="flex shrink-0 items-center gap-2 pl-1 sm:gap-2.5 sm:pl-2"
+        >
+          <Image
+            src="/assets/Logo.svg"
+            alt="Fluenca Logo"
+            width={40}
+            height={48}
+            priority
+            className="h-9 w-auto sm:h-10 lg:h-11"
+          />
+          <span className="text-[17px] font-semibold tracking-tight">
+              Fluenca
+              <span className="text-[#5452F6]">.ai</span>
+            </span>
+        </Link>
 
-      {/* <nav
-        aria-label="Main navigation"
-        className="col-span-2 row-start-2 mt-3 flex justify-center md:col-span-1 md:col-start-2 md:row-start-1 md:mt-0"
-      >
-        <ul className="flex items-center gap-1 rounded-full bg-surface-muted p-1">
-          {navigationItems.map(({ label, href, hasMenu }) => (
-            <li key={label}>
-              <Link
-                href={href}
-                className="flex min-h-9 items-center gap-1 rounded-full px-3.5 font-body text-caption text-ink transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-              >
-                {label}
-                {hasMenu && <ChevronDown aria-hidden="true" className="size-3.5" />}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav> */}
+        {/* Pages — center */}
+        <nav
+          aria-label="Main navigation"
+          className="min-w-0 flex-1 overflow-x-auto"
+        >
+          <ul className="mx-auto flex w-max max-w-full items-center justify-center gap-0.5 sm:gap-1">
+            {navigationItems.map(({ label, href, hasMenu }) => (
+              <li key={label}>
+                <Link
+                  href={href ?? "#"}
+                  className="flex h-10 items-center gap-1 whitespace-nowrap rounded-full px-3 font-body text-sm font-medium text-ink transition-colors hover:bg-black/5 sm:h-11 sm:px-4 lg:px-5"
+                >
+                  {label}
+                  {hasMenu && (
+                    <ChevronDown aria-hidden="true" className="size-3.5" />
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-      {/* <Link
-        href={signupHref}
-        className="col-start-2 row-start-1 inline-flex h-9 items-center justify-center rounded-full bg-brand px-5 font-body text-caption font-medium text-white shadow-[0_3px_0_#bfc1ff] transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:col-start-3 md:justify-self-end"
-      >
-        {signupLabel}
-      </Link> */}
+        {/* Sign up — end */}
+        <Link
+          href={signupHref}
+          className="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-brand px-4 font-body text-sm font-semibold text-white shadow-[0_3px_0_#bfc1ff] transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:h-11 sm:px-6 lg:px-7"
+        >
+          {signupLabel}
+        </Link>
+      </div>
     </header>
   );
 }
