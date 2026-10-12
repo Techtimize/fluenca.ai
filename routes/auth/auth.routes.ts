@@ -14,7 +14,12 @@ export const SignupApi = async (data: SignUpRequestProps): Promise<SignUpRespons
     return response.data;
 }
 
-export const MeApi = async () => {
-    const response = await api.get(AUTHENDPOINT.ME);
+export const MeApi = async (accessToken?: string) => {
+    const response = await api.get(
+        AUTHENDPOINT.ME,
+        accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : undefined,
+    );
     return response.data;
 }
+
+export const googleLoginUrl = () => `${process.env.NEXT_PUBLIC_BACKEND_URL}${AUTHENDPOINT.GOOGLE_LOGIN}`;
