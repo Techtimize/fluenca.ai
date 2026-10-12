@@ -1,6 +1,10 @@
 export const PAGE_ROUTES = {
-    HOME: '/',
+    HOME: '/home',
     COMING_SOON: '/coming-soon',
+    AGENTS: '/agents',
+    PLANS: '/plans',
+    BLOG: '/blog',
+    USE_CASES: '/use-cases',
 
     LOGIN: '/login',
     SIGNUP: '/signup',
