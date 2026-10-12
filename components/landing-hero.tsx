@@ -56,9 +56,8 @@ export function LandingHero({
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-48 bg-linear-to-t from-[#E4E6FF] via-[#F1F2FF] to-transparent"
       />
-      <header className="fixed inset-x-0 top-0 z-50 w-full bg-white/80 backdrop-blur-md">
+      {/* <header className="fixed inset-x-0 top-0 z-50 w-full bg-white/80 backdrop-blur-md">
         <div className="mx-auto grid h-16 w-full max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-6 md:px-8 lg:px-10">
-          {/* Logo lockup */}
           <Link href="/" className="flex h-10 w-[138px] items-center gap-2">
             <Image
               src="/assets/Logo.svg"
@@ -70,7 +69,6 @@ export function LandingHero({
             />
             <span className="whitespace-nowrap font-display text-body font-medium text-brand">fluenca.ai</span>
           </Link>
-
           <nav className="hidden items-center gap-1 rounded-full bg-brand-50 p-1 md:flex">
             <button
               type="button"
@@ -94,7 +92,7 @@ export function LandingHero({
             <BrandButton href="/signup">Sign up</BrandButton>
           </div>
         </div>
-      </header>
+      </header> */}
 
       <section className="mx-auto grid w-full max-w-[1440px] flex-1 items-center gap-6 px-4 pb-12 pt-[84px] sm:gap-8 sm:px-6 sm:pt-[92px] md:px-8 md:pb-16 md:pt-[96px] lg:grid-cols-[0.9fr_1.1fr] lg:gap-12 lg:px-10 lg:pb-16 lg:pt-16">
         <div className="relative flex flex-col items-start lg:-top-8">
@@ -103,19 +101,14 @@ export function LandingHero({
             <Target aria-hidden="true" className="size-4 shrink-0" />
             {eyebrow}
           </p>
-
           <h1 className="w-full font-display text-[28px] font-medium leading-[36px] tracking-normal text-ink sm:text-[32px] sm:leading-[40px] md:max-w-[520px] md:text-[40px] md:leading-[48px] lg:max-w-[449px] lg:text-[44px] lg:leading-[53px]">
             {titleLead}
             <span className="text-brand">{titleHighlight}</span>
             {titleTail}
           </h1>
-
-
           <p className="mt-3 w-full font-body text-[15px] font-normal leading-[24px] tracking-normal text-[#1C1C1E] sm:mt-4 md:max-w-[520px] md:text-[16px] md:leading-[26px] lg:max-w-[449px]">
             {description}
           </p>
-
-
           <div className="mt-5 flex w-fit flex-wrap items-center gap-3 sm:mt-6">
             {actions.map(({ label, href, variant }) => (
               <Link

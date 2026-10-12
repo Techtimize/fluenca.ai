@@ -27,7 +27,7 @@ const benefits: {
     title: "Accurate",
     text: "Verify the facts once, so later content is far less likely to include made-up or off-brand claims.",
     leadId: "dna",
-    leadNote: "Masrur’s DNA rules every draft",
+    leadNote: "Raheel’s DNA rules every draft",
   },
   {
     title: "Consistent",

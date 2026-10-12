@@ -27,7 +27,7 @@ import {
 /** Four scroll steps mapped onto the eight-floor office pipeline */
 const STEPS = [
   {
-    title: "Rayyan intakes your brand.",
+    title: "hassnain intakes your brand.",
     text: "Share your website and basics. Intake crawls your site and drafts verified Q&A — a clean brief, no blank forms.",
     animationData: step1Animation,
     box: { left: 131, top: 78, width: 328, height: 370, lift: 0 },
@@ -35,7 +35,7 @@ const STEPS = [
     pipelineThrough: 0,
   },
   {
-    title: "Ilsa maps rivals. Masrur locks DNA.",
+    title: "Ilsa maps rivals. Raheel locks DNA.",
     text: "Competitor intel lands with DNA & Strategy. You confirm every answer once — that immutable Company DNA becomes the source of truth for every later agent.",
     animationData: step2Animation,
     box: { left: 31, top: 53, width: 527, height: 338, lift: 30 },
@@ -334,9 +334,7 @@ export default function HowItWorks() {
           className="sticky flex flex-col gap-4 px-4 py-5 [--nav-h:64px] sm:gap-6 sm:px-8 sm:py-6 md:[--nav-h:80px] md:gap-8 md:px-12 md:py-8 lg:gap-8 lg:px-20 lg:py-8"
         >
           <div className="mx-auto grid w-full max-w-360 items-start gap-1 sm:gap-2 lg:grid-cols-[1fr_590px] lg:gap-16">
-            <h2 className="font-display text-[16px] font-normal leading-[24px] text-[#1C1C1E] sm:text-[20px] sm:leading-[28px] md:text-[26px] md:leading-[36px] lg:text-[36px] lg:leading-[48px]">
-              Your goal, floor by floor
-            </h2>
+
 
             <h2 className="font-display text-[24px] font-medium leading-[31px] sm:text-[28px] sm:leading-[36px] md:text-[38px] md:leading-[48px] lg:text-[50px] lg:leading-[62px]">
               <span className={GRADIENT_TEXT}>From </span>

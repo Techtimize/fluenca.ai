@@ -54,7 +54,7 @@ function fourMembers(
 
 /**
  * Screen layout (camera looks from +Z toward the hub):
- * - Back-center: Intake (Rayyan) — clear of the hub goal animation
+ * - Back-center: Intake (hassnain) — clear of the hub goal animation
  * - Center: DNA + SEO flanking the hub
  * - Left corner: Competitor + Goals
  * - Right corner: Media + Analytics
@@ -86,9 +86,9 @@ export const TOUR_ORDER: TeamId[] = [
 ];
 
 export const TOUR_LINES: Record<TeamId, string> = {
-  intake: "Rayyan researches your site and drafts verified Q&A.",
+  intake: "hassnain researches your site and drafts verified Q&A.",
   competitor: "Ilsa maps rivals so strategy isn’t built in a vacuum.",
-  dna: "Masrur locks Company DNA — your single source of truth.",
+  dna: "Raheel locks Company DNA — your single source of truth.",
   seo: "Talha turns DNA into topical maps and keyword plans.",
   media: "Sayyam ships creative: scripts, carousels, and reels.",
   analytics: "Arslan proves what worked and feeds the next loop.",
@@ -96,7 +96,7 @@ export const TOUR_LINES: Record<TeamId, string> = {
 };
 
 const FLOOR_SIZE: [number, number] = [9.6, 7.4];
-/** Slightly larger floor so Rayyan’s team reads clearly */
+/** Slightly larger floor so hassnain’s team reads clearly */
 const FRONT_FLOOR_SIZE: [number, number] = [10.4, 8.0];
 
 /** Teams arranged to fill corners + front/back of the viewport */
@@ -104,7 +104,7 @@ export const OFFICE_TEAMS: OfficeTeam[] = [
   {
     id: "intake",
     name: "Intake & Research",
-    leadName: "Rayyan",
+    leadName: "hassnain",
     leadTitle: "Intake Lead",
     leadImage: "/assets/Avatars/Hasnain-mascot.jpeg",
     color: "#5B57E6",
@@ -146,7 +146,7 @@ export const OFFICE_TEAMS: OfficeTeam[] = [
   {
     id: "dna",
     name: "DNA & Strategy",
-    leadName: "Masrur",
+    leadName: "Raheel",
     leadTitle: "DNA Lead",
     leadImage: "/assets/Avatars/raheel-mascot.png",
     color: "#D97706",
