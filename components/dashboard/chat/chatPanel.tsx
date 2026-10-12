@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import Card from "@/components/shared/card";
+import { BrandButton } from "@/components/ui/brand-button";
 import {
   Dialog,
   DialogContent,
@@ -307,14 +308,15 @@ export default function ChatPanel({
                 <span className="mt-1 block text-xs text-neutral-500">Running {m.toolName.replaceAll("_", " ")}</span>
               ) : null}
               {typeof m.toolResult?.path === "string" && m.toolResult.path.startsWith("/") ? (
-                <button
+                <BrandButton
                   type="button"
+                  size="xs"
+                  className="mt-2"
                   onClick={() => router.push(m.toolResult!.path as string)}
-                  className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#5B57E6] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#4A46D0]"
                 >
                   Go there
                   <ArrowRight className="size-3.5" />
-                </button>
+                </BrandButton>
               ) : null}
             </div>
           ))

@@ -4,8 +4,8 @@ import Image from "next/image";
 import { FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ScriptGenerationMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import { BrandButton } from "@/components/ui/brand-button";
 import type { ContentIdea } from "@/types/bussiness/content-recommendation-type";
-import { FOCUS_RING } from "@/utils/ui-classes";
 import { Chip } from "./chipsandsection";
 import { ideaToScriptRequest } from "./scriptPayload";
 
@@ -35,16 +35,20 @@ function PlatformBadge({ platform }: { platform: string }) {
 
 function PriorityBadge({ priority }: { priority: string }) {
   const lower = priority.toLowerCase();
+  const numeric = Number(priority);
+  const isTenScale = Number.isFinite(numeric) && numeric > 0 && numeric <= 10;
   const tone =
-    lower.includes("high") || Number(priority) >= 80
+    lower.includes("high") ||
+    (isTenScale ? numeric >= 8 : Number.isFinite(numeric) && numeric >= 80)
       ? "bg-rose-50 text-rose-700"
-      : lower.includes("medium") || Number(priority) >= 50
+      : lower.includes("medium") ||
+          (isTenScale ? numeric >= 5 : Number.isFinite(numeric) && numeric >= 50)
         ? "bg-amber-50 text-amber-700"
         : "bg-emerald-50 text-emerald-700";
 
   return (
     <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${tone}`}>
-      {priority}
+      {isTenScale ? `P${priority}` : priority}
     </span>
   );
 }
@@ -80,17 +84,21 @@ export default function IdeaCard({
       : item.priority_score != null
         ? String(item.priority_score)
         : null;
+  const pack = item.production_pack;
   const description =
+    item.hook ||
+    item.angle ||
     item.caption ||
     item.description ||
     item.summary ||
-    item.angle ||
-    item.hook ||
     item.body ||
     item.content ||
     "";
   const keyPoints = item.key_points?.filter(Boolean) ?? [];
   const hashtags = item.hashtags?.filter(Boolean) ?? [];
+  const abHooks = (item.ab_hooks || pack?.ab_hooks || []).filter(Boolean);
+  const carouselSlides = pack?.carousel_slides || item.slides || [];
+  const reelShots = pack?.reel_shot_list || [];
   const meta = [
     item.format || item.post_type,
     item.content_pillar || item.pillar,
@@ -129,6 +137,12 @@ export default function IdeaCard({
           <p className="line-clamp-3 text-[12px] leading-5 text-neutral-600">{description}</p>
         ) : null}
 
+        {item.reason ? (
+          <p className="line-clamp-2 text-[11px] leading-4 text-neutral-500">
+            {item.reason}
+          </p>
+        ) : null}
+
         {meta.length ? (
           <ul className="flex flex-wrap gap-1">
             {meta.map((value) => (
@@ -141,12 +155,39 @@ export default function IdeaCard({
 
         {keyPoints.length ? (
           <ul className="space-y-1 border-t border-[#EEF0F8] pt-2">
-            {keyPoints.slice(0, 3).map((point) => (
+            {keyPoints.slice(0, 4).map((point) => (
               <li key={point} className="text-[12px] leading-4 text-neutral-600">
                 · {point}
               </li>
             ))}
           </ul>
+        ) : null}
+
+        {abHooks.length ? (
+          <div className="border-t border-[#EEF0F8] pt-2">
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.04em] text-neutral-400">
+              A/B hooks
+            </p>
+            <ul className="space-y-1">
+              {abHooks.slice(0, 2).map((hook) => (
+                <li key={hook} className="text-[11px] leading-4 text-neutral-600">
+                  “{hook}”
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {carouselSlides.length ? (
+          <p className="text-[11px] text-neutral-500">
+            {carouselSlides.length} carousel slides ready
+          </p>
+        ) : null}
+
+        {reelShots.length ? (
+          <p className="text-[11px] text-neutral-500">
+            {reelShots.length} reel shots mapped
+          </p>
         ) : null}
 
         {hashtags.length ? (
@@ -165,11 +206,18 @@ export default function IdeaCard({
           </p>
         ) : null}
 
-        <button
+        {item.brand_voice_note || pack?.tone_guide ? (
+          <p className="line-clamp-2 text-[10px] leading-4 text-neutral-400">
+            Voice: {item.brand_voice_note || pack?.tone_guide}
+          </p>
+        ) : null}
+
+        <BrandButton
           type="button"
+          size="full"
+          className="mt-auto"
           onClick={handleGenerateScript}
           disabled={isPending || !companyId}
-          className={`mt-auto bg-brand-600 cursor-pointer hover:bg-brand-700 text-white inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg border border-[#D8D6F5] bg-[#F6F5FF] text-[12px] font-medium text-[#5B57E6] hover:bg-[#ECEBFF] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
         >
           {isPending ? (
             <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
@@ -177,7 +225,7 @@ export default function IdeaCard({
             <FileText className="size-3.5" aria-hidden="true" />
           )}
           {isPending ? "Generating script…" : "Generate script"}
-        </button>
+        </BrandButton>
       </div>
     </li>
   );

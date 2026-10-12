@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CalendarDays, Loader2, Sparkles } from "lucide-react";
 import PlannerCalendar from "@/components/dashboard/calendar/PlannerCalendar";
@@ -14,6 +13,7 @@ import {
 import TopBar from "@/components/dashboard/topBar";
 import ApiNotFoundCard from "@/components/notfound";
 import Card from "@/components/shared/card";
+import { BrandButton } from "@/components/ui/brand-button";
 import {
   Select,
   SelectContent,
@@ -30,7 +30,6 @@ import {
   PlannerVersionsQuery,
 } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
-import { FOCUS_RING } from "@/utils/ui-classes";
 
 export default function CalendarPage() {
   const companyId = useAuthStore((s) => s.company_id);
@@ -165,13 +164,10 @@ export default function CalendarPage() {
               Run intelligence to generate a planner schedule, then return here to view it on the
               calendar.
             </p>
-            <Link
-              href={PAGE_ROUTES.DNA}
-              className={`mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-[#5B57E6] px-5 text-sm font-medium text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
-            >
+            <BrandButton href={PAGE_ROUTES.DNA} className="mt-6">
               <Sparkles className="size-4" />
               Start intelligence run
-            </Link>
+            </BrandButton>
           </div>
         </Card>
       ) : null}

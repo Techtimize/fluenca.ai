@@ -72,9 +72,13 @@ function StatPill({ label, value }: { label: string; value?: number | null }) {
   const formatted = formatCompact(value);
   if (!formatted) return null;
   return (
-    <div className="rounded-xl bg-white px-2.5 py-2 ring-1 ring-[#E6E8F5]">
-      <p className="text-[10px] font-medium uppercase tracking-[0.05em] text-neutral-400">{label}</p>
-      <p className="mt-0.5 text-[13px] font-semibold tabular-nums text-neutral-900">{formatted}</p>
+    <div className="min-w-0 rounded-xl bg-white px-2 py-2 ring-1 ring-[#E6E8F5] sm:px-2.5">
+      <p className="truncate text-[9px] font-medium uppercase tracking-[0.05em] text-neutral-400 sm:text-[10px]">
+        {label}
+      </p>
+      <p className="mt-0.5 truncate text-[12px] font-semibold tabular-nums text-neutral-900 sm:text-[13px]">
+        {formatted}
+      </p>
     </div>
   );
 }
@@ -93,11 +97,11 @@ function Section({
   aside?: ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-[#E6E8F5] bg-white p-5 shadow-[0_1px_0_rgba(15,23,42,0.02)] sm:p-6">
+    <section className="min-w-0 rounded-2xl border border-[#E6E8F5] bg-white p-4 shadow-[0_1px_0_rgba(15,23,42,0.02)] sm:rounded-3xl sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
+        <div className="flex min-w-0 items-start gap-2.5 sm:gap-3">
           {Icon ? (
-            <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[#ECEBFF] text-[#5B57E6]">
+            <span className="grid size-9 shrink-0 place-items-center rounded-2xl bg-[#ECEBFF] text-[#5B57E6] sm:size-10">
               <Icon className="size-4" aria-hidden="true" />
             </span>
           ) : null}
@@ -110,7 +114,7 @@ function Section({
         </div>
         {aside}
       </div>
-      <div className="mt-5">{children}</div>
+      <div className="mt-4 min-w-0 sm:mt-5">{children}</div>
     </section>
   );
 }
@@ -285,13 +289,13 @@ function CompetitorCards({
         const websiteHref = website?.url || item.links?.website?.url;
 
         return (
-          <li key={`${item.name || "competitor"}-${index}`}>
-            <article className="flex h-full flex-col rounded-[22px] border border-[#E6E8F5] bg-[linear-gradient(180deg,#FFFFFF_0%,#FAFBFF_100%)] p-5">
+          <li key={`${item.name || "competitor"}-${index}`} className="min-w-0">
+            <article className="flex h-full min-w-0 flex-col rounded-[20px] border border-[#E6E8F5] bg-[linear-gradient(180deg,#FFFFFF_0%,#FAFBFF_100%)] p-4 sm:rounded-[22px] sm:p-5">
               <div className="flex items-start gap-3">
                 <Avatar name={item.name || "Competitor"} imageUrl={avatarUrl} size="lg" />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h4 className="truncate text-[16px] font-semibold tracking-tight text-neutral-900">
+                    <h4 className="max-w-full break-words text-[15px] font-semibold tracking-tight text-neutral-900 sm:truncate sm:text-[16px]">
                       {item.name || "Competitor"}
                     </h4>
                     {handleLabel ? (
@@ -481,14 +485,14 @@ function CompetitorCards({
                       {competitorPosts.length} post{competitorPosts.length === 1 ? "" : "s"}
                     </span>
                   </div>
-                  <div className="-mx-1 overflow-x-auto pb-1 [scrollbar-width:thin]">
+                  <div className="-mx-1 overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:thin]">
                     <ul className="flex w-max gap-2 px-1">
                       {competitorPosts.map((post, postIndex) => {
                         const image = post.thumbnail_url || post.media_url;
                         return (
                           <li
                             key={`${post.permalink || post.id || postIndex}`}
-                            className="w-[132px] shrink-0"
+                            className="w-[112px] shrink-0 sm:w-[132px]"
                           >
                             <article className="overflow-hidden rounded-xl border border-[#E6E8F5] bg-white">
                               <a
@@ -561,19 +565,19 @@ function RecommendedActionsPanel({
   actions: CompetitiveBriefRecommendedAction[];
 }) {
   return (
-    <section className="overflow-hidden rounded-[24px] border border-[#E6E8F5] bg-white shadow-[0_1px_0_rgba(15,23,42,0.02)]">
-      <div className="relative border-b border-[#EEF0F8] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] px-5 py-5 sm:px-6">
+    <section className="min-w-0 overflow-hidden rounded-[20px] border border-[#E6E8F5] bg-white shadow-[0_1px_0_rgba(15,23,42,0.02)] sm:rounded-[24px]">
+      <div className="relative border-b border-[#EEF0F8] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] px-4 py-4 sm:px-6 sm:py-5">
         <span
           className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#5B57E6] via-[#8B87F0] to-[#C4C2FF]"
           aria-hidden="true"
         />
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
-            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#ECEBFF] text-[#5B57E6]">
+            <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[#ECEBFF] text-[#5B57E6] sm:size-11">
               <Sparkles className="size-4" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <h3 className="text-[16px] font-semibold tracking-tight text-neutral-900">
+              <h3 className="text-[15px] font-semibold tracking-tight text-neutral-900 sm:text-[16px]">
                 Recommended actions
               </h3>
               <p className="mt-1 text-[13px] text-neutral-500">
@@ -587,15 +591,15 @@ function RecommendedActionsPanel({
         </div>
       </div>
 
-      <ol className="grid gap-4 p-4 sm:p-5 lg:grid-cols-3">
+      <ol className="grid gap-3 p-3 sm:gap-4 sm:p-5 lg:grid-cols-3">
         {actions.map((item, index) => (
           <li key={`${item.action}-${index}`} className="min-w-0">
-            <article className="flex h-full flex-col rounded-[20px] border border-[#E6E8F5] bg-[linear-gradient(180deg,#FFFFFF_0%,#FAFBFF_100%)] p-4">
-              <div className="flex items-start justify-between gap-3">
+            <article className="flex h-full flex-col rounded-[20px] border border-[#E6E8F5] bg-[linear-gradient(180deg,#FFFFFF_0%,#FAFBFF_100%)] p-3.5 sm:p-4">
+              <div className="flex items-start justify-between gap-2 sm:gap-3">
                 <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#5B57E6] text-[13px] font-bold leading-none text-white shadow-[0_6px_16px_rgba(91,87,230,0.28)]">
                   {index + 1}
                 </span>
-                <div className="flex flex-wrap justify-end gap-1.5">
+                <div className="flex min-w-0 flex-wrap justify-end gap-1.5">
                   {item.impact ? (
                     <span className="rounded-full bg-[#ECFDF5] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.04em] text-[#047857]">
                       Impact · {item.impact}
@@ -812,16 +816,16 @@ function InsightsTrio({
   ] as const;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
+    <div className="grid min-w-0 gap-3 sm:gap-4 lg:grid-cols-3 lg:items-stretch">
       {columns.map((column) => {
         const Icon = column.icon;
         return (
           <article
             key={column.key}
-            className="flex min-h-0 flex-col overflow-hidden rounded-[22px] border border-[#E6E8F5] bg-white shadow-[0_1px_0_rgba(15,23,42,0.02)]"
+            className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[20px] border border-[#E6E8F5] bg-white shadow-[0_1px_0_rgba(15,23,42,0.02)] sm:rounded-[22px]"
           >
             <div
-              className={`relative border-b border-[#EEF0F8] bg-gradient-to-br ${column.accent.header} px-4 py-4`}
+              className={`relative border-b border-[#EEF0F8] bg-gradient-to-br ${column.accent.header} px-3.5 py-3.5 sm:px-4 sm:py-4`}
             >
               <span
                 className={`absolute inset-x-0 top-0 h-1 ${column.accent.bar}`}
@@ -1042,7 +1046,7 @@ function InstagramProfileCard({
     : null;
 
   return (
-    <div className="rounded-2xl border border-[#E6E8F5] bg-white/80 p-4 backdrop-blur">
+    <div className="min-w-0 rounded-2xl border border-[#E6E8F5] bg-white/80 p-3.5 backdrop-blur sm:p-4">
       <div className="flex items-center gap-3">
         <Avatar
           name={profile.username || title}
@@ -1125,19 +1129,70 @@ function ComparisonTable({
     };
   }
 
+  const rows = comparison.rows || [];
+
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4">
       {comparison.so_what ? (
-        <p className="rounded-2xl border border-[#D8D6F5] bg-[#F6F5FF] px-4 py-3 text-[13px] leading-5 text-[#3F3B9E]">
+        <p className="rounded-2xl border border-[#D8D6F5] bg-[#F6F5FF] px-3 py-3 text-[13px] leading-5 text-[#3F3B9E] sm:px-4">
           {comparison.so_what}
         </p>
       ) : null}
 
-      <div className="overflow-x-auto rounded-2xl border border-[#E6E8F5]">
-        <table className="min-w-full border-collapse text-left">
+      {/* Mobile: stacked cards */}
+      <ul className="space-y-3 md:hidden">
+        {rows.map((row, index) => (
+          <li
+            key={`${row.area}-${index}`}
+            className="rounded-2xl border border-[#E6E8F5] bg-white p-3.5"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <p className="text-[13px] font-semibold text-neutral-900">{row.area}</p>
+              {row.insight ? (
+                <span className="inline-flex max-w-full rounded-full bg-[#ECEBFF] px-2.5 py-1 text-[11px] font-medium text-[#5B57E6]">
+                  {row.insight}
+                </span>
+              ) : null}
+            </div>
+            <dl className="mt-3 space-y-2.5">
+              {columns.map((column, colIndex) => {
+                const avatar = columnAvatar(column, colIndex);
+                const value =
+                  colIndex === 0
+                    ? row.your_company || "—"
+                    : row.competitors?.[column] || "—";
+                return (
+                  <div
+                    key={`${row.area}-${column}`}
+                    className="rounded-xl bg-[#F8F9FF] px-3 py-2.5"
+                  >
+                    <dt className="flex min-w-0 items-center gap-2">
+                      <Avatar
+                        name={avatar.name}
+                        imageUrl={avatar.imageUrl}
+                        size="sm"
+                      />
+                      <span className="truncate text-[11px] font-semibold text-neutral-500">
+                        {column}
+                      </span>
+                    </dt>
+                    <dd className="mt-1.5 break-words text-[12px] leading-5 text-neutral-700">
+                      {value}
+                    </dd>
+                  </div>
+                );
+              })}
+            </dl>
+          </li>
+        ))}
+      </ul>
+
+      {/* Desktop: horizontal table */}
+      <div className="-mx-1 hidden overflow-x-auto overscroll-x-contain rounded-2xl border border-[#E6E8F5] md:mx-0 md:block [scrollbar-width:thin]">
+        <table className="min-w-[640px] w-full border-collapse text-left">
           <thead>
             <tr className="bg-[#F8F9FF]">
-              <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+              <th className="sticky left-0 z-10 bg-[#F8F9FF] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
                 Area
               </th>
               {columns.map((column, index) => {
@@ -1166,12 +1221,12 @@ function ComparisonTable({
             </tr>
           </thead>
           <tbody>
-            {(comparison.rows || []).map((row, index) => (
+            {rows.map((row, index) => (
               <tr
                 key={`${row.area}-${index}`}
                 className="border-t border-[#EEF0F8] align-top odd:bg-white even:bg-[#FCFCFF]"
               >
-                <td className="px-4 py-3 text-[12px] font-semibold text-neutral-900">
+                <td className="sticky left-0 z-10 bg-white px-4 py-3 text-[12px] font-semibold text-neutral-900">
                   {row.area}
                 </td>
                 <td className="px-4 py-3 text-[12px] leading-5 text-neutral-700">
@@ -1318,23 +1373,23 @@ export default function CompetitiveBriefResults({
   }
 
   return (
-    <div className="space-y-4">
-      <section className="relative overflow-hidden rounded-3xl border border-[#E6E8F5] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_52%)] p-5 sm:p-7">
-        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)] lg:items-start">
+    <div className="min-w-0 space-y-3 sm:space-y-4">
+      <section className="relative min-w-0 overflow-hidden rounded-2xl border border-[#E6E8F5] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_52%)] p-4 sm:rounded-3xl sm:p-7">
+        <div className="relative grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(240px,0.8fr)] lg:items-start">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5B57E6]">
               Competitive brief
             </p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-900 sm:text-[28px]">
+            <h2 className="mt-2 break-words text-xl font-semibold tracking-tight text-neutral-900 sm:text-[28px]">
               {company?.name || "Your company"}
             </h2>
             {summary ? (
-              <p className="mt-3 text-[14px] leading-6 text-neutral-600">{summary}</p>
+              <p className="mt-3 text-[13px] leading-6 text-neutral-600 sm:text-[14px]">{summary}</p>
             ) : company?.one_liner ? (
-              <p className="mt-3 text-[14px] leading-6 text-neutral-600">{company.one_liner}</p>
+              <p className="mt-3 text-[13px] leading-6 text-neutral-600 sm:text-[14px]">{company.one_liner}</p>
             ) : null}
 
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-1.5 sm:mt-5 sm:gap-2">
               {company?.market ? <Chip>{company.market}</Chip> : null}
               {company?.region ? <Chip>{company.region}</Chip> : null}
               {company?.website ? (
@@ -1379,7 +1434,7 @@ export default function CompetitiveBriefResults({
               <Button
                 type="button"
                 onClick={onRunAnalysis}
-                className="mt-4 h-10 gap-2 rounded-full bg-[#5B57E6] px-4 text-white hover:bg-[#4A46D0]"
+                className="mt-4"
               >
                 <Sparkles className="size-4" />
                 Run analysis again

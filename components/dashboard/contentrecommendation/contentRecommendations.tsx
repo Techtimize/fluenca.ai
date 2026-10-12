@@ -8,9 +8,12 @@ import type { ContentRecommendationResultResponse } from "@/types/bussiness/cont
 import CalendarSection from "./CalendarSection";
 import { EmptyState } from "./Emptystate";
 import IdeasSection from "./IdeasSection";
+import {
+  InstagramPerformanceSection,
+  OpportunityScoresSection,
+  TrendSignalsSection,
+} from "./InsightSections";
 import PlatformStrategySection from "./PlatformStrategySection";
-import StrategySection from "./StrategySection";
-import SharedCard from "@/components/shared/card";
 
 type Props = {
   data?: ContentRecommendationResultResponse | null;
@@ -31,10 +34,6 @@ export default function ContentRecommendations({
   );
 
   const handleGenerate = () => {
-    if (!companyId) {
-      toast.error("Company ID is missing. Please log in again.");
-      return;
-    }
     recommend({ company_id: companyId });
   };
 
@@ -45,7 +44,18 @@ export default function ContentRecommendations({
   return (
     <div className="space-y-3">
       <PlatformStrategySection platforms={normalized.platforms} />
+      {/* <PlannerHandoffSection handoff={normalized.plannerHandoff} /> */}
+      <InstagramPerformanceSection
+        performance={normalized.instagramPerformance}
+      />
+      <TrendSignalsSection signals={normalized.trendSignals} />
+      <OpportunityScoresSection scores={normalized.opportunityScores} />
       <IdeasSection ideas={normalized.ideas} companyId={companyId} />
+      <CalendarSection
+        calendar={normalized.calendar}
+        items={normalized.calendarItems}
+        companyId={companyId}
+      />
     </div>
   );
 }

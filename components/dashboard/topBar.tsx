@@ -1,16 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
-import AssetImage from "@/components/shared/assetImage";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
+import AssetImage from "@/components/shared/assetImage";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import type { UserSummary } from "@/types/dashboard";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
 type Props = {
-  user: UserSummary;
+  user?: UserSummary;
   onSearch?: (query: string) => void;
   placeholder?: string;
   showLanguageSwitcher?: boolean;
@@ -25,54 +24,57 @@ export default function TopBar({
   const t = useTranslations("common");
   const tTop = useTranslations("topBar");
   const resolvedPlaceholder = placeholder ?? tTop("searchPortal");
+  const displayName = user?.name || t("brand");
+  const avatarSrc = user?.avatarSrc;
+  const initial = displayName.charAt(0).toUpperCase();
 
   return (
-    <header className="mb-4 flex items-center gap-4">
-      <form
-        role="search"
-        className="relative flex-1 md:max-w-xl"
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSearch?.(String(new FormData(e.currentTarget).get("q") ?? ""));
-        }}
-      >
-        {/* <Search className="pointer-events-none absolute start-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />
-        <input
-          name="q"
-          type="search"
-          placeholder={resolvedPlaceholder}
-          aria-label={t("search")}
-          className="h-11 w-full rounded-full border border-[#E6E8F5] bg-white pe-4 ps-11 text-sm outline-none placeholder:text-neutral-500 focus:ring-2 focus:ring-[#5B57E6]/30"
-        /> */}
-      </form>
-
-      <div className="ms-auto flex items-center gap-3">
-        {showLanguageSwitcher ? <LanguageSwitcher variant="light" className="hidden sm:inline-flex" /> : null}
-        {showLanguageSwitcher ? <LanguageSwitcher variant="light" compact className="sm:hidden" /> : null}
-        {/* <button
-          type="button"
-          aria-label={t("notifications")}
-          className={`grid size-10 place-items-center rounded-full border border-[#E6E8F5] bg-white text-neutral-700 hover:bg-neutral-50 ${FOCUS_RING}`}
+    <header className="mb-3 flex items-center gap-2 sm:mb-4 sm:gap-3">
+      {/* Leaves room for the fixed mobile menu button on the start edge */}
+      <div className="min-w-0 flex-1 ps-12 md:ps-0 md:max-w-xl">
+        <form
+          role="search"
+          className="relative hidden md:block"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSearch?.(String(new FormData(e.currentTarget).get("q") ?? ""));
+          }}
         >
-          <Bell className="size-4" />
-        </button> */}
+          <span className="sr-only">{resolvedPlaceholder}</span>
+        </form>
+      </div>
+
+      <div className="ms-auto flex shrink-0 items-center gap-2 sm:gap-3">
+        {showLanguageSwitcher ? (
+          <>
+            <LanguageSwitcher
+              variant="light"
+              className="hidden sm:inline-flex"
+            />
+            <LanguageSwitcher
+              variant="light"
+              compact
+              className="sm:hidden"
+            />
+          </>
+        ) : null}
         <Link
           href={PAGE_ROUTES.PROFILE}
-          aria-label={`${user.name} · Profile`}
+          aria-label={`${displayName} · Profile`}
           title="Profile"
           className={`shrink-0 rounded-full transition-opacity hover:opacity-90 ${FOCUS_RING}`}
         >
-          {user.avatarSrc ? (
+          {avatarSrc ? (
             <AssetImage
-              src={user.avatarSrc}
-              alt={user.name}
+              src={avatarSrc}
+              alt={displayName}
               width={40}
               height={40}
               className="size-10 rounded-full object-cover"
             />
           ) : (
             <span className="grid size-10 place-items-center rounded-full bg-[#5B57E6] text-sm font-semibold text-white">
-              {user.name.charAt(0).toUpperCase()}
+              {initial}
             </span>
           )}
         </Link>

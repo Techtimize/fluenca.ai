@@ -90,25 +90,27 @@ export default function CompetitorAnalysisAiPage() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="min-w-0 space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
           <h2 className="text-[16px] font-semibold tracking-tight text-neutral-900">
             AI competitor analysis
           </h2>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm leading-5 text-neutral-500">
             Discover peers, gaps, and recommended moves from your latest brief.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-end gap-2 sm:justify-end">
-          <CompetitorVersionSelect
-            value={selectedVersion}
-            onChange={setSelectedVersion}
-            versions={versions}
-            isLoading={isVersionsLoading}
-            disabled={!companyId}
-          />
+        <div className="flex w-full items-end gap-2 sm:w-auto sm:max-w-md sm:justify-end">
+          <div className="min-w-0 flex-1 sm:w-[220px] sm:flex-none">
+            <CompetitorVersionSelect
+              value={selectedVersion}
+              onChange={setSelectedVersion}
+              versions={versions}
+              isLoading={isVersionsLoading}
+              disabled={!companyId}
+            />
+          </div>
           <TooltipProvider delay={200}>
             <Tooltip>
               <TooltipTrigger
@@ -118,7 +120,7 @@ export default function CompetitorAnalysisAiPage() {
                     onClick={handleRun}
                     disabled={!companyId || isPending}
                     aria-label="Run AI analysis"
-                    className="size-10 shrink-0 rounded-full bg-[#5B57E6] p-0 text-white hover:bg-[#4A46D0]"
+                    className="mb-0.5 size-10 shrink-0 rounded-full bg-[#5B57E6] p-0 text-white hover:bg-[#4A46D0]"
                   />
                 }
               >
@@ -131,7 +133,7 @@ export default function CompetitorAnalysisAiPage() {
               <TooltipContent
                 side="bottom"
                 sideOffset={8}
-                className="max-w-[240px] text-center leading-relaxed"
+                className="max-w-[min(240px,calc(100vw-2rem))] text-center leading-relaxed"
               >
                 {isPending
                   ? "AI analysis is running. This may take a minute."

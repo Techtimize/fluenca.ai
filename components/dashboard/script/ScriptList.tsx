@@ -150,7 +150,7 @@ function ScriptListItem({
               type="button"
               size="sm"
               disabled={!payload || isPending}
-              className="h-9 shrink-0 gap-1.5 rounded-full bg-[#5B57E6] px-3.5 text-white hover:bg-[#4A46D4]"
+              
               onClick={() => {
                 if (!payload) return;
                 generateImage(payload);
