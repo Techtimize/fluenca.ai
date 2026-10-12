@@ -104,6 +104,21 @@
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "support": "Support"
+    },
+    "google": {
+      "continue": "Continue with Google",
+      "signingIn": "Signing you in with Google…",
+      "failedTitle": "Google sign-in didn't work",
+      "backToLogin": "Back to login",
+      "errors": {
+        "google_login_cancelled": "Google sign-in was cancelled.",
+        "invalid_google_login_state": "Google sign-in expired or was started in another browser. Please try again.",
+        "google_email_not_verified": "Your Google account's email is not verified. Verify it with Google, or sign up with email.",
+        "google_account_already_linked": "This email is already linked to a different Google account. Log in with that Google account, or with your email and password.",
+        "google_login_not_configured": "Google sign-in is not available yet. Please sign up with email.",
+        "account_suspended": "This account has been suspended. Please contact support.",
+        "default": "Google sign-in failed. Please try again."
+      }
     }
   },
   "topBar": {
