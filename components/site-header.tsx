@@ -24,21 +24,19 @@ export interface SiteHeaderProps {
 }
 
 const DEFAULT_NAV: readonly SiteNavigationItem[] = [
-  { label: "Home", href: PAGE_ROUTES.HOME },
+  { label: "Home", href: "/" },
   { label: "Agents", href: PAGE_ROUTES.AGENTS },
   { label: "Blog", href: PAGE_ROUTES.BLOG },
   { label: "Plans", href: PAGE_ROUTES.PLANS },
-  { label: "Use case", href: PAGE_ROUTES.USE_CASES },
 ];
 
-// Pages that share the persistent site header (rendered once from the root layout)
-export const SITE_HEADER_ROUTES: readonly string[] = DEFAULT_NAV.map(
-  ({ href }) => href ?? "",
-).filter(Boolean);
+export const SITE_HEADER_ROUTES: readonly string[] = [
+  "/",
+  ...DEFAULT_NAV.map(({ href }) => href ?? "").filter(Boolean),
+];
 
 const subscribeNoop = () => () => {};
 
-// false during SSR/hydration, true on the client — avoids setState in an effect
 function useHydrated() {
   return useSyncExternalStore(
     subscribeNoop,
@@ -69,7 +67,7 @@ export function SiteHeader({
       <div className="mx-auto flex h-16 w-full max-w-[1280px] items-center justify-between gap-3 rounded-full border border-black/5 bg-white px-3 shadow-lg shadow-black/10 sm:h-[4.5rem] sm:gap-4 sm:px-4 lg:h-20 lg:px-5">
         {/* Logo — start */}
         <Link
-          href={PAGE_ROUTES.HOME}
+          href="/"
           aria-label="Fluenca home"
           className="flex shrink-0 items-center gap-2 pl-1 sm:gap-2.5 sm:pl-2"
         >

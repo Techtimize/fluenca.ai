@@ -1,12 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import gsap from "gsap";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, Pause, Play, Sparkles, Zap } from "lucide-react";
 import { AGENTS, accentStyles, type AgentStory } from "@/components/agents/agents-data";
-import { PAGE_ROUTES } from "@/constant/page-routes";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import AgentChapter from "@/components/agents/agentchapter";
 
@@ -95,38 +93,9 @@ export default function AgentsPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.9),transparent_55%)]" />
       </div>
 
-      <header className="relative z-30 border-b border-[#E6E8F5]/80 bg-white/75 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/" className={`flex items-center gap-2.5 ${FOCUS_RING}`}>
-            <Image
-              src="/assets/Logo.svg"
-              alt="Fluenca"
-              width={28}
-              height={28}
-              className="size-7"
-            />
-            <span className="text-[17px] font-semibold tracking-tight">
-              Fluenca
-              <span className="text-[#5452F6]">.ai</span>
-            </span>
-            <span className="hidden rounded-full border border-[#D9DCF7] bg-[#EEF0FF] px-2 py-0.5 text-[10px] font-semibold text-[#5452F6] sm:inline">
-              Agent Engine
-            </span>
-          </Link>
-
-          <nav className="hidden items-center gap-6 text-sm font-medium text-neutral-600 md:flex">
-            <a href="#mascot-orbit" className="hover:text-[#5452F6]">
-              Orbit
-            </a>
-            <a href="#agents-showcase" className="hover:text-[#5452F6]">
-              Agent stories
-            </a>
-            <a href="#pipeline-specs" className="hover:text-[#5452F6]">
-              Architecture
-            </a>
-          </nav>
-
-          <div className="flex items-center gap-2">
+      <section id="mascot-orbit" className="relative z-10 px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-8">
+        <div className="mx-auto max-w-7xl text-center">
+          <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
             <button
               type="button"
               onClick={() => setPaused((value) => !value)}
@@ -143,18 +112,7 @@ export default function AgentsPage() {
               <Zap className="size-3.5 text-[#5452F6]" />
               {fast ? "Fast" : "Normal"}
             </button>
-            <Link
-              href={PAGE_ROUTES.SIGNUP}
-              className={`hidden h-9 items-center rounded-full bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] px-4 text-xs font-semibold text-white shadow-[0_10px_24px_-12px_rgba(79,70,229,0.8)] sm:inline-flex ${FOCUS_RING}`}
-            >
-              Get started
-            </Link>
           </div>
-        </div>
-      </header>
-
-      <section id="mascot-orbit" className="relative z-10 px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <div className="mx-auto max-w-7xl text-center">
           <motion.div
             initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
