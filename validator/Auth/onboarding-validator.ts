@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
-// NOTE: reconstructed from your form fields. Merge with your existing file
-// and keep any custom error messages / translations you already have.
+
 export const OnboardingFormSchema = z.object({
   company_name: z.string().min(1, 'Company name is required'),
   industry: z.string().min(1, 'Industry is required'),
@@ -20,3 +19,20 @@ export const OnboardingFormSchema = z.object({
 });
 
 export type OnboardingFormValidator = z.infer<typeof OnboardingFormSchema>;
+
+export const IndividualOnboardingFormSchema = z.object({
+  full_name: z.string().min(1, 'Full name is required'),
+  role: z.string().min(1, 'Tell us what you do'),
+  primary_goal: z.string().min(1, 'Primary goal is required'),
+  language: z.string().min(1, 'Language is required'),
+  platform: z.enum(['instagram', 'linkedin', 'both'], {
+    message: 'Select a platform',
+  }),
+  target_country: z.string().min(1, 'Country is required'),
+  instagram_username: z.string().optional(),
+  linkedin_url: z.string().optional(),
+});
+
+export type IndividualOnboardingFormValidator = z.infer<
+  typeof IndividualOnboardingFormSchema
+>;
