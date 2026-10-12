@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   ArrowRight,
   Clapperboard,
@@ -6,8 +5,8 @@ import {
   Lightbulb,
   Sparkles,
 } from "lucide-react";
+import { BrandButton } from "@/components/ui/brand-button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
-import { FOCUS_RING } from "@/utils/ui-classes";
 
 const FLOW = [
   {
@@ -74,14 +73,14 @@ export default function ScriptEmptyState() {
             ))}
           </ol>
 
-          <Link
+          <BrandButton
             href={PAGE_ROUTES.CONTENT_RECOMMENDATION}
-            className={`mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-[#5B57E6] px-5 text-sm font-medium text-white shadow-[0_10px_28px_rgba(91,87,230,0.24)] transition-[background-color,transform] hover:bg-[#4A46D0] active:scale-[0.98] ${FOCUS_RING}`}
+            className="mt-6"
           >
             <Lightbulb className="size-4" aria-hidden="true" />
             Choose an idea to script
             <ArrowRight className="size-4" aria-hidden="true" />
-          </Link>
+          </BrandButton>
         </div>
 
         <div className="relative overflow-hidden rounded-[22px] border border-[#E6E8F5] bg-white p-5 shadow-[0_12px_36px_rgba(91,87,230,0.08)]">

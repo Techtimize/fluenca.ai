@@ -209,3 +209,150 @@ export function instagramMediaImageUrl(item?: InstagramMediaItem | null) {
     null;
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
+
+/* ---------- Stories & Live ---------- */
+
+export interface InstagramStoryItem {
+  id: string;
+  mediaType: string | null;
+  mediaUrl: string | null;
+  thumbnailUrl: string | null;
+  permalink: string | null;
+  timestamp: string | null;
+  caption: string | null;
+  raw: Record<string, unknown>;
+}
+
+export interface InstagramLiveItem {
+  id: string;
+  title: string | null;
+  status: string | null;
+  isLive: boolean;
+  permalink: string | null;
+  coverUrl: string | null;
+  startedAt: string | null;
+  endedAt: string | null;
+  viewerCount: number | null;
+  raw: Record<string, unknown>;
+}
+
+function asTrimmed(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const t = value.trim();
+  return t || null;
+}
+
+function asNum(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim()) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+function collectArray(raw: unknown): Record<string, unknown>[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) {
+    return raw.filter(
+      (item): item is Record<string, unknown> =>
+        !!item && typeof item === "object" && !Array.isArray(item),
+    );
+  }
+  if (typeof raw !== "object") return [];
+  const obj = raw as Record<string, unknown>;
+  for (const key of ["data", "stories", "items", "media", "results", "live", "broadcasts"]) {
+    if (Array.isArray(obj[key])) return collectArray(obj[key]);
+  }
+  // Single object payload (common for live)
+  if (obj.id || obj.media_url || obj.status || obj.broadcast_status) {
+    return [obj];
+  }
+  return [];
+}
+
+export function normalizeInstagramStories(raw: unknown): InstagramStoryItem[] {
+  return collectArray(raw).map((item, index) => {
+    const id = String(
+      item.id ?? item.media_id ?? item.story_id ?? `story-${index}`,
+    );
+    const mediaType = asTrimmed(item.media_type ?? item.product_type);
+    const mediaUrl = asTrimmed(item.media_url ?? item.image_url ?? item.url);
+    const thumbnailUrl = asTrimmed(
+      item.thumbnail_url ?? item.media_url ?? item.image_url,
+    );
+    return {
+      id,
+      mediaType,
+      mediaUrl,
+      thumbnailUrl,
+      permalink: asTrimmed(item.permalink ?? item.post_url ?? item.link),
+      timestamp: asTrimmed(item.timestamp ?? item.created_at ?? item.taken_at),
+      caption: asTrimmed(item.caption ?? item.title),
+      raw: item,
+    };
+  });
+}
+
+function statusLooksLive(status: string | null) {
+  if (!status) return false;
+  const s = status.toLowerCase();
+  return (
+    s === "live" ||
+    s === "broadcasting" ||
+    s.includes("live") ||
+    s === "active"
+  );
+}
+
+export function normalizeInstagramLive(raw: unknown): InstagramLiveItem[] {
+  return collectArray(raw).map((item, index) => {
+    const id = String(
+      item.id ?? item.broadcast_id ?? item.live_id ?? `live-${index}`,
+    );
+    const status = asTrimmed(
+      item.status ?? item.broadcast_status ?? item.state ?? item.live_status,
+    );
+    const explicitLive =
+      item.is_live === true ||
+      item.live === true ||
+      item.isLive === true;
+    return {
+      id,
+      title: asTrimmed(item.title ?? item.name ?? item.caption),
+      status,
+      isLive: explicitLive || statusLooksLive(status),
+      permalink: asTrimmed(
+        item.permalink ?? item.post_url ?? item.link ?? item.broadcast_url,
+      ),
+      coverUrl: asTrimmed(
+        item.cover_url ??
+          item.thumbnail_url ??
+          item.preview_url ??
+          item.media_url ??
+          item.image_url,
+      ),
+      startedAt: asTrimmed(
+        item.broadcast_start_time ??
+          item.started_at ??
+          item.start_time ??
+          item.timestamp,
+      ),
+      endedAt: asTrimmed(
+        item.broadcast_end_time ?? item.ended_at ?? item.end_time,
+      ),
+      viewerCount: asNum(
+        item.viewer_count ??
+          item.concurrent_viewers ??
+          item.viewers ??
+          item.live_views,
+      ),
+      raw: item,
+    };
+  });
+}
+
+export function instagramStoryImageUrl(item?: InstagramStoryItem | null) {
+  if (!item) return null;
+  return item.thumbnailUrl || item.mediaUrl || null;
+}

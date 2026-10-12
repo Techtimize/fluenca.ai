@@ -1,9 +1,8 @@
-"use client";
+﻿"use client";
 
-import Link from "next/link";
 import { Plug } from "lucide-react";
+import { BrandButton } from "@/components/ui/brand-button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
-import { FOCUS_RING } from "@/utils/ui-classes";
 
 export function SocialNotConnected({
   platform,
@@ -26,12 +25,9 @@ export function SocialNotConnected({
         Connect {platform} in Integrations to view this profile and its content
         here.
       </p>
-      <Link
-        href={PAGE_ROUTES.INTEGRATIONS}
-        className={`mt-6 inline-flex h-11 items-center rounded-full bg-[#5B57E6] px-5 text-sm font-medium text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
-      >
+      <BrandButton href={PAGE_ROUTES.CONNECTORS} className="mt-6">
         Open Integrations
-      </Link>
+      </BrandButton>
     </div>
   );
 }

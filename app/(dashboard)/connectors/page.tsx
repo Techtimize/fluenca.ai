@@ -28,7 +28,13 @@ import {
   type SocialAccount,
 } from "@/types/bussiness/social-accounts-type";
 
-type PlatformId = "instagram" | "facebook" | "linkedin" | "x";
+type PlatformId =
+  | "instagram"
+  | "facebook"
+  | "linkedin"
+  | "x"
+  | "reddit"
+  | "tiktok";
 
 type PlatformCardConfig = {
   id: PlatformId;
@@ -74,6 +80,22 @@ const PLATFORMS: PlatformCardConfig[] = [
     description:
       "Link your X account to pull post performance and brand mentions into Fluenca.",
     iconSrc: "/assets/x.png",
+    ready: false,
+  },
+  {
+    id: "tiktok",
+    title: "TikTok",
+    description:
+      "Connect TikTok to sync short-form video performance and publishing into Fluenca.",
+    iconSrc: "/assets/tik-tok.png",
+    ready: false,
+  },
+  {
+    id: "reddit",
+    title: "Reddit",
+    description:
+      "Link Reddit to track community conversations and brand mentions in Fluenca.",
+    iconSrc: "/assets/reddit.png",
     ready: false,
   },
 ];
@@ -295,7 +317,7 @@ function IntegrationsPageContent() {
       void refetch();
     }
 
-    router.replace(PAGE_ROUTES.INTEGRATIONS);
+    router.replace(PAGE_ROUTES.CONNECTORS);
   }, [refetch, router, searchParams]);
 
   return (
@@ -316,8 +338,8 @@ function IntegrationsPageContent() {
               Connect your social accounts
             </h1>
             <p className="mt-2 max-w-2xl text-[14px] leading-6 text-neutral-600">
-              Link Instagram, Facebook, and LinkedIn now. X will open for
-              connection soon.
+              Link Instagram, Facebook, and LinkedIn now. X, TikTok, and Reddit
+              are coming soon.
             </p>
           </div>
           {isFetching && !isLoading ? (

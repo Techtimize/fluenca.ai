@@ -23,6 +23,7 @@ import {
   Search,
   Settings2,
   SlidersHorizontal,
+  Target,
   TrendingUp,
   Users,
   Zap,
@@ -59,6 +60,9 @@ const ICONS: Record<string, LucideIcon> = {
   settings: Settings2,
   social: Users,
   users: Users,
+  goals: Target,
+  target: Target,
+  goal: Target,
 };
 
 export function getIcon(name?: string): LucideIcon {

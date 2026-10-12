@@ -16,7 +16,6 @@ import {
   Zap,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { SiteHeader } from "@/components/site-header";
 import { getPlans, type PlanId } from "@/constant/plans";
 
 export const metadata: Metadata = {
@@ -108,8 +107,6 @@ export default async function PlansPage() {
 
   return (
     <>
-      <SiteHeader />
-
       <main className="relative overflow-hidden bg-linear-to-b from-white via-[#FAF8FF] to-[#F1ECFF]">
         {/* Soft purple glows */}
         <div

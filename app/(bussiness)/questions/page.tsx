@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { BrandButton } from "@/components/ui/brand-button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { AnswerQuestionMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { IntakeSection } from "@/types/company-details-type";
@@ -233,21 +234,22 @@ function FieldCard({ field }: { field: CompanyField }) {
               className="w-full resize-none rounded-md border border-[#CFD3F2] p-2 text-xs leading-5 text-neutral-800 outline-none focus:ring-2 focus:ring-[#5B57E6]/30"
             />
             <div className="flex justify-end gap-2">
-              <button
+              <BrandButton
                 type="button"
+                variant="outline"
+                size="xs"
                 onClick={() => setEditing(false)}
-                className="h-7 rounded-full px-3 text-xs text-neutral-600 hover:bg-neutral-100"
               >
                 Cancel
-              </button>
-              <button
+              </BrandButton>
+              <BrandButton
                 type="button"
+                size="xs"
                 onClick={() => save(draft.trim())}
                 disabled={isPending}
-                className="h-7 rounded-full bg-[#5B57E6] px-4 text-xs font-semibold text-white hover:bg-[#4a46d4] disabled:opacity-60"
               >
                 {isPending ? "Saving..." : "Save"}
-              </button>
+              </BrandButton>
             </div>
           </div>
         ) : field.value ? (
@@ -432,13 +434,9 @@ export default function QuestionsPage() {
 
           {!isLoading && (
             <div className="flex justify-end pt-6">
-              <button
-                type="button"
-                onClick={handleComplete}
-                className="h-9 rounded-full bg-[#5B57E6] px-6 text-sm font-semibold text-white hover:bg-[#4a46d4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B57E6]/40"
-              >
+              <BrandButton type="button" onClick={handleComplete}>
                 {t("complete")}
-              </button>
+              </BrandButton>
             </div>
           )}
         </div>

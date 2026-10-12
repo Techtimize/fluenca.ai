@@ -360,7 +360,7 @@ export default function CompetitorAnalysisManualPage() {
             type="button"
             onClick={handleRun}
             disabled={!companyId || isPending || filledFieldCount === 0}
-            className="h-11 gap-2 rounded-full bg-[#5B57E6] px-5 text-white hover:bg-[#4A46D0]"
+            
           >
             {isPending ? (
               <>

@@ -1429,7 +1429,7 @@ export default function ManualCompetitorResults({
               <Button
                 type="button"
                 onClick={onRunAnalysis}
-                className="mt-4 h-10 gap-2 rounded-full bg-[#5B57E6] px-4 text-white hover:bg-[#4A46D0]"
+                className="mt-4"
               >
                 <Sparkles className="size-4" />
                 Run analysis again

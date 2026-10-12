@@ -1,4 +1,13 @@
+"use client";
+
 // components/landing/testimonials-section.tsx
+import { motion, useReducedMotion } from "motion/react";
+
+const ease = [0.22, 1, 0.36, 1] as const;
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease } },
+};
 
 /* ------------------------------ TYPES ------------------------------ */
 
@@ -199,11 +208,10 @@ export default function TestimonialsSection({
   const half = Math.ceil(items.length / 2);
   const topRow = items.slice(0, half);
   const bottomRow = items.slice(half).length ? items.slice(half) : items;
+  const reduceMotion = useReducedMotion();
 
   return (
-    // Rounded top corners. The section overlaps the bottom of the FAQ by exactly the corner
-    // radius area (-mt-10 / -mt-14), so the FAQ's lavender glow shows behind the curve.
-    // That overlap is added back as bottom padding in faq-section.tsx, so the visible gap stays the same.
+    // Rounded top corners. Overlaps the section above so lavender/white sheets stack.
     <section
       id="testimonials"
       className="relative z-10 -mt-10 w-full overflow-hidden rounded-t-[40px] bg-white py-12 font-body md:-mt-14 md:rounded-t-[56px] md:py-20"
@@ -217,11 +225,17 @@ export default function TestimonialsSection({
       `}</style>
 
       {/* Header */}
-      <div className="mx-auto max-w-[1440px] px-6 md:px-[72px]">
+      <motion.div
+        className="mx-auto max-w-[1440px] px-6 md:px-[72px]"
+        initial={reduceMotion ? false : "hidden"}
+        whileInView="show"
+        viewport={{ once: true, amount: 0.35 }}
+        variants={fadeUp}
+      >
         <div className="grid items-start gap-4 md:gap-6 lg:grid-cols-[1fr_520px] lg:gap-10 xl:grid-cols-[auto_1fr]">
           <div>
-            <span className="inline-flex h-[34px] w-[305px] max-w-full items-center justify-center gap-[10px] whitespace-nowrap rounded-[40px] bg-[#F5F7FF] px-5 py-1 text-[14px] font-normal leading-[22px] text-indigo-500 md:text-[16px] md:leading-[26px]">
-              What Businesses Say About Fluenca
+            <span className="inline-flex h-[34px] max-w-full items-center justify-center gap-[10px] whitespace-nowrap rounded-[40px] bg-[#F5F7FF] px-5 py-1 text-[14px] font-normal leading-[22px] text-indigo-500 md:text-[16px] md:leading-[26px]">
+              What businesses say about the office
             </span>
             <h2 className="mt-3 w-[595px] max-w-full font-display text-[28px] leading-[36px] font-medium tracking-normal text-[#1C1C1E] md:text-[36px] md:leading-[44px] lg:text-[50px] lg:leading-[60px] xl:w-auto xl:whitespace-nowrap">
               Real experiences from
@@ -232,12 +246,11 @@ export default function TestimonialsSection({
           </div>
 
           <p className="max-w-full text-[15px] leading-[24px] font-normal tracking-normal text-[#62625F] md:text-[17px] md:leading-[28px] lg:ml-auto lg:mt-6 lg:max-w-[520px]">
-            Fluenca gave us a much clearer picture of our business and where our
-            marketing opportunities are. It saved us hours of research and helped
-            us turn insights into content much faster.
+            Founders get a clearer picture of the business — the same teams you
+            met upstairs research once, then turn insights into content faster.
           </p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Rows */}
       <div className="mt-8 flex flex-col gap-5 md:mt-12">

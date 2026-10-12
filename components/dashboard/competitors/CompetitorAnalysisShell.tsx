@@ -35,7 +35,7 @@ export default function CompetitorAnalysisShell({
     MODE_TABS.find((tab) => pathname?.startsWith(tab.href))?.id ?? "ai";
 
   return (
-    <main className="min-w-0 space-y-4 pb-4">
+    <main className="min-w-0 space-y-3 overflow-x-clip pb-4 sm:space-y-4">
       <TopBar
         user={{ name: companyName || "User" }}
         placeholder="Search competitors..."
@@ -45,7 +45,7 @@ export default function CompetitorAnalysisShell({
         <div
           role="tablist"
           aria-label="Competitor analysis mode"
-          className="inline-flex shrink-0 self-start rounded-full border border-[#E6E8F5] bg-[#F6F7FD] p-1"
+          className="inline-flex w-full max-w-full shrink-0 self-start rounded-full border border-[#E6E8F5] bg-[#F6F7FD] p-1 sm:w-auto"
         >
           {MODE_TABS.map((tab) => {
             const Icon = tab.icon;
@@ -56,7 +56,7 @@ export default function CompetitorAnalysisShell({
                 href={tab.href}
                 role="tab"
                 aria-selected={isActive}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${FOCUS_RING} ${
+                className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors sm:flex-none ${FOCUS_RING} ${
                   isActive
                     ? "bg-white text-[#5B57E6] shadow-[0_1px_3px_rgba(17,24,39,0.08)]"
                     : "text-neutral-500 hover:text-neutral-800"

@@ -48,6 +48,7 @@ export interface PlatformStrategy {
   platforms?: PlatformPlan[];
   linkedin?: PlatformPlan;
   instagram?: PlatformPlan;
+  facebook?: PlatformPlan;
   [key: string]: PlatformPlan | PlatformPlan[] | undefined;
 }
 
@@ -56,6 +57,31 @@ export interface ContentSlide {
   headline?: string;
   body?: string;
   image_prompt?: string;
+}
+
+export interface StoryFrame {
+  text?: string;
+  type?: string;
+  frame?: number;
+  sticker?: string | null;
+}
+
+export interface ReelShot {
+  shot?: number;
+  visual?: string;
+  audio_line?: string;
+  duration_sec?: number;
+}
+
+export interface ProductionPack {
+  do?: string[];
+  dont?: string[];
+  ab_hooks?: string[];
+  tone_guide?: string;
+  primary_hook?: string;
+  story_sequence?: StoryFrame[];
+  carousel_slides?: ContentSlide[];
+  reel_shot_list?: ReelShot[];
 }
 
 export interface ContentIdea {
@@ -87,6 +113,9 @@ export interface ContentIdea {
   cta?: string;
   call_to_action?: string;
   reason?: string;
+  ab_hooks?: string[];
+  brand_voice_note?: string;
+  production_pack?: ProductionPack;
   priority?: string | number;
   priority_score?: number;
   image_prompt?: string;
@@ -124,14 +153,69 @@ export interface ContentCalendar {
   items?: ContentCalendarPhaseItem[];
 }
 
+export interface BrandVoice {
+  do?: string[];
+  dont?: string[];
+  audience?: string[];
+  brand_name?: string;
+  tone_guide?: string | null;
+  positioning?: string | null;
+  content_themes?: string[];
+  differentiators?: string[];
+}
+
+export interface PlannerHandoff {
+  action_count?: number;
+  plan_summary?: string;
+  calendar_items_linked?: number;
+}
+
+export interface TrendSignal {
+  topic?: string;
+  signal?: string;
+  platform?: string;
+  score?: number;
+  reason?: string;
+  [key: string]: unknown;
+}
+
+export interface OpportunityScore {
+  name?: string;
+  topic?: string;
+  score?: number;
+  platform?: string;
+  reason?: string;
+  [key: string]: unknown;
+}
+
+export interface InstagramPerformanceSummary {
+  source?: string | null;
+  summary?: string | null;
+  post_count?: number | null;
+  best_topics?: string[];
+  best_formats?: string[];
+  account_insights?: Record<string, unknown>;
+  average_engagement_rate?: number | null;
+}
+
 export interface ContentRecommendationPayload {
   strategy?: ContentStrategyBlock | ContentStrategyCore;
+  content_strategy?: ContentStrategyBlock | ContentStrategyCore;
   platform_strategy?: PlatformStrategy;
   content_ideas?: ContentIdea[];
   ideas?: ContentIdea[];
   recommendations?: ContentIdea[];
   content_calendar?: ContentCalendar;
+  brand_voice?: BrandVoice | null;
+  planner_handoff?: PlannerHandoff | null;
+  trend_signals?: TrendSignal[];
+  opportunity_scores?: OpportunityScore[] | Record<string, number>;
+  instagram_performance_summary?: InstagramPerformanceSummary | null;
+  goal_mode?: string | null;
+  quick_mode?: boolean;
   summary?: string | null;
+  platforms?: string[];
+  ideas_count?: number;
   success?: boolean;
 }
 
@@ -139,18 +223,31 @@ export interface ContentRecommendationResultResponse {
   success?: boolean;
   message?: string;
   status?: string;
+  content_recommendation_id?: string;
   company_id?: string;
+  company_name?: string;
   prompt_id?: string;
+  version?: number;
   created_at?: string;
   error?: string | null;
   warnings?: string[];
   summary?: string | null;
+  platforms?: string[];
+  ideas_count?: number;
   result?: ContentRecommendationPayload | null;
   recommendation?: ContentRecommendationPayload | null;
+  content_strategy?: ContentStrategyBlock | ContentStrategyCore;
   strategy?: ContentStrategyBlock | ContentStrategyCore;
   platform_strategy?: PlatformStrategy;
   content_ideas?: ContentIdea[];
   ideas?: ContentIdea[];
   recommendations?: ContentIdea[];
   content_calendar?: ContentCalendar;
+  brand_voice?: BrandVoice | null;
+  planner_handoff?: PlannerHandoff | null;
+  trend_signals?: TrendSignal[];
+  opportunity_scores?: OpportunityScore[] | Record<string, number>;
+  instagram_performance_summary?: InstagramPerformanceSummary | null;
+  goal_mode?: string | null;
+  quick_mode?: boolean;
 }

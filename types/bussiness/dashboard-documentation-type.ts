@@ -1,6 +1,3 @@
-// Response of GET /analyzeCompany/dashboard/{company_id}/documentation.
-// Each key matches an `id` in the dashboard's documentation.items.
-
 export interface DocumentationSocials {
   linkedin_url?: string | null;
   instagram_url?: string | null;

@@ -194,24 +194,24 @@ export default function CompanyCard({
   const logoUrl = company.logoUrl || company.logoSrc;
 
   return (
-    <Card className="flex h-full flex-col p-5 sm:p-6">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-2xl text-base font-semibold text-white">
+    <Card className="flex h-full min-w-0 flex-col p-4 sm:p-5 md:p-6">
+      <div className="flex items-start justify-between gap-2 sm:gap-3">
+        <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+          <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-2xl text-sm font-semibold text-white sm:size-11 sm:text-base">
             {logoUrl ? (
               <AssetImage
                 src={logoUrl}
                 alt={company.name}
                 width={44}
                 height={44}
-                className="size-11 object-cover"
+                className="size-10 object-cover sm:size-11"
               />
             ) : (
               initials(company.name)
             )}
           </span>
           <div className="min-w-0">
-            <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-neutral-900">
+            <h2 className="flex min-w-0 items-center gap-2 text-lg font-bold tracking-tight text-neutral-900 sm:text-xl">
               <span className="truncate">{company.name}</span>
               {website?.href ? (
                 <a
@@ -219,14 +219,14 @@ export default function CompanyCard({
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Open website"
-                  className={`rounded text-neutral-400 hover:text-neutral-800 ${FOCUS_RING}`}
+                  className={`shrink-0 rounded text-neutral-400 hover:text-neutral-800 ${FOCUS_RING}`}
                 >
                   <ExternalLink className="size-4" />
                 </a>
               ) : null}
             </h2>
             {company.tagline ? (
-              <p className="text-xs text-neutral-500">{company.tagline}</p>
+              <p className="line-clamp-2 text-xs text-neutral-500">{company.tagline}</p>
             ) : null}
           </div>
         </div>
@@ -265,32 +265,32 @@ export default function CompanyCard({
       ) : null}
 
       {company.links.length > 0 && (
-        <ul className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2">
+        <ul className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6">
           {company.links.map((link) => {
             const Icon = PLATFORM_ICONS[link.id] ?? Globe;
             const assetIcon = PLATFORM_ASSET_ICONS[link.id];
             return (
-              <li key={link.id}>
+              <li key={link.id} className="min-w-0">
                 <a
                   href={link.href}
                   target="_blank"
                   rel="noreferrer"
-                  className={`group flex items-center gap-2.5 rounded-full text-sm text-neutral-800 ${FOCUS_RING}`}
+                  className={`group flex max-w-full items-center gap-2 rounded-full text-sm text-neutral-800 sm:gap-2.5 ${FOCUS_RING}`}
                 >
-                  <span className="grid size-9 place-items-center overflow-hidden rounded-full bg-[#F1F3FB] text-neutral-800 transition-colors group-hover:bg-[#E3E6FF]">
+                  <span className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-[#F1F3FB] text-neutral-800 transition-colors group-hover:bg-[#E3E6FF] sm:size-9">
                     {assetIcon ? (
                       <AssetImage
                         src={assetIcon}
                         alt=""
                         width={18}
                         height={18}
-                        className="size-4.5 object-contain"
+                        className="size-4 object-contain sm:size-4.5"
                       />
                     ) : (
                       <Icon className="size-4" />
                     )}
                   </span>
-                  <span className="group-hover:text-neutral-950">
+                  <span className="truncate group-hover:text-neutral-950">
                     {link.label}
                   </span>
                 </a>
@@ -305,7 +305,7 @@ export default function CompanyCard({
           <h3 className="mb-2.5 text-sm font-semibold text-neutral-900">
             Competitors
           </h3>
-          <ul className="grid gap-2.5 sm:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             {company.competitors.map((competitor, index) => (
               <CompetitorRow
                 key={competitor.id}

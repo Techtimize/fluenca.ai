@@ -1,6 +1,10 @@
 export const PAGE_ROUTES = {
-    HOME: '/',
+    HOME: '/home',
     COMING_SOON: '/coming-soon',
+    AGENTS: '/agents',
+    PLANS: '/plans',
+    BLOG: '/blog',
+    USE_CASES: '/use-cases',
 
     LOGIN: '/login',
     SIGNUP: '/signup',
@@ -17,7 +21,8 @@ export const PAGE_ROUTES = {
     DNA: '/dna',
 
     DASHBOARD: '/dashboard',
-    INTEGRATIONS: '/dashboard/integrations',
+    GOALS: '/goals',
+    CONNECTORS: '/connectors',
     SOCIAL: '/social',
     SOCIAL_INSTAGRAM: '/social/instagram',
     SOCIAL_FACEBOOK: '/social/facebook',

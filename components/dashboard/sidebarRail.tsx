@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, LogOut, Menu, X } from "lucide-react";
 import AssetImage from "@/components/shared/assetImage";
-import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import type { NavItem } from "@/types/dashboard";
 import { getIcon } from "@/utils/icon-utils";
 import { FOCUS_RING } from "@/utils/ui-classes";
@@ -59,10 +58,10 @@ const DEFAULT_NAV: NavItem[] = [
     href: PAGE_ROUTES.SOCIAL,
   },
   {
-    id: "integrations",
-    label: "Integrations",
+    id: "connectors",
+    label: "Connectors",
     icon: "plug",
-    href: PAGE_ROUTES.INTEGRATIONS,
+    href: PAGE_ROUTES.CONNECTORS,
   },
 ];
 
@@ -107,7 +106,7 @@ function writeCollapsed(collapsed: boolean) {
 }
 
 export const DASHBOARD_CONTENT_OFFSET =
-  "px-4 pb-10 pt-16 sm:px-6 md:pt-4 md:ps-[var(--sidebar-content-pad,5.5rem)] lg:pe-8 transition-[padding] duration-200";
+  "max-w-full overflow-x-clip px-3 pb-10 pt-16 sm:px-6 md:pt-4 md:ps-[var(--sidebar-content-pad,5.5rem)] lg:pe-8 transition-[padding] duration-200";
 
 export default function SidebarRail({
   items = DEFAULT_NAV,
@@ -122,8 +121,7 @@ export default function SidebarRail({
     readCollapsed,
     () => true,
   );
-  // The mobile menu remembers the page it was opened on, so it closes on navigation
-  // without an effect.
+
   const [mobileOpenedAt, setMobileOpenedAt] = useState<string | null>(null);
   const mobileOpen = mobileOpenedAt === pathname;
   const setMobileOpen = (open: boolean) =>
