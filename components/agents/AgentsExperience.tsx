@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight, Pause, Play, Sparkles, Zap } from "lucide-react";
+import { Pause, Play, Sparkles, Zap } from "lucide-react";
 import { AGENTS, accentStyles, type AgentStory } from "@/components/agents/agents-data";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { FOCUS_RING } from "@/utils/ui-classes";
@@ -112,13 +112,48 @@ function AgentSimCard({ agent }: { agent: AgentStory }) {
   );
 }
 
-function AgentChapter({
-  agent,
-  index,
-}: {
-  agent: AgentStory;
-  index: number;
-}) {
+function AgentVideo({ agent }: { agent: AgentStory }) {
+  const styles = accentStyles[agent.accent];
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const reduceMotion = useReducedMotion();
+
+  // Play only while visible, pause when scrolled away
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || reduceMotion) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) el.play().catch(() => {});
+        else el.pause();
+      },
+      { threshold: 0.35 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [reduceMotion, agent.video?.src]);
+
+  // Fallback for agents without a video yet
+  if (!agent.video) return <AgentSimCard agent={agent} />;
+
+  return (
+    <div
+      className={`relative overflow-hidden rounded-2xl border-2 bg-black shadow-[0_20px_50px_-28px_rgba(79,70,229,0.45)] ${styles.ring}`}
+    >
+      <video
+        ref={videoRef}
+        src={agent.video.src}
+        poster={agent.video.poster}
+        className="aspect-video w-full object-cover"
+        muted
+        loop
+        playsInline
+        preload="metadata"
+      />
+    </div>
+  );
+}
+
+function AgentChapter({ agent }: { agent: AgentStory }) {
   const styles = accentStyles[agent.accent];
   const reduceMotion = useReducedMotion();
 
@@ -131,62 +166,46 @@ function AgentChapter({
       viewport={{ once: true, amount: 0.2 }}
       variants={fadeUp}
     >
-      <div
-        className={`grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-12 ${
-          index % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""
-        }`}
-      >
-        <div className="lg:col-span-5">
-          <AgentSimCard agent={agent} />
-        </div>
+      <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-12">
+        {/* LEFT: content */}
+        <div className="space-y-4 lg:col-span-6">
+          <span
+            className={`inline-block rounded-full border px-3 py-1 text-[11px] font-semibold tracking-wide ${styles.chip}`}
+          >
+            {agent.chapter}
+          </span>
 
-        <div className="space-y-4 lg:col-span-7">
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={`rounded-full border px-3 py-1 text-xs font-semibold ${styles.chip}`}
-            >
-              {agent.badge}
-            </span>
-            <span className="font-mono text-[11px] text-neutral-400">
-              {agent.entry}
-            </span>
-          </div>
-
-          <h3 className="text-[26px] font-semibold tracking-tight text-[#1C1C1E] sm:text-[32px]">
-            {agent.name}:{" "}
+          <h3 className="text-[26px] font-semibold leading-tight tracking-tight text-[#1C1C1E] sm:text-[32px]">
+            {agent.label} —{" "}
             <span className="bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] bg-clip-text text-transparent">
               {agent.title}
             </span>
           </h3>
 
+          <p className={`text-[17px] font-semibold leading-7 ${styles.text}`}>
+            {agent.headline}
+          </p>
+
           <p className="max-w-2xl text-[15px] leading-7 text-[#62625F] sm:text-[16px]">
             {agent.summary}
           </p>
 
-          <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">
-            {agent.features.map((feature) => (
-              <div
-                key={feature.title}
-                className="rounded-2xl border border-[#E6E8F5] bg-[#F7F8FF]/80 p-3.5"
-              >
-                <p className={`text-xs font-semibold ${styles.text}`}>
-                  {feature.title}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-neutral-500">
-                  {feature.body}
-                </p>
-              </div>
-            ))}
+          <div className="rounded-2xl border border-[#E6E8F5] bg-[#F7F8FF]/80 p-4">
+            <p className="text-sm text-[#1C1C1E]">
+              <span className={`font-semibold ${styles.text}`}>His mission:</span>{" "}
+              {agent.mission}
+            </p>
           </div>
 
-          <div className="flex flex-wrap gap-x-4 gap-y-2 rounded-2xl border border-[#E6E8F5] bg-white px-3.5 py-3 font-mono text-[11px] text-neutral-600">
-            {agent.meta.map((item) => (
-              <div key={item.label}>
-                <span className="text-neutral-400">{item.label}:</span>{" "}
-                {item.value}
-              </div>
-            ))}
-          </div>
+          <p className="text-sm text-neutral-500">
+            Under the leadership of{" "}
+            <span className="font-semibold text-[#1C1C1E]">{agent.leader}</span>
+          </p>
+        </div>
+
+        {/* RIGHT: video (or animated sim card if no video yet) */}
+        <div className="lg:col-span-6">
+          <AgentVideo agent={agent} />
         </div>
       </div>
     </motion.section>
@@ -242,6 +261,7 @@ export function AgentsExperience() {
       tweenRef.current.forEach((t) => t.kill());
       tweenRef.current = [];
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fast, reduceMotion]);
 
   useEffect(() => {
@@ -286,9 +306,6 @@ export function AgentsExperience() {
             </a>
             <a href="#agents-showcase" className="hover:text-[#5452F6]">
               Agent stories
-            </a>
-            <a href="#pipeline-specs" className="hover:text-[#5452F6]">
-              Architecture
             </a>
           </nav>
 
@@ -349,9 +366,10 @@ export function AgentsExperience() {
             transition={{ duration: 0.7, delay: 0.12 }}
             className="mx-auto mt-4 max-w-2xl text-[15px] leading-7 text-[#62625F] sm:text-[17px]"
           >
-            Four specialized Fluenca agents stay in sync — intake, DNA, SEO, and
-            media. Watch the orbit, then open each story to see how the system
-            turns research into publish-ready content.
+            Specialized Fluenca agents stay in sync, from intake and brand DNA to
+            competitor research, content, and scripts. Watch the orbit, then
+            open each story to see how the system turns research into
+            publish-ready content.
           </motion.p>
 
           <div className="relative mx-auto mt-12 flex items-center justify-center sm:mt-14">
@@ -361,10 +379,13 @@ export function AgentsExperience() {
               <div className="absolute inset-16 rounded-full border border-dotted border-[#C7CBFF]/70 sm:inset-20" />
 
               <div className="absolute inset-0 m-auto flex size-32 flex-col items-center justify-center rounded-full border border-[#D9DCF7] bg-white text-center shadow-[0_20px_50px_-24px_rgba(79,70,229,0.55)] sm:size-36">
-                  <Image
-                   src="/assets/logo.svg" 
-                   alt="Fluenca" width={80} height={80} className="size-20" />
-              
+                <Image
+                  src="/assets/Logo.svg"
+                  alt="Fluenca"
+                  width={80}
+                  height={80}
+                  className="size-20"
+                />
               </div>
 
               <div ref={orbitRef} className="absolute inset-0">
@@ -452,72 +473,9 @@ export function AgentsExperience() {
           </p>
         </motion.div>
 
-        {AGENTS.map((agent, index) => (
-          <AgentChapter key={agent.id} agent={agent} index={index} />
+        {AGENTS.map((agent) => (
+          <AgentChapter key={agent.id} agent={agent} />
         ))}
-
-        <motion.section
-          id="pipeline-specs"
-          className="overflow-hidden rounded-[28px] border border-[#E6E8F5] bg-linear-to-br from-white via-[#F5F6FF] to-[#EEEDFF] p-6 sm:p-8"
-          initial={reduceMotion ? false : "hidden"}
-          whileInView="show"
-          viewport={{ once: true, amount: 0.25 }}
-          variants={fadeUp}
-        >
-          <div className="mx-auto mb-8 max-w-3xl text-center">
-            <h3 className="text-[24px] font-semibold tracking-tight text-[#1C1C1E] sm:text-[28px]">
-              Full system topology
-            </h3>
-            <p className="mt-2 text-sm text-[#62625F]">
-              Two synchronized families coordinating across workers and API
-              routes.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border border-[#E6E8F5] bg-white/90 p-5 shadow-sm">
-              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-[#5452F6]">
-                <span className="size-2 rounded-full bg-[#5452F6]" />
-                Core platform agents
-              </div>
-              <p className="mb-3 text-xs leading-5 text-neutral-500">
-                Intake → DNA → Topical Map → Keywords → Blog → Social → Planner,
-                plus the in-app Fluenca chatbot.
-              </p>
-              <ul className="space-y-1.5 font-mono text-[11px] text-neutral-600">
-                <li>• Request LlmTier.STRONG or LlmTier.FAST — never hardcode model names</li>
-                <li>• Managed by Celery/worker jobs in services/*</li>
-                <li>• Enforces monthly AI budget caps & fuzzy quote judges</li>
-              </ul>
-            </div>
-
-            <div className="rounded-2xl border border-[#E6E8F5] bg-white/90 p-5 shadow-sm">
-              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-violet-600">
-                <span className="size-2 rounded-full bg-violet-500" />
-                Intelligence & media agents
-              </div>
-              <p className="mb-3 text-xs leading-5 text-neutral-500">
-                Analyze Company, Competitor, Content Recommendation, Niche
-                Trends, Script Generation, Image & Video.
-              </p>
-              <ul className="space-y-1.5 font-mono text-[11px] text-neutral-600">
-                <li>• LangGraph async pipelines via FastAPI routes</li>
-                <li>• Default model with automated fallbacks</li>
-                <li>• Real Instagram & LinkedIn analytics connectors</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-6 flex justify-center">
-            <Link
-              href={PAGE_ROUTES.SIGNUP}
-              className={`inline-flex h-11 items-center gap-2 rounded-full bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] px-5 text-sm font-semibold text-white shadow-[0_14px_30px_-14px_rgba(79,70,229,0.85)] ${FOCUS_RING}`}
-            >
-              Start with Fluenca
-              <ArrowUpRight className="size-4" />
-            </Link>
-          </div>
-        </motion.section>
       </main>
 
       <footer className="relative z-10 border-t border-[#E6E8F5] bg-white/70 py-8 text-center text-xs text-neutral-500 backdrop-blur">
@@ -526,9 +484,6 @@ export function AgentsExperience() {
           <div className="flex items-center gap-4">
             <a href="#mascot-orbit" className="hover:text-[#5452F6]">
               Back to orbit
-            </a>
-            <a href="#pipeline-specs" className="hover:text-[#5452F6]">
-              Technical spec
             </a>
           </div>
         </div>

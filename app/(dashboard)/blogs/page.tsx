@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Loader2, PenLine, RotateCcw } from "lucide-react";
 import { BlogStatusChip } from "@/components/dashboard/blogs/blogStatusChip";
+import { BlogCards } from "@/components/dashboard/blogs/BlogCards";
 import TopBar from "@/components/dashboard/topBar";
 import ApiNotFoundCard from "@/components/notfound";
 import Card from "@/components/shared/card";
@@ -63,6 +64,8 @@ export default function BlogsPage() {
           Each blog brief from your keyword research becomes a full post with a hero image and links to your other posts.
         </p>
       </div>
+
+      <BlogCards />
 
       {loading ? (
         <Card className="flex items-center justify-center gap-3 p-8 text-neutral-500">
