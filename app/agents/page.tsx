@@ -4,7 +4,11 @@ import Image from "next/image";
 import gsap from "gsap";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, Pause, Play, Sparkles, Zap } from "lucide-react";
-import { AGENTS, accentStyles, type AgentStory } from "@/components/agents/agents-data";
+import {
+  AGENTS,
+  accentStyles,
+  type AgentStory,
+} from "@/components/agents/agents-data";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import AgentChapter from "@/components/agents/agentchapter";
 
@@ -93,9 +97,12 @@ export default function AgentsPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.9),transparent_55%)]" />
       </div>
 
-      <section id="mascot-orbit" className="relative z-10 px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-8">
+      <section
+        id="mascot-orbit"
+        className="relative z-10 px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-8"
+      >
         <div className="mx-auto max-w-7xl text-center">
-          <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
+          {/* <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
             <button
               type="button"
               onClick={() => setPaused((value) => !value)}
@@ -112,7 +119,7 @@ export default function AgentsPage() {
               <Zap className="size-3.5 text-[#5452F6]" />
               {fast ? "Fast" : "Normal"}
             </button>
-          </div>
+          </div> */}
           <motion.div
             initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -151,9 +158,13 @@ export default function AgentsPage() {
               <div className="absolute inset-16 rounded-full border border-dotted border-[#C7CBFF]/70 sm:inset-20" />
 
               <div className="absolute inset-0 m-auto flex size-32 flex-col items-center justify-center rounded-full border border-[#D9DCF7] bg-white text-center shadow-[0_20px_50px_-24px_rgba(79,70,229,0.55)] sm:size-36">
-                  <Image
-                   src="/assets/logo.svg" 
-                   alt="Fluenca" width={80} height={80} className="size-20" />
+                <Image
+                  src="/assets/logo.svg"
+                  alt="Fluenca"
+                  width={80}
+                  height={80}
+                  className="size-20"
+                />
               </div>
               <div ref={orbitRef} className="absolute inset-0">
                 {AGENTS.map((agent, index) => (
@@ -184,7 +195,6 @@ export default function AgentsPage() {
                         {agent.role}
                       </span>
                     </button>
-                    
                   </div>
                 ))}
               </div>
@@ -237,8 +247,8 @@ export default function AgentsPage() {
             </h2>
           </div>
           <p className="max-w-md text-sm leading-6 text-[#62625F]">
-            Each agent pairs a live working loop with its operational blueprint —
-            the same flow Fluenca runs for every company.
+            Each agent pairs a live working loop with its operational blueprint
+            — the same flow Fluenca runs for every company.
           </p>
         </motion.div>
 
@@ -249,5 +259,3 @@ export default function AgentsPage() {
     </div>
   );
 }
-
-
