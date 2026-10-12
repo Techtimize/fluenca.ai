@@ -44,10 +44,10 @@ export default function AgentChapter({
               <span
                 className={`rounded-full border px-3 py-1 text-xs font-semibold ${styles.chip}`}
               >
-                {agent.badge}
+                {agent.label}
               </span>
               <span className="font-mono text-[11px] text-neutral-400">
-                {agent.entry}
+                {agent.chapter}
               </span>
             </div>
   
@@ -63,7 +63,10 @@ export default function AgentChapter({
             </p>
   
             <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">
-              {agent.features.map((feature) => (
+              {[
+                { title: "Headline", body: agent.headline },
+                { title: "Mission", body: agent.mission },
+              ].map((feature) => (
                 <div
                   key={feature.title}
                   className="rounded-2xl border border-[#E6E8F5] bg-[#F7F8FF]/80 p-3.5"
@@ -79,7 +82,11 @@ export default function AgentChapter({
             </div>
   
             <div className="flex flex-wrap gap-x-4 gap-y-2 rounded-2xl border border-[#E6E8F5] bg-white px-3.5 py-3 font-mono text-[11px] text-neutral-600">
-              {agent.meta.map((item) => (
+              {[
+                { label: "Role", value: agent.role },
+                { label: "Lead", value: agent.leader },
+                { label: "Status", value: agent.statusLabel },
+              ].map((item) => (
                 <div key={item.label}>
                   <span className="text-neutral-400">{item.label}:</span>{" "}
                   {item.value}
