@@ -23,7 +23,7 @@ const faqs = [
   {
     question: "How does Fluenca understand my business?",
     answer:
-      "Rayyan’s Intake team crawls your site; Ilsa maps rivals; Masrur locks DNA from answers you confirm. SEO, media, and analytics then work from that shared truth.",
+      "hassnain’s Intake team crawls your site; Ilsa maps rivals; Raheel locks DNA from answers you confirm. SEO, media, and analytics then work from that shared truth.",
   },
   {
     question: "Can I review the information Fluenca collects?",

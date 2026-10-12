@@ -24,7 +24,7 @@ export interface AgentStory {
 export const AGENTS: AgentStory[] = [
   {
     id: "agent-1",
-    name: "Masrur",
+    name: "Raheel",
     role: "DNA & Strategy",
     badge: "Agent #02 · DNA Agent",
     entry: "agents/dna/dna_generator.py",
@@ -32,7 +32,7 @@ export const AGENTS: AgentStory[] = [
     image: "/assets/Avatars/raheel-mascot.png",
     title: "Guardian of Identity & Strategic Company DNA",
     summary:
-      "Masrur listens to confirmed intake findings and distills them into the immutable Company DNA — the single source of truth used by topical maps, keyword engines, content writers, and chatbots.",
+      "Raheel listens to confirmed intake findings and distills them into the immutable Company DNA — the single source of truth used by topical maps, keyword engines, content writers, and chatbots.",
     clipLabel: "CLIP: #DNA_SYNTHESIS_01",
     statusLabel: "Active Run #490",
     features: [
@@ -59,7 +59,7 @@ export const AGENTS: AgentStory[] = [
   },
   {
     id: "agent-2",
-    name: "Rayyan",
+    name: "hassnain",
     role: "Intake & Crawl",
     badge: "Agent #01 · Intake Agent",
     entry: "agents/intake/intake_agent.py",
@@ -67,7 +67,7 @@ export const AGENTS: AgentStory[] = [
     image: "/assets/Avatars/Hasnain-mascot.jpeg",
     title: "The Curious Web Scout & Evidence Inquisitor",
     summary:
-      "Rayyan is first contact for every new company. He reads up to eight corporate pages and drafts up to twenty perceptive questions with verified quotes and source links — so founders never start from a blank form.",
+      "hassnain is first contact for every new company. He reads up to eight corporate pages and drafts up to twenty perceptive questions with verified quotes and source links — so founders never start from a blank form.",
     clipLabel: "CLIP: #INTAKE_CRAWL_99",
     statusLabel: "Budget Enforced: $0.40/run",
     features: [
