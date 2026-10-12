@@ -3,7 +3,6 @@
 import type { ReactElement } from "react";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
-/** @deprecated Prefer shared LanguageSwitcher — kept for coming-soon imports. */
 export function ComingSoonLanguageSwitcher(): ReactElement {
   return (
     <>
