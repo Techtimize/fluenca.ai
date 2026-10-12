@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useSyncExternalStore } from "react";
 import { ChevronDown } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
@@ -23,27 +24,40 @@ export interface SiteHeaderProps {
 }
 
 const DEFAULT_NAV: readonly SiteNavigationItem[] = [
-  { label: "Agents", href: "/agents", hasMenu: true },
-  { label: "Blog", href: "/blog" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Use case", href: "/use-cases" },
+  { label: "Home", href: PAGE_ROUTES.HOME },
+  { label: "Agents", href: PAGE_ROUTES.AGENTS },
+  { label: "Blog", href: PAGE_ROUTES.BLOG },
+  { label: "Plans", href: PAGE_ROUTES.PLANS },
+  { label: "Use case", href: PAGE_ROUTES.USE_CASES },
 ];
+
+// Pages that share the persistent site header (rendered once from the root layout)
+export const SITE_HEADER_ROUTES: readonly string[] = DEFAULT_NAV.map(
+  ({ href }) => href ?? "",
+).filter(Boolean);
+
+const subscribeNoop = () => () => {};
+
+// false during SSR/hydration, true on the client — avoids setState in an effect
+function useHydrated() {
+  return useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  );
+}
 
 export function SiteHeader({
   navigationItems = DEFAULT_NAV,
   signupHref = PAGE_ROUTES.SIGNUP,
   signupLabel = "Sign up",
 }: SiteHeaderProps) {
+  const pathname = usePathname();
   const accessToken = useAuthStore((s) => s.access_token);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHydrated();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const loggedIn =
-    mounted && (isAuthenticated || Boolean(accessToken?.trim()));
+  const loggedIn = mounted && (isAuthenticated || Boolean(accessToken?.trim()));
 
   const handleLogout = () => {
     clearAuthTokenProvider();
@@ -79,19 +93,27 @@ export function SiteHeader({
           className="min-w-0 flex-1 overflow-x-auto"
         >
           <ul className="mx-auto flex w-max max-w-full items-center justify-center gap-0.5 sm:gap-1">
-            {navigationItems.map(({ label, href, hasMenu }) => (
-              <li key={label}>
-                <Link
-                  href={href ?? "#"}
-                  className="flex h-10 items-center gap-1 whitespace-nowrap rounded-full px-3 font-body text-sm font-medium text-ink transition-colors hover:bg-black/5 sm:h-11 sm:px-4 lg:px-5"
-                >
-                  {label}
-                  {hasMenu && (
-                    <ChevronDown aria-hidden="true" className="size-3.5" />
-                  )}
-                </Link>
-              </li>
-            ))}
+            {navigationItems.map(({ label, href, hasMenu }) => {
+              const isActive = href === pathname;
+              return (
+                <li key={label}>
+                  <Link
+                    href={href ?? "#"}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`flex h-10 items-center gap-1 whitespace-nowrap rounded-full px-3 font-body text-sm font-medium transition-colors sm:h-11 sm:px-4 lg:px-5 ${
+                      isActive
+                        ? "bg-[#5452F6]/10 text-[#5452F6]"
+                        : "text-ink hover:bg-black/5"
+                    }`}
+                  >
+                    {label}
+                    {hasMenu && (
+                      <ChevronDown aria-hidden="true" className="size-3.5" />
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
