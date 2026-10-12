@@ -328,7 +328,7 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
           </span>
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-neutral-400">
-              Todayâ€™s items
+              Today's items
             </p>
             <p className="text-xl font-semibold text-neutral-900">{items.length}</p>
           </div>
@@ -446,7 +446,7 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
           <Card className="space-y-3 p-5">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-[15px] font-semibold text-neutral-900">
-                Todayâ€™s queue
+                Today's queue
               </h2>
               <span className="text-[11px] text-neutral-400">{today}</span>
             </div>
