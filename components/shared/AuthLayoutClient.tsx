@@ -16,6 +16,7 @@ const CARD_PAGES = [
   "verify-email",
   "change-password",
   "password-updated",
+  "callback",
 ];
 
 export default function AuthLayoutClient({ children }: { children: ReactNode }) {

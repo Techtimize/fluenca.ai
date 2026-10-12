@@ -8,6 +8,7 @@ export const PAGE_ROUTES = {
 
     LOGIN: '/login',
     SIGNUP: '/signup',
+    GOOGLE_CALLBACK: '/auth/google/callback',
     FORGOT_PASSWORD: '/forgot-password',
     CHANGE_PASSWORD: '/change-password',
     VERIFY_EMAIL: '/verify-email',

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
+import GoogleSignInButton from '@/components/shared/GoogleSignInButton';
 import { SignupMutation } from '@/routes/auth/Auth-Mutation';
 import { PAGE_ROUTES } from '@/constant/page-routes';
 
@@ -196,6 +197,8 @@ export default function SignUpPage() {
               <span className="px-3 text-xs uppercase text-gray-400">{tCommon('or')}</span>
               <div className="flex-1 border-t border-gray-200" />
             </div>
+
+            <GoogleSignInButton />
 
             <p className="pt-1 text-center text-sm text-gray-500">
               {t('signup.haveAccount')}{' '}
