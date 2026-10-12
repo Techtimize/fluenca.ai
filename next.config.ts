@@ -3,6 +3,9 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  async redirects() {
+    return [{ source: "/dashboard/integrations", destination: "/connectors", permanent: false }];
+  },
   images: {
     remotePatterns: [
       {
