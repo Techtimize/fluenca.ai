@@ -55,6 +55,8 @@ import type {
   InstagramPublishResponse,
   LinkedInPublishRequest,
   LinkedInPublishResponse,
+  XPublishRequest,
+  XPublishResponse,
   SocialAccountsResponse,
 } from "@/types/bussiness/social-accounts-type";
 import type {
@@ -515,6 +517,17 @@ export const LinkedInPublishApi = async (
   data: LinkedInPublishRequest,
 ): Promise<LinkedInPublishResponse> => {
   const response = await api.post(BUSSINESSENDPOINT.PUBLISH.LINKEDIN_PUBLISH, data);
+  return response.data;
+}
+
+export const XLoginApi = async (): Promise<InstagramAuthorizeResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.CONNECTORS.X_LOGIN);
+  return response.data;
+}
+
+/** X post — text and/or image_url. 404 = X not connected, 502 = readable upstream error. */
+export const XPublishApi = async (data: XPublishRequest): Promise<XPublishResponse> => {
+  const response = await api.post(BUSSINESSENDPOINT.PUBLISH.X_PUBLISH, data);
   return response.data;
 }
 

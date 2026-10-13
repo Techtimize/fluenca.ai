@@ -226,8 +226,7 @@ export const ChatHistoryQuery = (conversationId: string | null, enabled = true) 
     enabled: enabled && conversationId !== null,
     refetchInterval: (query) => {
       const messages = query.state.data?.messages ?? [];
-      const last = messages[messages.length - 1];
-      return last?.status === "running" ? 3000 : false;
+      return messages.some((m) => m.status === "running") ? 3000 : false;
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
