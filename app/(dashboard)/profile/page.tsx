@@ -268,9 +268,27 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
               />
             </div>
             <div className="min-w-0">
-              <h1 className="truncate text-xl font-semibold tracking-tight sm:text-2xl">
-                {displayName}
-              </h1>
+              <div className="flex min-w-0 items-center gap-3">
+                <h1 className="truncate text-xl font-semibold tracking-tight sm:text-2xl">
+                  {displayName}
+                </h1>
+                {company.website ? (
+                  <a
+                    href={company.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex w-fit shrink-0 items-center gap-1.5 text-sm text-sky-300 hover:text-sky-200 hover:underline"
+                  >
+                    {company.website
+                      .replace(/^https?:\/\//, "")
+                      .replace(/\/$/, "")}
+                    <ExternalLink
+                      className="size-3.5 shrink-0"
+                      aria-hidden="true"
+                    />
+                  </a>
+                ) : null}
+              </div>
               <p className="mt-0.5 text-sm text-white/80">
                 {user.role ? `${user.role} at ` : null}
                 <span className="font-medium text-white">{companyName}</span>
@@ -378,7 +396,7 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
               title="Company"
               subtitle="The business you're growing"
             />
-            <div className="mb-3 flex items-center gap-3 rounded-2xl border border-[#E6E8F5] bg-[#FAFBFF] p-3">
+            {/* <div className="mb-3 flex items-center gap-3 rounded-2xl border border-[#E6E8F5] bg-[#FAFBFF] p-3">
               {company.logo_url ? (
                 <AssetImage
                   src={company.logo_url}
@@ -391,8 +409,8 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                 <span className="grid size-12 place-items-center rounded-full bg-[#EEF0FF] text-lg font-semibold text-[#5452F6]">
                   {companyName.charAt(0).toUpperCase()}
                 </span>
-              )}
-              <div className="min-w-0 flex-1">
+              )} */}
+            {/* <div className="min-w-0 flex-1">
                 <p className="text-[15px] font-semibold text-neutral-900">
                   {companyName}
                 </p>
@@ -412,8 +430,8 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                     />
                   </a>
                 ) : null}
-              </div>
-              {company.website ? (
+              </div> */}
+            {/* {company.website ? (
                 <a
                   href={company.website}
                   target="_blank"
@@ -424,7 +442,7 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                   <ChevronRight className="size-4" aria-hidden="true" />
                 </a>
               ) : null}
-            </div>
+            </div> */}
             <dl className="grid gap-3 sm:grid-cols-2">
               {editing ? (
                 <>
@@ -486,13 +504,13 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
               subtitle="Your account details"
             />
             <dl className="grid gap-3 sm:grid-cols-2">
-              <Field
+              {/* <Field
                 icon={<User />}
                 label="Full Name"
                 value={user.full_name}
                 input={userInput("full_name")}
               />
-              <Field icon={<ShieldCheck />} label="Role" value={user.role} />
+              <Field icon={<ShieldCheck />} label="Role" value={user.role} /> */}
               <Field icon={<Mail />} label="Email" value={user.email} />
               <Field
                 icon={<Phone />}
@@ -585,7 +603,7 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
             </section>
           ) : null}
 
-          <Card className="p-5">
+          {/* <Card className="p-5">
             <SectionHeader
               icon={<Link2 />}
               title="Connected Accounts"
@@ -650,7 +668,7 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                 );
               })}
             </ul>
-          </Card>
+          </Card> */}
         </div>
       </div>
     </form>
