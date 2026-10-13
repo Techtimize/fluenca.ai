@@ -8,6 +8,7 @@ import Card from "@/components/shared/card";
 import { Button } from "@/components/ui/button";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import api from "@/routes/apiClient";
+import { OnboardingDetailsQuery } from "@/routes/bussiness/Bussiness-Query";
 
 type Strategy = "mobile" | "desktop";
 
@@ -50,7 +51,9 @@ function fieldValue(id: string, percentile: number) {
 
 export default function PageSpeedCard() {
   const [strategy, setStrategy] = useState<Strategy>("mobile");
-  const [url, setUrl] = useState("");
+  const { data: company } = OnboardingDetailsQuery();
+  const [typedUrl, setTypedUrl] = useState<string | null>(null);
+  const url = typedUrl ?? company?.website_url ?? "";
   const check = useMutation({
     mutationFn: checkPageSpeed,
     onError: (error) => toast.error(getApiErrorMessage(error, "Could not check the website speed")),
@@ -67,8 +70,8 @@ export default function PageSpeedCard() {
         <div className="min-w-0">
           <h2 className="text-[16px] font-semibold text-neutral-900">Website speed</h2>
           <p className="mt-1 text-[13px] leading-5 text-neutral-500">
-            Google PageSpeed Insights: how fast your website loads and what to fix. Leave the address empty to check your
-            company website.
+            Google PageSpeed Insights: how fast your website loads and what to fix. Your company website is filled in;
+            change it to check another page.
           </p>
         </div>
       </div>
@@ -83,8 +86,8 @@ export default function PageSpeedCard() {
         <input
           type="text"
           value={url}
-          onChange={(event) => setUrl(event.target.value)}
-          placeholder="Your website (default) or https://yoursite.com/page"
+          onChange={(event) => setTypedUrl(event.target.value)}
+          placeholder="https://yoursite.com or a page on it"
           aria-label="Page address to check"
           className="h-10 min-w-0 flex-1 rounded-xl border border-[#E6E8F5] bg-white px-3 text-[14px]"
         />
