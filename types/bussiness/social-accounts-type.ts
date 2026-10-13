@@ -49,6 +49,22 @@ export type LinkedInPublishRequest =
 
 export type LinkedInPublishResponse = InstagramPublishResponse;
 
+/** X post: at least one of text / image_url. text max 280 chars; image_url public https, <= 5 MB. */
+export const X_MAX_TEXT_LENGTH = 280;
+
+export interface XPublishRequest {
+  text?: string;
+  image_url?: string;
+}
+
+export interface XPublishResponse {
+  platform: string;
+  user_id: string;
+  username: string;
+  post_id: string;
+  post_url: string;
+}
+
 export interface SocialAccount {
   id?: string;
   platform?: SocialPlatform;
@@ -111,6 +127,11 @@ export function findSocialAccount(
   platform: SocialPlatform,
 ) {
   const target = String(platform).toLowerCase();
+  const platformOf = (account: SocialAccount) =>
+    String(account.platform || account.provider || "").toLowerCase();
+  // Exact match first: a substring match on a short id like "x" is unreliable
+  const exact = accounts.find((account) => platformOf(account) === target);
+  if (exact || target.length < 3) return exact ?? null;
   return (
     accounts.find((account) => {
       const value = String(account.platform || account.provider || "").toLowerCase();

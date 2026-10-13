@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense, useEffect, useRef, type ComponentType } from "react";
+import { Fragment, Suspense, useEffect, useRef, type ComponentType } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Clock3, ExternalLink, Loader2, Plug, Unplug } from "lucide-react";
 import { toast } from "sonner";
 import GoogleAnalyticsCard from "@/components/dashboard/integrations/googleAnalyticsCard";
+import XComposer from "@/components/dashboard/social/XComposer";
 import TopBar from "@/components/dashboard/topBar";
 import { FacebookIcon } from "@/components/shared/brandIcons";
 import Card from "@/components/shared/card";
@@ -18,6 +19,7 @@ import {
   InstagramConnectMutation,
   LinkedInConnectMutation,
   SocialAccountDisconnectMutation,
+  XConnectMutation,
 } from "@/routes/bussiness/Bussiness-Mutation";
 import { SocialAccountsQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
@@ -78,9 +80,9 @@ const PLATFORMS: PlatformCardConfig[] = [
     id: "x",
     title: "X",
     description:
-      "Link your X account to pull post performance and brand mentions into Fluenca.",
+      "Sign in with X to link your account so Fluenca can post for you.",
     iconSrc: "/assets/x.png",
-    ready: false,
+    ready: true,
   },
   {
     id: "tiktok",
@@ -286,6 +288,7 @@ function IntegrationsPageContent() {
     FacebookConnectMutation();
   const { mutate: connectLinkedIn, isPending: isConnectingLinkedIn } =
     LinkedInConnectMutation();
+  const { mutate: connectX, isPending: isConnectingX } = XConnectMutation();
   const { mutate: disconnectAccount, isPending: isDisconnecting } =
     SocialAccountDisconnectMutation();
 
@@ -296,7 +299,9 @@ function IntegrationsPageContent() {
     instagram: { connect: connectInstagram, isPending: isConnectingInstagram },
     facebook: { connect: connectFacebook, isPending: isConnectingFacebook },
     linkedin: { connect: connectLinkedIn, isPending: isConnectingLinkedIn },
+    x: { connect: connectX, isPending: isConnectingX },
   };
+  const xConnected = isSocialAccountConnected(findSocialAccount(accounts, "x"));
 
   useEffect(() => {
     if (handledReturn.current) return;
@@ -338,7 +343,7 @@ function IntegrationsPageContent() {
               Connect your social accounts
             </h1>
             <p className="mt-2 max-w-2xl text-[14px] leading-6 text-neutral-600">
-              Link Instagram, Facebook, and LinkedIn now. X, TikTok, and Reddit
+              Link Instagram, Facebook, LinkedIn, and X now. TikTok and Reddit
               are coming soon.
             </p>
           </div>
@@ -364,26 +369,30 @@ function IntegrationsPageContent() {
           const connector = connectors[platform.id];
 
           return (
-            <PlatformCard
-              key={platform.id}
-              platform={platform}
-              account={
-                connector ? findSocialAccount(accounts, platform.id) : null
-              }
-              isLoading={platform.ready ? isLoading : false}
-              isConnecting={connector?.isPending ?? false}
-              isDisconnecting={connector ? isDisconnecting : false}
-              onConnect={() => {
-                if (connector) {
-                  connector.connect();
-                  return;
+            <Fragment key={platform.id}>
+              <PlatformCard
+                platform={platform}
+                account={
+                  connector ? findSocialAccount(accounts, platform.id) : null
                 }
-                toast.message(`${platform.title} connection is coming soon`);
-              }}
-              onDisconnect={
-                connector ? () => disconnectAccount(platform.id) : undefined
-              }
-            />
+                isLoading={platform.ready ? isLoading : false}
+                isConnecting={connector?.isPending ?? false}
+                isDisconnecting={connector ? isDisconnecting : false}
+                onConnect={() => {
+                  if (connector) {
+                    connector.connect();
+                    return;
+                  }
+                  toast.message(`${platform.title} connection is coming soon`);
+                }}
+                onDisconnect={
+                  connector ? () => disconnectAccount(platform.id) : undefined
+                }
+              />
+              {platform.id === "x" && xConnected ? (
+                <XComposer onConnect={() => connectX()} />
+              ) : null}
+            </Fragment>
           );
         })}
         <GoogleAnalyticsCard />
