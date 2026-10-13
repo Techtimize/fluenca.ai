@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import ChatInput from "@/components/dashboard/chat/chatInput";
+import { DEFAULT_NAV } from "@/components/dashboard/sidebarRail";
 import ChatPanel from "@/components/dashboard/chat/chatPanel";
 import { useChatbot } from "@/lib/chat/use-chatbot";
 
@@ -78,6 +79,7 @@ export default function ChatShell({ children }: { children: ReactNode }) {
     const visible = plain(pageRef.current?.innerText);
     const screenContext = `Page: ${pathname}. On the page: ${visible}`.slice(0, MAX_SCREEN_CONTEXT);
     const controls: Record<string, string> = {};
+    for (const item of DEFAULT_NAV) controls[`Page: ${item.label}`] = item.href;
     sentControls.current = [];
     for (const el of screenControls()) {
       const label = controlLabel(el);
