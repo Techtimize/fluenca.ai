@@ -320,14 +320,14 @@ export default function ChatPanel({
               ) : null}
               {Array.isArray(m.toolResult?.steps) && m.toolResult.steps.length ? (
                 <span className="mt-2 flex flex-wrap gap-1">
-                  {(m.toolResult.steps as { label?: string; ok?: boolean }[]).map((step, i) => (
+                  {(m.toolResult.steps as { label?: string; ok?: boolean; summary?: string }[]).map((step, i) => (
                     <span
                       key={i}
                       className={`rounded-full px-2 py-0.5 text-[11px] ${
                         step.ok === false ? "bg-rose-50 text-rose-600" : "bg-white text-neutral-500"
                       }`}
                     >
-                      {step.label}
+                      {step.summary ? `${step.label}: ${step.summary}` : step.label}
                     </span>
                   ))}
                 </span>
