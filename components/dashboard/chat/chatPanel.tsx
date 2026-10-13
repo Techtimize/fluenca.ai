@@ -96,6 +96,9 @@ type Props = {
   isSending?: boolean;
   isAwaitingReply?: boolean;
   isToolRunning?: boolean;
+  currentStep?: string | null;
+  onDecide?: (messageId: string, confirm: boolean) => void;
+  isDeciding?: boolean;
   mode: ChatMode;
   onModeChange: (mode: ChatMode) => void;
   conversations?: Conversation[];
@@ -105,6 +108,11 @@ type Props = {
   subtitle?: string;
   placeholder?: string;
 };
+
+function pendingAction(m: ChatMessage) {
+  const action = m.toolResult?.pending_action as { decision?: unknown } | undefined;
+  return m.role === "assistant" && m.id !== "streaming-assistant" && !!action && !action.decision;
+}
 
 function formatRelativeTime(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -126,6 +134,9 @@ export default function ChatPanel({
   isSending = false,
   isAwaitingReply = false,
   isToolRunning = false,
+  currentStep = null,
+  onDecide,
+  isDeciding = false,
   mode,
   onModeChange,
   conversations = [],
@@ -307,6 +318,35 @@ export default function ChatPanel({
               {m.status === "running" && m.toolName ? (
                 <span className="mt-1 block text-xs text-neutral-500">Running {m.toolName.replaceAll("_", " ")}</span>
               ) : null}
+              {Array.isArray(m.toolResult?.steps) && m.toolResult.steps.length ? (
+                <span className="mt-2 flex flex-wrap gap-1">
+                  {(m.toolResult.steps as { label?: string; ok?: boolean }[]).map((step, i) => (
+                    <span
+                      key={i}
+                      className={`rounded-full px-2 py-0.5 text-[11px] ${
+                        step.ok === false ? "bg-rose-50 text-rose-600" : "bg-white text-neutral-500"
+                      }`}
+                    >
+                      {step.label}
+                    </span>
+                  ))}
+                </span>
+              ) : null}
+              {pendingAction(m) && onDecide ? (
+                <span className="mt-2 flex gap-2">
+                  <BrandButton type="button" size="xs" disabled={isDeciding} onClick={() => onDecide(m.id, true)}>
+                    Confirm
+                  </BrandButton>
+                  <button
+                    type="button"
+                    disabled={isDeciding}
+                    onClick={() => onDecide(m.id, false)}
+                    className="rounded-md border border-[#E6E8F5] bg-white px-2 text-xs text-neutral-600 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </span>
+              ) : null}
               {typeof m.toolResult?.path === "string" && m.toolResult.path.startsWith("/") ? (
                 <BrandButton
                   type="button"
@@ -324,7 +364,7 @@ export default function ChatPanel({
 
         {isAwaitingReply ? (
           <div className="mr-auto max-w-[85%] rounded-2xl rounded-bl-md border border-[#E6E8F5] bg-[#F6F7FD] px-3 py-2 text-[13px] text-neutral-500">
-            Thinking…
+            {currentStep ? `${currentStep}…` : "Thinking…"}
           </div>
         ) : null}
 
