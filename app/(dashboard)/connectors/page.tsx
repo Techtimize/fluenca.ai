@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Clock3, ExternalLink, Loader2, Plug, Unplug } from "lucide-react";
 import { toast } from "sonner";
 import GoogleAnalyticsCard from "@/components/dashboard/integrations/googleAnalyticsCard";
+import PageSpeedCard from "@/components/dashboard/integrations/pageSpeedCard";
 import SearchConsoleCard from "@/components/dashboard/integrations/searchConsoleCard";
 import TopBar from "@/components/dashboard/topBar";
 import { FacebookIcon } from "@/components/shared/brandIcons";
@@ -389,6 +390,7 @@ function IntegrationsPageContent() {
         })}
         <GoogleAnalyticsCard />
         <SearchConsoleCard />
+        <PageSpeedCard />
       </div>
     </main>
   );
