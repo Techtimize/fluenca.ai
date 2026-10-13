@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import ChatInput from "@/components/dashboard/chat/chatInput";
+import { DEFAULT_NAV } from "@/components/dashboard/sidebarRail";
 import ChatPanel from "@/components/dashboard/chat/chatPanel";
 import { useChatbot } from "@/lib/chat/use-chatbot";
 
@@ -78,16 +79,22 @@ export default function ChatShell({ children }: { children: ReactNode }) {
     const visible = plain(pageRef.current?.innerText);
     const screenContext = `Page: ${pathname}. On the page: ${visible}`.slice(0, MAX_SCREEN_CONTEXT);
     const controls: Record<string, string> = {};
+    for (const item of DEFAULT_NAV) controls[`Page: ${item.label}`] = item.href;
     sentControls.current = [];
     for (const el of screenControls()) {
       const label = controlLabel(el);
-      if (label in controls || sentControls.current.length >= MAX_CONTROLS) continue;
+      if (label in controls || Object.keys(controls).length >= MAX_CONTROLS) continue;
+      const href = el instanceof HTMLAnchorElement ? new URL(el.href, window.location.origin) : null;
+      if (href && href.origin === window.location.origin) {
+        controls[label] = `${href.pathname}${href.search}`;
+        continue;
+      }
       controls[label] = `${CONTROL_PREFIX}${sentControls.current.length}`;
       sentControls.current.push(el);
     }
     awaitingReply.current = true;
     lastIdAtSend.current = chat.messages[chat.messages.length - 1]?.id;
-    chat.send(text, screenContext, imageUrl, controls);
+    chat.send(text, screenContext, imageUrl, controls, pathname);
     setChatOpen(true);
   };
 
@@ -111,6 +118,9 @@ export default function ChatShell({ children }: { children: ReactNode }) {
               isSending={chat.isSending}
               isAwaitingReply={chat.isAwaitingReply}
               isToolRunning={chat.isToolRunning}
+              currentStep={chat.currentStep}
+              onDecide={chat.decideAction}
+              isDeciding={chat.isDeciding}
               mode={chat.mode}
               onModeChange={chat.setMode}
               conversations={chat.conversations}

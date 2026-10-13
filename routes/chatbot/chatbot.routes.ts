@@ -51,6 +51,7 @@ export const UploadAttachmentApi = async (file: File): Promise<string> => {
 };
 
 type StreamHandlers = {
+  onStep?: (label: string) => void;
   onChunk: (text: string) => void;
   onDone: (event: SendMessageDoneEvent) => void;
 };
@@ -79,6 +80,7 @@ type SendMessageOptions = {
   imageUrl?: string;
   mode?: ChatMode;
   pages?: Record<string, string>;
+  pagePath?: string;
 };
 
 export const SendMessageApi = async (
@@ -102,6 +104,7 @@ export const SendMessageApi = async (
       image_url: options.imageUrl || undefined,
       mode: options.mode,
       pages: options.pages,
+      page_path: options.pagePath || undefined,
     }),
   });
 
@@ -139,8 +142,14 @@ export const SendMessageApi = async (
     for (const block of blocks) {
       const event = parseEvent(block);
       if (!event) continue;
-      if (event.name === "chunk") handlers.onChunk(event.data.text ?? "");
+      if (event.name === "step") handlers.onStep?.(event.data.label ?? "");
+      else if (event.name === "chunk") handlers.onChunk(event.data.text ?? "");
       else if (event.name === "done") handlers.onDone(event.data as SendMessageDoneEvent);
     }
   }
+};
+
+export const DecideActionApi = async (messageId: string, confirm: boolean) => {
+  const response = await api.post(`${BUSSINESSENDPOINT.MESSAGES}/${messageId}/decision`, { confirm });
+  return response.data;
 };

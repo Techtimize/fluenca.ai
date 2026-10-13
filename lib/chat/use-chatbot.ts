@@ -1,6 +1,9 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { DecideActionApi } from "@/routes/chatbot/chatbot.routes";
 import { mapChatHistory } from "@/lib/chat/map-chat-messages";
 import type { ChatMessage, ChatMode } from "@/types/chat";
 import { ChatHistoryQuery } from "@/routes/bussiness/Bussiness-Query";
@@ -11,8 +14,6 @@ const PENDING_USER_ID = "pending-user";
 const STREAMING_ASSISTANT_ID = "streaming-assistant";
 
 export const useChatbot = (enabled = true) => {
-  // null: no conversation picked yet — "New chat" state, nothing is sent to the
-  // backend until the first message, which creates one and this gets set to its id.
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
 
   const conversations = ConversationsQuery(enabled);
@@ -22,6 +23,7 @@ export const useChatbot = (enabled = true) => {
   const [pendingUserText, setPendingUserText] = useState<string | null>(null);
   const [pendingImageUrl, setPendingImageUrl] = useState<string | undefined>(undefined);
   const [streamingText, setStreamingText] = useState("");
+  const [currentStep, setCurrentStep] = useState<string | null>(null);
   const [mode, setMode] = useState<ChatMode>("action");
   const streamedRef = useRef("");
 
@@ -50,13 +52,27 @@ export const useChatbot = (enabled = true) => {
     return live;
   }, [history, pendingUserText, pendingImageUrl, streamingText]);
 
-  const send = (text: string, screenContext?: string, imageUrl?: string, pages?: Record<string, string>) => {
+  const queryClient = useQueryClient();
+  const decide = useMutation({
+    mutationFn: ({ messageId, confirm }: { messageId: string; confirm: boolean }) => DecideActionApi(messageId, confirm),
+    onSettled: () => queryClient.invalidateQueries(),
+    onError: () => toast.error("That action could not be completed."),
+  });
+
+  const send = (
+    text: string,
+    screenContext?: string,
+    imageUrl?: string,
+    pages?: Record<string, string>,
+    pagePath?: string,
+  ) => {
     if (sendMessage.isPending) return;
 
     streamedRef.current = "";
     setPendingUserText(text);
     setPendingImageUrl(imageUrl);
     setStreamingText("");
+    setCurrentStep(null);
 
     sendMessage.mutate(
       {
@@ -66,6 +82,8 @@ export const useChatbot = (enabled = true) => {
         imageUrl,
         mode,
         pages,
+        pagePath,
+        onStep: (label) => setCurrentStep(label),
         onChunk: (chunk) => {
           streamedRef.current += chunk;
           setStreamingText(streamedRef.current);
@@ -82,6 +100,7 @@ export const useChatbot = (enabled = true) => {
           setPendingUserText(null);
           setPendingImageUrl(undefined);
           setStreamingText("");
+          setCurrentStep(null);
         },
       },
     );
@@ -96,7 +115,7 @@ export const useChatbot = (enabled = true) => {
   };
 
   const isAwaitingReply = sendMessage.isPending && !streamingText;
-  const isToolRunning = history[history.length - 1]?.status === "running";
+  const isToolRunning = history.some((m) => m.status === "running");
 
   return {
     messages,
@@ -106,6 +125,9 @@ export const useChatbot = (enabled = true) => {
     isSending: sendMessage.isPending,
     isAwaitingReply,
     isToolRunning,
+    currentStep,
+    decideAction: (messageId: string, confirm: boolean) => decide.mutate({ messageId, confirm }),
+    isDeciding: decide.isPending,
     mode,
     setMode,
     conversations: conversations.data ?? [],

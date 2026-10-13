@@ -87,6 +87,7 @@ export const BUSSINESSENDPOINT = {
     KEYWORDS_RETRY: '/keywords/retry',
     BRIEFS: '/briefs',
     BLOG_POST: '/blog-posts',
+    SOCIAL_POSTS: '/social-posts',
     BLOG_POST_DETAILS: (blog_post_id: string) => `/blog-posts/${blog_post_id}`,
     BLOG_POST_IMAGES: (blog_post_id: string) => `/blog-posts/${blog_post_id}/images`,
 
@@ -96,7 +97,7 @@ export const BUSSINESSENDPOINT = {
         SOCIAL_ACCOUNTS_CONNECT: (platform: string) => `/social-accounts/${platform}/connect`,
         SOCIAL_ACCOUNTS_DISCONNECT: (platform: string) => `/social-accounts/${platform}`,
         FACEBOOK_CONNECT: '/connector/facebook/connect',
-        X_CONNECT: '/connector/x/login',
+        X_LOGIN: '/connector/x/login',
     },
 
     PUBLISH:{

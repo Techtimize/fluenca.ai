@@ -9,6 +9,7 @@ import {
   normalizeCompanyContent,
   type ContentGenerationResultItem,
 } from "@/components/dashboard/content/utils";
+import SocialPostsSection from "@/components/dashboard/content/socialPostsSection";
 import TopBar from "@/components/dashboard/topBar";
 import ApiNotFoundCard from "@/components/notfound";
 import Card from "@/components/shared/card";
@@ -233,6 +234,8 @@ export default function ContentPage() {
           </label>
         </div>
       </div>
+
+      <SocialPostsSection />
 
       {companyId && (isLoading || isFetching) && !hasResults && !notFound ? (
         <Card className="flex items-center justify-center gap-3 p-8 text-neutral-500">
