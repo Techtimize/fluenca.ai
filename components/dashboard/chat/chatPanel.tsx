@@ -316,7 +316,7 @@ export default function ChatPanel({
                 </span>
               ) : null}
               {m.status === "running" && m.toolName ? (
-                <span className="mt-1 block text-xs text-neutral-500">Running {m.toolName.replaceAll("_", " ")}</span>
+                <span className="mt-1 block text-xs text-neutral-500">Working on it, the result will show here.</span>
               ) : null}
               {Array.isArray(m.toolResult?.steps) && m.toolResult.steps.length ? (
                 <span className="mt-2 flex flex-wrap gap-1">
