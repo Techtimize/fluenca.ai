@@ -109,8 +109,7 @@ export default function IntelligenceProgressPage() {
       handled.current = true;
       queryClient.invalidateQueries(); // pages refetch the freshly saved results
       toast.success("Your workspace is ready!");
-      // TODO: re-enable after the UI work on this page is done.
-      // router.replace(PAGE_ROUTES.DASHBOARD);
+      router.replace(PAGE_ROUTES.DASHBOARD);
     } else if (isFailed) {
       handled.current = true;
       const notFound =
