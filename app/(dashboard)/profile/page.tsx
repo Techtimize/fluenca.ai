@@ -10,7 +10,9 @@ import {
   Briefcase,
   Building2,
   CalendarDays,
+  ChevronRight,
   Crown,
+  ExternalLink,
   FileText,
   Globe,
   ImageIcon,
@@ -44,6 +46,7 @@ import type {
   UserProfileUser,
 } from "@/types/bussiness/user-profile-type";
 import { FOCUS_RING } from "@/utils/ui-classes";
+import { ProfileSkeleton } from "@/components/shared/skeletons";
 
 const USAGE_ICONS: Record<string, typeof BarChart3> = {
   company_analysis: BarChart3,
@@ -57,7 +60,18 @@ const PLATFORMS: Record<string, { label: string; iconSrc: string }> = {
   instagram: { label: "Instagram", iconSrc: "/assets/insta.png" },
   linkedin: { label: "LinkedIn", iconSrc: "/assets/linkedin.png" },
   x: { label: "X", iconSrc: "/assets/x.png" },
+  facebook: { label: "Facebook", iconSrc: "/assets/globe.png" },
 };
+
+// "ar" -> "Arabic"; falls back to the raw value for anything Intl can't name
+function languageName(code: string | null | undefined) {
+  if (!code) return null;
+  try {
+    return new Intl.DisplayNames(["en"], { type: "language" }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
 
 function formatDate(value: string | null, opts: Intl.DateTimeFormatOptions) {
   if (!value) return null;
@@ -73,7 +87,7 @@ export default function ProfilePage() {
   const profile = data?.data;
 
   return (
-    <main className="min-w-0 space-y-4">
+    <main className="min-w-0 space-y-4 pb-28">
       <TopBar user={{ name: companyName || profile?.company?.name || "" }} />
 
       {isLoading ? (
@@ -170,7 +184,9 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
       return;
     }
     if (!user.id) {
-      toast.error("We couldn't find your account. Please reload and try again.");
+      toast.error(
+        "We couldn't find your account. Please reload and try again.",
+      );
       return;
     }
     editProfile(
@@ -213,147 +229,146 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
   return (
     <form onSubmit={handleSave} className="space-y-4">
       {/* Hero */}
-      <Card className="relative overflow-hidden">
-        <div className="relative h-36 overflow-hidden bg-linear-to-br from-[#4338CA] via-[#5B57E6] to-[#9061F9]">
-          <span
-            className="absolute -right-10 -top-16 size-56 rounded-full bg-white/10 blur-2xl"
-            aria-hidden="true"
-          />
-          <span
-            className="absolute -bottom-20 left-1/3 size-64 rounded-full bg-[#C4B5FD]/25 blur-3xl"
-            aria-hidden="true"
-          />
-          <span
-            className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] bg-size-[18px_18px]"
-            aria-hidden="true"
-          />
-          {plan ? (
-            <span className="absolute right-5 top-4 flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur">
-              <Crown className="size-3.5" aria-hidden="true" />
-              {plan.name} Plan
-            </span>
-          ) : null}
-        </div>
+      <section className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#3B3FD9] via-[#5B57E6] to-[#8B7BF7] px-5 py-6 text-white shadow-[0_18px_40px_-24px_rgba(79,70,229,0.8)] sm:px-7">
+        <span
+          className="absolute -right-24 -top-32 size-96 rounded-full bg-white/10 blur-2xl"
+          aria-hidden="true"
+        />
+        <span
+          className="absolute -bottom-40 right-1/4 size-96 rounded-full border-40 border-white/5"
+          aria-hidden="true"
+        />
+        <span
+          className="absolute -bottom-24 left-1/3 size-72 rounded-full bg-[#C4B5FD]/20 blur-3xl"
+          aria-hidden="true"
+        />
 
-        <div className="px-5 pb-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
-              <div className="relative -mt-12 w-fit">
-                {user.avatar_url ? (
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+            <div className="relative w-fit shrink-0">
+              {company.logo_url ? (
+                // Solid white backdrop so transparent logos don't pick up the banner gradient
+                <span className="grid size-22 place-items-center overflow-hidden rounded-full border-4 border-white bg-white p-3 shadow-lg sm:size-24">
                   <AssetImage
-                    src={user.avatar_url}
-                    alt={displayName}
+                    src={company.logo_url}
+                    alt={companyName}
                     width={96}
                     height={96}
-                    className="size-24 rounded-full border-4 border-white object-cover shadow-lg"
+                    className="size-full object-contain"
                   />
-                ) : (
-                  <span className="grid size-24 place-items-center rounded-full border-4 border-white bg-linear-to-br from-[#5B57E6] to-[#8B5CF6] text-3xl font-semibold text-white shadow-lg">
-                    {displayName.charAt(0).toUpperCase()}
-                  </span>
-                )}
-                <span
-                  className="absolute bottom-1.5 right-1.5 size-4 rounded-full border-2 border-white bg-emerald-500"
-                  aria-hidden="true"
-                />
-              </div>
-              <div className="pb-1">
-                <h1 className="text-xl font-semibold text-neutral-900">
-                  {displayName}
-                </h1>
-                <p className="text-sm text-neutral-500">
-                  {user.role ? `${user.role} at ` : null}
-                  <span className="font-medium text-neutral-700">
-                    {companyName}
-                  </span>
-                </p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {user.location ? (
-                    <Chip icon={<MapPin />}>{user.location}</Chip>
-                  ) : null}
-                  {joined ? (
-                    <Chip icon={<CalendarDays />}>Joined {joined}</Chip>
-                  ) : null}
-                  {user.email ? (
-                    <Chip icon={<Mail />}>{user.email}</Chip>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2 self-start sm:self-auto">
-              <Link
-                href={PAGE_ROUTES.QUESTIONS}
-                className={`flex h-10 items-center justify-center gap-2 rounded-full border border-[#D9DCF7] bg-white px-5 text-sm font-medium text-[#5452F6] transition-colors hover:bg-[#EEF0FF] ${FOCUS_RING}`}
-              >
-                <ClipboardList className="size-4" aria-hidden="true" />
-                View Questions
-              </Link>
-              {editing ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={cancelEditing}
-                    disabled={isSaving}
-                    className={`flex h-10 items-center justify-center gap-2 rounded-full border border-[#E6E8F5] bg-white px-5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-60 ${FOCUS_RING}`}
-                  >
-                    <X className="size-4" aria-hidden="true" />
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSaving}
-                    className={`flex h-10 items-center justify-center gap-2 rounded-full bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] px-5 text-sm font-medium text-white shadow-[0_6px_16px_-6px_rgba(99,70,240,0.6)] transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
-                  >
-                    {isSaving ? (
-                      <Loader2
-                        className="size-4 animate-spin"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <Save className="size-4" aria-hidden="true" />
-                    )}
-                    {isSaving ? "Saving..." : "Save Changes"}
-                  </button>
-                </>
+                </span>
               ) : (
-                <button
-                  type="button"
-                  onClick={startEditing}
-                  className={`flex h-10 items-center justify-center gap-2 rounded-full bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] px-5 text-sm font-medium text-white shadow-[0_6px_16px_-6px_rgba(99,70,240,0.6)] transition-opacity hover:opacity-95 ${FOCUS_RING}`}
-                >
-                  <Pencil className="size-4" aria-hidden="true" />
-                  Edit Profile
-                </button>
+                <span className="grid size-22 place-items-center rounded-full border-4 border-white/90 bg-linear-to-br from-[#5B57E6] to-[#8B5CF6] text-3xl font-semibold text-white shadow-lg sm:size-24">
+                  {displayName.charAt(0).toUpperCase()}
+                </span>
               )}
+              <span
+                className="absolute bottom-1 right-1 size-4.5 rounded-full border-3 border-white bg-emerald-500"
+                aria-hidden="true"
+              />
+            </div>
+            <div className="min-w-0">
+              <h1 className="truncate text-xl font-semibold tracking-tight sm:text-2xl">
+                {displayName}
+              </h1>
+              <p className="mt-0.5 text-sm text-white/80">
+                {user.role ? `${user.role} at ` : null}
+                <span className="font-medium text-white">{companyName}</span>
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {user.location ? (
+                  <Chip icon={<MapPin />}>{user.location}</Chip>
+                ) : null}
+                {joined ? (
+                  <Chip icon={<CalendarDays />}>Joined {joined}</Chip>
+                ) : null}
+                {user.email ? <Chip icon={<Mail />}>{user.email}</Chip> : null}
+              </div>
             </div>
           </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Stat
-              icon={<Crown />}
-              label="Current Plan"
-              value={plan?.name ?? "No plan"}
-              hint={renews ? `Renews ${renews}` : "—"}
-            />
-            <Stat
-              icon={<Sparkles />}
-              label="Credits Used"
-              value={`${totalUsed}/${totalLimit}`}
-              hint="Across all features"
-            />
-            <Stat
-              icon={<Link2 />}
-              label="Connected Accounts"
-              value={`${connectedCount}/${accounts.length}`}
-              hint={
-                connectedCount === accounts.length
-                  ? "All connected"
-                  : "Connect more for better insights"
-              }
-            />
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href={PAGE_ROUTES.QUESTIONS}
+              className={`flex h-11 items-center justify-center gap-2 rounded-2xl bg-white px-5 text-sm font-medium text-[#4F46E5] shadow-sm transition-colors hover:bg-[#EEF0FF] ${FOCUS_RING}`}
+            >
+              <ClipboardList className="size-4" aria-hidden="true" />
+              View Questions
+            </Link>
+            {editing ? (
+              <>
+                <button
+                  type="button"
+                  onClick={cancelEditing}
+                  disabled={isSaving}
+                  className={`flex h-11 items-center justify-center gap-2 rounded-2xl border border-white/40 bg-white/10 px-5 text-sm font-medium text-white backdrop-blur transition-colors hover:bg-white/20 disabled:opacity-60 ${FOCUS_RING}`}
+                >
+                  <X className="size-4" aria-hidden="true" />
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className={`flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#3730A3] px-5 text-sm font-medium text-white shadow-[0_8px_20px_-8px_rgba(30,27,120,0.8)] transition-colors hover:bg-[#312E81] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+                >
+                  {isSaving ? (
+                    <Loader2
+                      className="size-4 animate-spin"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <Save className="size-4" aria-hidden="true" />
+                  )}
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={startEditing}
+                className={`flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#3730A3] px-5 text-sm font-medium text-white shadow-[0_8px_20px_-8px_rgba(30,27,120,0.8)] transition-colors hover:bg-[#312E81] ${FOCUS_RING}`}
+              >
+                <Pencil className="size-4" aria-hidden="true" />
+                Edit Profile
+              </button>
+            )}
           </div>
         </div>
-      </Card>
+      </section>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Stat
+          tone="emerald"
+          icon={<Crown />}
+          label="Current Plan"
+          value={plan?.name ?? "No plan"}
+          hint={renews ? `Renews ${renews}` : "No renewal date"}
+          href="#plan"
+        />
+        <Stat
+          tone="violet"
+          icon={<Sparkles />}
+          label="Credits Used"
+          value={`${totalUsed}/${totalLimit}`}
+          hint="Across all features"
+          progress={totalLimit ? totalUsed / totalLimit : 0}
+          href="#plan"
+        />
+        <Stat
+          tone="blue"
+          icon={<Link2 />}
+          label="Connected Accounts"
+          value={`${connectedCount}/${accounts.length}`}
+          hint={
+            connectedCount === accounts.length
+              ? "All connected"
+              : "Connect more for better insights"
+          }
+          progress={accounts.length ? connectedCount / accounts.length : 0}
+          href={PAGE_ROUTES.CONNECTORS}
+        />
+      </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,1fr)]">
         <div className="space-y-4">
@@ -363,22 +378,22 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
               title="Company"
               subtitle="The business you're growing"
             />
-            <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#E6E8F5] bg-linear-to-r from-[#F5F6FF] to-white p-3">
+            <div className="mb-3 flex items-center gap-3 rounded-2xl border border-[#E6E8F5] bg-[#FAFBFF] p-3">
               {company.logo_url ? (
                 <AssetImage
                   src={company.logo_url}
                   alt={companyName}
                   width={48}
                   height={48}
-                  className="size-12 rounded-xl border border-[#E6E8F5] bg-white object-contain"
+                  className="size-12 rounded-full border border-[#E6E8F5] bg-white object-contain"
                 />
               ) : (
-                <span className="grid size-12 place-items-center rounded-xl bg-[#EEF0FF] text-lg font-semibold text-[#5452F6]">
+                <span className="grid size-12 place-items-center rounded-full bg-[#EEF0FF] text-lg font-semibold text-[#5452F6]">
                   {companyName.charAt(0).toUpperCase()}
                 </span>
               )}
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-neutral-900">
+                <p className="text-[15px] font-semibold text-neutral-900">
                   {companyName}
                 </p>
                 {company.website ? (
@@ -386,15 +401,29 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                     href={company.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 truncate text-xs text-[#5452F6] hover:underline"
+                    className="mt-0.5 flex w-fit items-center gap-1.5 truncate text-sm text-[#4F46E5] hover:underline"
                   >
-                    <Globe className="size-3.5 shrink-0" aria-hidden="true" />
                     {company.website
                       .replace(/^https?:\/\//, "")
                       .replace(/\/$/, "")}
+                    <ExternalLink
+                      className="size-3.5 shrink-0"
+                      aria-hidden="true"
+                    />
                   </a>
                 ) : null}
               </div>
+              {company.website ? (
+                <a
+                  href={company.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Open ${companyName} website`}
+                  className={`grid size-8 shrink-0 place-items-center rounded-full border border-[#E6E8F5] bg-white text-neutral-600 transition-colors hover:bg-[#EEF0FF] hover:text-[#4F46E5] ${FOCUS_RING}`}
+                >
+                  <ChevronRight className="size-4" aria-hidden="true" />
+                </a>
+              ) : null}
             </div>
             <dl className="grid gap-3 sm:grid-cols-2">
               {editing ? (
@@ -481,16 +510,19 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
               <Field
                 icon={<Languages />}
                 label="Language"
-                value={user.language}
+                value={languageName(user.language)}
                 input={userInput("language")}
               />
             </dl>
           </Card>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 xl:sticky xl:top-4 xl:self-start">
           {plan ? (
-            <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-[#312E81] via-[#4F46E5] to-[#7C3AED] p-5 text-white shadow-[0_16px_40px_-20px_rgba(79,70,229,0.7)]">
+            <section
+              id="plan"
+              className="relative scroll-mt-4 overflow-hidden rounded-3xl bg-linear-to-br from-[#2E2A8F] via-[#4F46E5] to-[#7C3AED] p-5 text-white shadow-[0_16px_40px_-20px_rgba(79,70,229,0.7)]"
+            >
               <span
                 className="absolute -right-12 -top-12 size-44 rounded-full bg-white/10 blur-2xl"
                 aria-hidden="true"
@@ -501,7 +533,7 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                     <p className="text-xs text-white/70">Current Plan</p>
                     <p className="mt-0.5 flex items-center gap-2 text-2xl font-semibold">
                       {plan.name}
-                      <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-[11px] font-medium capitalize text-emerald-200">
+                      <span className="rounded-full bg-emerald-500 px-2.5 py-0.5 text-xs font-medium capitalize text-white">
                         {plan.status}
                       </span>
                     </p>
@@ -511,35 +543,32 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                         .join(" · ")}
                     </p>
                   </div>
-                  <span className="grid size-10 place-items-center rounded-xl bg-white/15">
+                  <span className="grid size-11 place-items-center rounded-2xl bg-white/15">
                     <Crown className="size-5" aria-hidden="true" />
                   </span>
                 </div>
 
-                <ul className="mt-5 space-y-3.5">
+                <ul className="mt-4 divide-y divide-white/15 border-b border-white/15">
                   {usage.map((item) => {
                     const Icon = USAGE_ICONS[item.id] ?? Sparkles;
-                    const pct = item.limit
-                      ? Math.min(100, (item.used / item.limit) * 100)
-                      : 0;
+                    const nearLimit =
+                      item.limit > 0 && item.used / item.limit >= 0.8;
                     return (
-                      <li key={item.id}>
-                        <div className="mb-1.5 flex items-center justify-between gap-2 text-xs">
-                          <span className="flex items-center gap-2 text-white/85">
+                      <li
+                        key={item.id}
+                        className="flex items-center justify-between gap-3 py-2.5 text-sm"
+                      >
+                        <span className="flex items-center gap-3 text-white/90">
+                          <span className="grid size-7 place-items-center rounded-lg bg-white/15">
                             <Icon className="size-3.5" aria-hidden="true" />
-                            {item.label}
                           </span>
-                          <span className="font-semibold tabular-nums">
-                            {item.used}
-                            <span className="text-white/60">/{item.limit}</span>
-                          </span>
-                        </div>
-                        <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
-                          <div
-                            className={`h-full rounded-full ${pct >= 80 ? "bg-amber-300" : "bg-white"}`}
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
+                          {item.label}
+                        </span>
+                        <span
+                          className={`font-semibold tabular-nums ${nearLimit ? "text-amber-300" : ""}`}
+                        >
+                          {item.used}/{item.limit}
+                        </span>
                       </li>
                     );
                   })}
@@ -547,7 +576,7 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
 
                 <button
                   type="button"
-                  className={`mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-white text-[15px] font-semibold text-[#4F46E5] transition-colors hover:bg-white/90 ${FOCUS_RING}`}
+                  className={`mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-white text-[15px] font-semibold text-[#4F46E5] transition-colors hover:bg-white/90 ${FOCUS_RING}`}
                 >
                   <Sparkles className="size-4" aria-hidden="true" />
                   Upgrade Plan
@@ -565,13 +594,15 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
             <ul className="space-y-2">
               {accounts.map((account) => {
                 const platform = PLATFORMS[account.platform] ?? {
-                  label: account.platform,
+                  label:
+                    account.platform.charAt(0).toUpperCase() +
+                    account.platform.slice(1),
                   iconSrc: "/assets/globe.png",
                 };
                 return (
                   <li
                     key={account.platform}
-                    className="flex items-center gap-3 rounded-2xl border border-[#ECEDF5] px-3 py-2.5 transition-colors hover:bg-[#F8F9FF]"
+                    className="flex items-center gap-3 rounded-2xl border border-[#ECEDF5] bg-white px-3 py-2.5 transition-colors hover:bg-[#F8F9FF]"
                   >
                     <span className="grid size-10 place-items-center rounded-xl bg-[#F5F6FF]">
                       <AssetImage
@@ -608,6 +639,13 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                         Connect
                       </button>
                     )}
+                    <Link
+                      href={PAGE_ROUTES.CONNECTORS}
+                      aria-label={`Manage ${platform.label}`}
+                      className={`grid size-7 shrink-0 place-items-center rounded-full text-neutral-400 transition-colors hover:bg-[#EEF0FF] hover:text-[#4F46E5] ${FOCUS_RING}`}
+                    >
+                      <ChevronRight className="size-4" aria-hidden="true" />
+                    </Link>
                   </li>
                 );
               })}
@@ -616,30 +654,6 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
         </div>
       </div>
     </form>
-  );
-}
-
-function ProfileSkeleton() {
-  return (
-    <div className="animate-pulse space-y-4" aria-busy="true">
-      <div className="overflow-hidden rounded-3xl border border-[#E6E8F5] bg-white">
-        <div className="h-36 bg-[#E4E6FB]" />
-        <div className="px-5 pb-5">
-          <div className="-mt-12 size-24 rounded-full border-4 border-white bg-neutral-200" />
-          <div className="mt-3 h-5 w-48 rounded bg-neutral-200" />
-          <div className="mt-2 h-3 w-64 rounded bg-neutral-100" />
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="h-19 rounded-2xl bg-[#F4F5FD]" />
-            ))}
-          </div>
-        </div>
-      </div>
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,1fr)]">
-        <div className="h-72 rounded-3xl bg-white" />
-        <div className="h-72 rounded-3xl bg-[#E4E6FB]" />
-      </div>
-    </div>
   );
 }
 
@@ -655,13 +669,13 @@ function SectionHeader({
   return (
     <div className="mb-4 flex items-center gap-3">
       <span
-        className="grid size-9 place-items-center rounded-xl bg-[#EEF0FF] text-[#5452F6] [&>svg]:size-4.5"
+        className="grid size-11 place-items-center rounded-full bg-[#EEF0FF] text-[#4F46E5] [&>svg]:size-5"
         aria-hidden="true"
       >
         {icon}
       </span>
       <div>
-        <h2 className="text-sm font-semibold text-neutral-900">{title}</h2>
+        <h2 className="text-base font-semibold text-neutral-900">{title}</h2>
         {subtitle ? (
           <p className="text-xs text-neutral-500">{subtitle}</p>
         ) : null}
@@ -672,38 +686,80 @@ function SectionHeader({
 
 function Chip({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
-    <span className="flex items-center gap-1.5 rounded-full bg-[#F1F4FF] px-2.5 py-1 text-xs text-neutral-700 [&>svg]:size-3.5 [&>svg]:text-[#5452F6]">
+    <span className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-xs text-white backdrop-blur [&>svg]:size-3.5">
       {icon}
       {children}
     </span>
   );
 }
 
+const STAT_TONES = {
+  emerald: {
+    card: "border-emerald-100 bg-linear-to-br from-emerald-50/70 to-white",
+    icon: "bg-emerald-100/80 text-emerald-700",
+  },
+  violet: {
+    card: "border-[#E4E1FB] bg-linear-to-br from-[#F4F2FF] to-white",
+    icon: "bg-[#ECE9FF] text-[#4F46E5]",
+  },
+  blue: {
+    card: "border-[#DCE6FB] bg-linear-to-br from-[#EFF4FF] to-white",
+    icon: "bg-[#E2EAFF] text-[#3B5BDB]",
+  },
+} as const;
+
 function Stat({
+  tone,
   icon,
   label,
   value,
   hint,
+  progress,
+  href,
 }: {
+  tone: keyof typeof STAT_TONES;
   icon: ReactNode;
   label: string;
   value: string;
   hint: string;
+  // 0–1; shows a progress bar under the value when set
+  progress?: number;
+  href: string;
 }) {
+  const styles = STAT_TONES[tone];
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-[#E6E8F5] bg-linear-to-br from-[#F7F8FF] to-white p-3.5">
+    <Link
+      href={href}
+      className={`group flex items-start gap-4 rounded-3xl border p-5 transition-shadow hover:shadow-[0_10px_30px_-18px_rgba(79,70,229,0.5)] ${styles.card} ${FOCUS_RING}`}
+    >
       <span
-        className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-[#5452F6] shadow-sm [&>svg]:size-4.5"
+        className={`grid size-12 shrink-0 place-items-center rounded-full [&>svg]:size-5.5 ${styles.icon}`}
         aria-hidden="true"
       >
         {icon}
       </span>
-      <div className="min-w-0">
-        <p className="text-xs text-neutral-500">{label}</p>
-        <p className="text-base font-semibold text-neutral-900">{value}</p>
-        <p className="truncate text-[11px] text-neutral-400">{hint}</p>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm text-neutral-600">{label}</p>
+        <p className="mt-0.5 text-2xl font-semibold tabular-nums text-neutral-900">
+          {value}
+        </p>
+        {progress !== undefined ? (
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#E3E5F5]">
+            <div
+              className="h-full rounded-full bg-[#4F46E5]"
+              style={{
+                width: `${Math.min(100, Math.max(0, progress * 100))}%`,
+              }}
+            />
+          </div>
+        ) : null}
+        <p className="mt-2 truncate text-xs text-neutral-500">{hint}</p>
       </div>
-    </div>
+      <ChevronRight
+        className="mt-1 size-4 shrink-0 text-neutral-400 transition-transform group-hover:translate-x-0.5"
+        aria-hidden="true"
+      />
+    </Link>
   );
 }
 
@@ -755,8 +811,10 @@ function Field({
               aria-label={label}
               className="w-full bg-transparent text-sm font-semibold text-neutral-900 outline-none placeholder:font-normal placeholder:text-neutral-400"
             />
+          ) : value ? (
+            value
           ) : (
-            value || "—"
+            <span className="font-normal text-neutral-400">Not set</span>
           )}
         </dd>
       </div>
