@@ -246,14 +246,17 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
             <div className="relative w-fit shrink-0">
-              {user.avatar_url ? (
-                <AssetImage
-                  src={user.avatar_url}
-                  alt={displayName}
-                  width={96}
-                  height={96}
-                  className="size-22 rounded-full border-4 border-white/90 object-cover shadow-lg sm:size-24"
-                />
+              {company.logo_url ? (
+                // Solid white backdrop so transparent logos don't pick up the banner gradient
+                <span className="grid size-22 place-items-center overflow-hidden rounded-full border-4 border-white bg-white p-3 shadow-lg sm:size-24">
+                  <AssetImage
+                    src={company.logo_url}
+                    alt={companyName}
+                    width={96}
+                    height={96}
+                    className="size-full object-contain"
+                  />
+                </span>
               ) : (
                 <span className="grid size-22 place-items-center rounded-full border-4 border-white/90 bg-linear-to-br from-[#5B57E6] to-[#8B5CF6] text-3xl font-semibold text-white shadow-lg sm:size-24">
                   {displayName.charAt(0).toUpperCase()}
