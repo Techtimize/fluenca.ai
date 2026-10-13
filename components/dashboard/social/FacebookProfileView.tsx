@@ -166,7 +166,7 @@ export function FacebookProfileView() {
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
                 Engagement
               </p>
-              <p className="mt-1 text-[18px] font-semibold">â€”</p>
+              <p className="mt-1 text-[18px] font-semibold">-</p>
             </div>
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
@@ -355,7 +355,7 @@ export function FacebookProfileView() {
                           <ThumbsUp className="size-3.5 shrink-0" />
                           <span className="truncate">
                             {likes == null
-                              ? "â€” likes"
+                              ? "- likes"
                               : `${formatCount(likes)} likes`}
                           </span>
                         </span>
@@ -363,7 +363,7 @@ export function FacebookProfileView() {
                           <MessageCircle className="size-3.5 shrink-0" />
                           <span className="truncate">
                             {comments == null
-                              ? "â€” comments"
+                              ? "- comments"
                               : `${formatCount(comments)} comments`}
                           </span>
                         </span>

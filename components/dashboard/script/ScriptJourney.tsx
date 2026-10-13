@@ -69,24 +69,12 @@ export default function ScriptJourney({
 
       <div className="relative grid gap-8 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] lg:items-end lg:gap-10">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5B57E6] shadow-[0_1px_0_rgba(15,23,42,0.04)] ring-1 ring-[#E6E8F5]">
-              <Clapperboard className="size-3.5" aria-hidden="true" />
-              Script studio
-            </p>
-            {scriptCount > 0 ? (
-              <span className="inline-flex items-center rounded-full bg-[#ECEBFF] px-2.5 py-1 text-[11px] font-semibold tabular-nums text-[#5B57E6]">
-                {scriptCount} ready
-              </span>
-            ) : null}
-          </div>
-
-          <h1 className="mt-4 max-w-[18ch] text-balance text-[28px] font-semibold leading-[1.12] tracking-tight text-neutral-900 sm:text-[34px]">
+          <h1 className="mt-4 text-[28px] font-semibold leading-[1.12] tracking-tight text-neutral-900 sm:text-[34px]">
             Turn ideas into ready-to-shoot scripts
           </h1>
           <p className="mt-3 max-w-xl text-[14px] leading-6 text-neutral-600 sm:text-[15px]">
-            Fluenca writes the story for each content idea — hook, dialogue,
-            scenes, and characters — so you know exactly what to film or design
+            Fluenca writes the story for each content idea ,hook, dialogue,
+            scenes, and characters. So you know exactly what to film or design
             next.
           </p>
 
@@ -99,9 +87,6 @@ export default function ScriptJourney({
                 />
                 Start from an idea
               </BrandButton>
-              <p className="text-[12px] text-neutral-500">
-                Scripts appear here after you generate from an idea.
-              </p>
             </div>
           ) : null}
         </div>
