@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Clock3, ExternalLink, Loader2, Plug, Unplug } from "lucide-react";
 import { toast } from "sonner";
 import GoogleAnalyticsCard from "@/components/dashboard/integrations/googleAnalyticsCard";
+import SearchConsoleCard from "@/components/dashboard/integrations/searchConsoleCard";
 import TopBar from "@/components/dashboard/topBar";
 import { FacebookIcon } from "@/components/shared/brandIcons";
 import Card from "@/components/shared/card";
@@ -312,7 +313,7 @@ function IntegrationsPageContent() {
     } else if (connected) {
       const title =
         PLATFORMS.find((platform) => platform.id === connected)?.title ??
-        (connected === "google_analytics" ? "Google Analytics" : connected);
+        (connected === "google_analytics" ? "Google Analytics" : connected === "search_console" ? "Search Console" : connected);
       toast.success(`${title} connected`);
       void refetch();
     }
@@ -387,6 +388,7 @@ function IntegrationsPageContent() {
           );
         })}
         <GoogleAnalyticsCard />
+        <SearchConsoleCard />
       </div>
     </main>
   );
