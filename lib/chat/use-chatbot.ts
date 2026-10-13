@@ -115,7 +115,7 @@ export const useChatbot = (enabled = true) => {
   };
 
   const isAwaitingReply = sendMessage.isPending && !streamingText;
-  const isToolRunning = history[history.length - 1]?.status === "running";
+  const isToolRunning = history.some((m) => m.status === "running");
 
   return {
     messages,
