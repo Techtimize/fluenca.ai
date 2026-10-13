@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { toast } from "sonner";
 import { normalizeContentRecommendation } from "@/lib/dashboard/normalize-content-recommendation";
 import { ContentRecommendationMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import type { ContentRecommendationResultResponse } from "@/types/bussiness/content-recommendation-type";
@@ -42,15 +41,11 @@ export default function ContentRecommendations({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
       <PlatformStrategySection platforms={normalized.platforms} />
-      {/* <PlannerHandoffSection handoff={normalized.plannerHandoff} /> */}
-      <InstagramPerformanceSection
-        performance={normalized.instagramPerformance}
-      />
+      <IdeasSection ideas={normalized.ideas} companyId={companyId} />
       <TrendSignalsSection signals={normalized.trendSignals} />
       <OpportunityScoresSection scores={normalized.opportunityScores} />
-      <IdeasSection ideas={normalized.ideas} companyId={companyId} />
       <CalendarSection
         calendar={normalized.calendar}
         items={normalized.calendarItems}

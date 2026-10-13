@@ -1,17 +1,25 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowUpRight, ImageOff, Loader2 } from "lucide-react";
+import {
+  ArrowUpRight,
+  CalendarDays,
+  ImageIcon,
+  ImageOff,
+  Loader2,
+  Send,
+} from "lucide-react";
 import { FacebookIcon } from "@/components/shared/brandIcons";
 import { formatDate } from "@/utils/format-date";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import { DeleteImageControls } from "./deleteImageControl";
-import { MetaChip } from "./meta-chips";
 import type { ContentGenerationResultItem } from "./utils";
 
 type PlatformKey = "instagram" | "linkedin" | "facebook" | "x";
 
-function normalizePlatform(platform?: string): PlatformKey | null {
+export function normalizeContentPlatform(
+  platform?: string,
+): PlatformKey | null {
   const value = String(platform || "")
     .trim()
     .toLowerCase()
@@ -33,54 +41,36 @@ const PLATFORM_UI: Record<
     label: string;
     icon: string | null;
     useFacebookIcon?: boolean;
-    badgeClass: string;
-    buttonClass: string;
   }
 > = {
   instagram: {
     label: "Instagram",
     icon: "/assets/insta.png",
-    badgeClass: "bg-[#FCE7F3] text-[#BE185D]",
-    buttonClass:
-      "border-[#F5C2D8] bg-[linear-gradient(135deg,#FDF2F8_0%,#FFFFFF_55%)] text-[#BE185D] hover:border-[#EC4899] hover:bg-[#FCE7F3]",
   },
   linkedin: {
     label: "LinkedIn",
     icon: "/assets/linkedin.png",
-    badgeClass: "bg-[#E8F1FB] text-[#0A66C2]",
-    buttonClass:
-      "border-[#BFD6F2] bg-[linear-gradient(135deg,#EFF6FF_0%,#FFFFFF_55%)] text-[#0A66C2] hover:border-[#0A66C2] hover:bg-[#E8F1FB]",
   },
   facebook: {
     label: "Facebook",
     icon: null,
     useFacebookIcon: true,
-    badgeClass: "bg-[#E8F1FB] text-[#1877F2]",
-    buttonClass:
-      "border-[#B7D0F5] bg-[linear-gradient(135deg,#EFF6FF_0%,#FFFFFF_55%)] text-[#1877F2] hover:border-[#1877F2] hover:bg-[#E8F1FB]",
   },
   x: {
     label: "X",
     icon: null,
-    badgeClass: "border border-[#E6E8F5] bg-[#F6F7FD] text-neutral-700",
-    buttonClass:
-      "border-[#D8D6F5] bg-[#F6F5FF] text-[#5B57E6] hover:border-[#5B57E6] hover:bg-[#ECEBFF]",
   },
 };
 
 function PlatformGlyph({
   config,
-  size = 12,
+  size = 14,
 }: {
   config: (typeof PLATFORM_UI)[PlatformKey];
   size?: number;
 }) {
   if (config.useFacebookIcon) {
-    return (
-      <FacebookIcon
-        className={size === 16 ? "size-4 text-[#1877F2]" : "size-3 text-[#1877F2]"}
-      />
-    );
+    return <FacebookIcon className="size-3.5 text-[#1877F2]" />;
   }
   if (config.icon) {
     return (
@@ -89,34 +79,36 @@ function PlatformGlyph({
         alt=""
         width={size}
         height={size}
-        className={
-          size === 16
-            ? "size-4 object-contain"
-            : "size-3 rounded-[2px] object-contain"
-        }
+        className="size-3.5 object-contain"
       />
     );
   }
   return null;
 }
 
-function PlatformBadge({ platform }: { platform?: string }) {
-  const key = normalizePlatform(platform);
+function PlatformHeader({ platform }: { platform?: string }) {
+  const key = normalizeContentPlatform(platform);
   if (!key) {
-    if (!platform) return null;
-    return <MetaChip label="Platform" value={platform} />;
+    return (
+      <span className="text-[13px] font-semibold text-neutral-800">
+        {platform || "Content"}
+      </span>
+    );
   }
-
   const config = PLATFORM_UI[key];
-
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium shadow-sm backdrop-blur-sm ${config.badgeClass}`}
-    >
-      <PlatformGlyph config={config} size={12} />
+    <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-neutral-900">
+      <PlatformGlyph config={config} />
       {config.label}
     </span>
   );
+}
+
+function cardTags(item: ContentGenerationResultItem): string[] {
+  const raw = [item.purpose, item.style, item.tone, item.aspectRatio]
+    .filter((v): v is string => Boolean(v && String(v).trim()))
+    .map((v) => String(v).trim());
+  return raw.filter((v, i, arr) => arr.indexOf(v) === i).slice(0, 4);
 }
 
 function PublishButton({
@@ -130,45 +122,22 @@ function PublishButton({
   disabled: boolean;
   onClick: () => void;
 }) {
-  const key = normalizePlatform(platform);
-  const config = key ? PLATFORM_UI[key] : null;
-  const label = config?.label ?? "Post";
-  const buttonClass =
-    config?.buttonClass ??
-    "border-[#D8D6F5] bg-[#F6F5FF] text-[#5B57E6] hover:border-[#5B57E6] hover:bg-[#ECEBFF]";
+  const key = normalizeContentPlatform(platform);
+  const label = key ? PLATFORM_UI[key].label : "Post";
 
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`group inline-flex h-10 w-full items-center justify-between gap-2 rounded-xl border px-3 text-[12px] font-semibold transition-all active:translate-y-px disabled:pointer-events-none disabled:opacity-55 ${buttonClass} ${FOCUS_RING}`}
+      className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-[#4F46E5] via-[#5B57E6] to-[#7C3AED] px-4 text-[13px] font-semibold text-white shadow-[0_6px_16px_rgba(91,87,230,0.28)] transition hover:brightness-105 disabled:pointer-events-none disabled:opacity-55 ${FOCUS_RING}`}
     >
-      <span className="inline-flex items-center gap-2">
-        <span className="grid size-7 place-items-center rounded-lg bg-white/90 ring-1 ring-black/5">
-          {isPublishing ? (
-            <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-          ) : config ? (
-            <PlatformGlyph config={config} size={16} />
-          ) : (
-            <ArrowUpRight className="size-3.5" aria-hidden="true" />
-          )}
-        </span>
-        <span className="text-left leading-tight">
-          <span className="block text-[10px] font-medium uppercase tracking-[0.06em] opacity-70">
-            {isPublishing ? "Publishing" : "Ready to share"}
-          </span>
-          <span className="block">
-            {isPublishing ? `Publishing on ${label}…` : `Publish on ${label}`}
-          </span>
-        </span>
-      </span>
-      {!isPublishing ? (
-        <ArrowUpRight
-          className="size-4 shrink-0 opacity-60 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
-          aria-hidden="true"
-        />
-      ) : null}
+      {isPublishing ? (
+        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+      ) : (
+        <Send className="size-4" aria-hidden="true" />
+      )}
+      {isPublishing ? `Publishing on ${label}…` : `Publish on ${label}`}
     </button>
   );
 }
@@ -186,97 +155,105 @@ export function ResultCard({
   const created = formatDate(item.createdAt);
   const canPublish = Boolean(cover?.imageUrl && onPublish);
   const caption = item.caption?.trim() || "";
-  const summary = item.summary?.trim() || item.hook?.trim() || "";
+  const tags = cardTags(item);
+  const imageCount = item.imagesCount || item.images.length || 0;
 
   return (
-    <li className="flex flex-col overflow-hidden rounded-2xl border border-[#E6E8F5] bg-white shadow-[0_4px_18px_rgba(17,24,39,0.04)]">
-      <div className="relative aspect-square bg-[#F6F7FD]">
-        {cover ? (
-          <Image
-            src={cover.thumbnailUrl || cover.imageUrl}
-            alt={item.title || cover.headline || "Generated content"}
-            className="size-full object-cover"
-            width={500}
-            height={500}
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex size-full flex-col items-center justify-center gap-2 text-neutral-400">
-            <ImageOff className="size-8" aria-hidden="true" />
-            <p className="text-[12px] font-medium">No image generated</p>
-          </div>
-        )}
-        <div className="absolute left-2 top-2">
-          <PlatformBadge platform={item.platform} />
-        </div>
+    <li className="relative flex flex-col rounded-2xl border border-[#E6E8F5] bg-white p-4 shadow-[0_2px_12px_rgba(15,23,42,0.04)]">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <PlatformHeader platform={item.platform} />
         <DeleteImageControls
           imageId={item.id}
           label={item.title || "image"}
+          variant="inline"
         />
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-3">
-        <div className="min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <p className="truncate text-[13px] font-semibold text-neutral-900">
-              {item.title || item.projectName || "Untitled generation"}
-            </p>
-            {item.version != null ? (
-              <span className="shrink-0 text-[11px] font-medium text-neutral-400">
-                v{item.version}
-              </span>
-            ) : null}
-          </div>
+      <div className="relative overflow-hidden rounded-xl bg-[#F6F7FD]">
+        <div className="relative aspect-[4/3]">
+          {cover ? (
+            <Image
+              src={cover.thumbnailUrl || cover.imageUrl}
+              alt={item.title || cover.headline || "Generated content"}
+              className="size-full object-cover"
+              width={500}
+              height={500}
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex size-full flex-col items-center justify-center gap-2 text-neutral-400">
+              <ImageOff className="size-8" aria-hidden="true" />
+              <p className="text-[12px] font-medium">No image generated</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-1 flex-col gap-3">
+        <div className="flex flex-wrap items-start gap-2">
+          <h3 className="min-w-0 flex-1 text-[15px] font-semibold leading-snug tracking-tight text-neutral-900">
+            {item.title || item.projectName || "Untitled generation"}
+          </h3>
+          {item.version != null ? (
+            <span className="shrink-0 rounded-full bg-[#ECEBFF] px-2 py-0.5 text-[11px] font-semibold text-[#5B57E6]">
+              v{item.version}
+            </span>
+          ) : null}
         </div>
 
         {caption ? (
-          <div className="rounded-xl bg-[#F6F7FD] px-2.5 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+          <div className="rounded-xl bg-[#F5F6FA] px-3 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-neutral-400">
               Caption
             </p>
-            <p className="mt-1 line-clamp-3 text-[12px] leading-5 text-neutral-700">
+            <p className="mt-1 line-clamp-3 text-[13px] leading-5 text-neutral-700">
               {caption}
             </p>
           </div>
         ) : null}
 
-        <div className="flex flex-wrap gap-1">
-          <MetaChip label="Purpose" value={item.purpose} />
-          <MetaChip label="Ratio" value={item.aspectRatio} />
-          {normalizePlatform(item.platform) === "instagram" ? (
-            <MetaChip
-              label="Images"
-              value={`${item.imagesCount}/${item.jobsCount || item.imagesCount}`}
-            />
+        {tags.length > 0 ? (
+          <ul className="flex flex-wrap gap-1.5">
+            {tags.map((tag) => (
+              <li key={tag}>
+                <span className="inline-flex items-center rounded-full bg-[#F0F1F8] px-2.5 py-1 text-[11px] font-medium text-[#5B57E6]">
+                  {tag}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[12px] text-neutral-500">
+          <span className="inline-flex items-center gap-1.5">
+            <CalendarDays className="size-3.5 text-neutral-400" aria-hidden="true" />
+            {created || "Unknown date"}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <ImageIcon className="size-3.5 text-neutral-400" aria-hidden="true" />
+            {imageCount} {imageCount === 1 ? "image" : "images"}
+          </span>
+          {cover ? (
+            <a
+              href={cover.imageUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={`ml-auto inline-flex items-center gap-1 font-medium text-neutral-500 transition-colors hover:text-[#5B57E6] ${FOCUS_RING}`}
+            >
+              Open image
+              <ArrowUpRight className="size-3.5" aria-hidden="true" />
+            </a>
           ) : null}
         </div>
 
-        <div className="mt-auto space-y-2 border-t border-[#EEF0F8] pt-2.5">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] text-neutral-400">
-              {created || "Unknown date"}
-            </p>
-            {cover ? (
-              <a
-                href={cover.imageUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-[12px] font-medium text-neutral-500 transition-colors hover:text-[#5B57E6]"
-              >
-                Open image
-                <ArrowUpRight className="size-3" aria-hidden="true" />
-              </a>
-            ) : null}
-          </div>
-          {onPublish ? (
-            <PublishButton
-              platform={item.platform}
-              isPublishing={isPublishing}
-              disabled={!canPublish || isPublishing}
-              onClick={() => onPublish(item)}
-            />
-          ) : null}
-        </div>
+        {onPublish ? (
+          <PublishButton
+            platform={item.platform}
+            isPublishing={isPublishing}
+            disabled={!canPublish || isPublishing}
+            onClick={() => onPublish(item)}
+          />
+        ) : null}
       </div>
     </li>
   );

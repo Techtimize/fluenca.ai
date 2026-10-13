@@ -33,18 +33,18 @@ export default function ContentRecommendationPage() {
   };
 
   return (
-    <main className="min-w-0 space-y-3 pb-4">
+    <main className="min-w-0 space-y-5 pb-6">
       <TopBar
         user={{ name: companyName || "User" }}
         placeholder="Search recommendations..."
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h1 className="text-lg font-semibold text-neutral-900">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 sm:text-[28px]">
             Content recommendations
           </h1>
-          <p className="text-[13px] text-neutral-500">
+          <p className="mt-1.5 text-[14px] text-neutral-500">
             AI-generated ideas, themes, and post plans for your brand.
           </p>
         </div>
@@ -55,6 +55,7 @@ export default function ContentRecommendationPage() {
             size="sm"
             onClick={handleGenerate}
             disabled={isPending}
+            className="shrink-0"
           >
             {isPending ? (
               <Loader2 className="size-4 animate-spin" />
