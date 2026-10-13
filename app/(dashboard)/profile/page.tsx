@@ -46,6 +46,7 @@ import type {
   UserProfileUser,
 } from "@/types/bussiness/user-profile-type";
 import { FOCUS_RING } from "@/utils/ui-classes";
+import { ProfileSkeleton } from "@/components/shared/skeletons";
 
 const USAGE_ICONS: Record<string, typeof BarChart3> = {
   company_analysis: BarChart3,
@@ -183,7 +184,9 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
       return;
     }
     if (!user.id) {
-      toast.error("We couldn't find your account. Please reload and try again.");
+      toast.error(
+        "We couldn't find your account. Please reload and try again.",
+      );
       return;
     }
     editProfile(
@@ -306,7 +309,10 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                   className={`flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#3730A3] px-5 text-sm font-medium text-white shadow-[0_8px_20px_-8px_rgba(30,27,120,0.8)] transition-colors hover:bg-[#312E81] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
                 >
                   {isSaving ? (
-                    <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                    <Loader2
+                      className="size-4 animate-spin"
+                      aria-hidden="true"
+                    />
                   ) : (
                     <Save className="size-4" aria-hidden="true" />
                   )}
@@ -397,7 +403,10 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                     {company.website
                       .replace(/^https?:\/\//, "")
                       .replace(/\/$/, "")}
-                    <ExternalLink className="size-3.5 shrink-0" aria-hidden="true" />
+                    <ExternalLink
+                      className="size-3.5 shrink-0"
+                      aria-hidden="true"
+                    />
                   </a>
                 ) : null}
               </div>
@@ -509,7 +518,8 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
           {plan ? (
             <section
               id="plan"
-              className="relative scroll-mt-4 overflow-hidden rounded-3xl bg-linear-to-br from-[#2E2A8F] via-[#4F46E5] to-[#7C3AED] p-5 text-white shadow-[0_16px_40px_-20px_rgba(79,70,229,0.7)]">
+              className="relative scroll-mt-4 overflow-hidden rounded-3xl bg-linear-to-br from-[#2E2A8F] via-[#4F46E5] to-[#7C3AED] p-5 text-white shadow-[0_16px_40px_-20px_rgba(79,70,229,0.7)]"
+            >
               <span
                 className="absolute -right-12 -top-12 size-44 rounded-full bg-white/10 blur-2xl"
                 aria-hidden="true"
@@ -644,23 +654,6 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
   );
 }
 
-function ProfileSkeleton() {
-  return (
-    <div className="animate-pulse space-y-4" aria-busy="true">
-      <div className="h-36 rounded-3xl bg-[#DCDDFB]" />
-      <div className="grid gap-4 md:grid-cols-3">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="h-28 rounded-3xl bg-[#F1F2FC]" />
-        ))}
-      </div>
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,1fr)]">
-        <div className="h-72 rounded-3xl bg-white" />
-        <div className="h-72 rounded-3xl bg-[#E4E6FB]" />
-      </div>
-    </div>
-  );
-}
-
 function SectionHeader({
   icon,
   title,
@@ -751,7 +744,9 @@ function Stat({
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#E3E5F5]">
             <div
               className="h-full rounded-full bg-[#4F46E5]"
-              style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%` }}
+              style={{
+                width: `${Math.min(100, Math.max(0, progress * 100))}%`,
+              }}
             />
           </div>
         ) : null}

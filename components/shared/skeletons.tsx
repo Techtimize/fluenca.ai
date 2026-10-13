@@ -150,3 +150,20 @@ export function DashboardSkeleton({ compact = false }: { compact?: boolean }) {
     </div>
   );
 }
+
+export function ProfileSkeleton() {
+  return (
+    <div className="animate-pulse space-y-4" aria-busy="true">
+      <div className="h-36 rounded-3xl bg-[#DCDDFB]" />
+      <div className="grid gap-4 md:grid-cols-3">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-28 rounded-3xl bg-[#F1F2FC]" />
+        ))}
+      </div>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,1fr)]">
+        <div className="h-72 rounded-3xl bg-white" />
+        <div className="h-72 rounded-3xl bg-[#E4E6FB]" />
+      </div>
+    </div>
+  );
+}
