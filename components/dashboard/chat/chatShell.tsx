@@ -87,7 +87,7 @@ export default function ChatShell({ children }: { children: ReactNode }) {
     }
     awaitingReply.current = true;
     lastIdAtSend.current = chat.messages[chat.messages.length - 1]?.id;
-    chat.send(text, screenContext, imageUrl, controls);
+    chat.send(text, screenContext, imageUrl, controls, pathname);
     setChatOpen(true);
   };
 
@@ -111,6 +111,9 @@ export default function ChatShell({ children }: { children: ReactNode }) {
               isSending={chat.isSending}
               isAwaitingReply={chat.isAwaitingReply}
               isToolRunning={chat.isToolRunning}
+              currentStep={chat.currentStep}
+              onDecide={chat.decideAction}
+              isDeciding={chat.isDeciding}
               mode={chat.mode}
               onModeChange={chat.setMode}
               conversations={chat.conversations}
