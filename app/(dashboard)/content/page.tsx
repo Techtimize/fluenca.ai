@@ -85,14 +85,12 @@ export default function ContentPage() {
       caption: item.caption || item.hook || item.summary || item.title || "",
       image_urls: imageUrls.length > 1 ? imageUrls : undefined,
     };
-
     if (platform === "facebook") {
       publishFacebook(payload, {
         onSettled: () => setPublishingId(null),
       });
       return;
     }
-
     publishInstagram(payload, {
       onSettled: () => setPublishingId(null),
     });
@@ -153,11 +151,6 @@ export default function ContentPage() {
 
       {companyId && hasResults ? (
         <div className="space-y-3">
-          <p className="text-[12px] text-neutral-500">
-            {content.count} run{content.count === 1 ? "" : "s"}
-            {" · "}
-            {content.imagesCount} image{content.imagesCount === 1 ? "" : "s"}
-          </p>
           <ContentResultsGrid
             items={gridItems}
             publishingId={isPublishing ? publishingId : null}
