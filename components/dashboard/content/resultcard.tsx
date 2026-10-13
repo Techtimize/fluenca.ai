@@ -227,11 +227,6 @@ export function ResultCard({
               </span>
             ) : null}
           </div>
-          {summary && summary !== caption ? (
-            <p className="mt-1 line-clamp-2 text-[12px] leading-5 text-neutral-500">
-              {summary}
-            </p>
-          ) : null}
         </div>
 
         {caption ? (

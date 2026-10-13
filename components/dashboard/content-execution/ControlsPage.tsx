@@ -89,7 +89,7 @@ function statusTone(status?: string) {
 }
 
 function formatWhen(value?: string | null) {
-  if (!value) return "â€”";
+  if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString(undefined, {
@@ -186,10 +186,10 @@ function RunRow({ run }: { run: ContentExecutionRun }) {
         </span>
       </div>
       <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-neutral-500">
-        <span>Total {run.items_total ?? "â€”"}</span>
-        <span>Published {run.items_published ?? "â€”"}</span>
-        <span>Failed {run.items_failed ?? "â€”"}</span>
-        <span>Skipped {run.items_skipped ?? "â€”"}</span>
+        <span>Total {run.items_total ?? ""}</span>
+        <span>Published {run.items_published ?? ""}</span>
+        <span>Failed {run.items_failed ?? ""}</span>
+        <span>Skipped {run.items_skipped ?? ""}</span>
       </div>
       {run.error ? (
         <p className="mt-2 text-[12px] text-rose-600">{run.error}</p>

@@ -168,11 +168,7 @@ export function LinkedInProfileView() {
                 <span className="truncate">{email}</span>
               </p>
             ) : null}
-            {personId ? (
-              <p className="mt-1 truncate text-[11px] text-neutral-400">
-                ID {personId}
-              </p>
-            ) : null}
+
             {localeLabel ? (
               <p className="mt-1 inline-flex items-center gap-1.5 text-[12px] text-neutral-500">
                 <Globe2 className="size-3.5" />
@@ -186,20 +182,20 @@ export function LinkedInProfileView() {
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
                 Followers
               </p>
-              <p className="mt-1 text-[18px] font-semibold">â€”</p>
+              <p className="mt-1 text-[18px] font-semibold">-</p>
             </div>
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
                 Engagement
               </p>
-              <p className="mt-1 text-[18px] font-semibold">â€”</p>
+              <p className="mt-1 text-[18px] font-semibold">-</p>
             </div>
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
                 Locale
               </p>
               <p className="mt-1 truncate text-[16px] font-semibold">
-                {localeLabel || "â€”"}
+                {localeLabel || "-"}
               </p>
             </div>
             <div>
@@ -381,7 +377,7 @@ export function LinkedInProfileView() {
                           <ThumbsUp className="size-3.5 shrink-0" />
                           <span className="truncate">
                             {likes == null
-                              ? "â€” likes"
+                              ? "- likes"
                               : `${formatCount(likes)} likes`}
                           </span>
                         </span>
@@ -389,7 +385,7 @@ export function LinkedInProfileView() {
                           <MessageCircle className="size-3.5 shrink-0" />
                           <span className="truncate">
                             {comments == null
-                              ? "â€” comments"
+                              ? "- comments"
                               : `${formatCount(comments)} comments`}
                           </span>
                         </span>
