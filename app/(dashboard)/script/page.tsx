@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Library, Loader2 } from "lucide-react";
 import ScriptEmptyState from "@/components/dashboard/script/ScriptEmptyState";
@@ -103,37 +102,6 @@ export default function ScriptPage() {
 
       {companyId && hasResults ? (
         <section className="space-y-4">
-          <div className="flex flex-wrap items-end justify-between gap-3 rounded-[22px] border border-[#E6E8F5] bg-[linear-gradient(135deg,#FBFBFF_0%,#FFFFFF_70%)] px-4 py-3.5 sm:px-5">
-            <div className="flex min-w-0 items-start gap-3">
-              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[#ECEBFF] text-[#5B57E6]">
-                <Library className="size-4" aria-hidden="true" />
-              </span>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-[15px] font-semibold tracking-tight text-neutral-900">
-                    Generated scripts
-                  </h2>
-                  <span className="rounded-full bg-[#ECEBFF] px-2 py-0.5 text-[11px] font-semibold tabular-nums text-[#5B57E6]">
-                    {libraryCount}
-                  </span>
-                </div>
-                <p className="mt-0.5 text-[13px] text-neutral-500">
-                  Open a script to review the brief, copy, cast, and scene
-                  breakdown.
-                </p>
-              </div>
-            </div>
-            {isFetching && !isLoading ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[12px] text-neutral-500 ring-1 ring-[#E6E8F5]">
-                <Loader2
-                  className="size-3.5 animate-spin text-[#5B57E6]"
-                  aria-hidden="true"
-                />
-                Updating…
-              </span>
-            ) : null}
-          </div>
-
           <ScriptList items={items} />
 
           {pagination.hasPrevious || pagination.hasNext ? (
