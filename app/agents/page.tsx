@@ -1,9 +1,9 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight, Pause, Play, Sparkles, Zap } from "lucide-react";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import {
   AGENTS,
   accentStyles,
@@ -11,6 +11,9 @@ import {
 } from "@/components/agents/agents-data";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import AgentChapter from "@/components/agents/agentchapter";
+
+/** One full orbit rotation, in seconds (the former "Normal" speed). */
+const ORBIT_DURATION_SECONDS = 36;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -35,8 +38,6 @@ export default function AgentsPage() {
   const orbitRef = useRef<HTMLDivElement>(null);
   const nodesRef = useRef<HTMLDivElement[]>([]);
   const tweenRef = useRef<gsap.core.Tween[]>([]);
-  const [paused, setPaused] = useState(false);
-  const [fast, setFast] = useState(false);
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export default function AgentsPage() {
     if (!orbit || nodes.length === 0) return;
 
     const radius = window.innerWidth < 640 ? 118 : 168;
-    const duration = fast ? 14 : 36;
+    const duration = ORBIT_DURATION_SECONDS;
 
     nodes.forEach((node, i) => {
       const angle = (i / nodes.length) * Math.PI * 2 - Math.PI / 2;
@@ -73,19 +74,11 @@ export default function AgentsPage() {
       }),
     );
     tweenRef.current = [orbitTween, ...nodeTweens];
-    if (paused) tweenRef.current.forEach((t) => t.pause());
     return () => {
       tweenRef.current.forEach((t) => t.kill());
       tweenRef.current = [];
     };
-  }, [fast, reduceMotion]);
-
-  useEffect(() => {
-    tweenRef.current.forEach((t) => {
-      if (paused) t.pause();
-      else t.resume();
-    });
-  }, [paused]);
+  }, [reduceMotion]);
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#F7F8FF] text-[#1C1C1E]">
@@ -102,24 +95,6 @@ export default function AgentsPage() {
         className="relative z-10 px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-8"
       >
         <div className="mx-auto max-w-7xl text-center">
-          {/* <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
-            <button
-              type="button"
-              onClick={() => setPaused((value) => !value)}
-              className={`inline-flex h-9 items-center gap-1.5 rounded-full border border-[#D9DCF7] bg-white px-3 text-xs font-semibold text-neutral-700 hover:bg-[#EEF0FF] ${FOCUS_RING}`}
-            >
-              {paused ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}
-              {paused ? "Resume" : "Pause"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setFast((value) => !value)}
-              className={`inline-flex h-9 items-center gap-1.5 rounded-full border border-[#D9DCF7] bg-white px-3 text-xs font-semibold text-neutral-700 hover:bg-[#EEF0FF] ${FOCUS_RING}`}
-            >
-              <Zap className="size-3.5 text-[#5452F6]" />
-              {fast ? "Fast" : "Normal"}
-            </button>
-          </div> */}
           <motion.div
             initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}

@@ -141,7 +141,6 @@ export default function DashboardPage() {
         item={openDoc}
         onClose={() => setOpenDoc(null)}
       />
-
       <GoalsDialog open={goalsOpen} onOpenChange={setGoalsOpen} />
     </>
   );

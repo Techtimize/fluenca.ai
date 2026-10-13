@@ -71,10 +71,10 @@ const selectTriggerClass = `${fieldControlClass} data-[size=default]:h-11 md:dat
 
 const GOAL_KEYS = [
   "goalAudience",
-  "goalClients",
+  "goalEngagement",
   "goalBrand",
-  "goalMonetize",
-  "goalThought",
+  "goalLeads",
+  "goalConsistency",
 ] as const;
 
 function mapIndividualToRequest(
@@ -89,7 +89,7 @@ function mapIndividualToRequest(
   return {
     company_name: data.full_name.trim(),
     industry: data.primary_goal,
-    primary_product_or_service: `${data.role.trim()} · ${data.platform}`,
+    primary_product_or_service: `${data.profession.trim()} · ${data.platform}`,
     language: data.language,
     website_url,
     target_country: data.target_country,
@@ -136,7 +136,7 @@ export default function Onboarding() {
     resolver: zodResolver(IndividualOnboardingFormSchema),
     defaultValues: {
       full_name: "",
-      role: "",
+      profession: "",
       primary_goal: "",
       language: "",
       platform: "" as IndividualOnboardingFormValidator["platform"],
@@ -145,6 +145,12 @@ export default function Onboarding() {
       linkedin_url: "",
     },
   });
+
+  const selectedPlatform = individualForm.watch("platform");
+  const showInstagram =
+    selectedPlatform === "instagram" || selectedPlatform === "both";
+  const showLinkedin =
+    selectedPlatform === "linkedin" || selectedPlatform === "both";
 
   const onCompanySubmit = (data: OnboardingFormValidator) =>
     onboardingMutation(data);
@@ -313,13 +319,13 @@ export default function Onboarding() {
 
               <FormField
                 control={individualForm.control}
-                name="role"
+                name="profession"
                 render={({ field }) => (
                   <FormItem className="gap-1.5">
-                    <FormLabel className={labelClass}>{t("role")}</FormLabel>
+                    <FormLabel className={labelClass}>{t("profession")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder={t("rolePlaceholder")}
+                        placeholder={t("professionPlaceholder")}
                         {...field}
                         className={fieldControlClass}
                       />
@@ -403,7 +409,18 @@ export default function Onboarding() {
                       <FormLabel className={labelClass}>
                         {t("platform")}
                       </FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          // Drop the handle for whichever platform is no longer selected.
+                          if (value === "instagram") {
+                            individualForm.setValue("linkedin_url", "");
+                          } else if (value === "linkedin") {
+                            individualForm.setValue("instagram_username", "");
+                          }
+                        }}
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger className={selectTriggerClass}>
                             <SelectValue
@@ -435,53 +452,62 @@ export default function Onboarding() {
                   name="target_country"
                 />
 
-                <FormField
-                  control={individualForm.control}
-                  name="instagram_username"
-                  render={({ field }) => (
-                    <FormItem className="min-w-0 gap-1.5">
-                      <FormLabel className={labelClass}>
-                        {t("instagram")}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder={t("instagramPlaceholder")}
-                          {...field}
-                          className={fieldControlClass}
-                        />
-                      </FormControl>
-                      <FormMessage className={messageClass} />
-                    </FormItem>
-                  )}
-                />
+                {showInstagram && (
+                  <FormField
+                    control={individualForm.control}
+                    name="instagram_username"
+                    render={({ field }) => (
+                      <FormItem
+                        className={cn(
+                          "min-w-0 gap-1.5",
+                          !showLinkedin && "sm:col-span-2",
+                        )}
+                      >
+                        <FormLabel className={labelClass}>
+                          {t("instagram")}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t("instagramPlaceholder")}
+                            {...field}
+                            className={fieldControlClass}
+                          />
+                        </FormControl>
+                        <FormMessage className={messageClass} />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
-                <FormField
-                  control={individualForm.control}
-                  name="linkedin_url"
-                  render={({ field }) => (
-                    <FormItem className="min-w-0 gap-1.5">
-                      <FormLabel className={labelClass}>
-                        {t("linkedin")}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="url"
-                          inputMode="url"
-                          placeholder={t("linkedinPlaceholder")}
-                          {...field}
-                          className={fieldControlClass}
-                        />
-                      </FormControl>
-                      <FormMessage className={messageClass} />
-                    </FormItem>
-                  )}
-                />
+                {showLinkedin && (
+                  <FormField
+                    control={individualForm.control}
+                    name="linkedin_url"
+                    render={({ field }) => (
+                      <FormItem
+                        className={cn(
+                          "min-w-0 gap-1.5",
+                          !showInstagram && "sm:col-span-2",
+                        )}
+                      >
+                        <FormLabel className={labelClass}>
+                          {t("linkedin")}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="url"
+                            inputMode="url"
+                            placeholder={t("linkedinPlaceholder")}
+                            {...field}
+                            className={fieldControlClass}
+                          />
+                        </FormControl>
+                        <FormMessage className={messageClass} />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
-
-              <p className="flex items-center gap-1.5 text-sm text-[#5B57E6]/80">
-                <Info className="size-3.5 shrink-0" aria-hidden />
-                {t("profilesHint")}
-              </p>
 
               <BrandButton
                 type="submit"
