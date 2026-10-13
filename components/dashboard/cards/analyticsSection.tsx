@@ -11,7 +11,6 @@ import VitalsCard from "./vitalsCard";
 type Props = {
   data: AnalyticsData;
   sources: AnalyticsSource[];
-  // Id of the selected source tab.
   source: string;
   device: Device;
   compact?: boolean;
@@ -122,6 +121,7 @@ export default function AnalyticsSection({
             ))
           : null}
       </div>
+      
 
       {data.vitals.length > 0 && (
         <div className={`mt-3 grid gap-3 sm:mt-4 sm:gap-4 ${compact ? "" : "lg:grid-cols-2"}`}>

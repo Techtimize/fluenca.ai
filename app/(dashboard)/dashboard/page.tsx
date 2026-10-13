@@ -115,6 +115,7 @@ export default function DashboardPage() {
           </div>
         ) : null}
 
+
         {!isLoading && analytics ? (
           <AnalyticsSection
             data={analytics}
