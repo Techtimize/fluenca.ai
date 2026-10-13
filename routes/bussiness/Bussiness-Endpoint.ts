@@ -97,7 +97,7 @@ export const BUSSINESSENDPOINT = {
         SOCIAL_ACCOUNTS_CONNECT: (platform: string) => `/social-accounts/${platform}/connect`,
         SOCIAL_ACCOUNTS_DISCONNECT: (platform: string) => `/social-accounts/${platform}`,
         FACEBOOK_CONNECT: '/connector/facebook/connect',
-        X_CONNECT: '/connector/x/login',
+        X_LOGIN: '/connector/x/login',
     },
 
     PUBLISH:{
