@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -15,7 +15,6 @@ import {
   UserRound,
 } from "lucide-react";
 import { InstagramInsightsPanel } from "@/components/dashboard/social/InstagramInsightsPanel";
-import { InstagramStoriesLivePanel } from "@/components/dashboard/social/InstagramStoriesLivePanel";
 import { SocialNotConnected } from "@/components/dashboard/social/SocialNotConnected";
 import {
   accountHandle,
@@ -47,6 +46,7 @@ import {
   normalizeInstagramProfileContent,
   normalizeInstagramProfileInfo,
 } from "@/types/bussiness/instagram-type";
+import { normalizeDemographics } from "@/types/bussiness/instagram-insights-type";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import {
   engagementRate,
@@ -54,6 +54,16 @@ import {
   isReel,
   type MediaFilter,
 } from "@/utils/insta-utils";
+import { InstagramDemographicsBar } from "./instagramDemographicsbar";
+
+function isCountryBreakdown(dimension: string, title: string, id: string) {
+  const hay = `${dimension} ${title} ${id}`.toLowerCase();
+  return (
+    hay.includes("country") ||
+    hay.includes("countries") ||
+    hay.includes("nation")
+  );
+}
 
 export function InstagramProfileView() {
   const [mediaFilter, setMediaFilter] = useState<MediaFilter>("all");
@@ -89,7 +99,7 @@ export function InstagramProfileView() {
   } = InstagramProfileContentQuery(connected && username ? username : null);
 
   const profile = normalizeInstagramProfileInfo(profileRaw);
-  const posts = normalizeInstagramProfileContent(contentRaw);
+  const posts = normalizeInstagramProfileContent(contentRaw) ?? [];
 
   const displayName =
     profile.name || connectedAccount?.display_name || username || "Instagram";
@@ -129,9 +139,22 @@ export function InstagramProfileView() {
     instagramId,
     demographicsAudience,
   );
+
+  const followerDemographicsQ = InstagramProfileDemographicsQuery(
+    instagramId,
+    "followers",
+  );
   const followsQ = InstagramProfileFollowsQuery(instagramId);
   const viewsQ = InstagramProfileViewsQuery(instagramId);
   const actionsQ = InstagramProfileActionsQuery(instagramId);
+
+  const followerCountryBreakdown = useMemo(() => {
+    const list = normalizeDemographics(followerDemographicsQ.data);
+    if (!Array.isArray(list) || list.length === 0) return null;
+    return (
+      list.find((d) => isCountryBreakdown(d.dimension, d.title, d.id)) ?? null
+    );
+  }, [followerDemographicsQ.data]);
 
   const engagement = engagementRate(posts, followers);
   const profileUrl =
@@ -146,6 +169,7 @@ export function InstagramProfileView() {
       : mediaFilter === "posts"
         ? posts.filter((item) => !isReel(item))
         : posts;
+  const safeFilteredPosts = Array.isArray(filteredPosts) ? filteredPosts : [];
 
   const isRefreshing =
     isProfileFetching ||
@@ -153,6 +177,7 @@ export function InstagramProfileView() {
     reachQ.isFetching ||
     interactionsQ.isFetching ||
     demographicsQ.isFetching ||
+    followerDemographicsQ.isFetching ||
     followsQ.isFetching ||
     viewsQ.isFetching ||
     actionsQ.isFetching ||
@@ -170,15 +195,12 @@ export function InstagramProfileView() {
     void reachQ.refetch();
     void interactionsQ.refetch();
     void demographicsQ.refetch();
+    void followerDemographicsQ.refetch();
     void followsQ.refetch();
     void viewsQ.refetch();
     void actionsQ.refetch();
   };
 
-  const handleRefreshStoriesLive = () => {
-    void storiesQ.refetch();
-    void liveQ.refetch();
-  };
 
   if (isAccountsLoading) {
     return (
@@ -265,13 +287,29 @@ export function InstagramProfileView() {
           </div>
 
           <div className="space-y-2 text-[13px] leading-5 text-neutral-700">
-            {bio ? <p className="whitespace-pre-wrap">{bio}</p> : null}
-            {location ? (
-              <p className="inline-flex items-center gap-1.5 text-neutral-500">
-                <MapPin className="size-3.5" />
-                {location}
-              </p>
-            ) : null}
+            {(bio || location) && (
+              <div className="space-y-1.5">
+                {bio ? (
+                  <p className="min-w-0">
+                    <span className="mr-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
+                      Bio:
+                    </span>
+                    <span className="whitespace-pre-wrap text-neutral-500">{bio}</span>
+                  </p>
+                ) : null}
+                {location ? (
+                  <p className="inline-flex min-w-0 items-start gap-1.5 text-neutral-500">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
+                      Location:
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="size-3.5 shrink-0" />
+                      {location}
+                    </span>
+                  </p>
+                ) : null}
+              </div>
+            )}
             {isProfileError ? (
               <p className="text-[12px] text-red-500">
                 {getApiErrorMessage(
@@ -282,36 +320,39 @@ export function InstagramProfileView() {
             ) : null}
           </div>
 
-          <div className="space-y-2 pt-1">
-            {profileUrl ? (
-              <a
-                href={profileUrl}
-                target="_blank"
-                rel="noreferrer"
-                className={`inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white text-[13px] font-semibold text-neutral-900 hover:bg-neutral-50 ${FOCUS_RING}`}
-              >
-                <ExternalLink className="size-4" />
-                Open Instagram Profile
-              </a>
-            ) : (
-              <Link
-                href={PAGE_ROUTES.CONNECTORS}
-                className={`inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white text-[13px] font-semibold text-neutral-900 hover:bg-neutral-50 ${FOCUS_RING}`}
-              >
-                Manage connection
-              </Link>
-            )}
-            <button
-              type="button"
-              onClick={handleRefreshProfile}
-              disabled={isRefreshing}
-              className={`inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 text-[13px] font-semibold text-white hover:bg-neutral-800 disabled:opacity-60 ${FOCUS_RING}`}
-            >
-              <RefreshCw
-                className={`size-3.5 ${isRefreshing ? "animate-spin" : ""}`}
+          <div className="space-y-2 border-t border-neutral-100 pt-4">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-[12px] font-semibold uppercase tracking-[0.12em] text-neutral-400">
+                Demographics
+              </h3>
+              {followerDemographicsQ.isLoading ||
+              followerDemographicsQ.isFetching ? (
+                <Loader2 className="size-3.5 animate-spin text-[#E1306C]" />
+              ) : null}
+            </div>
+            {followerDemographicsQ.isError ? (
+              <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[12px] text-rose-700">
+                {getApiErrorMessage(
+                  followerDemographicsQ.error,
+                  "Couldn’t load follower countries",
+                )}
+              </p>
+            ) : followerCountryBreakdown ? (
+              <InstagramDemographicsBar
+                breakdown={{
+                  ...followerCountryBreakdown,
+                  title: "Followers by country",
+                }}
               />
-              Refresh profile & media
-            </button>
+            ) : followerDemographicsQ.isLoading ? (
+              <p className="rounded-xl border border-dashed border-neutral-200 bg-neutral-50 px-3 py-4 text-center text-[12px] text-neutral-500">
+                Loading countries…
+              </p>
+            ) : (
+              <p className="rounded-xl border border-dashed border-neutral-200 bg-neutral-50 px-3 py-4 text-center text-[12px] text-neutral-500">
+                No country breakdown yet for your followers.
+              </p>
+            )}
           </div>
         </div>
       </aside>
@@ -376,7 +417,7 @@ export function InstagramProfileView() {
           onDemographicsAudienceChange={setDemographicsAudience}
         />
 
-        <InstagramStoriesLivePanel
+        {/* <InstagramStoriesLivePanel
           accountId={instagramId}
           storiesRaw={storiesQ.data}
           liveRaw={liveQ.data}
@@ -395,7 +436,7 @@ export function InstagramProfileView() {
             refetch: () => void liveQ.refetch(),
           }}
           onRefresh={handleRefreshStoriesLive}
-        />
+        /> */}
 
         {/* Media content */}
         <section className="min-w-0 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
@@ -405,7 +446,7 @@ export function InstagramProfileView() {
                 Content (Media)
               </h2>
               <p className="mt-1 text-[13px] text-neutral-500">
-                {filteredPosts.length} of {posts.length} posts shown · your
+                {safeFilteredPosts.length} of {posts.length} posts shown · your
                 recent feed
               </p>
             </div>
@@ -460,7 +501,7 @@ export function InstagramProfileView() {
                 "Couldn’t load Instagram profile content",
               )}
             </div>
-          ) : filteredPosts.length === 0 ? (
+          ) : safeFilteredPosts.length === 0 ? (
             <div className="py-16 text-center">
               <p className="text-[18px] font-light text-neutral-900">
                 No media yet
@@ -472,7 +513,7 @@ export function InstagramProfileView() {
             </div>
           ) : (
             <ul className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-              {filteredPosts.map((post, index) => (
+              {safeFilteredPosts.map((post, index) => (
                 <MediaCard key={mediaKey(post, index)} post={post} index={index} />
               ))}
             </ul>

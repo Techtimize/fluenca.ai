@@ -22,8 +22,8 @@ export type OnboardingFormValidator = z.infer<typeof OnboardingFormSchema>;
 
 export const IndividualOnboardingFormSchema = z.object({
   full_name: z.string().min(1, 'Full name is required'),
-  role: z.string().min(1, 'Tell us what you do'),
-  primary_goal: z.string().min(1, 'Primary goal is required'),
+  profession: z.string().min(1, 'Profession is required'),
+  primary_goal: z.string().min(1, 'Primary growth goal is required'),
   language: z.string().min(1, 'Language is required'),
   platform: z.enum(['instagram', 'linkedin', 'both'], {
     message: 'Select a platform',

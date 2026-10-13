@@ -25,6 +25,7 @@ import {
   type InsightMetric,
 } from "@/types/bussiness/instagram-insights-type";
 import { FOCUS_RING } from "@/utils/ui-classes";
+import { InstagramDemographicsBar } from "./instagramDemographicsbar";
 
 type InsightBundle = {
   reach?: unknown;
@@ -61,12 +62,12 @@ type Props = {
 
 type TabId = "overview" | "audience" | "growth" | "engagement" | "actions";
 
-const TABS: { id: TabId; label: string; hint: string }[] = [
-  { id: "overview", label: "Overview", hint: "What happened recently" },
-  { id: "audience", label: "Audience", hint: "Who follows you" },
-  { id: "growth", label: "Growth", hint: "Follows & unfollows" },
-  { id: "engagement", label: "Engagement", hint: "Likes, comments, saves" },
-  { id: "actions", label: "Profile actions", hint: "Clicks on your profile" },
+const TABS: { id: TabId; label: string }[] = [
+  { id: "overview", label: "Overview" },
+  { id: "audience", label: "Audience" },
+  { id: "growth", label: "Growth" },
+  { id: "engagement", label: "Engagement" },
+  { id: "actions", label: "Actions" },
 ];
 
 function KpiCard({
@@ -133,14 +134,21 @@ function StatusPill({
   );
 }
 
-function MiniBars({ series, accent = "#E1306C" }: { series: InsightMetric["series"]; accent?: string }) {
-  if (!series.length) {
+function MiniBars({
+  series,
+  accent = "#E1306C",
+}: {
+  series?: InsightMetric["series"] | null;
+  accent?: string;
+}) {
+  const safeSeries = Array.isArray(series) ? series : [];
+  if (!safeSeries.length) {
     return (
       <p className="py-6 text-center text-[13px] text-neutral-400">No daily series yet</p>
     );
   }
-  const max = Math.max(1, ...series.map((p) => p.value));
-  const points = series.slice(-14);
+  const max = Math.max(1, ...safeSeries.map((p) => p.value));
+  const points = safeSeries.slice(-14);
   return (
     <div className="flex h-28 items-end gap-1.5">
       {points.map((p) => (
@@ -161,8 +169,9 @@ function MiniBars({ series, accent = "#E1306C" }: { series: InsightMetric["serie
   );
 }
 
-function MetricList({ metrics }: { metrics: InsightMetric[] }) {
-  if (!metrics.length) {
+function MetricList({ metrics }: { metrics?: InsightMetric[] | null }) {
+  const safeMetrics = Array.isArray(metrics) ? metrics : [];
+  if (!safeMetrics.length) {
     return (
       <p className="rounded-xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-8 text-center text-[13px] text-neutral-500">
         No metrics in this response yet.
@@ -171,7 +180,7 @@ function MetricList({ metrics }: { metrics: InsightMetric[] }) {
   }
   return (
     <ul className="grid gap-2 sm:grid-cols-2">
-      {metrics.map((m) => (
+      {safeMetrics.map((m) => (
         <li
           key={m.id}
           className="rounded-xl border border-neutral-200 bg-neutral-50/80 px-3.5 py-3"
@@ -179,11 +188,11 @@ function MetricList({ metrics }: { metrics: InsightMetric[] }) {
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <p className="truncate text-[13px] font-semibold text-neutral-900">
-                {m.title}
+                Reached by accounts
               </p>
               {m.description ? (
                 <p className="mt-0.5 line-clamp-2 text-[11px] text-neutral-500">
-                  {m.description}
+                  Unique accounts that saw your content
                 </p>
               ) : null}
             </div>
@@ -199,32 +208,6 @@ function MetricList({ metrics }: { metrics: InsightMetric[] }) {
         </li>
       ))}
     </ul>
-  );
-}
-
-function DemographicBars({ breakdown }: { breakdown: DemographicBreakdown }) {
-  const max = Math.max(1, ...breakdown.buckets.map((b) => b.value));
-  const rows = breakdown.buckets.slice(0, 8);
-  return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-4">
-      <h4 className="text-[13px] font-semibold text-neutral-900">{breakdown.title}</h4>
-      <ul className="mt-3 space-y-2.5">
-        {rows.map((b) => (
-          <li key={b.key}>
-            <div className="mb-1 flex items-center justify-between gap-2 text-[12px]">
-              <span className="truncate font-medium text-neutral-700">{b.label}</span>
-              <span className="shrink-0 text-neutral-500">{formatCount(b.value)}</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#F58529] via-[#E1306C] to-[#C13584]"
-                style={{ width: `${(b.value / max) * 100}%` }}
-              />
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }
 
@@ -289,24 +272,32 @@ export function InstagramInsightsPanel({
 }: Props) {
   const [tab, setTab] = useState<TabId>("overview");
 
-  const reach = useMemo(() => normalizeInsightMetrics(data.reach), [data.reach]);
+  const reach = useMemo(
+    () => normalizeInsightMetrics(data.reach) ?? [],
+    [data.reach],
+  );
   const interactions = useMemo(
-    () => normalizeInsightMetrics(data.interactions),
+    () => normalizeInsightMetrics(data.interactions) ?? [],
     [data.interactions],
   );
   const follows = useMemo(
-    () => normalizeInsightMetrics(data.follows),
+    () => normalizeInsightMetrics(data.follows) ?? [],
     [data.follows],
   );
-  const views = useMemo(() => normalizeInsightMetrics(data.views), [data.views]);
+  const views = useMemo(
+    () => normalizeInsightMetrics(data.views) ?? [],
+    [data.views],
+  );
   const actions = useMemo(
-    () => normalizeInsightMetrics(data.actions),
+    () => normalizeInsightMetrics(data.actions) ?? [],
     [data.actions],
   );
-  const demographics = useMemo(
-    () => normalizeDemographics(data.demographics),
-    [data.demographics],
-  );
+  const demographics = useMemo(() => {
+    const list = normalizeDemographics(data.demographics);
+    return Array.isArray(list)
+      ? list.filter((d) => Array.isArray(d?.buckets))
+      : [];
+  }, [data.demographics]);
 
   const reachMetric = pickMetric(reach, "reach", "accounts_reached");
   const viewsMetric = pickMetric(views, "views", "profile_views", "impressions");
@@ -387,7 +378,7 @@ export function InstagramInsightsPanel({
       <div
         role="tablist"
         aria-label="Insight sections"
-        className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="inline-flex max-w-full gap-0.5 overflow-x-auto rounded-lg border border-neutral-200 bg-neutral-100/80 p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {TABS.map((t) => {
           const active = tab === t.id;
@@ -398,16 +389,13 @@ export function InstagramInsightsPanel({
               role="tab"
               aria-selected={active}
               onClick={() => setTab(t.id)}
-              className={`shrink-0 rounded-full px-3.5 py-2 text-left transition ${FOCUS_RING} ${
+              className={`shrink-0 rounded-md px-2.5 py-1 text-[11px] font-semibold tracking-tight transition-colors ${FOCUS_RING} ${
                 active
-                  ? "bg-[#E1306C] text-white"
-                  : "border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+                  ? "bg-white text-[#E1306C] shadow-sm ring-1 ring-black/5"
+                  : "text-neutral-500 hover:bg-white/70 hover:text-neutral-800"
               }`}
             >
-              <span className="block text-[13px] font-semibold">{t.label}</span>
-              <span className={`block text-[11px] ${active ? "text-white/80" : "text-neutral-400"}`}>
-                {t.hint}
-              </span>
+              {t.label}
             </button>
           );
         })}
@@ -443,53 +431,6 @@ export function InstagramInsightsPanel({
             </div>
           </SectionShell>
         </div>
-      ) : null}
-
-      {tab === "audience" ? (
-        <SectionShell
-          title="Audience demographics"
-          subtitle="Age, gender, and location mix for your followers or engaged audience"
-          loading={states.demographics.isLoading}
-          error={states.demographics.isError}
-          errorMessage={getApiErrorMessage(
-            states.demographics.error,
-            "Demographics unavailable",
-          )}
-          onRetry={states.demographics.refetch}
-        >
-          <div className="mb-4 flex flex-wrap gap-2">
-            {(
-              [
-                { id: "followers" as const, label: "Followers" },
-                { id: "engaged-audience" as const, label: "Engaged audience" },
-              ]
-            ).map((opt) => (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => onDemographicsAudienceChange(opt.id)}
-                className={`rounded-full px-3 py-1.5 text-[12px] font-semibold ${FOCUS_RING} ${
-                  demographicsAudience === opt.id
-                    ? "bg-neutral-900 text-white"
-                    : "border border-neutral-200 text-neutral-700 hover:bg-neutral-50"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-          {demographics.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-10 text-center text-[13px] text-neutral-500">
-              No demographic breakdown returned for this audience yet.
-            </p>
-          ) : (
-            <div className="grid gap-3 md:grid-cols-2">
-              {demographics.map((d) => (
-                <DemographicBars key={d.id} breakdown={d} />
-              ))}
-            </div>
-          )}
-        </SectionShell>
       ) : null}
 
       {tab === "growth" ? (
