@@ -81,7 +81,12 @@ export default function ChatShell({ children }: { children: ReactNode }) {
     sentControls.current = [];
     for (const el of screenControls()) {
       const label = controlLabel(el);
-      if (label in controls || sentControls.current.length >= MAX_CONTROLS) continue;
+      if (label in controls || Object.keys(controls).length >= MAX_CONTROLS) continue;
+      const href = el instanceof HTMLAnchorElement ? new URL(el.href, window.location.origin) : null;
+      if (href && href.origin === window.location.origin) {
+        controls[label] = `${href.pathname}${href.search}`;
+        continue;
+      }
       controls[label] = `${CONTROL_PREFIX}${sentControls.current.length}`;
       sentControls.current.push(el);
     }
