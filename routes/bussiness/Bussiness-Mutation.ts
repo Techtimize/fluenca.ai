@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogImageApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, EditUserProfileApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, LinkedInPublishApi, OnboardingApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, SocialGrowthApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogImageApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, EditUserProfileApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, LinkedInPublishApi, OnboardingApi, XLoginApi, XPublishApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, SocialGrowthApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi } from "./bussiness.routes";
 import type {
   FacebookPublishRequest,
   InstagramPublishRequest,
   LinkedInPublishRequest,
+  XPublishRequest,
 } from "@/types/bussiness/social-accounts-type";
 import type {
   ContentExecutionAgentModeRequest,
@@ -18,7 +19,7 @@ import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from 
 import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/bussiness/onboarding-type";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import type { BlogImageRequest } from "@/types/bussiness/blog-type";
-import { getApiErrorMessage } from "@/errors/error-utils";
+import { getApiErrorMessage, isApiNotFoundError } from "@/errors/error-utils";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { setCompanyIdProvider, setOnboardingCompletedProvider } from "@/provider/auth-provider";
 import { CompetitorAnalysisAsyncResponse, CompetitorAnalysisManualRequest, CompetitorAnalysisRequest } from "@/types/bussiness/competitoranalysis-type";
@@ -475,6 +476,22 @@ export function LinkedInConnectMutation() {
   });
 }
 
+export function XConnectMutation() {
+  return useMutation({
+    mutationFn: async () => {
+      const response = await XLoginApi();
+      return getAuthorizeUrl(response);
+    },
+    onSuccess: (authorizeUrl) => {
+      toast.message("Redirecting to X…");
+      window.location.href = authorizeUrl;
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to start X connection"));
+    },
+  });
+}
+
 export function SocialAccountDisconnectMutation() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -484,6 +501,7 @@ export function SocialAccountDisconnectMutation() {
         instagram: "Instagram disconnected",
         facebook: "Facebook disconnected",
         linkedin: "LinkedIn disconnected",
+        x: "X disconnected",
       };
       toast.success(labels[platform] || `${platform} disconnected`);
       void queryClient.invalidateQueries({ queryKey: ["social-accounts"] });
@@ -679,6 +697,26 @@ export function LinkedInPublishMutation() {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to publish to LinkedIn"));
+    },
+  });
+}
+
+export function XPublishMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: XPublishRequest) => XPublishApi(data),
+    onSuccess: () => {
+      toast.success("Posted to X");
+    },
+    onError: (error) => {
+      if (isApiNotFoundError(error)) {
+        // 404: the X account is gone, so refresh accounts to show "Connect X" again
+        toast.error("X isn't connected. Connect X to post.");
+        void queryClient.invalidateQueries({ queryKey: ["social-accounts"] });
+        return;
+      }
+      // 502 carries a readable message from X
+      toast.error(getApiErrorMessage(error, "Failed to post to X"));
     },
   });
 }
