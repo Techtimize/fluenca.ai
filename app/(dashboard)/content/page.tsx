@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import Image from "next/image";
+import { ArrowDownWideNarrow, ChevronDown, Loader2, Sparkles } from "lucide-react";
 import { ContentResultsGrid } from "@/components/dashboard/content/contentResultGrid";
+import { normalizeContentPlatform } from "@/components/dashboard/content/resultcard";
 import {
   normalizeCompanyContent,
   type ContentGenerationResultItem,
@@ -18,6 +20,11 @@ import {
 } from "@/routes/bussiness/Bussiness-Mutation";
 import { CompanyImageGenerationResultsQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
+import { FOCUS_RING } from "@/utils/ui-classes";
+import { cn } from "@/lib/utils";
+
+type PlatformFilter = "all" | "instagram" | "linkedin";
+type SortOrder = "newest" | "oldest";
 
 function platformKey(platform?: string) {
   const value = String(platform || "").toLowerCase();
@@ -41,6 +48,16 @@ function linkedInPayload(item: ContentGenerationResultItem) {
   return { text };
 }
 
+const FILTERS: {
+  id: PlatformFilter;
+  label: string;
+  icon?: string;
+}[] = [
+  { id: "all", label: "All" },
+  { id: "instagram", label: "Instagram", icon: "/assets/insta.png" },
+  { id: "linkedin", label: "LinkedIn", icon: "/assets/linkedin.png" },
+];
+
 export default function ContentPage() {
   const companyId = useAuthStore((s) => s.company_id);
   const companyName = useAuthStore((s) => s.company_name);
@@ -53,6 +70,8 @@ export default function ContentPage() {
   const { mutate: publishLinkedIn, isPending: isPublishingLinkedIn } =
     LinkedInPublishMutation();
   const [publishingId, setPublishingId] = useState<string | null>(null);
+  const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   const content = normalizeCompanyContent(data);
   const hasResults = content.results.length > 0 || content.images.length > 0;
@@ -96,30 +115,123 @@ export default function ContentPage() {
     });
   };
 
-  const gridItems: ContentGenerationResultItem[] =
-    content.results.length > 0
-      ? content.results
-      : content.images.map((image, index) => ({
-          id: image.id || `image-${index}`,
-          success: true,
-          status: image.status || "success",
-          platform: image.platform,
-          purpose: image.purpose,
-          aspectRatio: image.aspectRatio,
-          imagesCount: 1,
-          jobsCount: 1,
-          createdAt: image.createdAt,
-          title: image.title || image.headline,
-          projectName: image.projectName,
-          caption: image.caption,
-          images: [image],
-        }));
+  const gridItems: ContentGenerationResultItem[] = useMemo(() => {
+    const base =
+      content.results.length > 0
+        ? content.results
+        : content.images.map((image, index) => ({
+            id: image.id || `image-${index}`,
+            success: true,
+            status: image.status || "success",
+            platform: image.platform,
+            purpose: image.purpose,
+            aspectRatio: image.aspectRatio,
+            imagesCount: 1,
+            jobsCount: 1,
+            createdAt: image.createdAt,
+            title: image.title || image.headline,
+            projectName: image.projectName,
+            caption: image.caption,
+            version: image.version,
+            images: [image],
+          }));
+
+    const filtered =
+      platformFilter === "all"
+        ? base
+        : base.filter(
+            (item) => normalizeContentPlatform(item.platform) === platformFilter,
+          );
+
+    return [...filtered].sort((a, b) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return sortOrder === "newest" ? bTime - aTime : aTime - bTime;
+    });
+  }, [content.results, content.images, platformFilter, sortOrder]);
 
   return (
-    <main className="min-w-0 space-y-3 pb-4">
-      <TopBar user={{ name: companyName || "User" }} placeholder="Search content..." />
-      <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Generated Content</h1>
+    <main className="min-w-0 space-y-5 pb-6">
+      <TopBar
+        user={{ name: companyName || "User" }}
+        placeholder="Search content..."
+      />
+
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2.5">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#ECEBFF] text-[#5B57E6]">
+              <Sparkles className="size-4" aria-hidden="true" />
+            </span>
+            <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 sm:text-[28px]">
+              Generated Content
+            </h1>
+          </div>
+          <p className="mt-1.5 max-w-2xl text-[14px] text-neutral-500">
+            AI-created content for your social media channels. Review, edit, and
+            publish your posts.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <div
+            role="tablist"
+            aria-label="Filter by platform"
+            className="inline-flex flex-wrap gap-1.5 rounded-full border border-[#E6E8F5] bg-white p-1"
+          >
+            {FILTERS.map((filter) => {
+              const active = platformFilter === filter.id;
+              return (
+                <button
+                  key={filter.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setPlatformFilter(filter.id)}
+                  className={cn(
+                    `inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold transition-colors ${FOCUS_RING}`,
+                    active
+                      ? "bg-[#5B57E6] text-white shadow-sm"
+                      : "text-neutral-600 hover:bg-[#F6F7FD]",
+                  )}
+                >
+                  {filter.icon ? (
+                    <Image
+                      src={filter.icon}
+                      alt=""
+                      width={14}
+                      height={14}
+                      className="size-3.5 object-contain"
+                    />
+                  ) : null}
+                  {filter.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <label className="relative inline-flex">
+            <span className="sr-only">Sort content</span>
+            <ArrowDownWideNarrow
+              className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-neutral-400"
+              aria-hidden="true"
+            />
+            <select
+              value={sortOrder}
+              onChange={(event) =>
+                setSortOrder(event.target.value as SortOrder)
+              }
+              className={`h-10 appearance-none rounded-full border border-[#E6E8F5] bg-white py-0 pl-9 pr-9 text-[12px] font-semibold text-neutral-700 outline-none ${FOCUS_RING}`}
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+            <ChevronDown
+              className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-neutral-400"
+              aria-hidden="true"
+            />
+          </label>
+        </div>
       </div>
 
       {companyId && (isLoading || isFetching) && !hasResults && !notFound ? (
@@ -149,14 +261,18 @@ export default function ContentPage() {
         <ApiNotFoundCard resource="content" />
       ) : null}
 
-      {companyId && hasResults ? (
-        <div className="space-y-3">
-          <ContentResultsGrid
-            items={gridItems}
-            publishingId={isPublishing ? publishingId : null}
-            onPublish={handlePublish}
-          />
-        </div>
+      {companyId && hasResults && gridItems.length === 0 ? (
+        <Card className="p-8 text-center text-sm text-neutral-500">
+          No posts match this platform filter.
+        </Card>
+      ) : null}
+
+      {companyId && hasResults && gridItems.length > 0 ? (
+        <ContentResultsGrid
+          items={gridItems}
+          publishingId={isPublishing ? publishingId : null}
+          onPublish={handlePublish}
+        />
       ) : null}
     </main>
   );
