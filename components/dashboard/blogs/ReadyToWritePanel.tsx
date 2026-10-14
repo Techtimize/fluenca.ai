@@ -1,4 +1,4 @@
-import { FileText, Loader2, PenLine, Sparkles } from "lucide-react";
+import { FileText, Loader2, PenLine, Radar, Sparkles } from "lucide-react";
 import type { BriefListItem, KeywordRunStatus } from "@/types/bussiness/blog-type";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
@@ -11,6 +11,9 @@ type Props = {
   onWrite: (briefId: string) => void;
   isGenerating: boolean;
   onGenerate: () => void;
+  gaps?: { question: string; named_instead: string[] }[];
+  pendingGap?: string | null;
+  onWriteGap?: (question: string) => void;
 };
 
 /** Blog briefs that have no post yet, highest priority first, each one click away from a draft. */
@@ -21,6 +24,9 @@ export default function ReadyToWritePanel({
   onWrite,
   isGenerating,
   onGenerate,
+  gaps = [],
+  pendingGap = null,
+  onWriteGap,
 }: Props) {
   // Re-running research replaces the current ideas, so only offer it when there are none to work from.
   const canGenerate = researchStatus === "not_started" || researchStatus === "failed";
@@ -33,7 +39,7 @@ export default function ReadyToWritePanel({
           <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-neutral-900">
             Ready to Write
             <span className="rounded-full bg-[#EEF0FF] px-2 py-0.5 text-[11px] font-semibold text-[#4544C9]">
-              {briefs.length}
+              {briefs.length + gaps.length}
             </span>
           </h2>
           <p className="mt-1 text-[12px] text-neutral-500">
@@ -58,8 +64,40 @@ export default function ReadyToWritePanel({
       </div>
 
       <div className="mt-4 rounded-2xl border border-[#E6E8F5] bg-white">
-        {briefs.length ? (
+        {briefs.length || gaps.length ? (
           <ul className="divide-y divide-[#EEF0F8]">
+            {gaps.map((gap) => {
+              const pending = pendingGap === gap.question;
+              return (
+                <li key={gap.question} className="flex items-start gap-3 px-4 py-4">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-rose-50 text-rose-600">
+                    <Radar className="size-4" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-semibold leading-5 text-neutral-900">{gap.question}</p>
+                    <p className="mt-1 text-[12px] text-neutral-500">
+                      <span className="me-1.5 rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-700">
+                        AI visibility gap
+                      </span>
+                      {gap.named_instead.length ? `AI names ${gap.named_instead.join(", ")}` : "AI does not name you"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onWriteGap?.(gap.question)}
+                    disabled={pendingGap !== null}
+                    className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-[#E6E8F5] bg-white px-3.5 text-[13px] font-medium text-[#4544C9] transition-colors hover:bg-[#F6F5FF] disabled:opacity-60 ${FOCUS_RING}`}
+                  >
+                    {pending ? (
+                      <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                    ) : (
+                      <PenLine className="size-3.5" aria-hidden="true" />
+                    )}
+                    Write
+                  </button>
+                </li>
+              );
+            })}
             {briefs.map((brief) => {
               const pending = pendingBriefId === brief.brief_id;
               return (
