@@ -20,7 +20,11 @@ export function readableAnswer(text: string): string {
         .replace(MARKDOWN_LINK, "$1")
         .replace(BARE_SOURCE, "")
         .replace(/\*\*|__|`/g, "")
-        .replace(/^#{1,6}\s+/, "");
+        .replace(/^#{1,6}\s+/, "")
+        .replace(/\\[()[\]]/g, "")
+        .replace(/\\text\{([^}]*)\}/g, "$1")
+        .replace(/\\times/g, "×")
+        .replace(/\s?(\[\d+\])+/g, "");
       if (!cleaned.trim().startsWith("|")) return cleaned;
       return cleaned
         .split("|")
@@ -70,19 +74,75 @@ function sourceHost(url: string) {
   return url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0];
 }
 
-function AnswerCard({ engine, answer }: { engine: string; answer: AiVisibilityAnswer }) {
+const MAX_CHIPS = 8;
+
+function Chips({ items, tone }: { items: string[]; tone: "brand" | "source" }) {
+  const shown = items.slice(0, MAX_CHIPS);
+  const style =
+    tone === "brand" ? "bg-[#ECEBFF] text-[#3730A3]" : "bg-[#F1F3F9] text-neutral-700 ring-1 ring-[#E6E8F5]";
   return (
-    <div className="flex min-w-0 flex-col rounded-xl bg-white p-3 ring-1 ring-[#E6E8F5]">
-      <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-neutral-500">
-        {ENGINE_NAMES[engine]} said
-      </p>
-      <p className="mt-1.5 max-h-72 overflow-y-auto whitespace-pre-wrap break-words text-[13px] leading-5 text-neutral-700">
-        {answer.answer_text ? highlight(readableAnswer(answer.answer_text), answer.brands) : "No answer this time."}
-      </p>
-      {answer.sources.length ? (
-        <p className="mt-2 truncate text-[12px] text-neutral-500">
-          Sources: {answer.sources.slice(0, 4).map(sourceHost).join(", ")}
-        </p>
+    <span className="flex flex-wrap gap-1.5">
+      {shown.map((item) => (
+        <span key={item} className={`max-w-full truncate rounded-full px-2 py-0.5 text-[12px] font-medium ${style}`}>
+          {item}
+        </span>
+      ))}
+      {items.length > shown.length ? (
+        <span className="px-1 py-0.5 text-[12px] text-neutral-500">+{items.length - shown.length} more</span>
+      ) : null}
+    </span>
+  );
+}
+
+function AnswerCard({ engine, answer }: { engine: string; answer: AiVisibilityAnswer }) {
+  const [full, setFull] = useState(false);
+  const sources = Array.from(new Set(answer.sources.map(sourceHost)));
+  const badge = !answer.answer_text
+    ? { text: "No answer", style: "bg-neutral-100 text-neutral-600" }
+    : answer.mentioned
+      ? { text: `Named you${answer.position ? ` #${answer.position}` : ""}`, style: "bg-emerald-50 text-emerald-700" }
+      : { text: "Not named", style: "bg-rose-50 text-rose-700" };
+
+  return (
+    <div className="flex min-w-0 flex-col gap-3 rounded-xl bg-white p-4 ring-1 ring-[#E6E8F5]">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[13px] font-semibold text-neutral-900">{ENGINE_NAMES[engine]}</p>
+        <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${badge.style}`}>{badge.text}</span>
+      </div>
+
+      <div className="space-y-1.5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-500">Recommends</p>
+        {answer.brands.length ? (
+          <Chips items={answer.brands} tone="brand" />
+        ) : (
+          <p className="text-[12px] text-neutral-500">No brands named</p>
+        )}
+      </div>
+
+      {sources.length ? (
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-500">Sources it used</p>
+          <Chips items={sources} tone="source" />
+        </div>
+      ) : null}
+
+      {answer.answer_text ? (
+        <div className="mt-auto border-t border-[#EEF0F7] pt-2">
+          <button
+            type="button"
+            onClick={() => setFull(!full)}
+            aria-expanded={full}
+            className={`inline-flex items-center gap-1 rounded text-[12px] font-medium text-[#4F46E5] hover:underline ${FOCUS_RING}`}
+          >
+            {full ? "Hide full answer" : "Read full answer"}
+            <ChevronDown className={`size-3.5 transition-transform ${full ? "rotate-180" : ""}`} aria-hidden="true" />
+          </button>
+          {full ? (
+            <p className="mt-2 max-h-80 overflow-y-auto whitespace-pre-wrap break-words text-[13px] leading-5 text-neutral-700">
+              {highlight(readableAnswer(answer.answer_text), answer.brands)}
+            </p>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );
