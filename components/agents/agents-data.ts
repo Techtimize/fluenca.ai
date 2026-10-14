@@ -13,7 +13,6 @@ export interface AgentStory {
   headline: string;
   summary: string;
   mission: string;
-  leader: string;
   // Used only by the fallback sim card (when no video is set)
   clipLabel: string;
   statusLabel: string;
@@ -28,20 +27,18 @@ export interface AgentStory {
 export const AGENTS: AgentStory[] = [
   {
     id: "agent-1",
-    name: "Sayyam",
+    name: "Intake",
     role: "Intake & Crawl",
     accent: "indigo",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCFEjCBVpYcAMxK-leVpdlHox3-gkT015kxmLuktGzMXCHO4phmSXlCC_v_WyGQD0EgrqzQh8E3MODzTHRqgo6chUpkHzsmoKweLeRVtsLwy_aE7Uv6SLyswxcNAimkPxSglx16LBXXs4Cp25b5JG9ScK0FPyjIxTNjePE-e9DM2KRRWl09iWsnTb4CquBGvUAZ-xyAOAvfbZlpyoBj-KQXBsMZItyuBdgRpgoZBU0ORH6Ew2ZPmiUedMnXdVKfqOJFAw",
+    image: "/assets/Avatars/sayyam-mascot.png",
     label: "01. Intake Agent",
     title: "The One Who Asks What Others Miss",
     chapter: "CHAPTER 01 · THE INVESTIGATOR",
     headline: "Every great business has a story. We start by uncovering it.",
     summary:
-      "Before we create a single strategy, someone needs to ask the right questions. Meet Sayyam, the curious mind of our AI team. He explores websites, follows evidence, and uncovers the details that make each business different. No blind assumptions. No starting from scratch. Just the right questions leading to better decisions.",
+      "Before we create a single strategy, someone needs to ask the right questions. Meet the curious mind of our AI team. He explores websites, follows evidence, and uncovers the details that make each business different. No blind assumptions. No starting from scratch. Just the right questions leading to better decisions.",
     mission: "Discover the story behind the business.",
-    leader: "Sayyam",
-    clipLabel: "CLIP: #INTAKE_CRAWL_99",
+    clipLabel: "CLIP: #INTAKE_CRAWL_01",
     statusLabel: "Intake Agent",
     sim: {
       headline: "Reading company pages",
@@ -52,35 +49,32 @@ export const AGENTS: AgentStory[] = [
   },
   {
     id: "agent-2",
-    name: "Masrur",
-    role: "DNA & Strategy",
-    accent: "amber",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDioTMTfciGARTKrMbUEQPMD1j1eY1Z5G6ziEGFTgdf-Xhy0VbkebDIVJmoic_dWQHB29P-ApCU_y7BxNEJIlOXibN_jegKlxkYpHWp55b-T12gFRfXFY8XbtgWg5jXYXQRpiO3ZePikuIum70osCFNwdy0Fdj6XQuZmuU8YwEyguReRStxaS8nBgLNMEYhOwEqIB3FJBDONIOKXmR5by15OB0E8jn23E4TGOnxeVy-v6-L7YQ1av9ndTbucN12qHwbrw",
-    label: "02. DNA Agent",
-    title: "The Guardian of Identity",
-    chapter: "CHAPTER 02 · THE IDENTITY KEEPER",
-    headline: "Before AI speaks for your brand, it needs to know who you are.",
+    name: "Competitor",
+    role: "Competitor Analysis",
+    accent: "indigo",
+    image: "/assets/Avatars/talha-mascot.png",
+    label: "02. Competitor Agent",
+    title: "The One Who Finds the Gaps",
+    chapter: "CHAPTER 02 · THE STRATEGIC OBSERVER",
+    headline: "Your competitors are making moves. What are they missing?",
     summary:
-      "Meet Masrur. He takes everything the business has confirmed and turns it into one clear identity—its voice, values, services, and unique strengths. Every content idea and every message has a foundation to build on. Because the smartest AI isn't the one that says the most. It's the one that understands your brand.",
-    mission: "Make every word feel like your brand.",
-    leader: "Talha",
-    clipLabel: "CLIP: #DNA_SYNTHESIS_01",
-    statusLabel: "DNA Agent",
+      "While others watch the competition, our AI investigates it. From their messaging and content to their online presence, this agent looks for patterns, overlooked opportunities, and gaps your business could explore. It doesn't just help you see who you're competing with. It helps you see where you could stand apart.",
+    mission: "Turn competitive insight into opportunity.",
+    clipLabel: "CLIP: #COMPETITOR_02",
+    statusLabel: "Competitor Agent",
     sim: {
-      headline: "Synthesizing DNA Profile",
-      metric: "1,800 Words",
-      rows: ["Voice", "Values", "Services", "Strengths"],
+      headline: "Scanning competitors",
+      metric: "12 Gaps Found",
+      rows: ["Websites", "Messaging", "Social", "Gaps"],
     },
     video: { src: "/videos/agents/Talha.mp4" },
   },
   {
     id: "agent-3",
-    name: "Storyteller", // TODO: replace with the agent's real name
+    name: "Content",
     role: "Content & Blog",
     accent: "violet",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAe-AlaEPUE_WwfHeEO5bu5qnY3fDL3XV8IR2YsuFQC0xVQTcYE1vIyZG20BqNNO1q7NnZw3ZLyuRfI8PfZGgf0-F7JyxYVq1ARqlberO3nCQ_46aLViVvH-XeOjbBIGEmRVIeJj6lM7vVeJTuS39sMqwjLC__94tHwKUkb7pmcO2mrPuuEKM2cd_MmYqDbbomyFdriKAYuaM4B7WyFLEwIt9PpBaOgaX5kVD_47Q9UFd7ZzDnRN8yGKXEyWHoYcKmRIQ",
+    image: "/assets/Avatars/raheel-mascot.png",
     label: "03. Content Agent",
     title: "The Storyteller",
     chapter: "CHAPTER 03 · THE CREATIVE MIND",
@@ -88,7 +82,6 @@ export const AGENTS: AgentStory[] = [
     summary:
       "Meet the storyteller who turns research and strategy into meaningful content. From complete blog posts to useful insights backed by sources, this agent brings your brand's expertise to life in a voice that feels true to you. Every piece has a purpose: to answer a question, share knowledge, and give your audience a reason to care.",
     mission: "Turn knowledge into stories worth reading.",
-    leader: "Raheel",
     clipLabel: "CLIP: #BLOG_WRITER_03",
     statusLabel: "Content Agent",
     sim: {
@@ -100,73 +93,67 @@ export const AGENTS: AgentStory[] = [
   },
   {
     id: "agent-4",
-    name: "Connector", // TODO: replace with the agent's real name
-    role: "Chatbot",
-    accent: "emerald",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDtOMXvSMwB-6saowK-rehe2CvlGGK8SFCJJvR9NeItup5sRvZsbimq_22NUCcwMZJ6Cog5ZSlIoIad6e1xzJ7jExIB3cMldvPQpEoHfZkxQAm78Gsi8fTnd_0aQqE5GK2hiVkm4bb5bpl_FqjK9ny-WM7PQFqR5-kQ82L-6R6Lf0ji2nK88MFK2fItrpe8Y6OOJc4fe8nHhbr1xFlYZCRpZlupIdCzRElFJWBGcFly-hZqRcZVF7-1enA3nS8RNJiv-g",
-    label: "04. Chatbot Agent",
-    title: "The Team's Front Door",
-    chapter: "CHAPTER 06 · THE CONNECTOR",
-    headline: "What if your entire AI team was just one conversation away?",
+    name: "DNA",
+    role: "DNA & Strategy",
+    accent: "amber",
+    image: "/assets/Avatars/Hasnain-mascot.jpeg",
+    label: "04. DNA Agent",
+    title: "The Guardian of Identity",
+    chapter: "CHAPTER 04 · THE IDENTITY KEEPER",
+    headline: "Before AI speaks for your brand, it needs to know who you are.",
     summary:
-      "Meet the assistant that brings the experience together. Ask a question, explore an idea, or request an action, and Fluenca can respond, connect you with the right specialist, or trigger a supported workflow. You don't need to figure out which agent does what. Just tell it what you need, and let the right capabilities come into play.",
-    mission: "Make the power of AI feel effortless.",
-    leader: "[Team Member 6]",
-    clipLabel: "CLIP: #CHATBOT_04",
-    statusLabel: "Chatbot Agent",
+      "Meet the identity keeper. He takes everything the business has confirmed and turns it into one clear identity—its voice, values, services, and unique strengths. Every content idea and every message has a foundation to build on. Because the smartest AI isn't the one that says the most. It's the one that understands your brand.",
+    mission: "Make every word feel like your brand.",
+    clipLabel: "CLIP: #DNA_SYNTHESIS_04",
+    statusLabel: "DNA Agent",
     sim: {
-      headline: "Routing your request",
-      metric: "1 Conversation",
-      rows: ["Ask", "Route", "Act", "Reply"],
+      headline: "Synthesizing DNA Profile",
+      metric: "1,800 Words",
+      rows: ["Voice", "Values", "Services", "Strengths"],
     },
     video: { src: "/videos/agents/Hasnain.mp4" },
   },
   {
     id: "agent-5",
-    name: "Observer", // TODO: replace with the agent's real name
-    role: "Competitor Analysis",
-    accent: "indigo",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCFEjCBVpYcAMxK-leVpdlHox3-gkT015kxmLuktGzMXCHO4phmSXlCC_v_WyGQD0EgrqzQh8E3MODzTHRqgo6chUpkHzsmoKweLeRVtsLwy_aE7Uv6SLyswxcNAimkPxSglx16LBXXs4Cp25b5JG9ScK0FPyjIxTNjePE-e9DM2KRRWl09iWsnTb4CquBGvUAZ-xyAOAvfbZlpyoBj-KQXBsMZItyuBdgRpgoZBU0ORH6Ew2ZPmiUedMnXdVKfqOJFAw",
-    label: "05. Competitor Agent",
-    title: "The Strategic Observer",
-    chapter: "CHAPTER 05 · THE STRATEGIC OBSERVER",
-    headline: "Your competitors are making moves. What are they missing?",
-    summary:
-      "Meet the strategist who looks beyond the surface. While others see competing brands, our Competitor Agent sees clues: unnoticed gaps, missed opportunities, and strategies waiting to be discovered. It studies their websites, messaging, and social presence to uncover where your business can stand apart. Because winning isn't always about doing more than your competitors. Sometimes, it's about seeing what they don't.",
-    mission: "Turn competitive insights into your next big opportunity.",
-    leader: "[Team Lead Name]",
-    clipLabel: "CLIP: #COMPETITOR_05",
-    statusLabel: "Competitor Agent",
-    sim: {
-      headline: "Scanning competitors",
-      metric: "12 Gaps Found",
-      rows: ["Websites", "Messaging", "Social", "Gaps"],
-    },
-    video: { src: "/videos/agents/Ilsa.mp4" },
-  },
-  {
-    id: "agent-6",
-    name: "Director", // TODO: replace with the agent's real name
+    name: "Script",
     role: "Script Generation",
     accent: "violet",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDioTMTfciGARTKrMbUEQPMD1j1eY1Z5G6ziEGFTgdf-Xhy0VbkebDIVJmoic_dWQHB29P-ApCU_y7BxNEJIlOXibN_jegKlxkYpHWp55b-T12gFRfXFY8XbtgWg5jXYXQRpiO3ZePikuIum70osCFNwdy0Fdj6XQuZmuU8YwEyguReRStxaS8nBgLNMEYhOwEqIB3FJBDONIOKXmR5by15OB0E8jn23E4TGOnxeVy-v6-L7YQ1av9ndTbucN12qHwbrw",
-    label: "06. Script Agent",
+    image: "/assets/Avatars/ilsa-mascot.png",
+    label: "05. Script Agent",
     title: "The Creative Director",
-    chapter: "CHAPTER 06 · THE CREATIVE DIRECTOR",
+    chapter: "CHAPTER 05 · THE CREATIVE DIRECTOR",
     headline: "Every scroll-stopping video begins with a story worth telling.",
     summary:
-      "Meet the creative mind that turns an idea into a scene-by-scene experience. From the opening hook that captures attention to the final call to action, our Script Generator Agent builds the story, shapes the dialogue, and plans every scene. Whether it's a video or a carousel, it transforms a simple concept into a creative blueprint ready to come to life. Because great content doesn't happen by accident. Every frame needs a purpose, and every second needs a reason to keep watching.",
+      "Meet the creative mind that turns an idea into a scene-by-scene experience. From the opening hook that captures attention to the final call to action, our Script Generator Agent builds the story, shapes the dialogue, and plans every scene. Whether it's a video or a carousel, it transforms a simple concept into a creative blueprint ready to come to life.\n\nBecause great content doesn't happen by accident. Every frame needs a purpose, and every second needs a reason to keep watching.",
     mission: "Turn ideas into stories people want to see.",
-    leader: "[Team Lead Name]",
-    clipLabel: "CLIP: #SCRIPT_GEN_06",
+    clipLabel: "CLIP: #SCRIPT_GEN_05",
     statusLabel: "Script Agent",
     sim: {
       headline: "Writing video script",
       metric: "8 Scenes",
       rows: ["Hook", "Story", "Dialogue", "CTA"],
+    },
+    video: { src: "/videos/agents/Ilsa.mp4" },
+  },
+  {
+    id: "agent-6",
+    name: "Chatbot",
+    role: "Chatbot",
+    accent: "emerald",
+    image: "/assets/Avatars/arslan-mascot.png",
+    label: "06. Chatbot Agent",
+    title: "The Team's Front Door",
+    chapter: "CHAPTER 06 · THE CONNECTOR",
+    headline: "What if your entire AI team was just one conversation away?",
+    summary:
+      "Meet the assistant that brings the experience together. Ask a question, explore an idea, or request an action—and Fluenca can respond, connect you with the right specialist, or trigger a supported workflow. You don't need to figure out which agent does what. Just tell it what you need, and let the right capabilities come into play.",
+    mission: "Make the power of AI feel effortless.",
+    clipLabel: "CLIP: #CHATBOT_06",
+    statusLabel: "Chatbot Agent",
+    sim: {
+      headline: "Routing your request",
+      metric: "1 Conversation",
+      rows: ["Ask", "Route", "Act", "Reply"],
     },
     video: { src: "/videos/agents/Muaz.mp4" },
   },
