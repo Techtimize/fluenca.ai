@@ -4,7 +4,6 @@ import {
   Activity,
   Check,
   ClipboardList,
-  LineChart,
   Search,
   Target,
 } from "lucide-react";
@@ -34,12 +33,6 @@ export const GOAL_STEPS = [
     description: "Content, schedule, tasks",
     icon: Activity,
   },
-  {
-    id: 5,
-    label: "Optimize",
-    description: "Learn and adjust",
-    icon: LineChart,
-  },
 ] as const;
 
 type Props = {
@@ -54,7 +47,7 @@ export default function GoalStepRail({
   onSelect,
 }: Props) {
   return (
-    <ol className="grid gap-2 sm:grid-cols-5">
+    <ol className="grid gap-2 sm:grid-cols-4">
       {GOAL_STEPS.map((step, index) => {
         const Icon = step.icon;
         const done = currentStep > step.id;

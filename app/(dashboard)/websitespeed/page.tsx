@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Gauge, Loader2, Monitor, RotateCw, Smartphone } from "lucide-react";
-import Card from "@/components/shared/card";
+import { ArrowLeft, Gauge, Link2, Loader2, Monitor, RotateCw, Smartphone } from "lucide-react";
 import TopBar from "@/components/dashboard/topBar";
-import { PageSpeedReport, scoreColor } from "@/components/dashboard/integrations/pageSpeedCard";
+import { PageSpeedReport } from "@/components/dashboard/website-speed/PageSpeedReport";
 import { Button } from "@/components/ui/button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { getApiErrorMessage } from "@/errors/error-utils";
@@ -37,6 +36,8 @@ export default function WebsiteSpeedPage() {
   };
   const active = queries[strategy];
 
+  const anyFetching = queries.mobile.isFetching || queries.desktop.isFetching;
+
   const rerun = () => {
     void queries.mobile.refetch();
     void queries.desktop.refetch();
@@ -65,9 +66,9 @@ export default function WebsiteSpeedPage() {
         </p>
       </section>
 
-      <Card className="space-y-5 p-5 sm:p-6">
+      <section className="space-y-5 rounded-[28px] border border-[#E6E8F5] bg-[#F8F9FD] p-4 sm:p-5">
         <form
-          className="flex flex-wrap items-center gap-2"
+          className="flex flex-col gap-3 sm:flex-row sm:items-center"
           onSubmit={(event) => {
             event.preventDefault();
             const next = (draftUrl ?? url).trim();
@@ -75,59 +76,66 @@ export default function WebsiteSpeedPage() {
             else setCheckedUrl(next);
           }}
         >
-          <input
-            type="text"
-            value={draftUrl ?? url}
-            onChange={(event) => setDraftUrl(event.target.value)}
-            placeholder="https://yoursite.com or a page on it"
-            aria-label="Page address to check"
-            className="h-10 min-w-0 flex-1 rounded-xl border border-[#E6E8F5] bg-white px-3 text-[14px]"
-          />
+          <label className="relative min-w-0 flex-1">
+            <span className="sr-only">Page address to check</span>
+            <Link2
+              className="pointer-events-none absolute inset-s-4 top-1/2 size-5 -translate-y-1/2 text-neutral-500"
+              aria-hidden="true"
+            />
+            <input
+              type="text"
+              value={draftUrl ?? url}
+              onChange={(event) => setDraftUrl(event.target.value)}
+              placeholder="https://yoursite.com or a page on it"
+              className={`h-12 w-full rounded-xl border border-[#E6E8F5] bg-white pe-4 ps-12 text-[15px] text-neutral-900 ${FOCUS_RING}`}
+            />
+          </label>
           <Button
             type="submit"
-            disabled={queries.mobile.isFetching || queries.desktop.isFetching}
-            className="h-10 gap-2 rounded-full bg-[#5B57E6] px-5 text-white hover:bg-[#4A46D0]"
+            disabled={anyFetching}
+            className="h-12 gap-2 rounded-xl bg-linear-to-r from-[#4F46E5] to-[#6D6AF5] px-6 text-[15px] font-semibold text-white shadow-[0_6px_16px_-6px_rgba(79,70,229,0.6)] hover:opacity-95"
           >
-            {queries.mobile.isFetching || queries.desktop.isFetching ? (
-              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            {anyFetching ? (
+              <Loader2 className="size-5 animate-spin" aria-hidden="true" />
             ) : (
-              <RotateCw className="size-4" aria-hidden="true" />
+              <RotateCw className="size-5" aria-hidden="true" />
             )}
             {(draftUrl ?? url).trim() === url ? "Re-run check" : "Check this page"}
           </Button>
         </form>
 
-        <div role="tablist" aria-label="Device" className="grid grid-cols-2 gap-2 sm:max-w-md">
+        <div role="tablist" aria-label="Device" className="flex flex-wrap gap-3">
           {STRATEGIES.map((item) => {
             const query = queries[item.id];
-            const performance = query.data?.categories.find((c) => c.id === "performance");
-            const score = performance?.score ?? query.data?.score ?? null;
             const selected = strategy === item.id;
             return (
-              <button
+              <div
                 key={item.id}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                onClick={() => setStrategy(item.id)}
-                className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-colors ${FOCUS_RING} ${
-                  selected ? "border-[#5452F6] bg-[#F6F5FF]" : "border-[#E6E8F5] bg-white hover:bg-[#F8F9FF]"
+                className={`flex w-full items-center rounded-xl border bg-white transition-colors sm:w-58 ${
+                  selected ? "border-[#4F46E5] bg-[#F6F5FF] ring-1 ring-[#4F46E5]/20" : "border-[#E6E8F5] hover:bg-[#F8F9FF]"
                 }`}
               >
-                <span className="flex items-center gap-2 text-[13px] font-medium text-neutral-900">
-                  <item.icon className="size-4 text-neutral-500" aria-hidden="true" />
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => setStrategy(item.id)}
+                  className={`flex min-w-0 flex-1 items-center gap-3 rounded-s-xl py-3 ps-5 text-[15px] font-medium text-neutral-900 ${FOCUS_RING}`}
+                >
+                  <item.icon className={`size-5 ${selected ? "text-[#4F46E5]" : "text-neutral-500"}`} aria-hidden="true" />
                   {item.label}
-                </span>
-                {query.isFetching ? (
-                  <Loader2 className="size-4 animate-spin text-[#5452F6]" aria-label="Checking" />
-                ) : (
-                  <span
-                    className={`grid size-10 place-items-center rounded-full bg-white text-sm font-semibold ring-4 ${scoreColor(score)}`}
-                  >
-                    {query.isError ? "!" : (score ?? "–")}
-                  </span>
-                )}
-              </button>
+                  {query.isError ? <span className="text-[12px] font-medium text-rose-600">Failed</span> : null}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void query.refetch()}
+                  disabled={query.isFetching}
+                  aria-label={`Re-run ${item.label.toLowerCase()} check`}
+                  className={`me-2 grid size-9 shrink-0 place-items-center rounded-full text-[#4F46E5] hover:bg-[#EEF0FF] disabled:cursor-default ${FOCUS_RING}`}
+                >
+                  <RotateCw className={`size-4.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+                </button>
+              </div>
             );
           })}
         </div>
@@ -151,7 +159,7 @@ export default function WebsiteSpeedPage() {
             </p>
           )}
         </div>
-      </Card>
+      </section>
     </main>
   );
 }

@@ -6,7 +6,6 @@ import {
   ArrowRight,
   CheckCircle2,
   Circle,
-  FlaskConical,
   Lightbulb,
   Loader2,
   Sparkles,
@@ -382,13 +381,13 @@ export function GoalExecutePanel({
   data,
   completedTasks,
   onToggleTask,
-  onContinue,
+  onRestart,
   onBack,
 }: {
   data?: SocialGrowthResponse | null;
   completedTasks: Set<string>;
   onToggleTask: (key: string, done: boolean) => void;
-  onContinue: () => void;
+  onRestart: () => void;
   onBack: () => void;
 }) {
   const tasks = data?.tasks || [];
@@ -410,13 +409,8 @@ export function GoalExecutePanel({
           >
             Back
           </Button>
-          <Button
-            type="button"
-            onClick={onContinue}
-            
-          >
-            Review results
-            <ArrowRight className="size-4" />
+          <Button type="button" onClick={onRestart}>
+            Set a new goal
           </Button>
         </div>
       }
@@ -539,130 +533,3 @@ export function GoalExecutePanel({
   );
 }
 
-export function GoalOptimizePanel({
-  data,
-  form,
-  onRestart,
-  onBack,
-}: {
-  data?: SocialGrowthResponse | null;
-  form: GoalFormValues;
-  onRestart: () => void;
-  onBack: () => void;
-}) {
-  const progress = data?.goal_progress;
-  const recommendations = data?.optimization_recommendations || [];
-  const experiment = data?.experiment;
-  const status = data?.goal_status || "";
-  const report = data?.performance_report;
-  const behind =
-    status.toLowerCase().includes("behind") ||
-    status.toLowerCase().includes("at_risk");
-
-  return (
-    <PanelShell
-      title="Learn and optimize"
-      description="Compare results to targets, keep what works, and adjust the next cycle."
-      footer={
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            className="h-10 rounded-full px-4"
-          >
-            Back
-          </Button>
-          <Button
-            type="button"
-            onClick={onRestart}
-            
-          >
-            Set a new goal
-          </Button>
-        </div>
-      }
-    >
-      {behind ? (
-        <div className="rounded-2xl border border-[#FECACA] bg-[#FFF1F2] px-3.5 py-3 text-[13px] text-[#9F1239]">
-          Alert: this plan looks behind target. Review the recommendations below
-          and tighten posting consistency this week.
-        </div>
-      ) : null}
-
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Goal status" value={status ? status.replaceAll("_", " ") : "—"} />
-        <StatCard
-          label="Follower progress"
-          value={
-            progress?.followers != null ? `${Math.round(progress.followers)}%` : "—"
-          }
-        />
-        <StatCard
-          label="Engagement progress"
-          value={
-            progress?.engagement != null
-              ? `${Math.round(progress.engagement)}%`
-              : "—"
-          }
-        />
-        <StatCard
-          label="Latest followers"
-          value={report?.followers != null ? String(report.followers) : "—"}
-          hint={summarizeGoal(form)}
-        />
-      </div>
-
-      {experiment?.hypothesis ? (
-        <div className="rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] p-4">
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
-            <FlaskConical className="size-3.5 text-[#5B57E6]" />
-            Active experiment
-          </p>
-          <p className="mt-2 text-[14px] font-semibold text-neutral-900">
-            {experiment.hypothesis}
-          </p>
-          <p className="mt-1 text-[12px] text-neutral-600">
-            {[experiment.platform, experiment.metric, experiment.action, experiment.variant]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-        </div>
-      ) : null}
-
-      {recommendations.length ? (
-        <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
-            Adjustments
-          </p>
-          <ul className="space-y-2">
-            {recommendations.map((item, index) => (
-              <li
-                key={`${item.hypothesis}-${index}`}
-                className="rounded-2xl border border-[#E6E8F5] p-3.5"
-              >
-                <p className="text-[13px] font-semibold text-neutral-900">
-                  {item.action || item.hypothesis}
-                </p>
-                {item.hypothesis && item.action ? (
-                  <p className="mt-1 text-[12px] text-neutral-600">
-                    {item.hypothesis}
-                  </p>
-                ) : null}
-                <p className="mt-2 text-[11px] text-neutral-500">
-                  {[item.platform, item.metric, item.variant]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        <p className="rounded-xl border border-dashed border-[#E6E8F5] px-3 py-4 text-center text-[13px] text-neutral-500">
-          Optimization recommendations will appear as performance data lands.
-        </p>
-      )}
-    </PanelShell>
-  );
-}

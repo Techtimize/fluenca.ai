@@ -18,7 +18,6 @@ const EXPANDED_PAD = "15.5rem";
 
 export const DEFAULT_NAV: NavItem[] = [
   { id: "home", label: "Home", icon: "home", href: PAGE_ROUTES.DASHBOARD },
-  { id: "trends", label: "Trends", icon: "trending", href: PAGE_ROUTES.TRENDS },
   {
     id: "content-recommendation",
     label: "Content recommendation",
@@ -57,6 +56,7 @@ export const DEFAULT_NAV: NavItem[] = [
     icon: "plug",
     href: PAGE_ROUTES.CONNECTORS,
   },
+  { id: "trends", label: "Trends", icon: "trending", href: PAGE_ROUTES.TRENDS },
 ];
 
 type Props = {
