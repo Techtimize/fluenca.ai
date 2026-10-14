@@ -103,3 +103,14 @@ export type GoalProgressResponse = Partial<GoalProgress> & {
 export type GoalLesson = Record<string, unknown>;
 
 export type GoalLessonsResponse = GoalLesson[];
+
+/**
+ * GET /goal/{id}/plan: the goal's plan. Shaped like the diagnosis (strategy, content_plan, tasks…),
+ * either at the top level or nested under plan / growth_result.
+ */
+export type GoalPlanResponse = {
+  plan?: Record<string, unknown> | null;
+  growth_result?: Record<string, unknown> | null;
+  tasks?: GoalTask[];
+  [key: string]: unknown;
+};

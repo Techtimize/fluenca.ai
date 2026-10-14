@@ -2,11 +2,15 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ChevronRight, ClipboardList, Loader2, Trash2, TrendingUp } from "lucide-react";
+import { ChevronRight, ClipboardList, Loader2, Pause, Play, Trash2, TrendingUp } from "lucide-react";
 import GoalPlanDialog from "@/components/dashboard/goals/GoalPlanDialog";
 import GoalProgressDialog from "@/components/dashboard/goals/GoalProgressDialog";
 import { FacebookIcon } from "@/components/shared/brandIcons";
-import { DeleteGoalMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import {
+  DeleteGoalMutation,
+  PauseGoalMutation,
+  ResumeGoalMutation,
+} from "@/routes/bussiness/Bussiness-Mutation";
 import {
   GOAL_PLATFORMS,
   flattenGoalProgress,
@@ -46,6 +50,8 @@ export default function CurrentGoalSummary({ onOpen }: Props) {
   const [progressOpen, setProgressOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const deleteGoal = DeleteGoalMutation();
+  const pauseGoal = PauseGoalMutation();
+  const resumeGoal = ResumeGoalMutation();
   const { data: goals } = CompanyGoalsQuery();
   const goal = pickCurrentGoal(goals);
   const { data: goalProgress } = GoalProgressQuery(
@@ -183,6 +189,26 @@ export default function CurrentGoalSummary({ onOpen }: Props) {
               <TrendingUp className="size-4" aria-hidden="true" />
               Performance
             </button>
+            {goal.status === "active" || goal.status === "paused" ? (
+              <button
+                type="button"
+                onClick={() =>
+                  goal.status === "active" ? pauseGoal.mutate(goal.id) : resumeGoal.mutate(goal.id)
+                }
+                disabled={pauseGoal.isPending || resumeGoal.isPending}
+                aria-label={goal.status === "active" ? "Pause goal" : "Resume goal"}
+                title={goal.status === "active" ? "Pause goal" : "Resume goal"}
+                className={`grid size-10 shrink-0 place-items-center border-s border-[#E6E8F5] text-neutral-500 transition-colors hover:bg-[#F6F5FF] hover:text-[#4544C9] disabled:opacity-60 ${FOCUS_RING}`}
+              >
+                {pauseGoal.isPending || resumeGoal.isPending ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                ) : goal.status === "active" ? (
+                  <Pause className="size-4" aria-hidden="true" />
+                ) : (
+                  <Play className="size-4" aria-hidden="true" />
+                )}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => setConfirmingDelete(true)}
@@ -196,7 +222,7 @@ export default function CurrentGoalSummary({ onOpen }: Props) {
         )}
       </div>
       <GoalPlanDialog
-        goalId={goal.id}
+        goal={goal}
         open={planOpen}
         onOpenChange={setPlanOpen}
       />

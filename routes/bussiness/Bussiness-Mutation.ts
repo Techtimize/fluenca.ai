@@ -37,6 +37,8 @@ import {
   GoogleAnalyticsConnectApi,
   GoogleAnalyticsDisconnectApi,
   DeleteGoalApi,
+  PauseGoalApi,
+  ResumeGoalApi,
   GoogleAnalyticsSelectPropertyApi,
   SearchConsoleConnectApi,
   SearchConsoleDisconnectApi,
@@ -917,5 +919,38 @@ export function DeleteGoalMutation() {
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to delete goal"));
     },
+  });
+}
+
+/** Pause or resume a goal's agent; both refresh the goal list and that goal's details. */
+function useGoalStatusMutation(
+  request: (goal_id: string) => Promise<unknown>,
+  messages: { success: string; error: string },
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (goal_id: string) => request(goal_id),
+    onSuccess: (_response, goal_id) => {
+      void queryClient.invalidateQueries({ queryKey: GOALS_KEY });
+      void queryClient.invalidateQueries({ queryKey: goalKey(goal_id) });
+      toast.success(messages.success);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, messages.error));
+    },
+  });
+}
+
+export function PauseGoalMutation() {
+  return useGoalStatusMutation(PauseGoalApi, {
+    success: "Goal paused. Fluenca won't run new tasks until you resume it.",
+    error: "Failed to pause goal",
+  });
+}
+
+export function ResumeGoalMutation() {
+  return useGoalStatusMutation(ResumeGoalApi, {
+    success: "Goal resumed",
+    error: "Failed to resume goal",
   });
 }
