@@ -103,8 +103,10 @@ import type {
   CreateGoalResponse,
   DiagnoseGoalResponse,
   GoalDetailResponse,
+  Goal,
   GoalListResponse,
   GoalLessonsResponse,
+  GoalPlanResponse,
   GoalProgressResponse,
   GoalTask,
   UpdateGoalTaskRequest,
@@ -867,4 +869,27 @@ export const SearchConsoleDisconnectApi = async (): Promise<void> => {
 
 export const DeleteGoalApi = async (goal_id: string): Promise<void> => {
   await api.delete(BUSSINESSENDPOINT.GOAL.GOAL_BY_ID(goal_id));
+};
+
+export const GoalPlanApi = async (goal_id: string): Promise<GoalPlanResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.GOAL.PLAN(goal_id));
+  return response.data;
+};
+
+export const PauseGoalApi = async (goal_id: string): Promise<Goal> => {
+  const response = await api.post(BUSSINESSENDPOINT.GOAL.PAUSE(goal_id));
+  return response.data;
+};
+
+export const ResumeGoalApi = async (goal_id: string): Promise<Goal> => {
+  const response = await api.post(BUSSINESSENDPOINT.GOAL.RESUME(goal_id));
+  return response.data;
+};
+
+export const GoalsByCompanyApi = async (company_id: string): Promise<GoalListResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.GOAL.GOALS_BY_COMPANY(company_id));
+  const data = response.data;
+  // Accept a bare array or a { goals } / { data } / { items } wrapper.
+  if (Array.isArray(data)) return data;
+  return data?.goals ?? data?.data ?? data?.items ?? [];
 };

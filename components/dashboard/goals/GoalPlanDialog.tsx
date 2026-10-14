@@ -11,9 +11,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { getApiErrorMessage } from "@/errors/error-utils";
-import { goalToForm, summarizeGoal } from "@/lib/goals/goal-form";
+import GoalProgressRing from "@/components/dashboard/goals/GoalProgressRing";
+import { goalProgressPercents, goalToForm, summarizeGoal } from "@/lib/goals/goal-form";
 import { normalizeSocialGrowthResponse } from "@/lib/goals/normalize-growth";
-import { GoalByIdQuery } from "@/routes/bussiness/Bussiness-Query";
+import { GoalPlanQuery, GoalProgressQuery } from "@/routes/bussiness/Bussiness-Query";
+import type { Goal, GoalPlanResponse } from "@/types/bussiness/goal-type";
 import type { SocialGrowthTask } from "@/types/bussiness/socail-growth-type";
 
 const DONE_STATUSES = ["done", "completed"];
@@ -61,23 +63,31 @@ function TaskRow({ task }: { task: SocialGrowthTask }) {
   );
 }
 
+/** The plan may come at the top level or nested under plan / growth_result. */
+function planSource(data?: GoalPlanResponse | null) {
+  if (!data) return null;
+  return data.plan ?? data.growth_result ?? data;
+}
+
 type Props = {
-  goalId: string | null;
+  goal: Goal;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-/** Read-only view of a goal's plan, loaded from GET /goal/{id}. */
-export default function GoalPlanDialog({ goalId, open, onOpenChange }: Props) {
-  const { data, isLoading, isError, error } = GoalByIdQuery(open ? goalId : null);
-  const goal = data?.goal;
-  const plan = normalizeSocialGrowthResponse(data?.growth_result);
-  // After approval the goal's own task records are the live ones.
-  const tasks: SocialGrowthTask[] = data?.tasks?.length ? data.tasks : (plan?.tasks ?? []);
+/** Read-only view of a goal's plan, loaded from GET /goal/{id}/plan. */
+export default function GoalPlanDialog({ goal, open, onOpenChange }: Props) {
+  const { data, isLoading, isError, error } = GoalPlanQuery(open ? goal.id : null);
+  const progressQuery = GoalProgressQuery(open ? goal.id : null);
+  const { progress, expected, expectedIsEstimate } = goalProgressPercents(goal, progressQuery.data);
+  const plan = normalizeSocialGrowthResponse(planSource(data));
+  // Task records with ids sit beside the plan once it is approved; otherwise use the plan's own.
+  const tasks: SocialGrowthTask[] = Array.isArray(data?.tasks) && data.tasks.length ? data.tasks : (plan?.tasks ?? []);
   const actions = plan?.strategy?.strategy ?? [];
   const pillars = plan?.content_plan?.pillars ?? [];
   const experiments = plan?.strategy?.opportunities_used ?? [];
-  const schedule = goal ? plan?.platform_strategies?.[goal.platform]?.posting_schedule : undefined;
+  const schedule = plan?.platform_strategies?.[goal.platform]?.posting_schedule;
+  const isEmpty = !actions.length && !pillars.length && !experiments.length && !tasks.length && !schedule;
   const doneCount = tasks.filter((task) => DONE_STATUSES.includes(String(task.status).toLowerCase())).length;
 
   let body: ReactNode;
@@ -87,13 +97,13 @@ export default function GoalPlanDialog({ goalId, open, onOpenChange }: Props) {
         <Loader2 className="size-5 animate-spin" aria-label="Loading plan" />
       </div>
     );
-  } else if (isError || !goal) {
+  } else if (isError) {
     body = (
       <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] text-rose-700">
         {getApiErrorMessage(error, "Couldn't load this plan. Try again.")}
       </p>
     );
-  } else if (!plan) {
+  } else if (!plan || isEmpty) {
     body = (
       <p className="rounded-2xl border border-dashed border-[#E6E8F5] px-4 py-8 text-center text-[13px] text-neutral-500">
         No plan yet. Diagnose this goal to build one.
@@ -102,14 +112,24 @@ export default function GoalPlanDialog({ goalId, open, onOpenChange }: Props) {
   } else {
     body = (
       <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <Stat label="Status" value={goal.status.replaceAll("_", " ")} />
-          <Stat label="Deadline" value={new Date(goal.deadline).toLocaleDateString()} />
-          <Stat label="Tasks done" value={tasks.length ? `${doneCount} / ${tasks.length}` : "—"} />
-          <Stat
-            label="Approved"
-            value={goal.approved_at ? new Date(goal.approved_at).toLocaleDateString() : "Not yet"}
-          />
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-stretch">
+          <div className="grid flex-1 grid-cols-2 content-start gap-2">
+            <Stat label="Status" value={goal.status.replaceAll("_", " ")} />
+            <Stat label="Deadline" value={new Date(goal.deadline).toLocaleDateString()} />
+            <Stat label="Tasks done" value={tasks.length ? `${doneCount} / ${tasks.length}` : "—"} />
+            <Stat
+              label="Approved"
+              value={goal.approved_at ? new Date(goal.approved_at).toLocaleDateString() : "Not yet"}
+            />
+          </div>
+          <div className="sm:w-52 sm:shrink-0">
+            <GoalProgressRing
+              progress={progress}
+              expected={expected}
+              expectedIsEstimate={expectedIsEstimate}
+              isLoading={progressQuery.isLoading}
+            />
+          </div>
         </div>
 
         {schedule ? (
@@ -205,7 +225,7 @@ export default function GoalPlanDialog({ goalId, open, onOpenChange }: Props) {
         <DialogHeader className="shrink-0 border-b border-[#EEF0F8] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] px-4 py-4 pe-12 sm:px-6 sm:py-5">
           <DialogTitle className="text-[18px] font-semibold tracking-tight text-neutral-900">Current plan</DialogTitle>
           <DialogDescription className="mt-1 text-[13px] leading-5 text-neutral-500">
-            {goal ? summarizeGoal(goalToForm(goal)) : "The strategy, content themes and tasks for this goal."}
+            {summarizeGoal(goalToForm(goal))}
           </DialogDescription>
         </DialogHeader>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6">{body}</div>
