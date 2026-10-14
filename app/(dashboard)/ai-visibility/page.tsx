@@ -129,21 +129,24 @@ export default function AiVisibilityPage() {
               >
                 <AnswersMatrix runId={latest.id} engines={overview.engines} />
               </Panel>
-              <div className="grid gap-4 xl:grid-cols-3">
+              <div className="grid gap-4 lg:grid-cols-2">
                 <Panel title="Share of voice" hint="Who AI names most for your questions.">
                   <ShareOfVoice summary={summary} brand={companyName} />
                 </Panel>
                 <Panel title="Sites AI trusts" hint="Getting featured here is the fastest way into AI answers.">
                   <TrustedSources summary={summary} />
                 </Panel>
-                <Panel title="Gaps to fix" hint="Questions where AI names others, not you.">
-                  <Gaps
-                    summary={summary}
-                    onWrite={writeGap}
-                    writing={gapPost.isPending ? (gapPost.variables ?? null) : null}
-                  />
-                </Panel>
               </div>
+              <Panel
+                title={`Gaps to fix${summary.gaps.length ? ` (${summary.gaps.length})` : ""}`}
+                hint="Questions where AI names others, not you. Write a blog post for one and AI drafts it in a few minutes from these answers; you review it on the Blogs page."
+              >
+                <Gaps
+                  summary={summary}
+                  onWrite={writeGap}
+                  writing={gapPost.isPending ? (gapPost.variables ?? null) : null}
+                />
+              </Panel>
             </>
           ) : !running ? (
             <section className="rounded-[24px] border border-dashed border-[#C8C6F5] bg-white p-6 text-center">

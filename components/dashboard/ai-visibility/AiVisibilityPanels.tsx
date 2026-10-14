@@ -178,9 +178,9 @@ export function Gaps({
     return <p className="text-[13px] text-emerald-700">No gaps: you are named for every tracked question.</p>;
   }
   return (
-    <ul className="space-y-2">
+    <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
       {summary.gaps.map((gap) => (
-        <li key={gap.question} className="rounded-xl bg-white p-3 ring-1 ring-[#E6E8F5]">
+        <li key={gap.question} className="flex flex-col rounded-xl bg-white p-3 ring-1 ring-[#E6E8F5]">
           <p className="flex items-start gap-2 text-[14px] font-medium text-neutral-900">
             <Target className="mt-0.5 size-4 shrink-0 text-rose-500" aria-hidden="true" />
             {gap.question}
@@ -192,7 +192,7 @@ export function Gaps({
             type="button"
             disabled={writing !== null}
             onClick={() => onWrite(gap.question)}
-            className="mt-2 ms-6 inline-flex items-center gap-1 text-[13px] font-medium text-[#4F46E5] hover:underline disabled:opacity-60"
+            className="mt-auto ms-6 inline-flex items-center gap-1 pt-2 text-[13px] font-medium text-[#4F46E5] hover:underline disabled:opacity-60"
           >
             {writing === gap.question ? (
               <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
@@ -201,9 +201,6 @@ export function Gaps({
             )}
             {writing === gap.question ? "Starting the post…" : "Write a blog post for this"}
           </button>
-          <p className="mt-1 ps-6 text-[11px] text-neutral-400">
-            AI writes it in a few minutes from these answers; you review it on the Blogs page.
-          </p>
         </li>
       ))}
     </ul>
