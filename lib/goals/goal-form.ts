@@ -1,4 +1,4 @@
-import type { CreateGoalRequest, Goal } from "@/types/bussiness/goal-type";
+import type { CreateGoalRequest, Goal, GoalProgressResponse } from "@/types/bussiness/goal-type";
 
 export type GoalPlatform =
   | "instagram"
@@ -240,10 +240,17 @@ export function goalToForm(goal: Goal): GoalFormValues {
 /** Progress (0–100) toward the goal's own metric, when the backend measures it. */
 export function goalMetricProgress(
   metric: GoalMetric,
-  progress?: { followers?: number; engagement?: number } | null,
+  progress?: Record<string, unknown> | null,
 ) {
   if (!progress) return null;
-  if (metric === "followers") return progress.followers ?? null;
-  if (metric === "engagement_rate") return progress.engagement ?? null;
-  return null;
+  const value =
+    metric === "followers" ? progress.followers : metric === "engagement_rate" ? progress.engagement : null;
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+/** GET /goal/{id}/progress may return the measurements flat or nested under goal_progress / progress. */
+export function flattenGoalProgress(raw?: GoalProgressResponse | null): Record<string, unknown> {
+  if (!raw) return {};
+  const nested = raw.goal_progress ?? raw.progress;
+  return nested && typeof nested === "object" ? { ...raw, ...nested } : raw;
 }
