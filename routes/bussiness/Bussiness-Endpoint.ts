@@ -87,7 +87,6 @@ export const BUSSINESSENDPOINT = {
     KEYWORDS_RETRY: '/keywords/retry',
     BRIEFS: '/briefs',
     BLOG_POST: '/blog-posts',
-    SOCIAL_POSTS: '/social-posts',
     BLOG_POST_DETAILS: (blog_post_id: string) => `/blog-posts/${blog_post_id}`,
     BLOG_POST_IMAGES: (blog_post_id: string) => `/blog-posts/${blog_post_id}/images`,
 
