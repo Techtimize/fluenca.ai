@@ -52,12 +52,6 @@ export const DEFAULT_NAV: NavItem[] = [
     href: PAGE_ROUTES.CONTROLS,
   },
   {
-    id: "social",
-    label: "Social profiles",
-    icon: "users",
-    href: PAGE_ROUTES.SOCIAL,
-  },
-  {
     id: "connectors",
     label: "Connectors",
     icon: "plug",
@@ -75,9 +69,7 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-// The collapsed flag lives in localStorage; reading it through useSyncExternalStore
-// avoids setting state inside an effect and keeps SSR (always collapsed) in sync.
-const COLLAPSED_EVENT = "fluenca-sidebar-collapsed-change";
+const COLLAPSED_EVENT = "sidebar-collapsed";
 
 function readCollapsed() {
   try {
@@ -164,7 +156,7 @@ export default function SidebarRail({
                 : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
             }`}
           >
-            <Icon className="size-[18px] shrink-0" />
+            <Icon className="size-4.5 shrink-0" />
             {opts.showLabels ? <span className="truncate">{label}</span> : null}
           </Link>
         </li>
@@ -176,13 +168,12 @@ export default function SidebarRail({
 
   return (
     <>
-      {/* Page content reads this padding to sit beside the rail. */}
       <style>{`:root{--sidebar-content-pad:${collapsed ? COLLAPSED_PAD : EXPANDED_PAD}}`}</style>
       <button
         type="button"
         aria-label={t("openNav")}
         onClick={() => setMobileOpen(true)}
-        className={`fixed start-4 top-4 z-30 grid size-10 place-items-center rounded-full border border-[#E6E8F5] bg-white text-neutral-700 shadow-sm md:hidden ${FOCUS_RING}`}
+        className={`fixed inset-s-4 top-4 z-30 grid size-10 place-items-center rounded-full border border-[#E6E8F5] bg-white text-neutral-700 shadow-sm md:hidden ${FOCUS_RING}`}
       >
         <Menu className="size-4" />
       </button>
@@ -197,7 +188,7 @@ export default function SidebarRail({
           />
           <nav
             aria-label="Main"
-            className="absolute bottom-4 start-4 top-4 flex w-[min(18rem,calc(100vw-2rem))] flex-col rounded-3xl border border-[#E6E8F5] bg-white p-4 shadow-xl"
+            className="absolute bottom-4 inset-s-4 top-4 flex w-[min(18rem,calc(100vw-2rem))] flex-col rounded-3xl border border-[#E6E8F5] bg-white p-4 shadow-xl"
           >
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -231,7 +222,7 @@ export default function SidebarRail({
               onClick={handleLogout}
               className={`mt-3 flex w-full items-center gap-3 rounded-2xl bg-[#5B57E6] px-3 py-2.5 text-sm font-medium text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
             >
-              <LogOut className="size-[18px]" />
+              <LogOut className="size-4.5" />
               {t("logout")}
             </button>
           </nav>
@@ -240,7 +231,7 @@ export default function SidebarRail({
 
       <nav
         aria-label="Main"
-        className={`fixed bottom-4 start-4 top-4 z-20 hidden flex-col border border-[#E6E8F5] bg-white py-4 transition-[width,border-radius,padding] duration-200 md:flex ${
+        className={`fixed bottom-4 inset-s-4 top-4 z-20 hidden flex-col border border-[#E6E8F5] bg-white py-4 transition-[width,border-radius,padding] duration-200 md:flex ${
           collapsed
             ? "w-14 items-center rounded-full px-0"
             : "w-56 rounded-3xl px-3"
@@ -279,7 +270,7 @@ export default function SidebarRail({
             {collapsed ? (
               <ExpandIcon className="size-4" />
             ) : (
-              <CollapseIcon className="size-[18px]" />
+              <CollapseIcon className="size-4.5" />
             )}
             {!collapsed ? <span>{t("collapse")}</span> : null}
           </button>
@@ -294,7 +285,7 @@ export default function SidebarRail({
                 : "flex w-full items-center gap-3 rounded-2xl bg-[#5B57E6] px-3 py-2.5 text-sm font-medium text-white hover:bg-[#4A46D0]"
             }`}
           >
-            <LogOut className="size-[18px]" />
+            <LogOut className="size-4.5" />
             {!collapsed ? <span>{t("logout")}</span> : null}
           </button>
         </div>

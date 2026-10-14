@@ -85,9 +85,9 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    shortcut: ["/icon.svg"],
-    apple: [{ url: "/icon.svg" }],
+    icon: [{ url: "/assets/Logo.svg", type: "image/svg+xml" }],
+    shortcut: ["/assets/Logo.svg"],
+    apple: [{ url: "/assets/Logo.svg" }],
   },
 };
 
@@ -103,7 +103,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${googleSansCode.variable} ${googleSansFlex.variable} ${plusJakartaSans.variable} ${notoSansArabic.variable} h-full antialiased`}
     >
       <body
-        className={`flex min-h-full flex-col overflow-x-hidden ${isArabic ? "font-[family-name:var(--font-noto-arabic)]" : ""}`}
+        className={`flex min-h-full flex-col overflow-x-hidden ${isArabic ? "font-(family-name:--font-noto-arabic)" : ""}`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <QueryProvider>

@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentExecutionAgentModeApi, ContentExecutionItemsApi, ContentExecutionRunsApi, ContentExecutionSettingsApi, ContentRecommendationResultApi, DnaApi, FacebookProfileContentApi, IntakeApi, IntelligenceJobApi, InstagramProfileIdApi, InstagramProfileInfoApi, LinkedInProfileContentApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi, InstagramProfileContentApi, InstagramProfileReachApi, InstagramProfileInteractionsApi, InstagramProfileDemographicsApi, InstagramProfileFollowsApi, InstagramProfileViewsApi, InstagramProfileActionsApi, InstagramProfileStoriesApi, InstagramLiveStreamApi } from "./bussiness.routes";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentExecutionAgentModeApi, ContentExecutionItemsApi, ContentExecutionRunsApi, ContentExecutionSettingsApi, ContentRecommendationResultApi, DnaApi, FacebookProfileContentApi, IntakeApi, IntelligenceJobApi, InstagramProfileIdApi, InstagramProfileInfoApi, LinkedInProfileContentApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi, InstagramProfileContentApi, InstagramProfileReachApi, InstagramProfileInteractionsApi, InstagramProfileDemographicsApi, InstagramProfileFollowsApi, InstagramProfileViewsApi, InstagramProfileActionsApi, InstagramProfileStoriesApi, InstagramLiveStreamApi, CompanyGoalsApi, GoalByIdApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   AnalyzeCompanyDashboardApi,
@@ -587,5 +587,25 @@ export const LinkedInProfileContentQuery = (
     enabled,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+  });
+};
+export const GOALS_KEY = ["goals"];
+export const goalKey = (goal_id?: string | null) => ["goal", goal_id];
+
+export const CompanyGoalsQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: GOALS_KEY,
+    queryFn: () => CompanyGoalsApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const GoalByIdQuery = (goal_id?: string | null) => {
+  return useQuery({
+    queryKey: goalKey(goal_id),
+    queryFn: () => GoalByIdApi(goal_id as string),
+    enabled: Boolean(goal_id),
+    refetchOnWindowFocus: false,
   });
 };
