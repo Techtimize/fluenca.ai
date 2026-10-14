@@ -3,6 +3,7 @@
 import Image from "next/image";
 import {
   ArrowUpRight,
+  CalendarClock,
   CalendarDays,
   ImageIcon,
   ImageOff,
@@ -13,6 +14,7 @@ import { FacebookIcon } from "@/components/shared/brandIcons";
 import { formatDate } from "@/utils/format-date";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import { DeleteImageControls } from "./deleteImageControl";
+import { formatSchedule, SchedulePostButton } from "./schedulePostDialog";
 import type { ContentGenerationResultItem } from "./utils";
 
 type PlatformKey = "instagram" | "linkedin" | "facebook" | "x";
@@ -157,6 +159,7 @@ export function ResultCard({
   const caption = item.caption?.trim() || "";
   const tags = cardTags(item);
   const imageCount = item.imagesCount || item.images.length || 0;
+  const scheduledFor = formatSchedule(item.schedule);
 
   return (
     <li className="relative flex flex-col rounded-2xl border border-[#E6E8F5] bg-white p-4 shadow-[0_2px_12px_rgba(15,23,42,0.04)]">
@@ -224,6 +227,13 @@ export function ResultCard({
           </ul>
         ) : null}
 
+        {scheduledFor ? (
+          <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#ECEBFF] px-2.5 py-1 text-[12px] font-medium text-[#5B57E6]">
+            <CalendarClock className="size-3.5" aria-hidden="true" />
+            Scheduled for {scheduledFor}
+          </p>
+        ) : null}
+
         <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[12px] text-neutral-500">
           <span className="inline-flex items-center gap-1.5">
             <CalendarDays className="size-3.5 text-neutral-400" aria-hidden="true" />
@@ -245,6 +255,12 @@ export function ResultCard({
             </a>
           ) : null}
         </div>
+
+        <SchedulePostButton
+          runId={item.id}
+          platform={normalizeContentPlatform(item.platform)}
+          schedule={item.schedule}
+        />
 
         {onPublish ? (
           <PublishButton

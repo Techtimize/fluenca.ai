@@ -27,7 +27,7 @@ import { ContentRecommendationRequest, ContentRecommendationResponse } from "@/t
 import { ChatMode, SendMessageDoneEvent } from "@/types/chat";
 import { SendMessageApi } from "../chatbot/chatbot.routes";
 import { ScriptGenerationRequest, ScriptGenerationResponse } from "@/types/bussiness/script-type";
-import { ImageGenerationRequest, ImageGenerationResponse } from "@/types/bussiness/imagegeneration-type";
+import { ImageGenerationRequest, ImageGenerationResponse, ImageGenerationScheduleRequest } from "@/types/bussiness/imagegeneration-type";
 import { IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 import useAuthStore from "@/store/AuthsStore";
 import type { EditProfileRequest } from "@/types/bussiness/user-profile-type";
@@ -358,6 +358,25 @@ export const DeleteImageMutation = () => {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to delete image"));
+    },
+  });
+};
+
+export const ScheduleImageGenerationMutation = () => {
+  const queryClient = useQueryClient();
+  const companyId = useAuthStore((s) => s.company_id);
+
+  return useMutation({
+    mutationFn: (data: ImageGenerationScheduleRequest) => ScheduleImageGenerationApi(data),
+    onSuccess: () => {
+      toast.success("Post scheduled");
+      void queryClient.invalidateQueries({
+        queryKey: ["company-image-generation-results", companyId],
+      });
+    },
+    onError: (error) => {
+      // 422 (past date / bad platform) and 404 (unknown run) carry readable messages
+      toast.error(getApiErrorMessage(error, "Failed to schedule post"));
     },
   });
 };
