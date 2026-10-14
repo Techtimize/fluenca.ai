@@ -48,11 +48,16 @@ function TopList({ title, rows }: { title: string; rows: { label: string; value:
   );
 }
 
-export default function GoogleAnalyticsCard() {
+type Props = {
+  compact?: boolean;
+};
+
+export default function GoogleAnalyticsCard({ compact = false }: Props) {
   const { data: connection, isLoading, isError, error } = GoogleAnalyticsConnectionQuery();
   const active = Boolean(connection?.connected && connection.status === "active");
-  const properties = GoogleAnalyticsPropertiesQuery(active);
-  const overview = GoogleAnalyticsOverviewQuery(active ? (connection?.property_id ?? null) : null, OVERVIEW_DAYS);
+  const showReport = active && !compact;
+  const properties = GoogleAnalyticsPropertiesQuery(showReport);
+  const overview = GoogleAnalyticsOverviewQuery(showReport ? (connection?.property_id ?? null) : null, OVERVIEW_DAYS);
   const connect = GoogleAnalyticsConnectMutation();
   const chooseProperty = GoogleAnalyticsSelectPropertyMutation();
   const disconnect = GoogleAnalyticsDisconnectMutation();
@@ -93,7 +98,13 @@ export default function GoogleAnalyticsCard() {
                 ? "Fluenca can no longer read this Google Analytics account. Connect it again to see your traffic."
                 : "Connect your website's Google Analytics 4 to see visits, top pages and where your traffic comes from."}
             </p>
-            {connection?.google_email ? (
+            {compact ? (
+              active ? (
+                <p className="mt-2 text-[13px] font-medium text-neutral-800">
+                  {connection?.property_name || "No project chosen yet"}
+                </p>
+              ) : null
+            ) : connection?.google_email ? (
               <p className="mt-2 text-[13px] font-medium text-neutral-800">{connection.google_email}</p>
             ) : null}
           </div>
@@ -130,7 +141,7 @@ export default function GoogleAnalyticsCard() {
         <p className="text-[13px] text-rose-700">{getApiErrorMessage(error, "Could not load Google Analytics")}</p>
       ) : null}
 
-      {active ? (
+      {showReport ? (
         <label className="block max-w-md">
           <span className="text-[13px] font-medium text-neutral-800">Property</span>
           <select
@@ -149,7 +160,7 @@ export default function GoogleAnalyticsCard() {
         </label>
       ) : null}
 
-      {active && connection?.property_id ? (
+      {showReport && connection?.property_id ? (
         overview.isLoading ? (
           <p className="flex items-center gap-2 text-[13px] text-neutral-500">
             <Loader2 className="size-4 animate-spin text-[#5B57E6]" />
