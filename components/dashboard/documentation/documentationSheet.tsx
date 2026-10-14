@@ -1,10 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { Globe, X } from "lucide-react";
 import AssetImage from "@/components/shared/assetImage";
 import { FacebookIcon, InstagramIcon, LinkedInIcon } from "@/components/shared/brandIcons";
+import AnalyticsChartsRow from "@/components/dashboard/cards/analyticsCharts";
+import { ANALYSIS_DOC_ID } from "@/lib/dashboard/map-dashboard";
 import { AnalyzeCompanyDashboardDocumentationQuery } from "@/routes/bussiness/Bussiness-Query";
 import type {
   CompanyDocumentationDetails,
@@ -13,18 +15,31 @@ import type {
   MarketingDocumentationDetails,
   PainPointsDocumentationDetails,
 } from "@/types/bussiness/dashboard-documentation-type";
-import type { DocItem } from "@/types/dashboard";
+import type { AnalyticsCharts, DocItem } from "@/types/dashboard";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
 type Props = {
   companyId: string;
   item: DocItem | null;
   onClose: () => void;
+  /** Each analytics channel's charts, shown as tabs in the analysis sheet. */
+  analysisChannels?: AnalysisChannel[];
+  /** The tab the analysis sheet opens on. */
+  defaultAnalysisChannel?: string;
 };
 
-export default function DocumentationSheet({ companyId, item, onClose }: Props) {
+export type AnalysisChannel = { id: string; label: string; charts: AnalyticsCharts | null };
+
+export default function DocumentationSheet({
+  companyId,
+  item,
+  onClose,
+  analysisChannels = [],
+  defaultAnalysisChannel,
+}: Props) {
   const open = item !== null;
-  const { data, isLoading, isError } = AnalyzeCompanyDashboardDocumentationQuery(companyId, open);
+  const isAnalysis = item?.id === ANALYSIS_DOC_ID;
+  const { data, isLoading, isError } = AnalyzeCompanyDashboardDocumentationQuery(companyId, open && !isAnalysis);
   const section = item ? data?.data?.[item.id as keyof DashboardDocumentationData] : undefined;
 
   return (
@@ -45,7 +60,9 @@ export default function DocumentationSheet({ companyId, item, onClose }: Props) 
           </header>
 
           <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5">
-            {isLoading ? (
+            {isAnalysis ? (
+              <AnalysisDetails channels={analysisChannels} defaultChannel={defaultAnalysisChannel} />
+            ) : isLoading ? (
               <SheetSkeleton />
             ) : isError ? (
               <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -276,6 +293,54 @@ function CompetitorsDetails({ details }: { details: CompetitorsDocumentationDeta
           <p className="text-sm text-neutral-500">No competitors identified yet.</p>
         )}
       </Section>
+    </>
+  );
+}
+
+function AnalysisDetails({ channels, defaultChannel }: { channels: AnalysisChannel[]; defaultChannel?: string }) {
+  const [selected, setSelected] = useState(defaultChannel);
+  const active = channels.find((channel) => channel.id === selected) ?? channels[0];
+
+  if (!active) {
+    return <p className="text-sm text-neutral-500">No channels have been analyzed yet.</p>;
+  }
+
+  const charts = active.charts;
+  const hasData =
+    charts && (charts.strengthsWeaknesses.length || charts.opportunities?.length || charts.actions.length);
+
+  return (
+    <>
+      <div
+        role="tablist"
+        aria-label="Channel"
+        className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {channels.map((channel) => (
+          <button
+            key={channel.id}
+            type="button"
+            role="tab"
+            aria-selected={channel.id === active.id}
+            onClick={() => setSelected(channel.id)}
+            className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${FOCUS_RING} ${
+              channel.id === active.id ? "bg-[#5452F6] text-white" : "bg-[#EEF0FF] text-neutral-800 hover:bg-[#E3E6FF]"
+            }`}
+          >
+            {channel.label}
+          </button>
+        ))}
+      </div>
+
+      <div role="tabpanel" aria-label={active.label} className="space-y-4">
+        {hasData ? (
+          <AnalyticsChartsRow charts={charts} />
+        ) : (
+          <p className="text-sm text-neutral-500">
+            No strengths or opportunities found for {active.label} yet.
+          </p>
+        )}
+      </div>
     </>
   );
 }

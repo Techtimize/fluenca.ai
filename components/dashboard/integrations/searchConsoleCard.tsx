@@ -7,15 +7,17 @@ import { Button } from "@/components/ui/button";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import {
   SearchConsoleConnectMutation,
-  SearchConsoleConnectionQuery,
   SearchConsoleDisconnectMutation,
   SearchConsoleIndexCheckMutation,
   SearchConsoleInspectMutation,
-  SearchConsoleOverviewQuery,
   SearchConsoleSelectSiteMutation,
+} from "@/routes/bussiness/Bussiness-Mutation";
+import {
+  SearchConsoleConnectionQuery,
+  SearchConsoleOverviewQuery,
   SearchConsoleSitemapsQuery,
   SearchConsoleSitesQuery,
-} from "@/routes/search-console/SearchConsole-Query";
+} from "@/routes/bussiness/Bussiness-Query";
 import type { SearchRow, UrlInspection } from "@/types/bussiness/search-console-type";
 
 const OVERVIEW_DAYS = 28;

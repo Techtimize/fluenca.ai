@@ -19,7 +19,6 @@ export const BUSSINESSENDPOINT = {
     ANALYZE_COMPANY_RESULTS:(company_id: string) => `/analyzeCompany/results/${company_id}`,
     ANALYZE_COMPANY_DASHBOARD:(company_id: string) => `/analyzeCompany/dashboard/${company_id}`,
     ANALYZE_COMPANY_DASHBOARD_DOCUMENTATION:(company_id: string) => `/analyzeCompany/dashboard/${company_id}/documentation`,
-    GROWTH: '/social-growth',
 
     ANALYSIS:{
     COMPETITOR_ANALYSIS: '/competitorAnalysis',
@@ -153,6 +152,34 @@ export const BUSSINESSENDPOINT = {
         DIAGNOSE: (goal_id: string) => `/goal/${goal_id}/diagnose`,
         APPROVE: (goal_id: string) => `/goal/${goal_id}/approve`,
         TASK: (goal_id: string, task_id: string) => `/goal/${goal_id}/tasks/${task_id}`,
+        PROGRESS: (goal_id: string) => `/goal/${goal_id}/progress`,
+        LESSONS: '/lessons',
+        PAUSE: (goal_id: string) => `/goal/${goal_id}/pause`,
+        RESUME: (goal_id: string) => `/goal/${goal_id}/resume`,
+        CANCEL: (goal_id: string) => `/goal/${goal_id}/cancel`,
+    },
+
+    GOOGLE_ANALYTICS: {
+        CONNECTION: '/google-analytics',
+        CONNECT: '/google-analytics/connect',
+        CALLBACK: '/google-analytics/callback',
+        PROPERTIES: '/google-analytics/properties',
+        PROPERTY: '/google-analytics/property',
+        OVERVIEW: '/google-analytics/overview',
+        DISCONNECT: '/google-analytics',
+    },
+
+    SEARCH_CONSOLE: {
+        CONNECTION: '/search-console',
+        CONNECT: '/search-console/connect',
+        CALLBACK: '/search-console/callback',
+        SITES: '/search-console/sites',
+        SITE: '/search-console/site',
+        OVERVIEW: '/search-console/overview',
+        SITEMAPS: '/search-console/sitemaps',
+        INSPECT: '/search-console/inspect',
+        INDEX_CHECK: '/search-console/index-check',
+        DISCONNECT: '/search-console',
     },
 }
 

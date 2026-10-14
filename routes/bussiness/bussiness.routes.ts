@@ -1,7 +1,19 @@
 import { BUSSINESSENDPOINT } from "./Bussiness-Endpoint";
+import type {
+  GoogleAnalyticsConnection,
+  GoogleAnalyticsOverview,
+  GoogleAnalyticsPropertyList,
+} from "@/types/bussiness/google-analytics-type";
+import type {
+  IndexCheck,
+  SearchConsoleConnection,
+  SearchConsoleOverview,
+  SearchConsoleSite,
+  Sitemap,
+  UrlInspection,
+} from "@/types/bussiness/search-console-type";
 import api from "../apiClient";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
-import { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
 import type { DashboardResponse } from "@/types/bussiness/dashboard-type";
 import type { DashboardDocumentationResponse } from "@/types/bussiness/dashboard-documentation-type";
 import type {
@@ -90,6 +102,8 @@ import type {
   DiagnoseGoalResponse,
   GoalDetailResponse,
   GoalListResponse,
+  GoalLessonsResponse,
+  GoalProgressResponse,
   GoalTask,
   UpdateGoalTaskRequest,
 } from "@/types/bussiness/goal-type";
@@ -119,13 +133,6 @@ export const OnboardingDetailsApi = async (): Promise<OnboardingResponseProps> =
 
 export const AnalyzeCompanyApi = async (data: AnalyzeCompanyRequest) => {
     const response = await api.post<AnalyzeCompanyResponse>(BUSSINESSENDPOINT.ANALYZE_COMPANY, data);
-    return response.data;
-}
-
-export const SocialGrowthApi = async (prompt: string) => {
-    const response = await api.post<SocialGrowthResponse>(BUSSINESSENDPOINT.GROWTH, {
-      prompt,
-    });
     return response.data;
 }
 
@@ -734,7 +741,10 @@ export const CreateGoalApi = async (
 
 export const CompanyGoalsApi = async (): Promise<GoalListResponse> => {
   const response = await api.get(BUSSINESSENDPOINT.GOAL.COMPANY_GOALS);
-  return response.data;
+  const data = response.data;
+  // Accept a bare array or a { goals } / { data } wrapper.
+  if (Array.isArray(data)) return data;
+  return data?.goals ?? data?.data ?? [];
 };
 
 export const GoalByIdApi = async (goal_id: string): Promise<GoalDetailResponse> => {
@@ -759,4 +769,88 @@ export const UpdateGoalTaskApi = async ({
 }: UpdateGoalTaskRequest): Promise<GoalTask> => {
   const response = await api.patch(BUSSINESSENDPOINT.GOAL.TASK(goal_id, task_id), { status });
   return response.data;
+};
+export const GoalProgressApi = async (goal_id: string): Promise<GoalProgressResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.GOAL.PROGRESS(goal_id));
+  return response.data;
+};
+
+export const GoalLessonsApi = async (): Promise<GoalLessonsResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.GOAL.LESSONS);
+  return response.data;
+};
+
+export const GoogleAnalyticsConnectionApi = async (): Promise<GoogleAnalyticsConnection> => {
+  const response = await api.get(BUSSINESSENDPOINT.GOOGLE_ANALYTICS.CONNECTION);
+  return response.data;
+};
+
+export const GoogleAnalyticsConnectApi = async (): Promise<{ authorize_url: string }> => {
+  const response = await api.get(BUSSINESSENDPOINT.GOOGLE_ANALYTICS.CONNECT);
+  return response.data;
+};
+
+export const GoogleAnalyticsPropertiesApi = async (): Promise<GoogleAnalyticsPropertyList> => {
+  const response = await api.get(BUSSINESSENDPOINT.GOOGLE_ANALYTICS.PROPERTIES);
+  return response.data;
+};
+
+export const GoogleAnalyticsSelectPropertyApi = async (
+  property_id: string,
+): Promise<GoogleAnalyticsConnection> => {
+  const response = await api.put(BUSSINESSENDPOINT.GOOGLE_ANALYTICS.PROPERTY, { property_id });
+  return response.data;
+};
+
+export const GoogleAnalyticsOverviewApi = async (days = 28): Promise<GoogleAnalyticsOverview> => {
+  const response = await api.get(BUSSINESSENDPOINT.GOOGLE_ANALYTICS.OVERVIEW, { params: { days } });
+  return response.data;
+};
+
+export const GoogleAnalyticsDisconnectApi = async (): Promise<void> => {
+  await api.delete(BUSSINESSENDPOINT.GOOGLE_ANALYTICS.DISCONNECT);
+};
+
+export const SearchConsoleConnectionApi = async (): Promise<SearchConsoleConnection> => {
+  const response = await api.get(BUSSINESSENDPOINT.SEARCH_CONSOLE.CONNECTION);
+  return response.data;
+};
+
+export const SearchConsoleConnectApi = async (): Promise<{ authorize_url: string }> => {
+  const response = await api.get(BUSSINESSENDPOINT.SEARCH_CONSOLE.CONNECT);
+  return response.data;
+};
+
+export const SearchConsoleSitesApi = async (): Promise<{ items: SearchConsoleSite[] }> => {
+  const response = await api.get(BUSSINESSENDPOINT.SEARCH_CONSOLE.SITES);
+  return response.data;
+};
+
+export const SearchConsoleSelectSiteApi = async (site_url: string): Promise<SearchConsoleConnection> => {
+  const response = await api.put(BUSSINESSENDPOINT.SEARCH_CONSOLE.SITE, { site_url });
+  return response.data;
+};
+
+export const SearchConsoleOverviewApi = async (days = 28): Promise<SearchConsoleOverview> => {
+  const response = await api.get(BUSSINESSENDPOINT.SEARCH_CONSOLE.OVERVIEW, { params: { days } });
+  return response.data;
+};
+
+export const SearchConsoleSitemapsApi = async (): Promise<{ site_url: string; items: Sitemap[] }> => {
+  const response = await api.get(BUSSINESSENDPOINT.SEARCH_CONSOLE.SITEMAPS);
+  return response.data;
+};
+
+export const SearchConsoleInspectApi = async (url: string): Promise<UrlInspection> => {
+  const response = await api.post(BUSSINESSENDPOINT.SEARCH_CONSOLE.INSPECT, { url });
+  return response.data;
+};
+
+export const SearchConsoleIndexCheckApi = async (): Promise<IndexCheck> => {
+  const response = await api.get(BUSSINESSENDPOINT.SEARCH_CONSOLE.INDEX_CHECK);
+  return response.data;
+};
+
+export const SearchConsoleDisconnectApi = async (): Promise<void> => {
+  await api.delete(BUSSINESSENDPOINT.SEARCH_CONSOLE.DISCONNECT);
 };

@@ -1,5 +1,4 @@
 ﻿"use client";
-
 import { useMemo } from "react";
 import Link from "next/link";
 import {
@@ -39,6 +38,7 @@ import {
 } from "@/types/bussiness/content-execution-type";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import { cn } from "cn";
+import { statusTone } from "./statusTone";
 
 function todayIsoDate() {
   return new Date().toISOString().slice(0, 10);
@@ -71,22 +71,7 @@ function resolveSettings(
   };
 }
 
-function statusTone(status?: string) {
-  const value = String(status || "").toLowerCase();
-  if (value.includes("publish") || value === "completed" || value === "scripted" || value === "imaged") {
-    return "bg-emerald-50 text-emerald-700 ring-emerald-100";
-  }
-  if (value.includes("fail") || value.includes("error")) {
-    return "bg-rose-50 text-rose-700 ring-rose-100";
-  }
-  if (value.includes("skip") || value.includes("disabled")) {
-    return "bg-amber-50 text-amber-700 ring-amber-100";
-  }
-  if (value.includes("run") || value.includes("queue") || value.includes("pending")) {
-    return "bg-[#ECEBFF] text-[#5B57E6] ring-[#D8D6F5]";
-  }
-  return "bg-[#F6F7FD] text-neutral-600 ring-[#E6E8F5]";
-}
+
 
 function formatWhen(value?: string | null) {
   if (!value) return "";
@@ -513,7 +498,7 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
             ) : null}
 
             {runs.length > 0 ? (
-              <ul className="max-h-[18rem] space-y-2 overflow-y-auto pr-1">
+              <ul className="max-h-72 space-y-2 overflow-y-auto pr-1">
                 {runs.map((run, index) => (
                   <RunRow
                     key={run.id || run.run_id || run.job_id || `run-${index}`}
