@@ -64,7 +64,7 @@ export const plans: readonly Plan[] = [
       { label: "Image Generation", used: 200, limit: 200 },
     ],
     cta: "Upgrade Plan",
-    href: "/signup?plan=accelerator",
+    href: "/sales",
     popular: true,
   },
   {
@@ -89,7 +89,7 @@ export const plans: readonly Plan[] = [
       { label: "Image Generation", used: 500, limit: 500 },
     ],
     cta: "Upgrade Plan",
-    href: "/signup?plan=command",
+    href: "/sales",
   },
 ];
 

@@ -3,7 +3,6 @@
 // components/landing/why-fluenca.tsx
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
-import { getTeam, type TeamId } from "@/components/herosection/office-data";
 
 const LOGO_ICON = "/assets/Logo.svg";
 
@@ -17,35 +16,22 @@ const stagger = {
   show: { transition: { staggerChildren: 0.08 } },
 };
 
-const benefits: {
-  title: string;
-  text: string;
-  leadId: TeamId;
-  leadNote: string;
-}[] = [
+const benefits = [
   {
     title: "Accurate",
     text: "Verify the facts once, so later content is far less likely to include made-up or off-brand claims.",
-    leadId: "dna",
-    leadNote: "Raheel’s DNA rules every draft",
   },
   {
     title: "Consistent",
     text: "Every channel and every piece of content draws from the same foundation.",
-    leadId: "seo",
-    leadNote: "Talha + Sayyam share one DNA lane",
   },
   {
     title: "Efficient",
     text: "Do the setup once instead of explaining your business again in every prompt.",
-    leadId: "intake",
-    leadNote: "Agents hand off — you don’t re-brief",
   },
   {
     title: "Personal",
     text: "Output reflects your actual business, not generic marketing copy.",
-    leadId: "analytics",
-    leadNote: "Arslan proves what fits your brand",
   },
 ];
 
@@ -110,7 +96,6 @@ export default function WhyFluenca() {
             className="flex flex-col justify-between rounded-[28px] border border-white/80 bg-[linear-gradient(150deg,#EFEEFF_0%,#F7F7FF_55%,#F3F2FF_100%)] p-5 shadow-[0_8px_30px_rgba(110,110,255,0.05)] md:rounded-[40px] md:p-[30px]"
           >
             {benefits.map((b, i) => {
-              const lead = getTeam(b.leadId);
               return (
                 <div
                   key={b.title}
@@ -123,20 +108,6 @@ export default function WhyFluenca() {
                     <h3 className="font-display text-[18px] font-medium leading-[26px] tracking-normal text-[#1C1C1E] md:text-[20px] md:leading-[28px]">
                       {b.title}
                     </h3>
-                    <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-white/80 py-0.5 pl-0.5 pr-2 ring-1 ring-indigo-100">
-                      <span className="relative h-5 w-5 overflow-hidden rounded-full">
-                        <Image
-                          src={lead.leadImage}
-                          alt=""
-                          fill
-                          sizes="20px"
-                          className="object-cover"
-                        />
-                      </span>
-                      <span className="hidden font-body text-[11px] text-[#62625F] sm:inline">
-                        {b.leadNote}
-                      </span>
-                    </span>
                   </div>
                   <p className="mt-1.5 font-body text-[15px] font-normal leading-[24px] tracking-normal text-[#62625F] md:mt-2 md:text-[17px] md:leading-[28px]">
                     {b.text}
