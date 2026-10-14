@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowRight,
   History,
@@ -121,6 +121,15 @@ function actionDecision(m: ChatMessage) {
   return action?.decision && action.decision in DECISION_LABELS ? action.decision : null;
 }
 
+function chatLinks(m: ChatMessage): { label: string; path: string }[] {
+  const links = m.toolResult?.links;
+  if (!Array.isArray(links)) return [];
+  return links.filter(
+    (link): link is { label: string; path: string } =>
+      typeof link?.label === "string" && typeof link?.path === "string" && link.path.startsWith("/"),
+  );
+}
+
 function pendingAction(m: ChatMessage) {
   const action = m.toolResult?.pending_action as { decision?: unknown } | undefined;
   return m.role === "assistant" && m.id !== "streaming-assistant" && !!action && !action.decision;
@@ -159,6 +168,7 @@ export default function ChatPanel({
   placeholder = "Ask anything about marketing ...",
 }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const [draft, setDraft] = useState("");
   const [voiceBaseText, setVoiceBaseText] = useState("");
   const [capabilitiesOpen, setCapabilitiesOpen] = useState(false);
@@ -365,7 +375,29 @@ export default function ChatPanel({
                   </button>
                 </span>
               ) : null}
-              {typeof m.toolResult?.path === "string" && m.toolResult.path.startsWith("/") ? (
+              {chatLinks(m).length ? (
+                <span className="mt-2 flex flex-col gap-1">
+                  {chatLinks(m).map((link) => (
+                    <button
+                      key={`${link.label}-${link.path}`}
+                      type="button"
+                      onClick={() => (link.path === pathname ? undefined : router.push(link.path))}
+                      disabled={link.path === pathname}
+                      className="group inline-flex w-fit max-w-full items-center gap-1.5 rounded-lg border border-[#E6E8F5] bg-white px-2.5 py-1 text-left text-xs text-[#5B57E6] transition-colors hover:border-[#C8C6F5] hover:bg-[#F6F5FF] disabled:cursor-default disabled:text-neutral-500"
+                    >
+                      <span className="truncate">{link.label}</span>
+                      {link.path === pathname ? (
+                        <span className="shrink-0 text-[11px] text-neutral-400">on this page</span>
+                      ) : (
+                        <ArrowRight className="size-3 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                      )}
+                    </button>
+                  ))}
+                </span>
+              ) : null}
+              {typeof m.toolResult?.path === "string" &&
+              m.toolResult.path.startsWith("/") &&
+              m.toolResult.path !== pathname ? (
                 <BrandButton
                   type="button"
                   size="xs"
