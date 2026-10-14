@@ -32,7 +32,8 @@ import { IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussine
 import useAuthStore from "@/store/AuthsStore";
 import type { EditProfileRequest } from "@/types/bussiness/user-profile-type";
 import type { CreateGoalRequest, UpdateGoalTaskRequest } from "@/types/bussiness/goal-type";
-import { GOALS_KEY, GOOGLE_ANALYTICS_KEY, SEARCH_CONSOLE_KEY, goalKey } from "./Bussiness-Query";
+import { GOALS_KEY, GOOGLE_ANALYTICS_KEY, SCHEDULED_POSTS_KEY, SEARCH_CONSOLE_KEY, goalKey, scheduledPostKey } from "./Bussiness-Query";
+import type { CreateScheduledPostRequest, UpdateScheduledPostRequest } from "@/types/bussiness/scheduled-post-type";
 import {
   GoogleAnalyticsConnectApi,
   GoogleAnalyticsDisconnectApi,
@@ -45,6 +46,10 @@ import {
   SearchConsoleIndexCheckApi,
   SearchConsoleInspectApi,
   SearchConsoleSelectSiteApi,
+  CreateScheduledPostApi,
+  UpdateScheduledPostApi,
+  CancelScheduledPostApi,
+  DeleteScheduledPostApi,
 } from "./bussiness.routes";
 
 export function EditUserProfileMutation() {
@@ -952,5 +957,69 @@ export function ResumeGoalMutation() {
   return useGoalStatusMutation(ResumeGoalApi, {
     success: "Goal resumed",
     error: "Failed to resume goal",
+  });
+}
+
+export function CreateScheduledPostMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      body,
+      onProgress,
+    }: {
+      body: CreateScheduledPostRequest;
+      onProgress?: (percent: number) => void;
+    }) => CreateScheduledPostApi(body, onProgress),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: SCHEDULED_POSTS_KEY });
+      toast.success("Post scheduled");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to schedule post"));
+    },
+  });
+}
+
+export function UpdateScheduledPostMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ post_id, body }: { post_id: string; body: UpdateScheduledPostRequest }) =>
+      UpdateScheduledPostApi(post_id, body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: SCHEDULED_POSTS_KEY });
+      toast.success("Scheduled post updated");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to update scheduled post"));
+    },
+  });
+}
+
+export function CancelScheduledPostMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (post_id: string) => CancelScheduledPostApi(post_id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: SCHEDULED_POSTS_KEY });
+      toast.success("Scheduled post cancelled");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to cancel scheduled post"));
+    },
+  });
+}
+
+export function DeleteScheduledPostMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (post_id: string) => DeleteScheduledPostApi(post_id),
+    onSuccess: (_response, post_id) => {
+      queryClient.removeQueries({ queryKey: scheduledPostKey(post_id) });
+      void queryClient.invalidateQueries({ queryKey: SCHEDULED_POSTS_KEY });
+      toast.success("Scheduled post deleted");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to delete scheduled post"));
+    },
   });
 }
