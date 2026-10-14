@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import {
   AiVisibilityCheckApi,
+  AiVisibilityGapPostApi,
   AiVisibilityOverviewApi,
   AiVisibilityQuestionsApi,
   AiVisibilityRefreshQuestionsApi,
@@ -50,3 +51,12 @@ export const AiVisibilityQuestionsMutation = () =>
 
 export const AiVisibilityRefreshQuestionsMutation = () =>
   useOverviewMutation<void>(() => AiVisibilityRefreshQuestionsApi(), "Could not refresh the questions");
+
+export const AiVisibilityGapPostMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: AiVisibilityGapPostApi,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["blog-posts"] }),
+    onError: (error) => toast.error(getApiErrorMessage(error, "Could not start the blog post")),
+  });
+};

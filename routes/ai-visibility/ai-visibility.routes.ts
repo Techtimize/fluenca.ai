@@ -75,3 +75,6 @@ export const AiVisibilityQuestionsApi = async (questions: string[]): Promise<AiV
 
 export const AiVisibilityRefreshQuestionsApi = async (): Promise<AiVisibilityOverview> =>
   (await api.post("/ai-visibility/questions/refresh")).data;
+
+export const AiVisibilityGapPostApi = async (question: string): Promise<{ id: string; status: string }> =>
+  (await api.post("/ai-visibility/gaps/post", { question })).data;

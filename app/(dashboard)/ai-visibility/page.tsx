@@ -17,7 +17,11 @@ import TopBar from "@/components/dashboard/topBar";
 import { Button } from "@/components/ui/button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { getApiErrorMessage } from "@/errors/error-utils";
-import { AiVisibilityCheckMutation, AiVisibilityQuery } from "@/routes/ai-visibility/AiVisibility-Query";
+import {
+  AiVisibilityCheckMutation,
+  AiVisibilityGapPostMutation,
+  AiVisibilityQuery,
+} from "@/routes/ai-visibility/AiVisibility-Query";
 import useAuthStore from "@/store/AuthsStore";
 
 function Panel({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
@@ -35,6 +39,9 @@ export default function AiVisibilityPage() {
   const companyName = useAuthStore((s) => s.company_name) || "";
   const { data: overview, isLoading, isError, error, refetch } = AiVisibilityQuery();
   const check = AiVisibilityCheckMutation();
+  const gapPost = AiVisibilityGapPostMutation();
+  const writeGap = (question: string) =>
+    gapPost.mutate(question, { onSuccess: (post) => router.push(PAGE_ROUTES.BLOG_DETAIL(post.id)) });
 
   const running = overview?.active;
   const latest = overview?.latest;
@@ -130,7 +137,11 @@ export default function AiVisibilityPage() {
                   <TrustedSources summary={summary} />
                 </Panel>
                 <Panel title="Gaps to fix" hint="Questions where AI names others, not you.">
-                  <Gaps summary={summary} onFix={() => router.push(PAGE_ROUTES.BLOGS)} />
+                  <Gaps
+                    summary={summary}
+                    onWrite={writeGap}
+                    writing={gapPost.isPending ? (gapPost.variables ?? null) : null}
+                  />
                 </Panel>
               </div>
             </>
