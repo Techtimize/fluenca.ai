@@ -36,6 +36,7 @@ export interface AiVisibilityOverview {
   trend: { date: string; score: number }[];
   questions: { id: string; text: string; source: "auto" | "user"; ai_volume: number | null }[];
   can_check_now: boolean;
+  gap_posts: Record<string, string>;
 }
 
 export interface AiVisibilityAnswer {

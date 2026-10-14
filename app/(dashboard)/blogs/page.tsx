@@ -6,6 +6,8 @@ import { FileText, Sparkles } from "lucide-react";
 import BlogPostRow from "@/components/dashboard/blogs/BlogPostRow";
 import BlogWriterHero from "@/components/dashboard/blogs/BlogWriterHero";
 import ReadyToWritePanel from "@/components/dashboard/blogs/ReadyToWritePanel";
+import { useRouter } from "next/navigation";
+import { AiVisibilityGapPostMutation, AiVisibilityQuery } from "@/routes/ai-visibility/AiVisibility-Query";
 import ApiNotFoundCard from "@/components/notfound";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -68,6 +70,18 @@ export default function BlogsPage() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   const blogBriefs = (briefs.data?.briefs ?? []).filter((brief) => brief.format === "blog");
+  const router = useRouter();
+  const visibility = AiVisibilityQuery();
+  const gapPost = AiVisibilityGapPostMutation();
+  const gapPosts = visibility.data?.gap_posts ?? {};
+  const gapPostIds = new Set(Object.values(gapPosts));
+  const latestVisibility = visibility.data?.latest;
+  const openGaps =
+    latestVisibility?.status === "done"
+      ? (latestVisibility.summary?.gaps ?? []).filter((gap) => !gapPosts[gap.question])
+      : [];
+  const writeGap = (question: string) =>
+    gapPost.mutate(question, { onSuccess: (post) => router.push(PAGE_ROUTES.BLOG_DETAIL(post.id)) });
   const allPosts = posts.data?.blog_posts ?? [];
   const briefsById = new Map(blogBriefs.map((brief) => [brief.brief_id, brief]));
   const briefsWithPost = new Set(allPosts.map((post) => post.brief_id));
@@ -227,7 +241,7 @@ export default function BlogsPage() {
                     key={post.id}
                     post={post}
                     briefTitle={brief?.title}
-                    keyword={brief?.primary_keyword}
+                    keyword={brief?.primary_keyword ?? (gapPostIds.has(post.id) ? "From AI visibility" : undefined)}
                     retrying={pendingBriefId === post.brief_id}
                     onRetry={() => write(post.brief_id)}
                   />
@@ -259,6 +273,9 @@ export default function BlogsPage() {
             onWrite={write}
             isGenerating={startResearch.isPending}
             onGenerate={() => startResearch.mutate()}
+            gaps={loading ? [] : openGaps}
+            pendingGap={gapPost.isPending ? (gapPost.variables ?? null) : null}
+            onWriteGap={writeGap}
           />
         </aside>
       </div>
