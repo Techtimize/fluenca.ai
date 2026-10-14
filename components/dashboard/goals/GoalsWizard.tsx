@@ -7,7 +7,6 @@ import GoalStepRail from "@/components/dashboard/goals/GoalStepRail";
 import {
   GoalDiagnosePanel,
   GoalExecutePanel,
-  GoalOptimizePanel,
   GoalPlanPanel,
 } from "@/components/dashboard/goals/GoalResultPanels";
 import {
@@ -231,17 +230,8 @@ export default function GoalsWizard({ initialGoal }: Props) {
           data={liveResult}
           completedTasks={completedTasks}
           onToggleTask={toggleTask}
-          onContinue={() => goTo(5)}
-          onBack={() => setStep(3)}
-        />
-      ) : null}
-
-      {step === 5 ? (
-        <GoalOptimizePanel
-          data={liveResult}
-          form={form}
           onRestart={handleRestart}
-          onBack={() => setStep(4)}
+          onBack={() => setStep(3)}
         />
       ) : null}
     </div>
