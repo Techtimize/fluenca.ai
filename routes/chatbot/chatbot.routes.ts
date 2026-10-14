@@ -50,7 +50,10 @@ export const UploadAttachmentApi = async (file: File): Promise<string> => {
   return response.data.url;
 };
 
+export type StreamStart = { message_id: string; conversation_id: string; user_message_id: string };
+
 type StreamHandlers = {
+  onStart?: (ids: StreamStart) => void;
   onStep?: (label: string) => void;
   onChunk: (text: string) => void;
   onReset?: (text: string) => void;
@@ -143,7 +146,8 @@ export const SendMessageApi = async (
     for (const block of blocks) {
       const event = parseEvent(block);
       if (!event) continue;
-      if (event.name === "step") handlers.onStep?.(event.data.label ?? "");
+      if (event.name === "start") handlers.onStart?.(event.data as StreamStart);
+      else if (event.name === "step") handlers.onStep?.(event.data.label ?? "");
       else if (event.name === "chunk") handlers.onChunk(event.data.text ?? "");
       else if (event.name === "reset") handlers.onReset?.(event.data.text ?? "");
       else if (event.name === "done") handlers.onDone(event.data as SendMessageDoneEvent);

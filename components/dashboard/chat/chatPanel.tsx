@@ -88,6 +88,8 @@ const CAPABILITIES: Capability[] = [
   },
 ];
 
+const FOLLOW_DISTANCE_PX = 120;
+
 type Props = {
   messages: ChatMessage[];
   onSend: (message: string) => void;
@@ -172,7 +174,8 @@ export default function ChatPanel({
   const [draft, setDraft] = useState("");
   const [voiceBaseText, setVoiceBaseText] = useState("");
   const [capabilitiesOpen, setCapabilitiesOpen] = useState(false);
-  const endRef = useRef<HTMLDivElement>(null);
+  const logRef = useRef<HTMLDivElement>(null);
+  const followRef = useRef(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Grows with the text up to ~5 lines, then scrolls internally instead of clipping.
@@ -198,8 +201,9 @@ export default function ChatPanel({
   const speech = useSpeechInput(handleTranscript);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, isAwaitingReply, isToolRunning]);
+    const log = logRef.current;
+    if (log && followRef.current) log.scrollTop = log.scrollHeight;
+  }, [messages, isAwaitingReply, isToolRunning, currentStep]);
 
   return (
     <Card
@@ -304,7 +308,16 @@ export default function ChatPanel({
         </button>
       </div>
 
-      <div role="log" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+      <div
+        ref={logRef}
+        onScroll={(event) => {
+          const log = event.currentTarget;
+          followRef.current = log.scrollHeight - log.scrollTop - log.clientHeight < FOLLOW_DISTANCE_PX;
+        }}
+        role="log"
+        aria-live="polite"
+        className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
+      >
         {messages.length === 0 && !isAwaitingReply ? (
           <div className="mt-8 space-y-3 text-center">
             <p className="text-xs text-neutral-500">Ask me anything, or try one of these:</p>
@@ -430,7 +443,6 @@ export default function ChatPanel({
           <p className="text-center text-xs text-neutral-500">Working on it. This can take a while.</p>
         ) : null}
 
-        <div ref={endRef} />
       </div>
 
       {speech.isListening ? (
@@ -464,6 +476,7 @@ export default function ChatPanel({
           const text = draft.trim();
           if (isSending) return;
           if (!text) return;
+          followRef.current = true;
           onSend(text);
           setDraft("");
         }}
