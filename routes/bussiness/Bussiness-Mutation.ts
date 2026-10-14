@@ -301,6 +301,7 @@ type SendMessageVariables = {
   pagePath?: string;
   onStep?: (label: string) => void;
   onChunk: (text: string) => void;
+  onReset?: (text: string) => void;
   onDone: (event: SendMessageDoneEvent) => void;
 };
 
@@ -308,8 +309,8 @@ export const SendMessageMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ message, conversationId, screenContext, imageUrl, mode, pages, pagePath, onStep, onChunk, onDone }: SendMessageVariables) =>
-      SendMessageApi(message, { onStep, onChunk, onDone }, { conversationId, screenContext, imageUrl, mode, pages, pagePath }),
+    mutationFn: ({ message, conversationId, screenContext, imageUrl, mode, pages, pagePath, onStep, onChunk, onReset, onDone }: SendMessageVariables) =>
+      SendMessageApi(message, { onStep, onChunk, onReset, onDone }, { conversationId, screenContext, imageUrl, mode, pages, pagePath }),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["chat-history"] });
       queryClient.invalidateQueries({ queryKey: ["chat-conversations"] });
