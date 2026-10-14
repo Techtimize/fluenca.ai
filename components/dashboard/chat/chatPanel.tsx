@@ -109,6 +109,17 @@ type Props = {
   placeholder?: string;
 };
 
+const DECISION_LABELS: Record<string, string> = {
+  confirmed: "Confirmed",
+  cancelled: "Cancelled",
+  replaced: "Replaced by a newer request",
+};
+
+function actionDecision(m: ChatMessage) {
+  const action = m.toolResult?.pending_action as { decision?: string } | undefined;
+  return action?.decision && action.decision in DECISION_LABELS ? action.decision : null;
+}
+
 function pendingAction(m: ChatMessage) {
   const action = m.toolResult?.pending_action as { decision?: unknown } | undefined;
   return m.role === "assistant" && m.id !== "streaming-assistant" && !!action && !action.decision;
@@ -331,6 +342,9 @@ export default function ChatPanel({
                     </span>
                   ))}
                 </span>
+              ) : null}
+              {actionDecision(m) ? (
+                <span className="mt-1 block text-xs text-neutral-500">{DECISION_LABELS[actionDecision(m) as string]}</span>
               ) : null}
               {pendingAction(m) && onDecide ? (
                 <span className="mt-2 flex gap-2">
