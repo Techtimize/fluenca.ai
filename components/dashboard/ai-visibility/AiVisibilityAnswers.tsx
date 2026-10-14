@@ -1,80 +1,39 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import { Check, ChevronDown, Loader2, Minus, X } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { ChevronDown, Loader2 } from "lucide-react";
 import type { AiVisibilityAnswer } from "@/routes/ai-visibility/ai-visibility.routes";
 import { AiVisibilityRunQuery } from "@/routes/ai-visibility/AiVisibility-Query";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import { ENGINE_NAMES } from "./AiVisibilityPanels";
 
-const TABLE_DIVIDER = /^\s*\|?\s*:?-{2,}/;
-const MARKDOWN_LINK = /\[([^\]]+)\]\((https?:[^)]+)\)/g;
-const BARE_SOURCE = /\(\s*\[?[a-z0-9.-]+\.[a-z]{2,}\]?\s*\)/gi;
+const MAX_CHIPS = 8;
+const NAMED_PREVIEW = 4;
 
-export function readableAnswer(text: string): string {
-  return text
-    .split("\n")
-    .filter((line) => !TABLE_DIVIDER.test(line))
-    .map((line) => {
-      const cleaned = line
-        .replace(MARKDOWN_LINK, "$1")
-        .replace(BARE_SOURCE, "")
-        .replace(/\*\*|__|`/g, "")
-        .replace(/^#{1,6}\s+/, "")
-        .replace(/\\[()[\]]/g, "")
-        .replace(/\\text\{([^}]*)\}/g, "$1")
-        .replace(/\\times/g, "×")
-        .replace(/\s?(\[\d+\])+/g, "");
-      if (!cleaned.trim().startsWith("|")) return cleaned;
-      return cleaned
-        .split("|")
-        .map((cell) => cell.trim())
-        .filter(Boolean)
-        .join(" · ");
-    })
-    .join("\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
-
-function Cell({ answer }: { answer: AiVisibilityAnswer | undefined }) {
-  if (!answer) return <Minus className="mx-auto size-4 text-neutral-300" aria-label="Not asked" />;
+function Status({ answer }: { answer: AiVisibilityAnswer | undefined }) {
+  if (!answer || (!answer.answer_text && answer.engine !== "google_search" && !answer.mentioned)) {
+    return <span className="text-[12px] text-neutral-400">No answer</span>;
+  }
   if (answer.engine === "google_search") {
     return answer.google_rank ? (
-      <span className="text-[13px] font-semibold text-emerald-600">#{answer.google_rank}</span>
+      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[12px] font-semibold text-emerald-700">
+        Rank #{answer.google_rank}
+      </span>
     ) : (
-      <X className="mx-auto size-4 text-rose-500" aria-label="Not in the top 10" />
+      <span className="rounded-full bg-rose-50 px-2 py-0.5 text-[12px] font-medium text-rose-700">Not top 10</span>
     );
   }
-  if (!answer.mentioned) return <X className="mx-auto size-4 text-rose-500" aria-label="Not mentioned" />;
-  return (
-    <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-emerald-600">
-      <Check className="size-4" aria-hidden="true" />
-      {answer.position ? `#${answer.position}` : ""}
-      {answer.cited ? <span className="text-[11px] font-medium text-[#4F46E5]">cited</span> : null}
+  return answer.mentioned ? (
+    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[12px] font-semibold text-emerald-700">
+      Named{answer.position ? ` #${answer.position}` : ""}
+      {answer.cited ? " · cited" : ""}
     </span>
+  ) : (
+    <span className="rounded-full bg-rose-50 px-2 py-0.5 text-[12px] font-medium text-rose-700">Not named</span>
   );
 }
-
-function highlight(text: string, brands: string[]) {
-  if (!brands.length) return text;
-  const pattern = new RegExp(`(${brands.map((b) => b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
-  return text.split(pattern).map((part, index) =>
-    index % 2 ? (
-      <mark key={index} className="rounded bg-[#ECEBFF] px-0.5 text-[#3730A3]">
-        {part}
-      </mark>
-    ) : (
-      part
-    ),
-  );
-}
-
-function sourceHost(url: string) {
-  return url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0];
-}
-
-const MAX_CHIPS = 8;
 
 function Chips({ items, tone }: { items: string[]; tone: "brand" | "source" }) {
   const shown = items.slice(0, MAX_CHIPS);
@@ -94,20 +53,43 @@ function Chips({ items, tone }: { items: string[]; tone: "brand" | "source" }) {
   );
 }
 
+function sourceHost(url: string) {
+  return url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0];
+}
+
+function AnswerText({ text }: { text: string }) {
+  return (
+    <div className="mt-2 max-h-80 space-y-2 overflow-y-auto break-words text-[13px] leading-5 text-neutral-700 [&_a]:text-[#4F46E5] [&_a]:underline [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-semibold [&_li]:ms-4 [&_ol]:list-decimal [&_strong]:font-semibold [&_strong]:text-neutral-900 [&_td]:border [&_td]:border-[#E6E8F5] [&_td]:p-1.5 [&_th]:border [&_th]:border-[#E6E8F5] [&_th]:bg-[#F8F9FD] [&_th]:p-1.5 [&_th]:text-left [&_ul]:list-disc">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          a: ({ href, children }) => (
+            <a href={href} target="_blank" rel="noreferrer">
+              {children}
+            </a>
+          ),
+          table: ({ children }) => (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-[12px]">{children}</table>
+            </div>
+          ),
+        }}
+      >
+        {text}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
 function AnswerCard({ engine, answer }: { engine: string; answer: AiVisibilityAnswer }) {
   const [full, setFull] = useState(false);
   const sources = Array.from(new Set(answer.sources.map(sourceHost)));
-  const badge = !answer.answer_text
-    ? { text: "No answer", style: "bg-neutral-100 text-neutral-600" }
-    : answer.mentioned
-      ? { text: `Named you${answer.position ? ` #${answer.position}` : ""}`, style: "bg-emerald-50 text-emerald-700" }
-      : { text: "Not named", style: "bg-rose-50 text-rose-700" };
 
   return (
     <div className="flex min-w-0 flex-col gap-3 rounded-xl bg-white p-4 ring-1 ring-[#E6E8F5]">
       <div className="flex items-center justify-between gap-2">
         <p className="text-[13px] font-semibold text-neutral-900">{ENGINE_NAMES[engine]}</p>
-        <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${badge.style}`}>{badge.text}</span>
+        <Status answer={answer} />
       </div>
 
       <div className="space-y-1.5">
@@ -137,11 +119,7 @@ function AnswerCard({ engine, answer }: { engine: string; answer: AiVisibilityAn
             {full ? "Hide full answer" : "Read full answer"}
             <ChevronDown className={`size-3.5 transition-transform ${full ? "rotate-180" : ""}`} aria-hidden="true" />
           </button>
-          {full ? (
-            <p className="mt-2 max-h-80 overflow-y-auto whitespace-pre-wrap break-words text-[13px] leading-5 text-neutral-700">
-              {highlight(readableAnswer(answer.answer_text), answer.brands)}
-            </p>
-          ) : null}
+          {full ? <AnswerText text={answer.answer_text} /> : null}
         </div>
       ) : null}
     </div>
@@ -166,15 +144,25 @@ export function AnswersMatrix({ runId, engines }: { runId: string; engines: stri
   const find = (question: string, engine: string) =>
     data.answers.find((a) => a.question === question && a.engine === engine);
   const worded = engines.filter((engine) => engine !== "google_search");
+  const namedFor = (question: string) => {
+    const counts = new Map<string, number>();
+    for (const answer of data.answers) {
+      if (answer.question !== question) continue;
+      for (const brand of answer.brands) counts.set(brand, (counts.get(brand) ?? 0) + 1);
+    }
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([brand]) => brand);
+  };
 
   return (
     <div className="space-y-2">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-160 table-fixed text-left text-[14px]">
+        <table className="w-full min-w-180 table-fixed text-left text-[14px]">
           <colgroup>
             <col />
             {engines.map((engine) => (
-              <col key={engine} className="w-28" />
+              <col key={engine} className="w-32" />
             ))}
             <col className="w-12" />
           </colgroup>
@@ -192,13 +180,28 @@ export function AnswersMatrix({ runId, engines }: { runId: string; engines: stri
           <tbody>
             {questions.map((question) => {
               const expanded = open === question;
+              const named = namedFor(question);
               return (
                 <Fragment key={question}>
                   <tr className="border-t border-[#EEF0F7] align-top">
-                    <td className="py-3 pe-3 text-neutral-900">{question}</td>
+                    <td className="py-3 pe-3">
+                      <button
+                        type="button"
+                        onClick={() => setOpen(expanded ? null : question)}
+                        className={`text-left text-neutral-900 hover:text-[#4F46E5] ${FOCUS_RING}`}
+                      >
+                        {question}
+                      </button>
+                      {named.length ? (
+                        <p className="mt-1 text-[12px] text-neutral-500">
+                          AI names: {named.slice(0, NAMED_PREVIEW).join(", ")}
+                          {named.length > NAMED_PREVIEW ? ` +${named.length - NAMED_PREVIEW}` : ""}
+                        </p>
+                      ) : null}
+                    </td>
                     {engines.map((engine) => (
                       <td key={engine} className="py-3 text-center">
-                        <Cell answer={find(question, engine)} />
+                        <Status answer={find(question, engine)} />
                       </td>
                     ))}
                     <td className="py-2 text-end">
@@ -235,7 +238,8 @@ export function AnswersMatrix({ runId, engines }: { runId: string; engines: stri
         </table>
       </div>
       <p className="text-[12px] text-neutral-500">
-        ✓ #n means the AI named you, at position n. Google search shows your rank in the top 10. ✗ means not named.
+        Named #n: the AI recommended you, at position n. Not named: it answered but recommended others. Google
+        search shows your rank in the top 10. Open a question to see who it recommended and why.
       </p>
     </div>
   );
