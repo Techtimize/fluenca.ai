@@ -5,13 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import {
-  Building2,
+  // Building2, Sparkles, User: used by the disabled individual flow
   Check,
   ChevronsUpDown,
   Info,
   Loader2,
-  Sparkles,
-  User,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -54,14 +52,15 @@ import { LANGUAGE_LIST } from "@/constant/language";
 import { COUNTRY_LIST } from "@/constant/country";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import {
-  IndividualOnboardingFormSchema,
-  IndividualOnboardingFormValidator,
+  // IndividualOnboardingFormSchema,
+  // IndividualOnboardingFormValidator,
   OnboardingFormSchema,
   OnboardingFormValidator,
 } from "@/validator/Auth/onboarding-validator";
-import type { OnboardingRequestProps } from "@/types/bussiness/onboarding-type";
+// import type { OnboardingRequestProps } from "@/types/bussiness/onboarding-type";
 
-type OnboardingMode = "individual" | "company";
+// Individual onboarding is disabled for now; only "company" is live.
+// type OnboardingMode = "individual" | "company";
 
 const labelClass = "text-sm font-semibold tracking-[0.02em] text-neutral-900";
 const messageClass = "text-xs text-red-400";
@@ -69,6 +68,7 @@ const fieldControlClass =
   "h-11 w-full rounded-full border-gray-300 text-sm text-black placeholder:text-slate-500 focus:ring-2 focus:ring-primarytext md:h-10";
 const selectTriggerClass = `${fieldControlClass} data-[size=default]:h-11 md:data-[size=default]:h-10`;
 
+/* Individual onboarding (disabled)
 const GOAL_KEYS = [
   "goalAudience",
   "goalEngagement",
@@ -97,10 +97,11 @@ function mapIndividualToRequest(
     linkedin_url: data.linkedin_url || null,
   };
 }
+*/
 
 export default function Onboarding() {
   const t = useTranslations("onboarding");
-  const [mode, setMode] = useState<OnboardingMode>("individual");
+  // const [mode, setMode] = useState<OnboardingMode>("individual");
   const [industryOpen, setIndustryOpen] = useState(false);
   const [countryOpen, setCountryOpen] = useState(false);
   const { mutate: onboardingMutation, isPending } = OnboardingMutation();
@@ -132,6 +133,7 @@ export default function Onboarding() {
     },
   });
 
+  /* Individual onboarding (disabled)
   const individualForm = useForm<IndividualOnboardingFormValidator>({
     resolver: zodResolver(IndividualOnboardingFormSchema),
     defaultValues: {
@@ -152,23 +154,20 @@ export default function Onboarding() {
   const showLinkedin =
     selectedPlatform === "linkedin" || selectedPlatform === "both";
 
+  */
+
   const onCompanySubmit = (data: OnboardingFormValidator) =>
     onboardingMutation(data);
 
-  const onIndividualSubmit = (data: IndividualOnboardingFormValidator) =>
-    onboardingMutation(mapIndividualToRequest(data));
+  // Individual onboarding (disabled)
+  // const onIndividualSubmit = (data: IndividualOnboardingFormValidator) =>
+  //   onboardingMutation(mapIndividualToRequest(data));
 
-  const CountryField = ({
-    control,
-    name,
-  }: {
-    control: typeof companyForm.control | typeof individualForm.control;
-    name: "target_country";
-  }) => (
+  // Plain JSX (not a nested component) so it isn't re-created on every render
+  const countryField = (
     <FormField
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      control={control as any}
-      name={name}
+      control={companyForm.control}
+      name="target_country"
       render={({ field }) => (
         <FormItem className="min-w-0 gap-1.5">
           <FormLabel className={labelClass}>{t("country")}</FormLabel>
@@ -246,7 +245,7 @@ export default function Onboarding() {
           />
         </Link>
 
-        {/* Individual / Company switch */}
+        {/* Individual / Company switch — disabled with the individual flow
         <div
           role="tablist"
           aria-label="Onboarding type"
@@ -282,18 +281,18 @@ export default function Onboarding() {
             <Building2 className="size-4" aria-hidden />
             {t("modeCompany")}
           </button>
-        </div>
+        </div> */}
 
         <div className="space-y-1.5 text-center">
           <h1 className="text-2xl font-semibold tracking-tight text-neutral-950 sm:text-3xl">
-            {mode === "individual" ? t("individualTitle") : t("title")}
+            {t("title")}
           </h1>
           <p className="mx-auto max-w-md text-sm font-light text-neutral-500 sm:text-base">
-            {mode === "individual" ? t("individualSubtitle") : t("subtitle")}
+            {t("subtitle")}
           </p>
         </div>
 
-        {mode === "individual" ? (
+        {/* Individual onboarding — disabled for now; only the company flow is live.
           <Form {...individualForm}>
             <form
               onSubmit={individualForm.handleSubmit(onIndividualSubmit)}
@@ -524,7 +523,7 @@ export default function Onboarding() {
               </BrandButton>
             </form>
           </Form>
-        ) : (
+        */}
           <Form {...companyForm}>
             <form
               onSubmit={companyForm.handleSubmit(onCompanySubmit)}
@@ -667,10 +666,7 @@ export default function Onboarding() {
                   )}
                 />
 
-                <CountryField
-                  control={companyForm.control}
-                  name="target_country"
-                />
+                {countryField}
 
                 <FormField
                   control={companyForm.control}
@@ -758,7 +754,6 @@ export default function Onboarding() {
               </BrandButton>
             </form>
           </Form>
-        )}
       </div>
     </div>
   );

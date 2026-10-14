@@ -197,10 +197,10 @@ function AgentChapter({ agent }: { agent: AgentStory }) {
             </p>
           </div>
 
-          <p className="text-sm text-neutral-500">
+          {/* <p className="text-sm text-neutral-500">
             Under the leadership of{" "}
             <span className="font-semibold text-[#1C1C1E]">{agent.leader}</span>
-          </p>
+          </p> */}
         </div>
 
         {/* RIGHT: video (or animated sim card if no video yet) */}
