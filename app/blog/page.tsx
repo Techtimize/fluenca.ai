@@ -10,6 +10,7 @@ import { RetryKeywordsMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { BlogPostsQuery, BriefsQuery, KeywordsQuery } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
 import type { KeywordRunStep } from "@/types/bussiness/blog-type";
+import FooterSection from "@/components/landing/footer-section";
 
 const RESEARCH_STEPS: Record<KeywordRunStep, string> = {
   queued: "Starting",
@@ -33,8 +34,9 @@ export default function BlogPage() {
   const researchStep = keywords.data?.step ? RESEARCH_STEPS[keywords.data.step] : RESEARCH_STEPS.queued;
 
   return (
-    <main className="mx-auto w-full max-w-[1280px] min-w-0 space-y-4 px-3 py-6 sm:px-5 lg:px-8">
-      <TopBar user={{ name: companyName || "User" }} placeholder="Search blog posts..." />
+    <>
+      <main className="mx-auto w-full max-w-[1280px] min-w-0 space-y-4 px-3 py-6 sm:px-5 lg:px-8">
+        <TopBar user={{ name: companyName || "User" }} placeholder="Search blog posts..." />
 
       <div>
         <h1 className="text-lg font-semibold text-neutral-900">Blog posts</h1>
@@ -98,5 +100,7 @@ export default function BlogPage() {
       ) : null}
 
     </main>
+    <FooterSection />
+    </>
   );
 }

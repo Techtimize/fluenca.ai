@@ -3,7 +3,6 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight, Sparkles } from "lucide-react";
 import {
   AGENTS,
   accentStyles,
@@ -11,18 +10,10 @@ import {
 } from "@/components/agents/agents-data";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import AgentChapter from "@/components/agents/agentchapter";
+import FooterSection from "@/components/landing/footer-section";
 
 /** One full orbit rotation, in seconds (the former "Normal" speed). */
 const ORBIT_DURATION_SECONDS = 36;
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
-  },
-};
 
 function scrollToAgent(id: string) {
   const el = document.getElementById(id);
@@ -95,36 +86,17 @@ export default function AgentsPage() {
         className="relative z-10 px-4 pb-16 pt-8 sm:px-6 sm:pt-10 lg:px-8"
       >
         <div className="mx-auto max-w-7xl text-center">
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 rounded-full border border-[#D9DCF7] bg-white/80 px-3.5 py-1.5 text-xs font-medium text-[#5452F6] shadow-sm"
-          >
-            <Sparkles className="size-3.5" />
-            How Fluenca agents work together
-          </motion.div>
           <motion.h1
             initial={reduceMotion ? false : { opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.05 }}
-            className="mx-auto mt-5 max-w-4xl text-[34px] font-semibold leading-[1.12] tracking-tight text-[#1C1C1E] sm:text-[48px] sm:leading-[1.1] lg:text-[56px]"
+            className="mx-auto mt-0 max-w-4xl text-[34px] font-semibold leading-[1.12] tracking-tight text-[#1C1C1E] sm:text-[48px] sm:leading-[1.1] lg:text-[56px]"
           >
             Meet the minds behind your{" "}
             <span className="bg-linear-to-r from-[#4F46E5] via-[#5452F6] to-[#8B5CF6] bg-clip-text text-transparent">
               autonomous growth pipeline
             </span>
           </motion.h1>
-          <motion.p
-            initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.12 }}
-            className="mx-auto mt-4 max-w-2xl text-[15px] leading-7 text-[#62625F] sm:text-[17px]"
-          >
-            Four specialized Fluenca agents stay in sync — intake, DNA, SEO, and
-            media. Watch the orbit, then open each story to see how the system
-            turns research into publish-ready content.
-          </motion.p>
 
           <div className="relative mx-auto mt-12 flex items-center justify-center sm:mt-14">
             <div className="relative size-[320px] sm:size-[460px]">
@@ -162,7 +134,7 @@ export default function AgentsPage() {
                       <Image
                         src={agent.image}
                         alt={agent.name}
-                        className={`relative size-full rounded-full border-2 object-cover shadow-xl ${accentStyles[agent.accent].ring}`}
+                        className={`relative size-full rounded-full border-2 object-cover bg-transparent shadow-xl ${accentStyles[agent.accent].ring}`}
                         width={100}
                         height={100}
                       />
@@ -206,31 +178,11 @@ export default function AgentsPage() {
         id="agents-showcase"
         className="relative z-10 mx-auto max-w-7xl space-y-10 px-4 pb-24 sm:px-6 lg:px-8"
       >
-        <motion.div
-          className="flex flex-col justify-between gap-4 border-b border-[#E6E8F5] pb-6 md:flex-row md:items-end"
-          initial={reduceMotion ? false : "hidden"}
-          whileInView="show"
-          viewport={{ once: true }}
-          variants={fadeUp}
-        >
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5452F6]">
-              Chronicles & engineering
-            </p>
-            <h2 className="mt-1 text-[28px] font-semibold tracking-tight text-[#1C1C1E] sm:text-[34px]">
-              Agent stories & visual lab
-            </h2>
-          </div>
-          <p className="max-w-md text-sm leading-6 text-[#62625F]">
-            Each agent pairs a live working loop with its operational blueprint
-            — the same flow Fluenca runs for every company.
-          </p>
-        </motion.div>
-
         {AGENTS.map((agent, index) => (
           <AgentChapter key={agent.id} agent={agent} index={index} />
         ))}
       </main>
+      <FooterSection />
     </div>
   );
 }
