@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogImageApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, EditUserProfileApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, LinkedInPublishApi, OnboardingApi, XLoginApi, XPublishApi, RetryDnaApi, ScheduleImageGenerationApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, SocialGrowthApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi, CreateGoalApi, DiagnoseGoalApi, ApproveGoalApi, UpdateGoalTaskApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogImageApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, EditUserProfileApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, LinkedInPublishApi, OnboardingApi, XLoginApi, XPublishApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi, CreateGoalApi, DiagnoseGoalApi, ApproveGoalApi, UpdateGoalTaskApi } from "./bussiness.routes";
 import type {
   FacebookPublishRequest,
   InstagramPublishRequest,
@@ -32,7 +32,17 @@ import { IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussine
 import useAuthStore from "@/store/AuthsStore";
 import type { EditProfileRequest } from "@/types/bussiness/user-profile-type";
 import type { CreateGoalRequest, UpdateGoalTaskRequest } from "@/types/bussiness/goal-type";
-import { GOALS_KEY, goalKey } from "./Bussiness-Query";
+import { GOALS_KEY, GOOGLE_ANALYTICS_KEY, SEARCH_CONSOLE_KEY, goalKey } from "./Bussiness-Query";
+import {
+  GoogleAnalyticsConnectApi,
+  GoogleAnalyticsDisconnectApi,
+  GoogleAnalyticsSelectPropertyApi,
+  SearchConsoleConnectApi,
+  SearchConsoleDisconnectApi,
+  SearchConsoleIndexCheckApi,
+  SearchConsoleInspectApi,
+  SearchConsoleSelectSiteApi,
+} from "./bussiness.routes";
 
 export function EditUserProfileMutation() {
     const queryClient = useQueryClient();
@@ -740,21 +750,6 @@ export function XPublishMutation() {
   });
 }
 
-export function SocialGrowthMutation() {
-  return useMutation({
-    mutationFn: async (prompt: string) => {
-      const response = await SocialGrowthApi(prompt);
-      if (response?.success === false) {
-        throw new Error(response?.error || "Failed to build growth plan");
-      }
-      return response;
-    },
-    onError: (error: unknown) => {
-      toast.error(getApiErrorMessage(error, "Failed to build growth plan"));
-    },
-  });
-}
-
 export function CreateGoalMutation() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -806,6 +801,105 @@ export function UpdateGoalTaskMutation() {
     },
     onError: (error: unknown) => {
       toast.error(getApiErrorMessage(error, "Failed to update task"));
+    },
+  });
+}
+
+/** Sends the browser to Google's sign-in; Google returns via the backend callback. */
+export function GoogleAnalyticsConnectMutation() {
+  return useMutation({
+    mutationFn: () => GoogleAnalyticsConnectApi(),
+    onSuccess: ({ authorize_url }) => {
+      window.location.assign(authorize_url);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not start the Google Analytics connection"));
+    },
+  });
+}
+
+export function GoogleAnalyticsSelectPropertyMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (propertyId: string) => GoogleAnalyticsSelectPropertyApi(propertyId),
+    onSuccess: (connection) => {
+      queryClient.setQueryData(GOOGLE_ANALYTICS_KEY, connection);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not choose that property"));
+    },
+  });
+}
+
+export function GoogleAnalyticsDisconnectMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => GoogleAnalyticsDisconnectApi(),
+    onSuccess: () => {
+      toast.success("Google Analytics disconnected");
+      void queryClient.invalidateQueries({ queryKey: GOOGLE_ANALYTICS_KEY });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not disconnect Google Analytics"));
+    },
+  });
+}
+
+/** Sends the browser to Google's sign-in; Google returns via the backend callback. */
+export function SearchConsoleConnectMutation() {
+  return useMutation({
+    mutationFn: () => SearchConsoleConnectApi(),
+    onSuccess: ({ authorize_url }) => {
+      window.location.assign(authorize_url);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not start the Search Console connection"));
+    },
+  });
+}
+
+export function SearchConsoleSelectSiteMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (siteUrl: string) => SearchConsoleSelectSiteApi(siteUrl),
+    onSuccess: (connection) => {
+      queryClient.setQueryData(SEARCH_CONSOLE_KEY, connection);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not choose that website"));
+    },
+  });
+}
+
+/** Checks whether the site's key pages are indexed; run on demand. */
+export function SearchConsoleIndexCheckMutation() {
+  return useMutation({
+    mutationFn: () => SearchConsoleIndexCheckApi(),
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not check the index status"));
+    },
+  });
+}
+
+export function SearchConsoleInspectMutation() {
+  return useMutation({
+    mutationFn: (url: string) => SearchConsoleInspectApi(url),
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not inspect that page"));
+    },
+  });
+}
+
+export function SearchConsoleDisconnectMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => SearchConsoleDisconnectApi(),
+    onSuccess: () => {
+      toast.success("Search Console disconnected");
+      void queryClient.invalidateQueries({ queryKey: SEARCH_CONSOLE_KEY });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not disconnect Search Console"));
     },
   });
 }

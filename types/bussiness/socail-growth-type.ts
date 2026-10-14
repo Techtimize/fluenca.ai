@@ -1,7 +1,3 @@
-export type SocialGrowthRequest = {
-  prompt: string;
-};
-
 export type MetricTarget = {
   target: number;
   current: number;
@@ -67,7 +63,7 @@ export type PlatformPostingSchedule = {
   stories_daily: boolean;
 };
 
-export type InstagramPlatformStrategy = {
+export type PlatformStrategy = {
   content_plan: PlatformContentItem[];
   posting_schedule: PlatformPostingSchedule;
   hashtags: string[];
@@ -75,9 +71,8 @@ export type InstagramPlatformStrategy = {
   collaborations: string[];
 };
 
-export type PlatformStrategies = {
-  instagram: InstagramPlatformStrategy;
-};
+/** Keyed by platform id, e.g. "instagram", "linkedin". */
+export type PlatformStrategies = Partial<Record<string, PlatformStrategy>>;
 
 export type ContentPillar = {
   name: string;
@@ -137,6 +132,7 @@ export type EngagementPlan = {
 };
 
 export type SocialGrowthTask = {
+  id?: string;
   task: string;
   platform: string;
   priority: string;

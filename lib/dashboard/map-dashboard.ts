@@ -44,6 +44,24 @@ const DOC_LINKS: Record<string, { icon: string; href: string }> = {
 
 const PRIORITIES = ["high", "medium", "low"] as const;
 
+/** Client-side sheet listing strengths, opportunities and recommended actions. */
+export const ANALYSIS_DOC_ID = "analysis";
+
+const ANALYSIS_DOC: DocItem = {
+  id: ANALYSIS_DOC_ID,
+  title: "Strengths & Opportunities",
+  subtitle: "Strengths, weaknesses, growth and impact vs effort",
+  icon: "trending",
+  href: PAGE_ROUTES.COMPANY_OVERVIEW,
+};
+
+/** Place the analysis sheet right below Competitors, or last when there is none. */
+function withAnalysisDoc(docs: DocItem[]): DocItem[] {
+  const index = docs.findIndex((doc) => doc.id === "competitors");
+  const at = index === -1 ? docs.length : index + 1;
+  return [...docs.slice(0, at), ANALYSIS_DOC, ...docs.slice(at)];
+}
+
 function hostLabel(url: string): string {
   try {
     return new URL(url).hostname.replace(/^www\./, "");
@@ -183,7 +201,7 @@ export function mapDashboard(response: DashboardResponse): DashboardView {
       instagram_url: company_card.socials.instagram_url,
       instagram_username: company_card.socials.instagram_username,
     },
-    docs: (documentation.items ?? []).map(mapDoc),
+    docs: withAnalysisDoc((documentation.items ?? []).map(mapDoc)),
     sources: ids.map((id) => ({ id, label: analytics.channels[id].label })),
     defaultSource: ids.includes(analytics.default_channel) ? analytics.default_channel : (ids[0] ?? ""),
     channels: Object.fromEntries(ids.map((id) => [id, mapChannel(analytics.channels[id])])),

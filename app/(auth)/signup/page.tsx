@@ -18,7 +18,6 @@ export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordMismatchError, setPasswordMismatchError] = useState('');
   const signupMutation = SignupMutation();
@@ -71,12 +70,12 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen w-full bg-white">
-      <div className="absolute end-4 top-4 z-20 sm:end-6 sm:top-6">
+      <div className="absolute inset-e-4 top-4 z-20 sm:inset-e-6 sm:top-6">
         <LanguageSwitcher variant="muted" />
       </div>
       <div className="mx-auto flex h-screen flex-col overflow-hidden bg-white lg:flex-row lg:overflow-hidden">
         <section className="flex min-h-screen w-full items-center justify-center overflow-y-auto bg-[radial-gradient(circle_at_top_left,#E3E6FB,transparent_55%)] lg:min-h-0 lg:w-1/2">
-          <div className="w-full max-w-[420px] space-y-3 px-6 py-5 sm:max-w-[460px] sm:px-8 sm:py-4 md:max-w-[500px] md:px-12 lg:px-16">
+          <div className="w-full max-w-105 space-y-3 px-6 py-5 sm:max-w-115 sm:px-8 sm:py-4 md:max-w-125 md:px-12 lg:px-16">
             <div className="flex justify-center">
               <Image
                 src="/assets/Logo.svg"
@@ -169,18 +168,7 @@ export default function SignUpPage() {
               </div>
 
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <label className="flex cursor-pointer items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-3.5 w-3.5 rounded border-gray-300 text-[#5B5BD6] focus:ring-[#5B5BD6]"
-                  />
-                  <span>{t('rememberMe')}</span>
-                </label>
-                <Link href={PAGE_ROUTES.FORGOT_PASSWORD} className="hover:text-gray-700">
-                  {t('forgotPassword')}
-                </Link>
+
               </div>
 
               <button
