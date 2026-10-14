@@ -184,6 +184,13 @@ export const BUSSINESSENDPOINT = {
         INDEX_CHECK: '/search-console/index-check',
         DISCONNECT: '/search-console',
     },
+
+    SCHEDULED_POSTS: {
+        LIST: '/scheduled-posts',
+        CREATE: '/scheduled-posts',
+        BY_ID: (post_id: string) => `/scheduled-posts/${post_id}`,
+        CANCEL: (post_id: string) => `/scheduled-posts/${post_id}/cancel`,
+    },
 }
 
 

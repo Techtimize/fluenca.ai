@@ -87,7 +87,6 @@ const FILTERS: { id: PlatformFilter; label: string }[] = [
   { id: "linkedin", label: "LinkedIn" },
   { id: "instagram", label: "Instagram" },
   { id: "both", label: "Multi-platform" },
-  { id: "general", label: "General" },
 ];
 
 function PlatformIcons({
@@ -324,7 +323,7 @@ export default function PlannerCalendar({ data, versionSelect }: Props) {
           >
             <ChevronLeft className="size-4" />
           </button>
-          <p className="min-w-[140px] text-center text-sm font-semibold text-neutral-900">
+          <p className="min-w-35 text-center text-sm font-semibold text-neutral-900">
             {monthLabel(visibleMonth)}
           </p>
           <button
@@ -389,16 +388,7 @@ export default function PlannerCalendar({ data, versionSelect }: Props) {
               className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-neutral-400"
               aria-hidden="true"
             />
-            <select
-              value={sortOrder}
-              onChange={(event) =>
-                setSortOrder(event.target.value as SortOrder)
-              }
-              className={`h-10 appearance-none rounded-full border border-[#E6E8F5] bg-white py-0 pl-9 pr-9 text-[12px] font-semibold text-neutral-700 outline-none ${FOCUS_RING}`}
-            >
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
+
             <ChevronDown
               className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-neutral-400"
               aria-hidden="true"
@@ -440,7 +430,7 @@ export default function PlannerCalendar({ data, versionSelect }: Props) {
                   disabled={!inPlan}
                   onClick={() => handleSelectDate(cell)}
                   className={cn(
-                    `flex min-h-[104px] flex-col border-b border-r border-[#EEF0F8] p-1.5 text-left transition-colors sm:min-h-[118px] sm:p-2 ${FOCUS_RING}`,
+                    `flex min-h-26 flex-col border-b border-r border-[#EEF0F8] p-1.5 text-left transition-colors sm:min-h-[118px] sm:p-2 ${FOCUS_RING}`,
                     selected
                       ? "bg-[#F7F6FF] ring-1 ring-inset ring-[#5B57E6]"
                       : inPlan
@@ -494,7 +484,7 @@ export default function PlannerCalendar({ data, versionSelect }: Props) {
         </section>
 
         {detailOpen ? (
-          <aside className="flex min-h-[420px] flex-col rounded-2xl border border-[#E6E8F5] bg-white p-4 shadow-[0_8px_28px_rgba(15,23,42,0.06)] sm:p-5">
+          <aside className="flex min-h-105 flex-col rounded-2xl border border-[#E6E8F5] bg-white p-4 shadow-[0_8px_28px_rgba(15,23,42,0.06)] sm:p-5">
             <div className="flex items-start justify-between gap-2">
               <div className="flex min-w-0 items-start gap-2">
                 <button
@@ -657,13 +647,6 @@ export default function PlannerCalendar({ data, versionSelect }: Props) {
                     <ExternalLink className="size-4" />
                     View content
                   </BrandButton>
-                  <Link
-                    href={PAGE_ROUTES.CONTENT_RECOMMENDATION}
-                    className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#E6E8F5] bg-white text-[13px] font-semibold text-neutral-800 transition hover:bg-neutral-50 ${FOCUS_RING}`}
-                  >
-                    <Pencil className="size-3.5" />
-                    Edit schedule
-                  </Link>
                 </div>
               </div>
             ) : (
@@ -674,7 +657,7 @@ export default function PlannerCalendar({ data, versionSelect }: Props) {
                 <p className="mt-3 text-[14px] font-medium text-neutral-800">
                   No posts on this day
                 </p>
-                <p className="mt-1 max-w-[220px] text-[13px] text-neutral-500">
+                <p className="mt-1 max-w-55 text-[13px] text-neutral-500">
                   Pick another date on the calendar to review scheduled content.
                 </p>
               </div>
