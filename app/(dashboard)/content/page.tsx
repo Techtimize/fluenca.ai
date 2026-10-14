@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { ArrowDownWideNarrow, ChevronDown, Loader2, Sparkles } from "lucide-react";
 import { ContentResultsGrid } from "@/components/dashboard/content/contentResultGrid";
@@ -75,7 +75,7 @@ export default function ContentPage() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   const content = normalizeCompanyContent(data);
-  const hasResults = content.results.length > 0 || content.images.length > 0;
+  const hasResults = content.results.length > 0;
   const notFound = isError && isApiNotFoundError(error);
   const isPublishing =
     isPublishingInstagram || isPublishingFacebook || isPublishingLinkedIn;
@@ -116,40 +116,17 @@ export default function ContentPage() {
     });
   };
 
-  const gridItems: ContentGenerationResultItem[] = useMemo(() => {
-    const base =
-      content.results.length > 0
-        ? content.results
-        : content.images.map((image, index) => ({
-            id: image.id || `image-${index}`,
-            success: true,
-            status: image.status || "success",
-            platform: image.platform,
-            purpose: image.purpose,
-            aspectRatio: image.aspectRatio,
-            imagesCount: 1,
-            jobsCount: 1,
-            createdAt: image.createdAt,
-            title: image.title || image.headline,
-            projectName: image.projectName,
-            caption: image.caption,
-            version: image.version,
-            images: [image],
-          }));
-
-    const filtered =
-      platformFilter === "all"
-        ? base
-        : base.filter(
-            (item) => normalizeContentPlatform(item.platform) === platformFilter,
-          );
-
-    return [...filtered].sort((a, b) => {
+  const gridItems = content.results
+    .filter(
+      (item) =>
+        platformFilter === "all" ||
+        normalizeContentPlatform(item.platform) === platformFilter,
+    )
+    .sort((a, b) => {
       const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return sortOrder === "newest" ? bTime - aTime : aTime - bTime;
     });
-  }, [content.results, content.images, platformFilter, sortOrder]);
 
   return (
     <main className="min-w-0 space-y-5 pb-6">

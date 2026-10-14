@@ -36,6 +36,8 @@ import type {
   CompanyImageGenerationResponse,
   ImageGenerationRequest,
   ImageGenerationResponse,
+  ImageGenerationScheduleRequest,
+  ImageGenerationScheduleResponse,
   LatestGeneratedImageResponse,
 } from "@/types/bussiness/imagegeneration-type";
 import { IntelligenceJobResponse, IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
@@ -357,6 +359,14 @@ export const CompanyImageGenerationApi = async (
 
 export const DeleteImageApi = async (company_id: string, image_id: string) => {
     const response = await api.delete(BUSSINESSENDPOINT.GENERATION.DELETE_IMAGE(company_id, image_id));
+    return response.data;
+}
+
+/** POST /generation/image-generation/schedule — saves (or replaces) the run's schedule. */
+export const ScheduleImageGenerationApi = async (
+  data: ImageGenerationScheduleRequest,
+): Promise<ImageGenerationScheduleResponse> => {
+    const response = await api.post(BUSSINESSENDPOINT.GENERATION.IMAGE_GENERATION_SCHEDULE, data);
     return response.data;
 }
 
