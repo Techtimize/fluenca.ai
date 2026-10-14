@@ -115,9 +115,11 @@ export function EngineTable({ summary }: { summary: AiVisibilitySummary }) {
 
 export function ShareOfVoice({ summary, brand }: { summary: AiVisibilitySummary; brand: string }) {
   if (!summary.share_of_voice.length) return <p className="text-[13px] text-neutral-500">No brands were named yet.</p>;
+  const named = summary.share_of_voice.some((s) => s.brand.toLowerCase() === brand.toLowerCase());
+  const rows = named || !brand ? summary.share_of_voice : [{ brand, mentions: 0, share: 0 }, ...summary.share_of_voice];
   return (
     <ul className="space-y-2.5">
-      {summary.share_of_voice.map((item) => {
+      {rows.map((item) => {
         const ours = item.brand.toLowerCase() === brand.toLowerCase();
         return (
           <li key={item.brand}>
