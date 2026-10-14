@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { DecideActionApi } from "@/routes/chatbot/chatbot.routes";
+import { useSessionValue } from "@/lib/chat/chat-session-store";
 import { mapChatHistory } from "@/lib/chat/map-chat-messages";
 import type { ChatMessage, ChatMode } from "@/types/chat";
 import { ChatHistoryQuery } from "@/routes/bussiness/Bussiness-Query";
@@ -12,9 +13,10 @@ import { ConversationsQuery } from "@/routes/chatbot/Chatbot-Query";
 
 const PENDING_USER_ID = "pending-user";
 const STREAMING_ASSISTANT_ID = "streaming-assistant";
+const CONVERSATION_KEY = "fluenca-chat-conversation";
 
 export const useChatbot = (enabled = true) => {
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [activeConversationId, setActiveConversationId] = useSessionValue(CONVERSATION_KEY);
 
   const conversations = ConversationsQuery(enabled);
   const { data, isLoading, isError } = ChatHistoryQuery(activeConversationId, enabled);
