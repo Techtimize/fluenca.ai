@@ -40,6 +40,8 @@ export function proxy(request: NextRequest) {
             path.startsWith('/content') ||
             path.startsWith('/social') ||
             path.startsWith('/connectors') ||
+            path.startsWith('/googleanalytics') ||
+            path.startsWith('/websitespeed') ||
             path.startsWith('/competitor-analysis') ||
             path.startsWith('/superadmin')
         ) {
@@ -70,6 +72,8 @@ export const config = {
         '/content/:path*',
         '/social/:path*',
         '/connectors/:path*',
+        '/googleanalytics/:path*',
+        '/websitespeed/:path*',
         '/competitor-analysis/:path*',
         '/superadmin/:path*',
     ],

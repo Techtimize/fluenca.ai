@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentExecutionAgentModeApi, ContentExecutionItemsApi, ContentExecutionRunsApi, ContentExecutionSettingsApi, ContentRecommendationResultApi, DnaApi, FacebookProfileContentApi, IntakeApi, IntelligenceJobApi, InstagramProfileIdApi, InstagramProfileInfoApi, LinkedInProfileContentApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi, InstagramProfileContentApi, InstagramProfileReachApi, InstagramProfileInteractionsApi, InstagramProfileDemographicsApi, InstagramProfileFollowsApi, InstagramProfileViewsApi, InstagramProfileActionsApi, InstagramProfileStoriesApi, InstagramLiveStreamApi, CompanyGoalsApi, GoalByIdApi } from "./bussiness.routes";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentExecutionAgentModeApi, ContentExecutionItemsApi, ContentExecutionRunsApi, ContentExecutionSettingsApi, ContentRecommendationResultApi, DnaApi, FacebookProfileContentApi, IntakeApi, IntelligenceJobApi, InstagramProfileIdApi, InstagramProfileInfoApi, LinkedInProfileContentApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi, InstagramProfileContentApi, InstagramProfileReachApi, InstagramProfileInteractionsApi, InstagramProfileDemographicsApi, InstagramProfileFollowsApi, InstagramProfileViewsApi, InstagramProfileActionsApi, InstagramProfileStoriesApi, InstagramLiveStreamApi, CompanyGoalsApi, GoalByIdApi, GoalProgressApi, GoalLessonsApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   AnalyzeCompanyDashboardApi,
@@ -13,6 +13,15 @@ import {
 import type { GoogleTrendQueryParams } from "@/types/bussiness/google-trends-type";
 import { ChatHistoryApi } from "../chatbot/chatbot.routes";
 import { BlogPostDetailsApi, BlogPostsApi, BriefsApi, KeywordsApi } from "./bussiness.routes";
+import {
+  GoogleAnalyticsConnectionApi,
+  GoogleAnalyticsOverviewApi,
+  GoogleAnalyticsPropertiesApi,
+  SearchConsoleConnectionApi,
+  SearchConsoleOverviewApi,
+  SearchConsoleSitemapsApi,
+  SearchConsoleSitesApi,
+} from "./bussiness.routes";
 
 const BLOG_POLL_INTERVAL_MS = 3000;
 const isWriting = (status?: string) => status === "queued" || status === "writing";
@@ -607,5 +616,92 @@ export const GoalByIdQuery = (goal_id?: string | null) => {
     queryFn: () => GoalByIdApi(goal_id as string),
     enabled: Boolean(goal_id),
     refetchOnWindowFocus: false,
+  });
+};
+
+export const GoalProgressQuery = (goal_id?: string | null) => {
+  return useQuery({
+    queryKey: [...goalKey(goal_id), "progress"],
+    queryFn: () => GoalProgressApi(goal_id as string),
+    enabled: Boolean(goal_id),
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const GoalLessonsQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: ["goal-lessons"],
+    queryFn: () => GoalLessonsApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const GOOGLE_ANALYTICS_KEY = ["google-analytics"];
+const GOOGLE_ANALYTICS_STALE_MS = 5 * 60 * 1000;
+
+export const GoogleAnalyticsConnectionQuery = () => {
+  return useQuery({
+    queryKey: GOOGLE_ANALYTICS_KEY,
+    queryFn: () => GoogleAnalyticsConnectionApi(),
+    refetchOnWindowFocus: true,
+  });
+};
+
+export const GoogleAnalyticsPropertiesQuery = (enabled: boolean) => {
+  return useQuery({
+    queryKey: [...GOOGLE_ANALYTICS_KEY, "properties"],
+    queryFn: () => GoogleAnalyticsPropertiesApi(),
+    enabled,
+    staleTime: GOOGLE_ANALYTICS_STALE_MS,
+  });
+};
+
+/** Runs once a property is chosen; the key includes it so switching property refetches. */
+export const GoogleAnalyticsOverviewQuery = (propertyId: string | null, days = 28) => {
+  return useQuery({
+    queryKey: [...GOOGLE_ANALYTICS_KEY, "overview", propertyId, days],
+    queryFn: () => GoogleAnalyticsOverviewApi(days),
+    enabled: Boolean(propertyId),
+    staleTime: GOOGLE_ANALYTICS_STALE_MS,
+  });
+};
+
+export const SEARCH_CONSOLE_KEY = ["search-console"];
+const SEARCH_CONSOLE_STALE_MS = 5 * 60 * 1000;
+
+export const SearchConsoleConnectionQuery = () => {
+  return useQuery({
+    queryKey: SEARCH_CONSOLE_KEY,
+    queryFn: () => SearchConsoleConnectionApi(),
+    refetchOnWindowFocus: true,
+  });
+};
+
+export const SearchConsoleSitesQuery = (enabled: boolean) => {
+  return useQuery({
+    queryKey: [...SEARCH_CONSOLE_KEY, "sites"],
+    queryFn: () => SearchConsoleSitesApi(),
+    enabled,
+    staleTime: SEARCH_CONSOLE_STALE_MS,
+  });
+};
+
+/** Runs once a site is chosen; the key includes it so switching site refetches. */
+export const SearchConsoleOverviewQuery = (siteUrl: string | null, days = 28) => {
+  return useQuery({
+    queryKey: [...SEARCH_CONSOLE_KEY, "overview", siteUrl, days],
+    queryFn: () => SearchConsoleOverviewApi(days),
+    enabled: Boolean(siteUrl),
+    staleTime: SEARCH_CONSOLE_STALE_MS,
+  });
+};
+
+export const SearchConsoleSitemapsQuery = (siteUrl: string | null) => {
+  return useQuery({
+    queryKey: [...SEARCH_CONSOLE_KEY, "sitemaps", siteUrl],
+    queryFn: () => SearchConsoleSitemapsApi(),
+    enabled: Boolean(siteUrl),
+    staleTime: SEARCH_CONSOLE_STALE_MS,
   });
 };

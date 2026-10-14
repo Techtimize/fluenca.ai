@@ -1,0 +1,157 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, Gauge, Loader2, Monitor, RotateCw, Smartphone } from "lucide-react";
+import Card from "@/components/shared/card";
+import TopBar from "@/components/dashboard/topBar";
+import { PageSpeedReport, scoreColor } from "@/components/dashboard/integrations/pageSpeedCard";
+import { Button } from "@/components/ui/button";
+import { PAGE_ROUTES } from "@/constant/page-routes";
+import { getApiErrorMessage } from "@/errors/error-utils";
+import { OnboardingDetailsQuery } from "@/routes/bussiness/Bussiness-Query";
+import { PageSpeedQuery } from "@/routes/page-speed/PageSpeed-Query";
+import type { PageSpeedStrategy } from "@/routes/page-speed/page-speed.routes";
+import useAuthStore from "@/store/AuthsStore";
+import { FOCUS_RING } from "@/utils/ui-classes";
+
+const STRATEGIES: { id: PageSpeedStrategy; label: string; icon: typeof Smartphone }[] = [
+  { id: "mobile", label: "Mobile", icon: Smartphone },
+  { id: "desktop", label: "Desktop", icon: Monitor },
+];
+
+export default function WebsiteSpeedPage() {
+  const companyName = useAuthStore((s) => s.company_name);
+  const { data: company, isSuccess } = OnboardingDetailsQuery();
+  const companyUrl = company?.website_url?.trim() ?? "";
+
+  // Same url as the dashboard card by default, so its cached results show instantly.
+  const [checkedUrl, setCheckedUrl] = useState<string | null>(null);
+  const [draftUrl, setDraftUrl] = useState<string | null>(null);
+  const [strategy, setStrategy] = useState<PageSpeedStrategy>("mobile");
+  const url = checkedUrl ?? companyUrl;
+
+  const queries = {
+    mobile: PageSpeedQuery(url, "mobile", isSuccess),
+    desktop: PageSpeedQuery(url, "desktop", isSuccess),
+  };
+  const active = queries[strategy];
+
+  const rerun = () => {
+    void queries.mobile.refetch();
+    void queries.desktop.refetch();
+  };
+
+  return (
+    <main className="min-w-0 space-y-4 pb-6">
+      <TopBar user={{ name: companyName || "User" }} placeholder="Search..." />
+
+      <section className="rounded-[28px] border border-[#E6E8F5] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] p-5 sm:p-7">
+        <Link
+          href={PAGE_ROUTES.DASHBOARD}
+          className={`inline-flex items-center gap-1.5 rounded-full text-[13px] font-medium text-neutral-600 hover:text-neutral-900 ${FOCUS_RING}`}
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Back to dashboard
+        </Link>
+        <p className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5452F6] ring-1 ring-[#E6E8F5]">
+          <Gauge className="size-3.5" aria-hidden="true" />
+          Website speed
+        </p>
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight text-neutral-900">PageSpeed report</h1>
+        <p className="mt-2 max-w-2xl text-[14px] leading-6 text-neutral-600">
+          Performance, accessibility, best practices and SEO from Google PageSpeed Insights, with what to fix first.
+          Your company website is checked by default; enter another page to check it instead.
+        </p>
+      </section>
+
+      <Card className="space-y-5 p-5 sm:p-6">
+        <form
+          className="flex flex-wrap items-center gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const next = (draftUrl ?? url).trim();
+            if (next === url) rerun();
+            else setCheckedUrl(next);
+          }}
+        >
+          <input
+            type="text"
+            value={draftUrl ?? url}
+            onChange={(event) => setDraftUrl(event.target.value)}
+            placeholder="https://yoursite.com or a page on it"
+            aria-label="Page address to check"
+            className="h-10 min-w-0 flex-1 rounded-xl border border-[#E6E8F5] bg-white px-3 text-[14px]"
+          />
+          <Button
+            type="submit"
+            disabled={queries.mobile.isFetching || queries.desktop.isFetching}
+            className="h-10 gap-2 rounded-full bg-[#5B57E6] px-5 text-white hover:bg-[#4A46D0]"
+          >
+            {queries.mobile.isFetching || queries.desktop.isFetching ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <RotateCw className="size-4" aria-hidden="true" />
+            )}
+            {(draftUrl ?? url).trim() === url ? "Re-run check" : "Check this page"}
+          </Button>
+        </form>
+
+        <div role="tablist" aria-label="Device" className="grid grid-cols-2 gap-2 sm:max-w-md">
+          {STRATEGIES.map((item) => {
+            const query = queries[item.id];
+            const performance = query.data?.categories.find((c) => c.id === "performance");
+            const score = performance?.score ?? query.data?.score ?? null;
+            const selected = strategy === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                onClick={() => setStrategy(item.id)}
+                className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-colors ${FOCUS_RING} ${
+                  selected ? "border-[#5452F6] bg-[#F6F5FF]" : "border-[#E6E8F5] bg-white hover:bg-[#F8F9FF]"
+                }`}
+              >
+                <span className="flex items-center gap-2 text-[13px] font-medium text-neutral-900">
+                  <item.icon className="size-4 text-neutral-500" aria-hidden="true" />
+                  {item.label}
+                </span>
+                {query.isFetching ? (
+                  <Loader2 className="size-4 animate-spin text-[#5452F6]" aria-label="Checking" />
+                ) : (
+                  <span
+                    className={`grid size-10 place-items-center rounded-full bg-white text-sm font-semibold ring-4 ${scoreColor(score)}`}
+                  >
+                    {query.isError ? "!" : (score ?? "–")}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div role="tabpanel">
+          {active.data ? (
+            <PageSpeedReport result={active.data} />
+          ) : active.isError ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3">
+              <p className="text-[13px] text-rose-700">
+                {getApiErrorMessage(active.error, "Could not check the website speed")}
+              </p>
+              <Button type="button" variant="outline" onClick={() => void active.refetch()} className="h-9 rounded-full">
+                Try again
+              </Button>
+            </div>
+          ) : (
+            <p className="flex items-center gap-2 text-[13px] text-neutral-500">
+              <Loader2 className="size-4 animate-spin text-[#5B57E6]" aria-hidden="true" />
+              Checking the {strategy} version… this can take up to a minute.
+            </p>
+          )}
+        </div>
+      </Card>
+    </main>
+  );
+}

@@ -24,6 +24,8 @@ export const PAGE_ROUTES = {
     DASHBOARD: '/dashboard',
     GOALS: '/goals',
     CONNECTORS: '/connectors',
+    GOOGLE_ANALYTICS: '/googleanalytics',
+    WEBSITE_SPEED: '/websitespeed',
     SOCIAL: '/social',
     SOCIAL_INSTAGRAM: '/social/instagram',
     SOCIAL_FACEBOOK: '/social/facebook',

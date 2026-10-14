@@ -203,18 +203,22 @@ export function GoalDiagnosePanel({
 
 export function GoalPlanPanel({
   data,
+  platform,
   approved,
+  isApproving = false,
   onApprove,
   onBack,
 }: {
   data?: SocialGrowthResponse | null;
+  platform: string;
   approved: boolean;
+  isApproving?: boolean;
   onApprove: () => void;
   onBack: () => void;
 }) {
   const actions = data?.strategy?.strategy || [];
   const pillars = data?.content_plan?.pillars || [];
-  const schedule = data?.platform_strategies?.instagram?.posting_schedule;
+  const schedule = data?.platform_strategies?.[platform]?.posting_schedule;
   const opportunities = data?.strategy?.opportunities_used || [];
 
   return (
@@ -234,9 +238,14 @@ export function GoalPlanPanel({
           <Button
             type="button"
             onClick={onApprove}
-            
+            disabled={isApproving}
           >
-            {approved ? (
+            {isApproving ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Approving…
+              </>
+            ) : approved ? (
               <>
                 <CheckCircle2 className="size-4" />
                 Plan approved — continue
@@ -378,7 +387,7 @@ export function GoalExecutePanel({
 }: {
   data?: SocialGrowthResponse | null;
   completedTasks: Set<string>;
-  onToggleTask: (key: string) => void;
+  onToggleTask: (key: string, done: boolean) => void;
   onContinue: () => void;
   onBack: () => void;
 }) {
@@ -459,7 +468,7 @@ export function GoalExecutePanel({
         {tasks.length ? (
           <ul className="space-y-2">
             {tasks.map((task, index) => {
-              const key = `${task.task}-${index}`;
+              const key = task.id || `${task.task}-${index}`;
               const done =
                 completedTasks.has(key) ||
                 task.status === "completed" ||
@@ -468,7 +477,7 @@ export function GoalExecutePanel({
                 <li key={key}>
                   <button
                     type="button"
-                    onClick={() => onToggleTask(key)}
+                    onClick={() => onToggleTask(key, !done)}
                     className={`flex w-full items-start gap-3 rounded-2xl border px-3.5 py-3 text-left transition-colors ${
                       done
                         ? "border-[#D1FAE5] bg-[#F7FFFB]"
@@ -544,7 +553,7 @@ export function GoalOptimizePanel({
   const progress = data?.goal_progress;
   const recommendations = data?.optimization_recommendations || [];
   const experiment = data?.experiment;
-  const status = data?.goal_status || "in_progress";
+  const status = data?.goal_status || "";
   const report = data?.performance_report;
   const behind =
     status.toLowerCase().includes("behind") ||
@@ -582,7 +591,7 @@ export function GoalOptimizePanel({
       ) : null}
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Goal status" value={status.replaceAll("_", " ")} />
+        <StatCard label="Goal status" value={status ? status.replaceAll("_", " ") : "—"} />
         <StatCard
           label="Follower progress"
           value={

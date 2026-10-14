@@ -8,12 +8,12 @@ import {
   GoogleAnalyticsConnectMutation,
   GoogleAnalyticsDisconnectMutation,
   GoogleAnalyticsSelectPropertyMutation,
-} from "@/routes/google-analytics/GoogleAnalytics-Mutation";
+} from "@/routes/bussiness/Bussiness-Mutation";
 import {
   GoogleAnalyticsConnectionQuery,
   GoogleAnalyticsOverviewQuery,
   GoogleAnalyticsPropertiesQuery,
-} from "@/routes/google-analytics/GoogleAnalytics-Query";
+} from "@/routes/bussiness/Bussiness-Query";
 
 const OVERVIEW_DAYS = 28;
 const TOP_ROWS = 5;

@@ -2,6 +2,7 @@ import type { GoalMetric, GoalPlatform } from "@/lib/goals/goal-form";
 import type {
   GoalProgress,
   SocialGrowthResponse,
+  SocialGrowthTask,
 } from "@/types/bussiness/socail-growth-type";
 
 export type GoalMode = "individual" | "company";
@@ -45,8 +46,14 @@ export interface CreateGoalRequest {
   constraints: GoalConstraints;
 }
 
-export type Goal = CreateGoalRequest & {
+/** GoalResponse: list items name the values `baseline`/`target`; full goals may use `*_value`. */
+export type Goal = Omit<CreateGoalRequest, "baseline_value" | "target_value"> & {
   id: string;
+  baseline?: number | null;
+  target?: number;
+  baseline_value?: number | null;
+  target_value?: number;
+  tasks_waiting_for_approval?: number;
   company_id?: string;
   user_id?: string;
   status: GoalStatus;
@@ -55,17 +62,7 @@ export type Goal = CreateGoalRequest & {
   updated_at?: string;
 };
 
-export type GoalTask = {
-  id: string;
-  task: string;
-  platform: string;
-  priority: string;
-  due_at: string;
-  topic: string;
-  requires_approval: boolean;
-  status: string;
-  approved_by?: string;
-};
+export type GoalTask = SocialGrowthTask & { id: string };
 
 export type CreateGoalResponse = {
   goal_id: string;
@@ -92,3 +89,10 @@ export type UpdateGoalTaskRequest = {
   task_id: string;
   status: GoalTaskStatus;
 };
+
+export type GoalProgressResponse = GoalProgress;
+
+/** What the agent has learned across all of the company's goals. */
+export type GoalLesson = Record<string, unknown>;
+
+export type GoalLessonsResponse = GoalLesson[];
