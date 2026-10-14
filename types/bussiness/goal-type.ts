@@ -92,7 +92,12 @@ export type UpdateGoalTaskRequest = {
   status: GoalTaskStatus;
 };
 
-export type GoalProgressResponse = GoalProgress;
+/** GET /goal/{id}/progress: measured progress (0–100 per metric) plus whatever else the backend reports. */
+export type GoalProgressResponse = Partial<GoalProgress> & {
+  goal_progress?: Partial<GoalProgress> & Record<string, unknown>;
+  progress?: Partial<GoalProgress> & Record<string, unknown>;
+  [key: string]: unknown;
+};
 
 /** What the agent has learned across all of the company's goals. */
 export type GoalLesson = Record<string, unknown>;

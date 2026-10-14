@@ -864,3 +864,7 @@ export const SearchConsoleIndexCheckApi = async (): Promise<IndexCheck> => {
 export const SearchConsoleDisconnectApi = async (): Promise<void> => {
   await api.delete(BUSSINESSENDPOINT.SEARCH_CONSOLE.DISCONNECT);
 };
+
+export const DeleteGoalApi = async (goal_id: string): Promise<void> => {
+  await api.delete(BUSSINESSENDPOINT.GOAL.GOAL_BY_ID(goal_id));
+};
