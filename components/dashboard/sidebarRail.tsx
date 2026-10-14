@@ -32,6 +32,7 @@ export const DEFAULT_NAV: NavItem[] = [
     href: PAGE_ROUTES.CONTENT,
   },
   { id: "blogs", label: "Blogs", icon: "clipboard", href: PAGE_ROUTES.BLOGS },
+  { id: "ai-visibility", label: "AI visibility", icon: "radar", href: PAGE_ROUTES.AI_VISIBILITY },
   {
     id: "competitors",
     label: "Competitor analysis",
