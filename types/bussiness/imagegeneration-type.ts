@@ -77,10 +77,6 @@ export interface GeneratedImageAsset {
   bytes?: number;
   company_id?: string;
   created_at?: string;
-  images_id?: string;
-  run_created_at?: string;
-  run_platform?: ImageGenerationPlatform;
-  run_purpose?: ImageGenerationPurpose;
 }
 
 export interface ImageGenerationResult {
@@ -119,23 +115,53 @@ export interface ImageGenerationResult {
 
 export type ImageGenerationResponse = ImageGenerationResult;
 
-export interface CompanyImageGenerationListResponse {
-  success?: boolean;
-  company_id?: string;
-  count?: number;
-  images_count?: number;
-  results?: ImageGenerationResult[];
-  generated_images?: GeneratedImageAsset[];
-  images?: GeneratedImageAsset[];
-  data?: ImageGenerationResult | ImageGenerationResult[] | GeneratedImageAsset[];
-  items?: ImageGenerationResult[] | GeneratedImageAsset[];
-  [key: string]: unknown;
+export type ScheduleablePlatform = "instagram" | "facebook" | "linkedin" | "x";
+
+export interface ImageGenerationScheduleRequest {
+  platform: ScheduleablePlatform;
+  id: string;
+  schedule: string;
 }
 
-export type CompanyImageGenerationResponse =
-  | CompanyImageGenerationListResponse
-  | ImageGenerationResult
-  | ImageGenerationResult[]
-  | GeneratedImageAsset[];
+export interface ImageGenerationScheduleResponse {
+  success: boolean;
+  id: string;
+  company_id: string;
+  platform: ScheduleablePlatform;
+  schedule: string;
+}
+
+/* ---------- GET /generation/image-generation/{company_id} ---------- */
+
+export interface CompanyImageGenerationImage {
+  s3_url: string;
+  headline: string;
+  scene_number: number;
+}
+
+export interface CompanyImageGenerationRun {
+  id: string;
+  company_id: string;
+  agent_type: string;
+  version: number;
+  created_at: string;
+  platform: ImageGenerationPlatform;
+  purpose: ImageGenerationPurpose;
+  style: string;
+  aspect_ratio: string;
+  images_count: number;
+  summary: string | null;
+  /** ISO date-time the post is scheduled for; null when not scheduled */
+  schedule: string | null;
+  project: Pick<ImageGenerationProject, "name" | "tone">;
+  script: Pick<ImageGenerationScript, "title" | "caption" | "hook">;
+  image_jobs: ImageJob[];
+  generated_images: CompanyImageGenerationImage[];
+}
+
+export interface CompanyImageGenerationResponse {
+  company_id: string;
+  results: CompanyImageGenerationRun[];
+}
 
 export type LatestGeneratedImageResponse = ImageGenerationResult | GeneratedImageAsset;
