@@ -53,6 +53,7 @@ export const UploadAttachmentApi = async (file: File): Promise<string> => {
 type StreamHandlers = {
   onStep?: (label: string) => void;
   onChunk: (text: string) => void;
+  onReset?: (text: string) => void;
   onDone: (event: SendMessageDoneEvent) => void;
 };
 
@@ -144,6 +145,7 @@ export const SendMessageApi = async (
       if (!event) continue;
       if (event.name === "step") handlers.onStep?.(event.data.label ?? "");
       else if (event.name === "chunk") handlers.onChunk(event.data.text ?? "");
+      else if (event.name === "reset") handlers.onReset?.(event.data.text ?? "");
       else if (event.name === "done") handlers.onDone(event.data as SendMessageDoneEvent);
     }
   }

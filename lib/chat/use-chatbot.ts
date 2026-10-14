@@ -90,6 +90,10 @@ export const useChatbot = (enabled = true) => {
           streamedRef.current += chunk;
           setStreamingText(streamedRef.current);
         },
+        onReset: (text) => {
+          streamedRef.current = text;
+          setStreamingText(text);
+        },
         onDone: (event) => {
           streamedRef.current = "";
           if (event.conversation_id && event.conversation_id !== activeConversationId) {
