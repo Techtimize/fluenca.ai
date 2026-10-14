@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ArrowDownWideNarrow, ChevronDown, Loader2, Sparkles } from "lucide-react";
+import { ArrowDownWideNarrow, CalendarClock, ChevronDown, Loader2, Sparkles } from "lucide-react";
 import { ContentResultsGrid } from "@/components/dashboard/content/contentResultGrid";
 import { normalizeContentPlatform } from "@/components/dashboard/content/resultcard";
+import ScheduledPostsList from "@/components/dashboard/content/scheduled/scheduledPostsList";
+import UploadSchedulePanel from "@/components/dashboard/content/scheduled/uploadSchedulePanel";
 import {
   normalizeCompanyContent,
   type ContentGenerationResultItem,
@@ -25,6 +27,12 @@ import { cn } from "@/lib/utils";
 
 type PlatformFilter = "all" | "instagram" | "linkedin";
 type SortOrder = "newest" | "oldest";
+type ContentMode = "generated" | "upload";
+
+const MODES: { id: ContentMode; label: string; icon: typeof Sparkles }[] = [
+  { id: "generated", label: "Generated content", icon: Sparkles },
+  { id: "upload", label: "Upload & schedule", icon: CalendarClock },
+];
 
 function platformKey(platform?: string) {
   const value = String(platform || "").toLowerCase();
@@ -72,6 +80,8 @@ export default function ContentPage() {
   const [publishingId, setPublishingId] = useState<string | null>(null);
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [mode, setMode] = useState<ContentMode>("generated");
+  const showGenerated = mode === "generated";
 
   const content = normalizeCompanyContent(data);
   const hasResults = content.results.length > 0;
@@ -141,16 +151,48 @@ export default function ContentPage() {
               <Sparkles className="size-4" aria-hidden="true" />
             </span>
             <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 sm:text-[28px]">
-              Generated Content
+              {showGenerated ? "Generated Content" : "Upload & Schedule"}
             </h1>
           </div>
           <p className="mt-1.5 max-w-2xl text-[14px] text-neutral-500">
-            AI-created content for your social media channels. Review, edit, and
-            publish your posts.
+            {showGenerated
+              ? "AI-created content for your social media channels. Review, edit, and publish your posts."
+              : "Upload your own images and videos and choose when they go out on each platform."}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div
+          role="tablist"
+          aria-label="Content mode"
+          className="inline-flex shrink-0 gap-1 self-start rounded-2xl border border-[#E6E8F5] bg-white p-1 lg:self-auto"
+        >
+          {MODES.map((item) => {
+            const active = mode === item.id;
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setMode(item.id)}
+                className={cn(
+                  `inline-flex h-9 items-center gap-1.5 rounded-xl px-3.5 text-[13px] font-semibold transition-colors ${FOCUS_RING}`,
+                  active
+                    ? "bg-[#5B57E6] text-white shadow-sm"
+                    : "text-neutral-600 hover:bg-[#F6F7FD]",
+                )}
+              >
+                <Icon className="size-4" aria-hidden="true" />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {showGenerated ? (
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <div
             role="tablist"
             aria-label="Filter by platform"
@@ -209,16 +251,16 @@ export default function ContentPage() {
             />
           </label>
         </div>
-      </div>
+      ) : null}
 
-      {companyId && (isLoading || isFetching) && !hasResults && !notFound ? (
+      {showGenerated && companyId && (isLoading || isFetching) && !hasResults && !notFound ? (
         <Card className="flex items-center justify-center gap-3 p-8 text-neutral-500">
           <Loader2 className="size-5 animate-spin text-[#5B57E6]" />
           <span className="text-sm">Loading content…</span>
         </Card>
       ) : null}
 
-      {companyId && notFound ? (
+      {showGenerated && companyId && notFound ? (
         <ApiNotFoundCard
           resource="content"
           onRetry={() => void refetch()}
@@ -226,7 +268,7 @@ export default function ContentPage() {
         />
       ) : null}
 
-      {companyId && isError && !notFound ? (
+      {showGenerated && companyId && isError && !notFound ? (
         <Card className="border-rose-200 bg-rose-50/80 p-4">
           <p className="text-sm text-rose-800">
             {getApiErrorMessage(error, "Failed to load generated images")}
@@ -234,23 +276,30 @@ export default function ContentPage() {
         </Card>
       ) : null}
 
-      {companyId && !isLoading && !isError && !hasResults ? (
+      {showGenerated && companyId && !isLoading && !isError && !hasResults ? (
         <ApiNotFoundCard resource="content" />
       ) : null}
 
-      {companyId && hasResults && gridItems.length === 0 ? (
+      {showGenerated && companyId && hasResults && gridItems.length === 0 ? (
         <Card className="p-8 text-center text-sm text-neutral-500">
           No posts match this platform filter.
         </Card>
       ) : null}
 
-      {companyId && hasResults && gridItems.length > 0 ? (
+      {showGenerated && companyId && hasResults && gridItems.length > 0 ? (
         <ContentResultsGrid
           items={gridItems}
           publishingId={isPublishing ? publishingId : null}
           onPublish={handlePublish}
         />
       ) : null}
+
+      {showGenerated ? null : (
+        <>
+          <UploadSchedulePanel />
+          <ScheduledPostsList />
+        </>
+      )}
     </main>
   );
 }
