@@ -1,4 +1,4 @@
-import { ArrowRight, Globe2, Target } from "lucide-react";
+import { Globe2, Loader2, PenLine, Target } from "lucide-react";
 import type { AiVisibilityOverview, AiVisibilitySummary } from "@/routes/ai-visibility/ai-visibility.routes";
 
 export const ENGINE_NAMES: Record<string, string> = {
@@ -165,7 +165,15 @@ export function TrustedSources({ summary }: { summary: AiVisibilitySummary }) {
   );
 }
 
-export function Gaps({ summary, onFix }: { summary: AiVisibilitySummary; onFix: (question: string) => void }) {
+export function Gaps({
+  summary,
+  onWrite,
+  writing,
+}: {
+  summary: AiVisibilitySummary;
+  onWrite: (question: string) => void;
+  writing: string | null;
+}) {
   if (!summary.gaps.length) {
     return <p className="text-[13px] text-emerald-700">No gaps: you are named for every tracked question.</p>;
   }
@@ -182,12 +190,20 @@ export function Gaps({ summary, onFix }: { summary: AiVisibilitySummary; onFix: 
           ) : null}
           <button
             type="button"
-            onClick={() => onFix(gap.question)}
-            className="mt-2 ms-6 inline-flex items-center gap-1 text-[13px] font-medium text-[#4F46E5] hover:underline"
+            disabled={writing !== null}
+            onClick={() => onWrite(gap.question)}
+            className="mt-2 ms-6 inline-flex items-center gap-1 text-[13px] font-medium text-[#4F46E5] hover:underline disabled:opacity-60"
           >
-            Write a post that answers this
-            <ArrowRight className="size-3.5" aria-hidden="true" />
+            {writing === gap.question ? (
+              <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+            ) : (
+              <PenLine className="size-3.5" aria-hidden="true" />
+            )}
+            {writing === gap.question ? "Starting the post…" : "Write a blog post for this"}
           </button>
+          <p className="mt-1 ps-6 text-[11px] text-neutral-400">
+            AI writes it in a few minutes from these answers; you review it on the Blogs page.
+          </p>
         </li>
       ))}
     </ul>
