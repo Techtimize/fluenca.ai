@@ -1,9 +1,4 @@
-import type {
-  CreateGoalRequest,
-  Goal,
-  GoalMode,
-  GoalTaskType,
-} from "@/types/bussiness/goal-type";
+import type { CreateGoalRequest, Goal } from "@/types/bussiness/goal-type";
 
 export type GoalPlatform =
   | "instagram"
@@ -15,30 +10,17 @@ export type GoalPlatform =
 
 export type GoalMetric = "followers" | "engagement_rate" | "leads";
 
-/** Mirrors the POST /goal payload; number fields stay strings while being typed. */
+/** What the user picks; buildCreateGoalRequest turns it into the POST /goal payload. */
 export type GoalFormValues = {
-  mode: GoalMode;
   platform: GoalPlatform;
   metric: GoalMetric;
+  /** baseline_value; number fields stay strings while being typed. */
   currentValue: string;
+  /** target_value */
   targetValue: string;
   /** yyyy-mm-dd */
   deadline: string;
-  /** Blank sends an auto-generated summary. */
-  objective: string;
-  /** Blank sends an auto-generated brief. */
-  description: string;
-  postsPerWeek: string;
-  approveEverything: boolean;
-  allowedTaskTypes: GoalTaskType[];
-  budgetUsd: string;
-  notes: string;
 };
-
-export const GOAL_MODES: { id: GoalMode; label: string; hint: string }[] = [
-  { id: "company", label: "Company", hint: "Grow the brand account" },
-  { id: "individual", label: "Individual", hint: "Grow a personal profile" },
-];
 
 export const GOAL_PLATFORMS: {
   id: GoalPlatform;
@@ -79,14 +61,6 @@ export const GOAL_METRICS: {
   },
 ];
 
-export const GOAL_TASK_TYPES: { id: GoalTaskType; label: string }[] = [
-  { id: "content_creation", label: "Content creation" },
-  { id: "content_curation", label: "Content curation" },
-  { id: "engagement", label: "Engagement" },
-  { id: "growth", label: "Growth" },
-  { id: "analytics", label: "Analytics" },
-];
-
 export const GOAL_DURATIONS = [
   { days: 30, label: "30 days" },
   { days: 60, label: "60 days" },
@@ -94,7 +68,6 @@ export const GOAL_DURATIONS = [
 ] as const;
 
 export const MIN_GOAL_DAYS = 7;
-export const MAX_POSTS_PER_WEEK = 50;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -138,19 +111,11 @@ function formatDeadline(deadline: string) {
 
 export function createInitialGoalForm(): GoalFormValues {
   return {
-    mode: "company",
     platform: "instagram",
     metric: "followers",
     currentValue: "",
     targetValue: "",
     deadline: deadlineInDays(90),
-    objective: "",
-    description: "",
-    postsPerWeek: "5",
-    approveEverything: true,
-    allowedTaskTypes: GOAL_TASK_TYPES.map((item) => item.id),
-    budgetUsd: "0",
-    notes: "",
   };
 }
 
@@ -233,19 +198,6 @@ export function getGoalFormError(form: GoalFormValues): string | null {
   if (days < MIN_GOAL_DAYS) {
     return `Deadline must be at least ${MIN_GOAL_DAYS} days away.`;
   }
-
-  const posts = parseGoalNumber(form.postsPerWeek);
-  if (
-    posts == null ||
-    !Number.isInteger(posts) ||
-    posts < 0 ||
-    posts > MAX_POSTS_PER_WEEK
-  ) {
-    return `Posts per week must be a whole number from 0 to ${MAX_POSTS_PER_WEEK}.`;
-  }
-  const budget = parseGoalNumber(form.budgetUsd || "0");
-  if (budget == null || budget < 0) return "Budget can't be negative.";
-  if (!form.allowedTaskTypes.length) return "Allow at least one task type.";
   return null;
 }
 
@@ -255,23 +207,14 @@ export function isGoalFormValid(form: GoalFormValues) {
 
 export function buildCreateGoalRequest(form: GoalFormValues): CreateGoalRequest {
   return {
-    mode: form.mode,
-    objective: form.objective.trim() || summarizeGoal(form),
-    description: form.description.trim() || buildGoalPrompt(form),
     platform: form.platform,
     metric: form.metric,
     baseline_value: parseGoalNumber(form.currentValue),
     target_value: parseGoalNumber(form.targetValue) ?? 0,
     // Followers, engagement rate and leads all improve upward.
     lower_is_better: false,
-    deadline: new Date(`${form.deadline}T23:59:59`).toISOString(),
-    constraints: {
-      posts_per_week: parseGoalNumber(form.postsPerWeek) ?? 0,
-      approve_everything: form.approveEverything,
-      allowed_task_types: form.allowedTaskTypes,
-      budget_usd: parseGoalNumber(form.budgetUsd || "0") ?? 0,
-      notes: form.notes.trim(),
-    },
+    deadline: `${form.deadline}T00:00:00Z`,
+    description: buildGoalPrompt(form),
   };
 }
 
@@ -281,27 +224,16 @@ export function goalToForm(goal: Goal): GoalFormValues {
   const baseline = goal.baseline_value ?? goal.baseline;
   const target = goal.target_value ?? goal.target;
   const deadline = new Date(goal.deadline);
-  const constraints = goal.constraints;
 
   return {
-    mode: goal.mode ?? defaults.mode,
     platform: goal.platform,
     metric: goal.metric,
     currentValue: baseline != null ? String(baseline) : "",
     targetValue: target != null ? String(target) : "",
+    // Deadlines are midnight UTC, so read the UTC date to avoid shifting a day.
     deadline: Number.isNaN(deadline.getTime())
       ? defaults.deadline
-      : toDateInput(deadline),
-    objective: goal.objective ?? "",
-    description: goal.description ?? "",
-    postsPerWeek: String(constraints?.posts_per_week ?? defaults.postsPerWeek),
-    approveEverything:
-      constraints?.approve_everything ?? defaults.approveEverything,
-    allowedTaskTypes: constraints?.allowed_task_types?.length
-      ? constraints.allowed_task_types
-      : defaults.allowedTaskTypes,
-    budgetUsd: String(constraints?.budget_usd ?? defaults.budgetUsd),
-    notes: constraints?.notes ?? "",
+      : deadline.toISOString().slice(0, 10),
   };
 }
 
