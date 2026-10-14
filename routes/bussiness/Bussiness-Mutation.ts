@@ -14,6 +14,7 @@ import type {
   ContentExecutionSettingsRequest,
 } from "@/types/bussiness/content-execution-type";
 import { toast } from "sonner";
+import type { StreamStart } from "@/routes/chatbot/chatbot.routes";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
 import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/bussiness/onboarding-type";
@@ -299,6 +300,7 @@ type SendMessageVariables = {
   mode?: ChatMode;
   pages?: Record<string, string>;
   pagePath?: string;
+  onStart?: (ids: StreamStart) => void;
   onStep?: (label: string) => void;
   onChunk: (text: string) => void;
   onReset?: (text: string) => void;
@@ -309,8 +311,8 @@ export const SendMessageMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ message, conversationId, screenContext, imageUrl, mode, pages, pagePath, onStep, onChunk, onReset, onDone }: SendMessageVariables) =>
-      SendMessageApi(message, { onStep, onChunk, onReset, onDone }, { conversationId, screenContext, imageUrl, mode, pages, pagePath }),
+    mutationFn: ({ message, conversationId, screenContext, imageUrl, mode, pages, pagePath, onStart, onStep, onChunk, onReset, onDone }: SendMessageVariables) =>
+      SendMessageApi(message, { onStart, onStep, onChunk, onReset, onDone }, { conversationId, screenContext, imageUrl, mode, pages, pagePath }),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["chat-history"] });
       queryClient.invalidateQueries({ queryKey: ["chat-conversations"] });
