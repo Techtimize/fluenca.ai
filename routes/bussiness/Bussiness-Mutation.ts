@@ -36,6 +36,7 @@ import { GOALS_KEY, GOOGLE_ANALYTICS_KEY, SEARCH_CONSOLE_KEY, goalKey } from "./
 import {
   GoogleAnalyticsConnectApi,
   GoogleAnalyticsDisconnectApi,
+  DeleteGoalApi,
   GoogleAnalyticsSelectPropertyApi,
   SearchConsoleConnectApi,
   SearchConsoleDisconnectApi,
@@ -900,6 +901,21 @@ export function SearchConsoleDisconnectMutation() {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Could not disconnect Search Console"));
+    },
+  });
+}
+
+export function DeleteGoalMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (goal_id: string) => DeleteGoalApi(goal_id),
+    onSuccess: (_response, goal_id) => {
+      queryClient.removeQueries({ queryKey: goalKey(goal_id) });
+      void queryClient.invalidateQueries({ queryKey: GOALS_KEY });
+      toast.success("Goal deleted");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to delete goal"));
     },
   });
 }
