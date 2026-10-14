@@ -35,11 +35,6 @@ export type GoalFormValues = {
   notes: string;
 };
 
-export const GOAL_MODES: { id: GoalMode; label: string; hint: string }[] = [
-  { id: "company", label: "Company", hint: "Grow the brand account" },
-  { id: "individual", label: "Individual", hint: "Grow a personal profile" },
-];
-
 export const GOAL_PLATFORMS: {
   id: GoalPlatform;
   label: string;
@@ -94,7 +89,6 @@ export const GOAL_DURATIONS = [
 ] as const;
 
 export const MIN_GOAL_DAYS = 7;
-export const MAX_POSTS_PER_WEEK = 50;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -233,19 +227,6 @@ export function getGoalFormError(form: GoalFormValues): string | null {
   if (days < MIN_GOAL_DAYS) {
     return `Deadline must be at least ${MIN_GOAL_DAYS} days away.`;
   }
-
-  const posts = parseGoalNumber(form.postsPerWeek);
-  if (
-    posts == null ||
-    !Number.isInteger(posts) ||
-    posts < 0 ||
-    posts > MAX_POSTS_PER_WEEK
-  ) {
-    return `Posts per week must be a whole number from 0 to ${MAX_POSTS_PER_WEEK}.`;
-  }
-  const budget = parseGoalNumber(form.budgetUsd || "0");
-  if (budget == null || budget < 0) return "Budget can't be negative.";
-  if (!form.allowedTaskTypes.length) return "Allow at least one task type.";
   return null;
 }
 
