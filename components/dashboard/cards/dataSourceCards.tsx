@@ -15,7 +15,7 @@ import {
   RotateCw,
   Smartphone,
 } from "lucide-react";
-import { scoreColor } from "@/components/dashboard/integrations/pageSpeedCard";
+import { scoreColor } from "@/components/dashboard/website-speed/PageSpeedReport";
 import {
   Select,
   SelectContent,
