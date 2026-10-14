@@ -11,9 +11,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { getApiErrorMessage } from "@/errors/error-utils";
-import { goalToForm, summarizeGoal } from "@/lib/goals/goal-form";
+import GoalProgressRing from "@/components/dashboard/goals/GoalProgressRing";
+import { goalProgressPercents, goalToForm, summarizeGoal } from "@/lib/goals/goal-form";
 import { normalizeSocialGrowthResponse } from "@/lib/goals/normalize-growth";
-import { GoalPlanQuery } from "@/routes/bussiness/Bussiness-Query";
+import { GoalPlanQuery, GoalProgressQuery } from "@/routes/bussiness/Bussiness-Query";
 import type { Goal, GoalPlanResponse } from "@/types/bussiness/goal-type";
 import type { SocialGrowthTask } from "@/types/bussiness/socail-growth-type";
 
@@ -77,6 +78,8 @@ type Props = {
 /** Read-only view of a goal's plan, loaded from GET /goal/{id}/plan. */
 export default function GoalPlanDialog({ goal, open, onOpenChange }: Props) {
   const { data, isLoading, isError, error } = GoalPlanQuery(open ? goal.id : null);
+  const progressQuery = GoalProgressQuery(open ? goal.id : null);
+  const { progress, expected, expectedIsEstimate } = goalProgressPercents(goal, progressQuery.data);
   const plan = normalizeSocialGrowthResponse(planSource(data));
   // Task records with ids sit beside the plan once it is approved; otherwise use the plan's own.
   const tasks: SocialGrowthTask[] = Array.isArray(data?.tasks) && data.tasks.length ? data.tasks : (plan?.tasks ?? []);
@@ -109,14 +112,24 @@ export default function GoalPlanDialog({ goal, open, onOpenChange }: Props) {
   } else {
     body = (
       <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <Stat label="Status" value={goal.status.replaceAll("_", " ")} />
-          <Stat label="Deadline" value={new Date(goal.deadline).toLocaleDateString()} />
-          <Stat label="Tasks done" value={tasks.length ? `${doneCount} / ${tasks.length}` : "—"} />
-          <Stat
-            label="Approved"
-            value={goal.approved_at ? new Date(goal.approved_at).toLocaleDateString() : "Not yet"}
-          />
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-stretch">
+          <div className="grid flex-1 grid-cols-2 content-start gap-2">
+            <Stat label="Status" value={goal.status.replaceAll("_", " ")} />
+            <Stat label="Deadline" value={new Date(goal.deadline).toLocaleDateString()} />
+            <Stat label="Tasks done" value={tasks.length ? `${doneCount} / ${tasks.length}` : "—"} />
+            <Stat
+              label="Approved"
+              value={goal.approved_at ? new Date(goal.approved_at).toLocaleDateString() : "Not yet"}
+            />
+          </div>
+          <div className="sm:w-52 sm:shrink-0">
+            <GoalProgressRing
+              progress={progress}
+              expected={expected}
+              expectedIsEstimate={expectedIsEstimate}
+              isLoading={progressQuery.isLoading}
+            />
+          </div>
         </div>
 
         {schedule ? (
