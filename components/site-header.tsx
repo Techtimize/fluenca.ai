@@ -63,8 +63,8 @@ export function SiteHeader({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full px-3 pt-3 sm:px-5 sm:pt-4 lg:px-8">
-      <div className="mx-auto flex h-16 w-full max-w-[1280px] items-center justify-between gap-3 rounded-full border border-black/5 bg-white px-3 shadow-lg shadow-black/10 sm:h-[4.5rem] sm:gap-4 sm:px-4 lg:h-20 lg:px-5">
+    <header className="sticky top-0 z-50 w-full">
+      <div className="flex h-11 w-full items-center justify-between gap-3 border-b border-black/5 bg-white px-3 shadow-sm sm:h-12 sm:gap-4 sm:px-4 lg:h-14 lg:px-5">
         {/* Logo — start */}
         <Link
           href="/"

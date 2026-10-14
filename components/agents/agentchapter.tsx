@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from "motion/react";
-import { accentStyles, AgentStory } from "./agents-data";
+import { AgentStory } from "./agents-data";
 import AgentVideo from "./agentvideo";
 
 const fadeUp = {
@@ -18,7 +18,6 @@ export default function AgentChapter({
     agent: AgentStory;
     index: number;
   }) {
-    const styles = accentStyles[agent.accent];
     const reduceMotion = useReducedMotion();
   
     return (
@@ -40,19 +39,8 @@ export default function AgentChapter({
           </div>
   
           <div className="space-y-4 lg:col-span-7">
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={`rounded-full border px-3 py-1 text-xs font-semibold ${styles.chip}`}
-              >
-                {agent.label}
-              </span>
-              <span className="font-mono text-[11px] text-neutral-400">
-                {agent.chapter}
-              </span>
-            </div>
-  
             <h3 className="text-[26px] font-semibold tracking-tight text-[#1C1C1E] sm:text-[32px]">
-              {agent.name}:{" "}
+              {/* {agent.name}:{" "} */}
               <span className="bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] bg-clip-text text-transparent">
                 {agent.title}
               </span>
@@ -71,25 +59,12 @@ export default function AgentChapter({
                   key={feature.title}
                   className="rounded-2xl border border-[#E6E8F5] bg-[#F7F8FF]/80 p-3.5"
                 >
-                  <p className={`text-xs font-semibold ${styles.text}`}>
+                  <p className="text-xs font-semibold">
                     {feature.title}
                   </p>
                   <p className="mt-1 text-xs leading-5 text-neutral-500">
                     {feature.body}
                   </p>
-                </div>
-              ))}
-            </div>
-  
-            <div className="flex flex-wrap gap-x-4 gap-y-2 rounded-2xl border border-[#E6E8F5] bg-white px-3.5 py-3 font-mono text-[11px] text-neutral-600">
-              {[
-                { label: "Role", value: agent.role },
-                { label: "Lead", value: agent.leader },
-                { label: "Status", value: agent.statusLabel },
-              ].map((item) => (
-                <div key={item.label}>
-                  <span className="text-neutral-400">{item.label}:</span>{" "}
-                  {item.value}
                 </div>
               ))}
             </div>

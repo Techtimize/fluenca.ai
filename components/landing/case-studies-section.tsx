@@ -4,7 +4,6 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
-import { getTeam, type TeamId } from "@/components/herosection/office-data";
 
 /* =====================================================================
    STEP A: THE DATA  (the only part you edit)
@@ -18,8 +17,6 @@ export type CaseStudy = {
   stats: { value: string; label: string }[];
   href?: string;
   image?: string; // "/assets/case-study-1.jpeg" OR a url from the API
-  /** Office floors that “shipped” this result */
-  teamIds?: TeamId[];
 };
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -50,7 +47,6 @@ const CASE_STUDIES: CaseStudy[] = [
     ],
     href: "#",
     image: IMAGE_1,
-    teamIds: ["intake", "dna", "seo"],
   },
   {
     id: 2,
@@ -62,7 +58,6 @@ const CASE_STUDIES: CaseStudy[] = [
     ],
     href: "#",
     image: IMAGE_2,
-    teamIds: ["seo", "media"],
   },
   {
     id: 3,
@@ -74,7 +69,6 @@ const CASE_STUDIES: CaseStudy[] = [
     ],
     href: "#",
     image: IMAGE_3,
-    teamIds: ["intake", "competitor", "media"],
   },
   {
     id: 4,
@@ -86,7 +80,6 @@ const CASE_STUDIES: CaseStudy[] = [
     ],
     href: "#",
     image: IMAGE_4,
-    teamIds: ["dna", "media", "analytics"],
   },
   {
     id: 5,
@@ -98,7 +91,6 @@ const CASE_STUDIES: CaseStudy[] = [
     ],
     href: "#",
     image: IMAGE_5,
-    teamIds: ["seo", "media", "analytics"],
   },
 ];
 
@@ -169,31 +161,6 @@ function CardImage({ src, alt, index }: { src?: string; alt: string; index: numb
   );
 }
 
-function TeamChips({ teamIds }: { teamIds: TeamId[] }) {
-  return (
-    <div className="mt-3 flex flex-wrap items-center gap-1.5">
-      <span className="font-body text-[11px] text-[#9CA3AF]">Assigned team</span>
-      {teamIds.map((id) => {
-        const team = getTeam(id);
-        return (
-          <span
-            key={id}
-            className="inline-flex items-center gap-1 rounded-full bg-white py-0.5 pl-0.5 pr-2 ring-1 ring-indigo-100"
-            title={team.name}
-          >
-            <span className="relative h-5 w-5 overflow-hidden rounded-full">
-              <Image src={team.leadImage} alt="" fill sizes="20px" className="object-cover" />
-            </span>
-            <span className="font-body text-[11px] font-medium text-[#1C1C1E]">
-              {team.leadName}
-            </span>
-          </span>
-        );
-      })}
-    </div>
-  );
-}
-
 function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
   return (
     // Card: 800 x 400, 1px border, radius 30, padding 10.
@@ -211,7 +178,6 @@ function CaseCard({ item, index }: { item: CaseStudy; index: number }) {
       <div className="flex min-w-0 flex-1 flex-col justify-between py-4 pl-3 pr-2 md:py-5">
         <div>
           <Logo company={item.company} src={item.logo} />
-          {item.teamIds?.length ? <TeamChips teamIds={item.teamIds} /> : null}
           {/* max width makes the title wrap into 3 short lines, like the design */}
           {/* Title: 500, 22px / 32px (a bit smaller on phones so it fits) */}
           <h3 className="mt-3 max-w-[340px] font-display text-[18px] font-medium leading-[26px] tracking-normal text-slate-900 md:mt-5 md:text-[22px] md:leading-[32px]">
