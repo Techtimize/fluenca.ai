@@ -8,26 +8,26 @@ import CompanyCard from "@/components/dashboard/cards/companyCard";
 import { DashboardSkeleton } from "@/components/shared/skeletons";
 import DocumentationCard from "@/components/dashboard/documentationCard";
 import DocumentationSheet from "@/components/dashboard/documentation/documentationSheet";
+import CurrentGoalSummary from "@/components/dashboard/goals/CurrentGoalSummary";
 import GoalsDialog from "@/components/dashboard/goals/GoalsDialog";
 import TopBar from "@/components/dashboard/topBar";
 import { mapDashboard } from "@/lib/dashboard/map-dashboard";
 import { AnalyzeCompanyDashboardQuery } from "@/routes/bussiness/Bussiness-Query";
-import {
-  AnalyzeCompanyMutation,
-  InstagramConnectMutation,
-} from "@/routes/bussiness/Bussiness-Mutation";
+import { AnalyzeCompanyMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import useAuthStore from "@/store/AuthsStore";
 import type { Device, DocItem } from "@/types/dashboard";
-import { PAGE_ROUTES } from "@/constant/page-routes";
-import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
-  const router = useRouter();
   const companyId = useAuthStore((s) => s.company_id);
   const companyName = useAuthStore((s) => s.company_name);
-  const { mutate: connectInstagram } = InstagramConnectMutation();
   const [goalsOpen, setGoalsOpen] = useState(false);
+  const [openGoalId, setOpenGoalId] = useState<string | null>(null);
+
+  const openGoal = (goalId: string | null) => {
+    setOpenGoalId(goalId);
+    setGoalsOpen(true);
+  };
 
   const {
     data: dashboard,
@@ -109,7 +109,8 @@ export default function DashboardPage() {
                 items={mapped.docs}
                 goalLabel={t("setYourGoal")}
                 onSelect={setOpenDoc}
-                onSetGoal={() => setGoalsOpen(true)}
+                onSetGoal={() => openGoal(null)}
+                goalSlot={<CurrentGoalSummary onOpen={openGoal} />}
               />
             ) : null}
           </div>
@@ -125,13 +126,6 @@ export default function DashboardPage() {
             compact={chatOpen}
             onSourceChange={setSource}
             onDeviceChange={setDevice}
-            onConnectIntegration={(id) => {
-              if (id === "instagram") {
-                connectInstagram();
-                return;
-              }
-              router.push(PAGE_ROUTES.CONNECTORS);
-            }}
           />
         ) : null}
       </main>
@@ -140,8 +134,18 @@ export default function DashboardPage() {
         companyId={companyId}
         item={openDoc}
         onClose={() => setOpenDoc(null)}
+        analysisChannels={sources.map((s) => ({
+          id: s.id,
+          label: s.label,
+          charts: channels[s.id]?.emptyMessage ? null : (channels[s.id]?.charts ?? null),
+        }))}
+        defaultAnalysisChannel={source}
       />
-      <GoalsDialog open={goalsOpen} onOpenChange={setGoalsOpen} />
+      <GoalsDialog
+        open={goalsOpen}
+        onOpenChange={setGoalsOpen}
+        goalId={openGoalId}
+      />
     </>
   );
 }

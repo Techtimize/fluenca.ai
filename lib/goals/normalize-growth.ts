@@ -68,7 +68,7 @@ export function normalizeSocialGrowthResponse(
     performance_report: (performance ||
       {}) as SocialGrowthResponse["performance_report"],
     goal_status: String(
-      nested.goal_status || root.goal_status || "in_progress",
+      nested.goal_status || root.goal_status || "",
     ),
     goal_progress: {
       followers: Number(progress?.followers ?? 0),

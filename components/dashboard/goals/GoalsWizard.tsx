@@ -1,9 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
-import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import GoalSetupForm from "@/components/dashboard/goals/GoalSetupForm";
 import GoalStepRail from "@/components/dashboard/goals/GoalStepRail";
 import {
   GoalDiagnosePanel,
@@ -11,64 +10,122 @@ import {
   GoalOptimizePanel,
   GoalPlanPanel,
 } from "@/components/dashboard/goals/GoalResultPanels";
-import { FacebookIcon } from "@/components/shared/brandIcons";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { getApiErrorMessage } from "@/errors/error-utils";
 import {
-  GOAL_DURATIONS,
-  GOAL_METRICS,
-  GOAL_PLATFORMS,
-  buildGoalPrompt,
-  isGoalFormValid,
+  buildCreateGoalRequest,
+  createInitialGoalForm,
+  getGoalFormError,
+  goalToForm,
   type GoalFormValues,
-  type GoalMetric,
-  type GoalPlatform,
 } from "@/lib/goals/goal-form";
 import { normalizeSocialGrowthResponse } from "@/lib/goals/normalize-growth";
-import { SocialGrowthMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import {
+  ApproveGoalMutation,
+  CreateGoalMutation,
+  DiagnoseGoalMutation,
+  UpdateGoalTaskMutation,
+} from "@/routes/bussiness/Bussiness-Mutation";
+import { GoalByIdQuery } from "@/routes/bussiness/Bussiness-Query";
+import type { GoalDetailResponse, GoalStatus } from "@/types/bussiness/goal-type";
 import type { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
-import { FOCUS_RING } from "@/utils/ui-classes";
 
-const INITIAL_FORM: GoalFormValues = {
-  platform: "instagram",
-  metric: "followers",
-  currentValue: "",
-  targetValue: "",
-  durationDays: 90,
+const APPROVED_STATUSES: GoalStatus[] = ["active", "paused", "completed", "failed"];
+
+/** Wizard state for reopening a saved goal at the step it has reached. */
+function stateFromGoal(detail: GoalDetailResponse) {
+  const form = goalToForm(detail.goal);
+  const result = normalizeSocialGrowthResponse(detail.growth_result);
+  const approved =
+    Boolean(detail.goal.approved_at) ||
+    APPROVED_STATUSES.includes(detail.goal.status);
+  const step = approved ? 4 : result ? 3 : 1;
+  return {
+    form,
+    result,
+    approved,
+    step,
+    goal: { id: detail.goal.id, formKey: JSON.stringify(form) },
+  };
+}
+
+type Props = {
+  /** A saved goal to reopen; omit to set a new one. */
+  initialGoal?: GoalDetailResponse | null;
 };
 
-export default function GoalsWizard() {
-  const [step, setStep] = useState(1);
-  const [maxReached, setMaxReached] = useState(1);
-  const [form, setForm] = useState<GoalFormValues>(INITIAL_FORM);
-  const [result, setResult] = useState<SocialGrowthResponse | null>(null);
-  const [planApproved, setPlanApproved] = useState(false);
+export default function GoalsWizard({ initialGoal }: Props) {
+  const [initial] = useState(() =>
+    initialGoal ? stateFromGoal(initialGoal) : null,
+  );
+  const [step, setStep] = useState(initial?.step ?? 1);
+  const [maxReached, setMaxReached] = useState(initial?.step ?? 1);
+  const [form, setForm] = useState<GoalFormValues>(
+    () => initial?.form ?? createInitialGoalForm(),
+  );
+  const [result, setResult] = useState<SocialGrowthResponse | null>(
+    initial?.result ?? null,
+  );
+  const [planApproved, setPlanApproved] = useState(initial?.approved ?? false);
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(
     () => new Set(),
   );
 
-  const { mutate: runGrowth, isPending } = SocialGrowthMutation();
-
-  const selectedMetric = useMemo(
-    () => GOAL_METRICS.find((item) => item.id === form.metric),
-    [form.metric],
+  // The goal created for the current form; reused when re-diagnosing an unchanged form.
+  const [goal, setGoal] = useState<{ id: string; formKey: string } | null>(
+    initial?.goal ?? null,
   );
+
+  const { mutateAsync: createGoal, isPending: isCreating } =
+    CreateGoalMutation();
+  const { mutate: diagnoseGoal, isPending: isDiagnosing } =
+    DiagnoseGoalMutation();
+  const { mutate: approveGoal, isPending: isApproving } = ApproveGoalMutation();
+  const { mutate: updateTask } = UpdateGoalTaskMutation();
+  const { data: goalDetail } = GoalByIdQuery(planApproved ? goal?.id : null);
+
+  const isPending = isCreating || isDiagnosing;
+
+  // After approval the goal holds live tasks and measured progress.
+  const liveResult = useMemo(() => {
+    if (!planApproved || !goalDetail) return result;
+    const growth =
+      normalizeSocialGrowthResponse(goalDetail.growth_result) || result;
+    if (!growth) return null;
+    return {
+      ...growth,
+      tasks: goalDetail.tasks?.length ? goalDetail.tasks : growth.tasks,
+      goal_progress: goalDetail.goal_progress || growth.goal_progress,
+      goal_status: goalDetail.goal?.status || growth.goal_status,
+    };
+  }, [planApproved, goalDetail, result]);
 
   const goTo = (next: number) => {
     setStep(next);
     setMaxReached((prev) => Math.max(prev, next));
   };
 
-  const handleDiagnose = () => {
-    if (!isGoalFormValid(form)) {
-      toast.error("Enter a valid current value, higher target, and deadline.");
+  const handleDiagnose = async () => {
+    const formError = getGoalFormError(form);
+    if (formError) {
+      toast.error(formError);
       return;
     }
 
-    const prompt = buildGoalPrompt(form);
+    const formKey = JSON.stringify(form);
+    let goalId = goal?.formKey === formKey ? goal.id : null;
     goTo(2);
-    runGrowth(prompt, {
+
+    if (!goalId) {
+      try {
+        const created = await createGoal(buildCreateGoalRequest(form));
+        goalId = created.goal_id;
+        setGoal({ id: goalId, formKey });
+      } catch {
+        setStep(1);
+        return;
+      }
+    }
+
+    diagnoseGoal(goalId, {
       onSuccess: (response) => {
         const normalized = normalizeSocialGrowthResponse(response);
         if (!normalized) {
@@ -82,34 +139,48 @@ export default function GoalsWizard() {
         setResult(normalized);
         toast.success("Diagnosis ready — review your situation.");
       },
-      onError: (error) => {
-        toast.error(getApiErrorMessage(error, "Failed to diagnose goal"));
-        setStep(1);
-      },
+      onError: () => setStep(1),
     });
   };
 
   const handleApprovePlan = () => {
-    setPlanApproved(true);
-    goTo(4);
-    toast.success("Plan approved. Track execution below.");
+    if (planApproved) {
+      goTo(4);
+      return;
+    }
+    if (!goal) return;
+    approveGoal(goal.id, {
+      onSuccess: () => {
+        setPlanApproved(true);
+        goTo(4);
+      },
+    });
   };
 
   const handleRestart = () => {
-    setForm(INITIAL_FORM);
+    setForm(createInitialGoalForm());
     setResult(null);
+    setGoal(null);
     setPlanApproved(false);
     setCompletedTasks(new Set());
     setStep(1);
     setMaxReached(1);
   };
 
-  const toggleTask = (key: string) => {
+  const toggleTask = (key: string, done: boolean) => {
     setCompletedTasks((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
+      if (done) next.add(key);
+      else next.delete(key);
       return next;
+    });
+
+    const isLiveTask = liveResult?.tasks?.some((task) => task.id === key);
+    if (!goal || !isLiveTask) return;
+    updateTask({
+      goal_id: goal.id,
+      task_id: key,
+      status: done ? "done" : "pending",
     });
   };
 
@@ -127,202 +198,12 @@ export default function GoalsWizard() {
       />
 
       {step === 1 ? (
-        <section className="overflow-hidden rounded-2xl border border-[#E6E8F5] bg-white sm:rounded-3xl">
-          <div className="border-b border-[#EEF0F8] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] px-4 py-4 sm:px-6 sm:py-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5B57E6]">
-              Step 1
-            </p>
-            <h2 className="mt-1 text-[18px] font-semibold tracking-tight text-neutral-900">
-              Set your goal
-            </h2>
-            <p className="mt-1 max-w-2xl text-[13px] leading-5 text-neutral-500">
-              Choose a platform, metric, target, and deadline. Examples: grow
-              Instagram from 10K to 15K followers in 90 days, or lift LinkedIn
-              engagement from 2% to 4%.
-            </p>
-          </div>
-
-          <div className="space-y-5 p-4 sm:p-6">
-            <div>
-              <p className="mb-2 text-[12px] font-medium text-neutral-600">
-                Platform
-              </p>
-              <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-                {GOAL_PLATFORMS.map((platform) => {
-                  const active = form.platform === platform.id;
-                  return (
-                    <li key={platform.id}>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setForm((prev) => ({
-                            ...prev,
-                            platform: platform.id as GoalPlatform,
-                          }))
-                        }
-                        className={`${FOCUS_RING} flex w-full items-center gap-2 rounded-2xl border px-3 py-3 text-left transition-colors ${
-                          active
-                            ? "border-[#5B57E6] bg-[#F6F5FF]"
-                            : "border-[#E6E8F5] bg-white hover:bg-[#F8F9FF]"
-                        }`}
-                      >
-                        <span className="grid size-8 place-items-center rounded-xl bg-[#F6F7FD] ring-1 ring-[#E6E8F5]">
-                          {platform.id === "facebook" ? (
-                            <FacebookIcon className="size-4 text-[#1877F2]" />
-                          ) : platform.iconSrc ? (
-                            <Image
-                              src={platform.iconSrc}
-                              alt=""
-                              width={16}
-                              height={16}
-                              className="size-4 object-contain"
-                            />
-                          ) : null}
-                        </span>
-                        <span className="truncate text-[13px] font-medium text-neutral-900">
-                          {platform.label}
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-
-            <div>
-              <p className="mb-2 text-[12px] font-medium text-neutral-600">
-                Metric
-              </p>
-              <ul className="grid gap-2 sm:grid-cols-3">
-                {GOAL_METRICS.map((metric) => {
-                  const active = form.metric === metric.id;
-                  return (
-                    <li key={metric.id}>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setForm((prev) => ({
-                            ...prev,
-                            metric: metric.id as GoalMetric,
-                          }))
-                        }
-                        className={`${FOCUS_RING} w-full rounded-2xl border px-3.5 py-3 text-left transition-colors ${
-                          active
-                            ? "border-[#5B57E6] bg-[#F6F5FF]"
-                            : "border-[#E6E8F5] bg-white hover:bg-[#F8F9FF]"
-                        }`}
-                      >
-                        <span className="block text-[13px] font-semibold text-neutral-900">
-                          {metric.label}
-                        </span>
-                        <span className="mt-1 block text-[12px] leading-4 text-neutral-500">
-                          {metric.hint}
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="min-w-0 space-y-1.5">
-                <span className="text-[12px] font-medium text-neutral-600">
-                  Current {selectedMetric?.unit || "value"}
-                </span>
-                <Input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder={
-                    form.metric === "engagement_rate" ? "2" : "10000"
-                  }
-                  value={form.currentValue}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      currentValue: e.target.value,
-                    }))
-                  }
-                  className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
-                />
-              </label>
-              <label className="min-w-0 space-y-1.5">
-                <span className="text-[12px] font-medium text-neutral-600">
-                  Target {selectedMetric?.unit || "value"}
-                </span>
-                <Input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder={
-                    form.metric === "engagement_rate"
-                      ? "4"
-                      : form.metric === "leads"
-                        ? "50"
-                        : "15000"
-                  }
-                  value={form.targetValue}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      targetValue: e.target.value,
-                    }))
-                  }
-                  className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
-                />
-              </label>
-            </div>
-
-            <div>
-              <p className="mb-2 text-[12px] font-medium text-neutral-600">
-                Deadline
-              </p>
-              <ul className="flex flex-wrap gap-2">
-                {GOAL_DURATIONS.map((item) => {
-                  const active = form.durationDays === item.days;
-                  return (
-                    <li key={item.days}>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setForm((prev) => ({
-                            ...prev,
-                            durationDays: item.days,
-                          }))
-                        }
-                        className={`${FOCUS_RING} rounded-full border px-4 py-2 text-[13px] font-medium transition-colors ${
-                          active
-                            ? "border-[#5B57E6] bg-[#5B57E6] text-white"
-                            : "border-[#E6E8F5] bg-white text-neutral-700 hover:bg-[#F8F9FF]"
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#EEF0F8] bg-[#FCFCFF] px-4 py-3 sm:px-6">
-            <p className="text-[12px] text-neutral-500">
-              Fluenca will diagnose, plan, and track this goal end-to-end.
-            </p>
-            <Button
-              type="button"
-              disabled={isPending || !isGoalFormValid(form)}
-              onClick={handleDiagnose}
-              
-            >
-              {isPending ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Sparkles className="size-4" />
-              )}
-              Diagnose & plan
-            </Button>
-          </div>
-        </section>
+        <GoalSetupForm
+          form={form}
+          onChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
+          onSubmit={handleDiagnose}
+          isPending={isPending}
+        />
       ) : null}
 
       {step === 2 ? (
@@ -337,7 +218,9 @@ export default function GoalsWizard() {
       {step === 3 ? (
         <GoalPlanPanel
           data={result}
+          platform={form.platform}
           approved={planApproved}
+          isApproving={isApproving}
           onApprove={handleApprovePlan}
           onBack={() => setStep(2)}
         />
@@ -345,7 +228,7 @@ export default function GoalsWizard() {
 
       {step === 4 ? (
         <GoalExecutePanel
-          data={result}
+          data={liveResult}
           completedTasks={completedTasks}
           onToggleTask={toggleTask}
           onContinue={() => goTo(5)}
@@ -355,7 +238,7 @@ export default function GoalsWizard() {
 
       {step === 5 ? (
         <GoalOptimizePanel
-          data={result}
+          data={liveResult}
           form={form}
           onRestart={handleRestart}
           onBack={() => setStep(4)}
