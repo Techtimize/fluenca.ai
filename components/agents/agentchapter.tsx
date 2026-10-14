@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from "motion/react";
 import { accentStyles, AgentStory } from "./agents-data";
-import AgentSimCard from "./agentsimcard";
+import AgentVideo from "./agentvideo";
 
 const fadeUp = {
     hidden: { opacity: 0, y: 28 },
@@ -36,7 +36,7 @@ export default function AgentChapter({
           }`}
         >
           <div className="lg:col-span-5">
-            <AgentSimCard agent={agent} />
+            <AgentVideo agent={agent} />
           </div>
   
           <div className="space-y-4 lg:col-span-7">
