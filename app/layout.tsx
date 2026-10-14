@@ -109,7 +109,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <QueryProvider>
             <Toaster position={isArabic ? "bottom-left" : "bottom-right"} />
             <ErrorBoundary>
-              <SiteHeader />
+              {/* <SiteHeader /> */}
               {children}
             </ErrorBoundary>
           </QueryProvider>

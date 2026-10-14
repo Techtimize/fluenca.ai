@@ -34,21 +34,23 @@ export type GoalConstraints = {
 };
 
 export interface CreateGoalRequest {
-  mode: GoalMode;
-  objective: string;
-  description: string;
   platform: GoalPlatform;
   metric: GoalMetric;
   baseline_value: number | null;
   target_value: number;
   lower_is_better: boolean;
+  /** ISO date at midnight UTC, e.g. "2027-01-12T00:00:00Z". */
   deadline: string;
-  constraints: GoalConstraints;
+  description: string;
 }
 
 /** GoalResponse: list items name the values `baseline`/`target`; full goals may use `*_value`. */
 export type Goal = Omit<CreateGoalRequest, "baseline_value" | "target_value"> & {
   id: string;
+  /** Set by the backend; not part of the create payload. */
+  mode?: GoalMode;
+  objective?: string;
+  constraints?: GoalConstraints;
   baseline?: number | null;
   target?: number;
   baseline_value?: number | null;
