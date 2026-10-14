@@ -281,7 +281,7 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
               Controls
             </h1>
             <p className="mt-2 max-w-2xl text-[14px] leading-6 text-neutral-600">
-              Gate agent mode, auto-publish, and manually queue todayâ€™s calendar
+              Gate agent mode, auto-publish, and manually queue today's calendar
               pipeline: script â†’ image â†’ publish.
             </p>
           </div>

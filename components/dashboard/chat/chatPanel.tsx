@@ -13,6 +13,7 @@ import {
   Sparkles,
   Wand2,
   X,
+  Loader2,
 } from "lucide-react";
 import Card from "@/components/shared/card";
 import { BrandButton } from "@/components/ui/brand-button";
@@ -108,6 +109,17 @@ type Props = {
   subtitle?: string;
   placeholder?: string;
 };
+
+const DECISION_LABELS: Record<string, string> = {
+  confirmed: "Confirmed",
+  cancelled: "Cancelled",
+  replaced: "Replaced by a newer request",
+};
+
+function actionDecision(m: ChatMessage) {
+  const action = m.toolResult?.pending_action as { decision?: string } | undefined;
+  return action?.decision && action.decision in DECISION_LABELS ? action.decision : null;
+}
 
 function pendingAction(m: ChatMessage) {
   const action = m.toolResult?.pending_action as { decision?: unknown } | undefined;
@@ -303,7 +315,7 @@ export default function ChatPanel({
           messages.map((m) => (
             <div
               key={m.id}
-              className={`max-w-[85%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-[13px] leading-5 ${
+              className={`max-w-[85%] animate-in fade-in slide-in-from-bottom-1 whitespace-pre-wrap break-words rounded-2xl px-3 py-2 duration-300 text-[13px] leading-5 ${
                 m.role === "user"
                   ? "ml-auto rounded-br-md bg-[#ECEBFF] text-neutral-900"
                   : "mr-auto rounded-bl-md border border-[#E6E8F5] bg-[#F6F7FD] text-neutral-800"
@@ -316,7 +328,10 @@ export default function ChatPanel({
                 </span>
               ) : null}
               {m.status === "running" && m.toolName ? (
-                <span className="mt-1 block text-xs text-neutral-500">Working on it, the result will show here.</span>
+                <span className="mt-1 flex items-center gap-1.5 text-xs text-neutral-500">
+                  <Loader2 className="size-3 animate-spin text-[#5B57E6]" aria-hidden="true" />
+                  <span className="animate-pulse">Working on it, the result will show here.</span>
+                </span>
               ) : null}
               {Array.isArray(m.toolResult?.steps) && m.toolResult.steps.length ? (
                 <span className="mt-2 flex flex-wrap gap-1">
@@ -331,6 +346,9 @@ export default function ChatPanel({
                     </span>
                   ))}
                 </span>
+              ) : null}
+              {actionDecision(m) ? (
+                <span className="mt-1 block text-xs text-neutral-500">{DECISION_LABELS[actionDecision(m) as string]}</span>
               ) : null}
               {pendingAction(m) && onDecide ? (
                 <span className="mt-2 flex gap-2">
@@ -363,8 +381,16 @@ export default function ChatPanel({
         )}
 
         {isAwaitingReply ? (
-          <div className="mr-auto max-w-[85%] rounded-2xl rounded-bl-md border border-[#E6E8F5] bg-[#F6F7FD] px-3 py-2 text-[13px] text-neutral-500">
-            {currentStep ? `${currentStep}…` : "Thinking…"}
+          <div className="mr-auto flex max-w-[85%] animate-in fade-in slide-in-from-bottom-1 items-center gap-2 rounded-2xl rounded-bl-md border border-[#E6E8F5] bg-[#F6F7FD] px-3 py-2 text-[13px] text-neutral-500 duration-300">
+            <Loader2 className="size-3.5 shrink-0 animate-spin text-[#5B57E6]" aria-hidden="true" />
+            <span key={currentStep ?? "thinking"} className="animate-in fade-in duration-300">
+              {currentStep ? `${currentStep}…` : "Thinking…"}
+            </span>
+            <span className="flex gap-0.5" aria-hidden="true">
+              <span className="size-1 animate-bounce rounded-full bg-[#5B57E6] [animation-delay:-0.3s]" />
+              <span className="size-1 animate-bounce rounded-full bg-[#5B57E6] [animation-delay:-0.15s]" />
+              <span className="size-1 animate-bounce rounded-full bg-[#5B57E6]" />
+            </span>
           </div>
         ) : null}
 

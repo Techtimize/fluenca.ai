@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { CreateGoalMutation } from "@/routes/bussiness/Bussiness-Mutation";
 
 type Props = {
   open: boolean;
@@ -15,6 +16,9 @@ type Props = {
 };
 
 export default function GoalsDialog({ open, onOpenChange }: Props) {
+  const { mutate: createGoal } = CreateGoalMutation();
+
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
