@@ -13,6 +13,8 @@ import {
 import type { GoogleTrendQueryParams } from "@/types/bussiness/google-trends-type";
 import { ChatHistoryApi } from "../chatbot/chatbot.routes";
 import { BlogPostDetailsApi, BlogPostsApi, BriefsApi, KeywordsApi } from "./bussiness.routes";
+import { ScheduledPostApi, ScheduledPostsApi } from "./bussiness.routes";
+import type { ScheduledPost, ScheduledPostStatus } from "@/types/bussiness/scheduled-post-type";
 import {
   GoogleAnalyticsConnectionApi,
   GoogleAnalyticsOverviewApi,
@@ -722,5 +724,34 @@ export const GoalsByCompanyQuery = (company_id?: string | null) => {
     queryFn: () => GoalsByCompanyApi(company_id as string),
     enabled: Boolean(company_id),
     refetchOnWindowFocus: false,
+  });
+};
+
+export const SCHEDULED_POSTS_KEY = ["scheduled-posts"];
+export const scheduledPostKey = (post_id?: string | null) => [...SCHEDULED_POSTS_KEY, "detail", post_id];
+const SCHEDULED_POSTS_POLL_MS = 15000;
+
+/** A post is in flight while publishing, or when its time has passed but it hasn't moved on yet. */
+const isScheduledPostInFlight = (post: ScheduledPost) =>
+  post.status === "publishing" ||
+  (post.status === "scheduled" && new Date(post.scheduled_at).getTime() <= Date.now());
+
+/** Soonest first; polls while any post is going out so its status updates by itself. */
+export const ScheduledPostsQuery = (status?: ScheduledPostStatus) => {
+  return useQuery({
+    queryKey: [...SCHEDULED_POSTS_KEY, "list", status ?? "all"],
+    queryFn: () => ScheduledPostsApi(status),
+    refetchInterval: (query) =>
+      query.state.data?.some(isScheduledPostInFlight) ? SCHEDULED_POSTS_POLL_MS : false,
+  });
+};
+
+export const ScheduledPostQuery = (post_id?: string | null) => {
+  return useQuery({
+    queryKey: scheduledPostKey(post_id),
+    queryFn: () => ScheduledPostApi(post_id as string),
+    enabled: Boolean(post_id),
+    refetchInterval: (query) =>
+      query.state.data && isScheduledPostInFlight(query.state.data) ? SCHEDULED_POSTS_POLL_MS : false,
   });
 };
