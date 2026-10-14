@@ -65,6 +65,7 @@ export const BUSSINESSENDPOINT = {
     DELETE_SCRIPT:(script_id: string) => `/scriptGeneration/script/${script_id}`,
 
     IMAGE_GENERATION: '/generation/image-generation',
+    IMAGE_GENERATION_SCHEDULE: '/generation/image-generation/schedule',
     COMPANY_IMAGE_GENERATION:(company_id: string) => `/generation/image-generation/${company_id}`,
     LATEST_GENERATED_IMAGE:(company_id: string) => `/generation/image-generation/${company_id}/latest`,
     DELETE_IMAGE: (company_id: string, image_id: string) => `/generation/image-generation/${company_id}/images/${image_id}`,
