@@ -149,6 +149,7 @@ export const BUSSINESSENDPOINT = {
     GOAL:{
         CREATE_GOAL: '/goal',
         COMPANY_GOALS: '/goal',
+        GOALS_BY_COMPANY: (company_id: string) => `/goal/company/${company_id}`,
         GOAL_BY_ID: (goal_id: string) => `/goal/${goal_id}`,
         DIAGNOSE: (goal_id: string) => `/goal/${goal_id}/diagnose`,
         APPROVE: (goal_id: string) => `/goal/${goal_id}/approve`,
