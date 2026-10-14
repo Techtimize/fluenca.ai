@@ -41,7 +41,7 @@ export default function AiVisibilityPage() {
   const summary = latest?.status === "done" ? latest.summary : null;
 
   return (
-    <main className="min-w-0 space-y-4 pb-6">
+    <main className="min-w-0 space-y-4 pb-32">
       <TopBar user={{ name: companyName || "User" }} placeholder="Search..." />
 
       <section className="rounded-[28px] border border-[#E6E8F5] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] p-5 sm:p-7">
