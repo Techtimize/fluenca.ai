@@ -1,17 +1,19 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import ChatInput from "@/components/dashboard/chat/chatInput";
 import { DEFAULT_NAV } from "@/components/dashboard/sidebarRail";
+import { useSessionValue } from "@/lib/chat/chat-session-store";
 import ChatPanel from "@/components/dashboard/chat/chatPanel";
 import { useChatbot } from "@/lib/chat/use-chatbot";
 
 const MAX_SCREEN_CONTEXT = 6000;
 const MAX_CONTROLS = 150;
 const CONTROL_PREFIX = "control:";
+const CHAT_OPEN_KEY = "fluenca-chat-open";
 
 const ChatOpenContext = createContext(false);
 
@@ -45,7 +47,9 @@ export default function ChatShell({ children }: { children: ReactNode }) {
   const sentControls = useRef<HTMLElement[]>([]);
   const awaitingReply = useRef(false);
   const lastIdAtSend = useRef<string | undefined>(undefined);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpenValue, setChatOpenValue] = useSessionValue(CHAT_OPEN_KEY);
+  const chatOpen = chatOpenValue === "1";
+  const setChatOpen = (open: boolean) => setChatOpenValue(open ? "1" : "0");
   const chat = useChatbot();
 
   useEffect(() => {
