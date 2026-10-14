@@ -154,6 +154,7 @@ export const BUSSINESSENDPOINT = {
         APPROVE: (goal_id: string) => `/goal/${goal_id}/approve`,
         TASK: (goal_id: string, task_id: string) => `/goal/${goal_id}/tasks/${task_id}`,
         PROGRESS: (goal_id: string) => `/goal/${goal_id}/progress`,
+        PLAN: (goal_id: string) => `/goal/${goal_id}/plan`,
         LESSONS: '/lessons',
         PAUSE: (goal_id: string) => `/goal/${goal_id}/pause`,
         RESUME: (goal_id: string) => `/goal/${goal_id}/resume`,
