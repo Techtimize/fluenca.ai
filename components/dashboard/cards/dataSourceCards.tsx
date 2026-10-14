@@ -16,6 +16,14 @@ import {
   Smartphone,
 } from "lucide-react";
 import { scoreColor } from "@/components/dashboard/integrations/pageSpeedCard";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import {
   GoogleAnalyticsConnectMutation,
@@ -157,6 +165,7 @@ export function GoogleAnalyticsSourceCard() {
   const connected = state === "connected";
   const properties = GoogleAnalyticsPropertiesQuery(connected);
   const chooseProperty = GoogleAnalyticsSelectPropertyMutation();
+  const propertyItems = properties.data?.items ?? [];
   // Same window as the full report, so both share one cached overview.
   const overview = GoogleAnalyticsOverviewQuery(connected ? (connection?.property_id ?? null) : null, GA_OVERVIEW_DAYS);
   const totals = overview.data?.totals;
@@ -179,30 +188,42 @@ export function GoogleAnalyticsSourceCard() {
       }
     >
       {connected ? (
-        <label className="mt-4 block">
-          <span className="text-xs font-medium text-neutral-600">Property</span>
-          <span className="relative mt-1 block">
-            <select
-              value={connection?.property_id ?? ""}
-              disabled={properties.isLoading || chooseProperty.isPending}
-              onChange={(event) => event.target.value && chooseProperty.mutate(event.target.value)}
-              className={`h-10 w-full truncate rounded-xl border border-[#E6E8F5] bg-white pe-8 ps-3 text-[13px] text-neutral-800 disabled:opacity-60 ${FOCUS_RING}`}
-            >
-              <option value="">{properties.isLoading ? "Loading properties…" : "Choose a property"}</option>
-              {(properties.data?.items ?? []).map((property) => (
-                <option key={property.property_id} value={property.property_id}>
-                  {property.display_name} ({property.account_name})
-                </option>
-              ))}
-            </select>
+        <div className="mt-4">
+          <p id="ga-property-label" className="flex items-center gap-1.5 text-xs font-medium text-neutral-600">
+            Property
             {chooseProperty.isPending ? (
-              <Loader2
-                className="pointer-events-none absolute inset-e-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-[#5452F6]"
-                aria-label="Saving property"
-              />
+              <Loader2 className="size-3 animate-spin text-[#5452F6]" aria-label="Saving property" />
             ) : null}
-          </span>
-        </label>
+          </p>
+          <Select
+            value={connection?.property_id ?? null}
+            disabled={properties.isLoading || chooseProperty.isPending}
+            onValueChange={(next) => {
+              if (typeof next === "string" && next !== connection?.property_id) chooseProperty.mutate(next);
+            }}
+          >
+            <SelectTrigger
+              aria-labelledby="ga-property-label"
+              className="mt-1 h-10 w-full rounded-xl border-[#E6E8F5] bg-white px-3 text-[13px] text-neutral-800"
+            >
+              <SelectValue placeholder={properties.isLoading ? "Loading properties…" : "Choose a property"}>
+                {(value: string | null) => {
+                  const property = propertyItems.find((item) => item.property_id === value);
+                  return property ? `${property.display_name} (${property.account_name})` : connection?.property_name;
+                }}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent align="start">
+              <SelectGroup>
+                {propertyItems.map((property) => (
+                  <SelectItem key={property.property_id} value={property.property_id}>
+                    {property.display_name} ({property.account_name})
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       ) : null}
       {connected && connection?.property_id ? (
         <>
