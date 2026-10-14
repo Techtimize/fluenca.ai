@@ -6,13 +6,11 @@ import { Loader2, Sparkles } from "lucide-react";
 import { FacebookIcon } from "@/components/shared/brandIcons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   GOAL_DURATIONS,
   GOAL_METRICS,
   GOAL_PLATFORMS,
   MIN_GOAL_DAYS,
-  buildGoalPrompt,
   deadlineInDays,
   getGoalFormError,
   type GoalFormValues,
@@ -22,7 +20,6 @@ import { FOCUS_RING } from "@/utils/ui-classes";
 const CHIP_ACTIVE = "border-[#5B57E6] bg-[#F6F5FF]";
 const CHIP_IDLE = "border-[#E6E8F5] bg-white hover:bg-[#F8F9FF]";
 const FIELD_CLASS = "h-11 rounded-full border-[#E6E8F5] bg-white px-4";
-const TEXTAREA_CLASS = "rounded-2xl border-[#E6E8F5] bg-white px-4 py-3";
 
 function Section({
   title,
@@ -214,18 +211,6 @@ export default function GoalSetupForm({
           </div>
         </Section>
 
-        <Field
-          label="Description"
-          hint="Context for the agent. Leave blank to send an auto-generated brief."
-        >
-          <Textarea
-            rows={3}
-            placeholder={buildGoalPrompt(form)}
-            value={form.description}
-            onChange={(e) => onChange({ description: e.target.value })}
-            className={TEXTAREA_CLASS}
-          />
-        </Field>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#EEF0F8] bg-[#FCFCFF] px-4 py-3 sm:px-6">
