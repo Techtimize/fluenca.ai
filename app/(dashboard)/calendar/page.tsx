@@ -92,7 +92,7 @@ export default function CalendarPage() {
       }}
       disabled={!companyId || isVersionsLoading}
     >
-      <SelectTrigger className="h-8 w-[180px] rounded-full border-[#E6E8F5] bg-white px-3 text-[12px]">
+      <SelectTrigger className="h-10 w-[180px] rounded-full border-[#E6E8F5] bg-white px-3 text-[12px] font-semibold">
         <SelectValue
           placeholder={isVersionsLoading ? "Loading…" : "Version"}
         />
@@ -114,8 +114,11 @@ export default function CalendarPage() {
   );
 
   return (
-    <main className="min-w-0 space-y-4 pb-4">
-      <TopBar user={{ name: companyName || "User" }} placeholder="Search calendar..." />
+    <main className="min-w-0 space-y-5 pb-6">
+      <TopBar
+        user={{ name: companyName || "User" }}
+        placeholder="Search content, ideas, or goals..."
+      />
 
       {companyId && (isLoading || isFetching) && !hasPlan && !notFound ? (
         <Card className="flex items-center justify-center gap-3 p-12 text-neutral-500">

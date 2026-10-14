@@ -86,6 +86,15 @@ import type {
   SocialProfileContentRequest,
   SocialProfileContentResponse,
 } from "@/types/bussiness/social-profile-content-type";
+import type {
+  CreateGoalRequest,
+  CreateGoalResponse,
+  DiagnoseGoalResponse,
+  GoalDetailResponse,
+  GoalListResponse,
+  GoalTask,
+  UpdateGoalTaskRequest,
+} from "@/types/bussiness/goal-type";
 
 function toQueryParams(params?: GoogleTrendQueryParams) {
   if (!params) return undefined;
@@ -566,13 +575,11 @@ export const UpdateContentExecutionAgentModeApi = async (
   return response.data;
 }
 
-/** Cron: queue sweep for all auto-publish companies. */
 export const ContentExecutionDailyApi = async (): Promise<ContentExecutionDailyResponse> => {
   const response = await api.post(BUSSINESSENDPOINT.CONTENT_EXECUTION.DAILY);
   return response.data;
 }
 
-/** Queue content execution for this company. */
 export const ContentExecutionRunApi = async (
   data?: ContentExecutionRunRequest,
 ): Promise<ContentExecutionRunResponse> => {
@@ -716,7 +723,6 @@ export const FacebookProfileContentApi = async (
   return response.data;
 };
 
-/** GET /connector/linkedin/profile-content?media_limit= — connected LinkedIn profile content. */
 export const LinkedInProfileContentApi = async (
   params: SocialProfileContentRequest = {},
 ): Promise<SocialProfileContentResponse> => {
@@ -728,3 +734,39 @@ export const LinkedInProfileContentApi = async (
   return response.data;
 };
 
+
+export const CreateGoalApi = async (
+  data: CreateGoalRequest,
+): Promise<CreateGoalResponse> => {
+  const response = await api.post(BUSSINESSENDPOINT.GOAL.CREATE_GOAL, data);
+  return response.data;
+};
+
+export const CompanyGoalsApi = async (): Promise<GoalListResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.GOAL.COMPANY_GOALS);
+  return response.data;
+};
+
+export const GoalByIdApi = async (goal_id: string): Promise<GoalDetailResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.GOAL.GOAL_BY_ID(goal_id));
+  return response.data;
+};
+
+export const DiagnoseGoalApi = async (goal_id: string): Promise<DiagnoseGoalResponse> => {
+  const response = await api.post(BUSSINESSENDPOINT.GOAL.DIAGNOSE(goal_id));
+  return response.data;
+};
+
+export const ApproveGoalApi = async (goal_id: string): Promise<GoalDetailResponse> => {
+  const response = await api.post(BUSSINESSENDPOINT.GOAL.APPROVE(goal_id));
+  return response.data;
+};
+
+export const UpdateGoalTaskApi = async ({
+  goal_id,
+  task_id,
+  status,
+}: UpdateGoalTaskRequest): Promise<GoalTask> => {
+  const response = await api.patch(BUSSINESSENDPOINT.GOAL.TASK(goal_id, task_id), { status });
+  return response.data;
+};

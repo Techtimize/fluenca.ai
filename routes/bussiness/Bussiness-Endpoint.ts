@@ -88,7 +88,6 @@ export const BUSSINESSENDPOINT = {
     KEYWORDS_RETRY: '/keywords/retry',
     BRIEFS: '/briefs',
     BLOG_POST: '/blog-posts',
-    SOCIAL_POSTS: '/social-posts',
     BLOG_POST_DETAILS: (blog_post_id: string) => `/blog-posts/${blog_post_id}`,
     BLOG_POST_IMAGES: (blog_post_id: string) => `/blog-posts/${blog_post_id}/images`,
 
@@ -146,7 +145,16 @@ export const BUSSINESSENDPOINT = {
     PRIVACY:{
         FACEBOOK_DEAUTHORIZE: '/integrations/facebook/deauthorize',
         FACEBOOK_DATA_DELETION: '/integrations/facebook/data-deletion',
-    }
+    },
+
+    GOAL:{
+        CREATE_GOAL: '/goal',
+        COMPANY_GOALS: '/goal',
+        GOAL_BY_ID: (goal_id: string) => `/goal/${goal_id}`,
+        DIAGNOSE: (goal_id: string) => `/goal/${goal_id}/diagnose`,
+        APPROVE: (goal_id: string) => `/goal/${goal_id}/approve`,
+        TASK: (goal_id: string, task_id: string) => `/goal/${goal_id}/tasks/${task_id}`,
+    },
 }
 
 

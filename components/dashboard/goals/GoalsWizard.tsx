@@ -115,7 +115,7 @@ export default function GoalsWizard() {
 
   return (
     <div className="min-w-0 space-y-4">
-      {/* <GoalStepRail
+      <GoalStepRail
         currentStep={step}
         maxReached={maxReached}
         onSelect={(next: number) => {
@@ -124,7 +124,7 @@ export default function GoalsWizard() {
           if (next >= 2 && !result && !isPending) return;
           setStep(next);
         }}
-      /> */}
+      />
 
       {step === 1 ? (
         <section className="overflow-hidden rounded-2xl border border-[#E6E8F5] bg-white sm:rounded-3xl">

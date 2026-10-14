@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogImageApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, EditUserProfileApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, LinkedInPublishApi, OnboardingApi, ScheduleImageGenerationApi, XLoginApi, XPublishApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, SocialGrowthApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogImageApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, EditUserProfileApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, LinkedInPublishApi, OnboardingApi, XLoginApi, XPublishApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, SocialGrowthApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi, CreateGoalApi, DiagnoseGoalApi, ApproveGoalApi, UpdateGoalTaskApi } from "./bussiness.routes";
 import type {
   FacebookPublishRequest,
   InstagramPublishRequest,
@@ -31,6 +31,8 @@ import { ImageGenerationRequest, ImageGenerationResponse, ImageGenerationSchedul
 import { IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 import useAuthStore from "@/store/AuthsStore";
 import type { EditProfileRequest } from "@/types/bussiness/user-profile-type";
+import type { CreateGoalRequest, UpdateGoalTaskRequest } from "@/types/bussiness/goal-type";
+import { GOALS_KEY, goalKey } from "./Bussiness-Query";
 
 export function EditUserProfileMutation() {
     const queryClient = useQueryClient();
@@ -729,12 +731,10 @@ export function XPublishMutation() {
     },
     onError: (error) => {
       if (isApiNotFoundError(error)) {
-        // 404: the X account is gone, so refresh accounts to show "Connect X" again
         toast.error("X isn't connected. Connect X to post.");
         void queryClient.invalidateQueries({ queryKey: ["social-accounts"] });
         return;
       }
-      // 502 carries a readable message from X
       toast.error(getApiErrorMessage(error, "Failed to post to X"));
     },
   });
@@ -751,6 +751,61 @@ export function SocialGrowthMutation() {
     },
     onError: (error: unknown) => {
       toast.error(getApiErrorMessage(error, "Failed to build growth plan"));
+    },
+  });
+}
+
+export function CreateGoalMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateGoalRequest) => CreateGoalApi(data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: GOALS_KEY });
+    },
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to create goal"));
+    },
+  });
+}
+
+export function DiagnoseGoalMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (goal_id: string) => DiagnoseGoalApi(goal_id),
+    onSuccess: (_response, goal_id) => {
+      void queryClient.invalidateQueries({ queryKey: GOALS_KEY });
+      void queryClient.invalidateQueries({ queryKey: goalKey(goal_id) });
+    },
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to diagnose goal"));
+    },
+  });
+}
+
+export function ApproveGoalMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (goal_id: string) => ApproveGoalApi(goal_id),
+    onSuccess: (response, goal_id) => {
+      queryClient.setQueryData(goalKey(goal_id), response);
+      void queryClient.invalidateQueries({ queryKey: GOALS_KEY });
+      toast.success("Plan approved. Fluenca is executing your goal.");
+    },
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to approve plan"));
+    },
+  });
+}
+
+export function UpdateGoalTaskMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: UpdateGoalTaskRequest) => UpdateGoalTaskApi(data),
+    onSuccess: (_response, { goal_id }) => {
+      void queryClient.invalidateQueries({ queryKey: goalKey(goal_id) });
+    },
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to update task"));
     },
   });
 }
