@@ -72,8 +72,7 @@ export const AGENTS: AgentStory[] = [
       metric: "1,800 Words",
       rows: ["Voice", "Values", "Services", "Strengths"],
     },
-    // TEMP: replace with Masrur's own video when ready
-    video: { src: "/videos/agents/Sayyam.mp4" },
+    video: { src: "/videos/agents/Talha.mp4" },
   },
   {
     id: "agent-3",
@@ -99,7 +98,7 @@ export const AGENTS: AgentStory[] = [
     },
     video: { src: "/videos/agents/Raheel.mp4" },
   },
-    {
+  {
     id: "agent-4",
     name: "Connector", // TODO: replace with the agent's real name
     role: "Chatbot",
@@ -121,15 +120,13 @@ export const AGENTS: AgentStory[] = [
       metric: "1 Conversation",
       rows: ["Ask", "Route", "Act", "Reply"],
     },
-    // TEMP: replace with this agent's own video when ready
-    video: { src: "/videos/agents/Raheel.mp4" },
+    video: { src: "/videos/agents/Hasnain.mp4" },
   },
   {
     id: "agent-5",
     name: "Observer", // TODO: replace with the agent's real name
     role: "Competitor Analysis",
     accent: "indigo",
-    // TEMP: replace with this agent's own image when ready
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCFEjCBVpYcAMxK-leVpdlHox3-gkT015kxmLuktGzMXCHO4phmSXlCC_v_WyGQD0EgrqzQh8E3MODzTHRqgo6chUpkHzsmoKweLeRVtsLwy_aE7Uv6SLyswxcNAimkPxSglx16LBXXs4Cp25b5JG9ScK0FPyjIxTNjePE-e9DM2KRRWl09iWsnTb4CquBGvUAZ-xyAOAvfbZlpyoBj-KQXBsMZItyuBdgRpgoZBU0ORH6Ew2ZPmiUedMnXdVKfqOJFAw",
     label: "05. Competitor Agent",
@@ -147,15 +144,13 @@ export const AGENTS: AgentStory[] = [
       metric: "12 Gaps Found",
       rows: ["Websites", "Messaging", "Social", "Gaps"],
     },
-    // TEMP: replace with this agent's own video when ready
-    video: { src: "/videos/agents/Sayyam.mp4" },
+    video: { src: "/videos/agents/Ilsa.mp4" },
   },
   {
     id: "agent-6",
     name: "Director", // TODO: replace with the agent's real name
     role: "Script Generation",
     accent: "violet",
-    // TEMP: replace with this agent's own image when ready
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDioTMTfciGARTKrMbUEQPMD1j1eY1Z5G6ziEGFTgdf-Xhy0VbkebDIVJmoic_dWQHB29P-ApCU_y7BxNEJIlOXibN_jegKlxkYpHWp55b-T12gFRfXFY8XbtgWg5jXYXQRpiO3ZePikuIum70osCFNwdy0Fdj6XQuZmuU8YwEyguReRStxaS8nBgLNMEYhOwEqIB3FJBDONIOKXmR5by15OB0E8jn23E4TGOnxeVy-v6-L7YQ1av9ndTbucN12qHwbrw",
     label: "06. Script Agent",
@@ -173,8 +168,7 @@ export const AGENTS: AgentStory[] = [
       metric: "8 Scenes",
       rows: ["Hook", "Story", "Dialogue", "CTA"],
     },
-    // TEMP: replace with this agent's own video when ready
-    video: { src: "/videos/agents/Raheel.mp4" },
+    video: { src: "/videos/agents/Muaz.mp4" },
   },
 ];
 
