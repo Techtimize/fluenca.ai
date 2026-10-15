@@ -128,24 +128,14 @@ export default function IntelligenceProgressPage() {
   const visibleItems = feed.slice(Math.max(0, shown - VISIBLE_ITEMS), shown);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#F7F8FF] px-4 pb-16 pt-12 sm:pt-16">
+    <main className="relative min-h-screen overflow-hidden bg-[#F7F8FF] px-4 pb-16 pt-4 sm:pt-6">
       {/* soft background glows + dot grid */}
       <div className="pointer-events-none absolute -left-32 -top-32 size-112 rounded-full bg-[#C7CBFF]/50 blur-3xl" />
       <div className="pointer-events-none absolute -right-32 top-1/3 size-104 rounded-full bg-[#E4D4FF]/50 blur-3xl" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(84,82,246,0.08)_1px,transparent_0)] bg-size-[22px_22px] mask-[linear-gradient(to_bottom,black,transparent_70%)]" />
 
       <div className="relative mx-auto max-w-6xl">
-        {/* Heading */}
         <div className="text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#E0E2FB] bg-white/80 px-3.5 py-1.5 text-xs font-medium text-[#5452F6] shadow-sm backdrop-blur">
-            <span className="relative flex size-2">
-              {!isReady ? (
-                <span className="absolute inset-0 animate-ping rounded-full bg-[#22C55E]/60" />
-              ) : null}
-              <span className="relative size-2 rounded-full bg-[#22C55E]" />
-            </span>
-            {isReady ? "Analysis complete" : "Live analysis"}
-          </span>
           <h1 className="mt-5 text-3xl font-bold tracking-tight text-neutral-900 sm:text-5xl sm:leading-[1.1]">
             Our AI agents are analyzing
             <br />
