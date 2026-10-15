@@ -127,7 +127,7 @@ export default function AiVisibilityPage() {
                 title="What AI answered"
                 hint={`Checked ${new Date(latest.finished_at ?? latest.created_at).toLocaleString()}. Open a question to read the answers.`}
               >
-                <AnswersMatrix runId={latest.id} engines={overview.engines} />
+                <AnswersMatrix runId={latest.id} engines={overview.engines} peopleAlsoAsk={summary.people_also_ask} />
               </Panel>
               <div className="grid gap-4 lg:grid-cols-2">
                 <Panel title="Share of voice" hint="Who AI names most for your questions.">
