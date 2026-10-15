@@ -126,7 +126,15 @@ function AnswerCard({ engine, answer }: { engine: string; answer: AiVisibilityAn
   );
 }
 
-export function AnswersMatrix({ runId, engines }: { runId: string; engines: string[] }) {
+export function AnswersMatrix({
+  runId,
+  engines,
+  peopleAlsoAsk = {},
+}: {
+  runId: string;
+  engines: string[];
+  peopleAlsoAsk?: Record<string, string[]>;
+}) {
   const { data, isLoading, isError } = AiVisibilityRunQuery(runId);
   const [open, setOpen] = useState<string | null>(null);
 
@@ -222,6 +230,24 @@ export function AnswersMatrix({ runId, engines }: { runId: string; engines: stri
                   {expanded ? (
                     <tr>
                       <td colSpan={engines.length + 2} className="pb-4">
+                        {peopleAlsoAsk[question]?.length ? (
+                          <div className="mb-3 rounded-xl bg-white p-4 ring-1 ring-[#E6E8F5]">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-500">
+                              People also ask on Google
+                            </p>
+                            <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
+                              {peopleAlsoAsk[question].map((related) => (
+                                <li key={related} className="flex items-start gap-2 text-[13px] text-neutral-700">
+                                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#4F46E5]" aria-hidden="true" />
+                                  {related}
+                                </li>
+                              ))}
+                            </ul>
+                            <p className="mt-2 text-[11px] text-neutral-400">
+                              A post written for this question answers these in its FAQ.
+                            </p>
+                          </div>
+                        ) : null}
                         <div className="grid gap-3 lg:grid-cols-3">
                           {worded.map((engine) => {
                             const answer = find(question, engine);

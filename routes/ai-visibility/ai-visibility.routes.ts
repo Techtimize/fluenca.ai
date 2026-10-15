@@ -9,6 +9,7 @@ export interface AiVisibilitySummary {
   top_sources: { domain: string; count: number }[];
   gaps: { question: string; named_instead: string[] }[];
   questions: number;
+  people_also_ask?: Record<string, string[]>;
   answers: number;
   mentioned: number;
   cited: number;
