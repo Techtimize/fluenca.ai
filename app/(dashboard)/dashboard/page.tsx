@@ -116,7 +116,6 @@ export default function DashboardPage() {
           </div>
         ) : null}
 
-
         {!isLoading && analytics ? (
           <AnalyticsSection
             data={analytics}
@@ -137,7 +136,9 @@ export default function DashboardPage() {
         analysisChannels={sources.map((s) => ({
           id: s.id,
           label: s.label,
-          charts: channels[s.id]?.emptyMessage ? null : (channels[s.id]?.charts ?? null),
+          charts: channels[s.id]?.emptyMessage
+            ? null
+            : (channels[s.id]?.charts ?? null),
         }))}
         defaultAnalysisChannel={source}
       />

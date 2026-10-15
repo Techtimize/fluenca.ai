@@ -200,19 +200,20 @@ export default function CompanyCard({
     <Card className="flex h-full min-w-0 flex-col p-4 sm:p-5 md:p-6">
       <div className="flex items-start justify-between gap-2 sm:gap-3">
         <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-          <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-2xl text-sm font-semibold text-white sm:size-11 sm:text-base">
+          <span className="grid size-14 shrink-0 place-items-center overflow-hidden text-sm font-semibold text-white sm:size-16">
             {logoUrl ? (
               <AssetImage
                 src={logoUrl}
                 alt={company.name}
-                width={44}
-                height={44}
-                className="size-10 object-cover sm:size-11"
+                width={64}
+                height={64}
+                className="size-14 object-contain sm:size-16"
               />
             ) : (
               initials(company.name)
             )}
           </span>
+
           <div className="min-w-0">
             <h2 className="flex min-w-0 items-center gap-2 text-lg font-bold tracking-tight text-neutral-900 sm:text-xl">
               <span className="truncate">{company.name}</span>
@@ -229,7 +230,9 @@ export default function CompanyCard({
               ) : null}
             </h2>
             {company.tagline ? (
-              <p className="line-clamp-2 text-xs text-neutral-500">{company.tagline}</p>
+              <p className="line-clamp-2 text-xs text-neutral-500">
+                {company.tagline}
+              </p>
             ) : null}
           </div>
         </div>
