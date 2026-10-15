@@ -32,6 +32,7 @@ export default function TrendsPage() {
   const [time, setTime] = useState("now 1-d");
   const [exploreInput, setExploreInput] = useState("");
   const [exploreQuery, setExploreQuery] = useState("");
+  const [keyword, setKeyword] = useState("");
 
   const filterParams = useMemo(
     () => ({
@@ -86,13 +87,20 @@ export default function TrendsPage() {
     filtersQuery.error ||
     exploreQueryResult.error;
 
+  // Narrows the lists already on screen; does not change what is fetched
+  const needle = keyword.trim().toLowerCase();
+  const matchesKeyword = (item: (typeof nowItems)[number]) =>
+    !needle ||
+    item.topic.toLowerCase().includes(needle) ||
+    item.query.toLowerCase().includes(needle);
+
   const handleSelectTrend = (query: string) => {
     setExploreInput(query);
     setExploreQuery(query);
   };
 
   return (
-    <main className="min-w-0">
+    <main className="min-w-0 space-y-4 pb-28">
           <TopBar
             user={{ name: companyName || "" }}
             placeholder={tTop("searchTrends")}
@@ -103,8 +111,8 @@ export default function TrendsPage() {
             }}
           />
 
-          <div className="mb-4">
-            <h1 className="text-2xl font-semibold text-neutral-900">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
               {t("title")}
             </h1>
             <p className="mt-1 text-sm text-neutral-500">
@@ -119,7 +127,7 @@ export default function TrendsPage() {
             </p>
           </div>
 
-          <Card className="mb-4 p-5 sm:p-6">
+          <section className="rounded-2xl border border-[#E6E8F5] bg-white p-4 shadow-[0_2px_10px_rgba(15,23,42,0.03)] sm:p-5">
             <TrendsFiltersBar
               geos={filters.geos}
               categories={filters.categories}
@@ -127,14 +135,16 @@ export default function TrendsPage() {
               geo={geo}
               category={category}
               time={time}
+              keyword={keyword}
               onGeoChange={setGeo}
               onCategoryChange={setCategory}
               onTimeChange={setTime}
+              onKeywordChange={setKeyword}
             />
-          </Card>
+          </section>
 
           {queryError ? (
-            <Card className="mb-4 border-[#F5D0D0] bg-[#FFF7F7] p-4 text-sm text-[#B42318]">
+            <Card className="border-[#F5D0D0] bg-[#FFF7F7] p-4 text-sm text-[#B42318]">
               {t("error")}
             </Card>
           ) : null}
@@ -146,27 +156,32 @@ export default function TrendsPage() {
             dateLabel={nowData.meta.dateLabel}
           />
 
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid items-start gap-4 lg:grid-cols-3">
             <TrendsListCard
               title={t("trendingNow")}
               subtitle={t("trendingNowSub")}
-              items={nowItems.slice(0, 8)}
+              items={nowItems.slice(0, 8).filter(matchesKeyword)}
               isLoading={nowQuery.isLoading}
+              variant="trending"
+              geoLabel={nowData.meta.geoLabel}
               onSelect={handleSelectTrend}
             />
             <TrendsListCard
               title={t("risingQueries")}
               subtitle={t("risingQueriesSub")}
-              items={risingItems.slice(0, 8)}
+              items={risingItems.slice(0, 8).filter(matchesKeyword)}
               isLoading={nowQuery.isLoading || trendingQuery.isLoading}
-              showRising
+              variant="rising"
+              geoLabel={nowData.meta.geoLabel}
               onSelect={handleSelectTrend}
             />
             <TrendsListCard
               title={t("topQueries")}
               subtitle={t("topQueriesSub")}
-              items={nowData.topQueries.slice(0, 8)}
+              items={nowData.topQueries.slice(0, 8).filter(matchesKeyword)}
               isLoading={nowQuery.isLoading}
+              variant="top"
+              geoLabel={nowData.meta.geoLabel}
               onSelect={handleSelectTrend}
             />
           </div>
