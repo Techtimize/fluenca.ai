@@ -20,6 +20,8 @@ type Props = {
   profile?: CompanyProfile | null;
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  /** Shown below the competitors, e.g. the current goal. */
+  footer?: ReactNode;
 };
 
 const PLATFORM_ICONS: Record<string, ComponentType<{ className?: string }>> = {
@@ -189,6 +191,7 @@ export default function CompanyCard({
   profile,
   onRefresh,
   isRefreshing = false,
+  footer,
 }: Props) {
   const website = company.links.find((link) => link.id === "web");
   const logoUrl = company.logoUrl || company.logoSrc;
@@ -316,6 +319,7 @@ export default function CompanyCard({
           </ul>
         </div>
       )}
+      {footer}
     </Card>
   );
 }

@@ -43,7 +43,7 @@ export function formatSchedule(value?: string | null) {
 }
 
 // Existing schedule, or the next full hour from now
-function initialDate(schedule?: string | null) {
+export function initialDate(schedule?: string | null) {
   const existing = schedule ? new Date(schedule) : null;
   if (existing && !Number.isNaN(existing.getTime()) && existing > new Date()) {
     return existing;
@@ -53,7 +53,7 @@ function initialDate(schedule?: string | null) {
   return next;
 }
 
-function MonthCalendar({
+export function MonthCalendar({
   selected,
   onSelect,
 }: {

@@ -12,6 +12,12 @@ import type {
   Sitemap,
   UrlInspection,
 } from "@/types/bussiness/search-console-type";
+import type {
+  CreateScheduledPostRequest,
+  ScheduledPost,
+  ScheduledPostStatus,
+  UpdateScheduledPostRequest,
+} from "@/types/bussiness/scheduled-post-type";
 import api from "../apiClient";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import type { DashboardResponse } from "@/types/bussiness/dashboard-type";
@@ -103,8 +109,10 @@ import type {
   CreateGoalResponse,
   DiagnoseGoalResponse,
   GoalDetailResponse,
+  Goal,
   GoalListResponse,
   GoalLessonsResponse,
+  GoalPlanResponse,
   GoalProgressResponse,
   GoalTask,
   UpdateGoalTaskRequest,
@@ -863,4 +871,85 @@ export const SearchConsoleIndexCheckApi = async (): Promise<IndexCheck> => {
 
 export const SearchConsoleDisconnectApi = async (): Promise<void> => {
   await api.delete(BUSSINESSENDPOINT.SEARCH_CONSOLE.DISCONNECT);
+};
+
+export const DeleteGoalApi = async (goal_id: string): Promise<void> => {
+  await api.delete(BUSSINESSENDPOINT.GOAL.GOAL_BY_ID(goal_id));
+};
+
+export const GoalPlanApi = async (goal_id: string): Promise<GoalPlanResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.GOAL.PLAN(goal_id));
+  return response.data;
+};
+
+export const PauseGoalApi = async (goal_id: string): Promise<Goal> => {
+  const response = await api.post(BUSSINESSENDPOINT.GOAL.PAUSE(goal_id));
+  return response.data;
+};
+
+export const ResumeGoalApi = async (goal_id: string): Promise<Goal> => {
+  const response = await api.post(BUSSINESSENDPOINT.GOAL.RESUME(goal_id));
+  return response.data;
+};
+
+export const GoalsByCompanyApi = async (company_id: string): Promise<GoalListResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.GOAL.GOALS_BY_COMPANY(company_id));
+  const data = response.data;
+  // Accept a bare array or a { goals } / { data } / { items } wrapper.
+  if (Array.isArray(data)) return data;
+  return data?.goals ?? data?.data ?? data?.items ?? [];
+};
+
+const unwrapScheduledPosts = (data: unknown): ScheduledPost[] => {
+  // Accept a bare array or a { scheduled_posts } / { items } / { data } wrapper.
+  if (Array.isArray(data)) return data;
+  const wrapped = data as { scheduled_posts?: ScheduledPost[]; items?: ScheduledPost[]; data?: ScheduledPost[] } | null;
+  return wrapped?.scheduled_posts ?? wrapped?.items ?? wrapped?.data ?? [];
+};
+
+export const ScheduledPostsApi = async (status?: ScheduledPostStatus): Promise<ScheduledPost[]> => {
+  const response = await api.get(BUSSINESSENDPOINT.SCHEDULED_POSTS.LIST, {
+    params: status ? { status } : undefined,
+  });
+  return unwrapScheduledPosts(response.data);
+};
+
+export const ScheduledPostApi = async (post_id: string): Promise<ScheduledPost> => {
+  const response = await api.get(BUSSINESSENDPOINT.SCHEDULED_POSTS.BY_ID(post_id));
+  return response.data;
+};
+
+export const CreateScheduledPostApi = async (
+  body: CreateScheduledPostRequest,
+  onProgress?: (percent: number) => void,
+): Promise<ScheduledPost> => {
+  const formData = new FormData();
+  formData.append("file", body.file);
+  body.platforms.forEach((platform) => formData.append("platforms", platform));
+  formData.append("scheduled_at", body.scheduled_at);
+  if (body.caption) formData.append("caption", body.caption);
+  const response = await api.post(BUSSINESSENDPOINT.SCHEDULED_POSTS.CREATE, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress: (event) => {
+      if (onProgress && event.total) onProgress(Math.round((event.loaded / event.total) * 100));
+    },
+  });
+  return response.data;
+};
+
+export const UpdateScheduledPostApi = async (
+  post_id: string,
+  body: UpdateScheduledPostRequest,
+): Promise<ScheduledPost> => {
+  const response = await api.patch(BUSSINESSENDPOINT.SCHEDULED_POSTS.BY_ID(post_id), body);
+  return response.data;
+};
+
+export const CancelScheduledPostApi = async (post_id: string): Promise<ScheduledPost> => {
+  const response = await api.post(BUSSINESSENDPOINT.SCHEDULED_POSTS.CANCEL(post_id));
+  return response.data;
+};
+
+export const DeleteScheduledPostApi = async (post_id: string): Promise<void> => {
+  await api.delete(BUSSINESSENDPOINT.SCHEDULED_POSTS.BY_ID(post_id));
 };

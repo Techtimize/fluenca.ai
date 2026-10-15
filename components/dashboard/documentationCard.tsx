@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { ChevronRight, Target } from "lucide-react";
 import Card from "@/components/shared/card";
 import type { DocItem } from "@/types/dashboard";
@@ -9,8 +8,6 @@ type Props = {
   items: DocItem[];
   goalLabel?: string;
   onSetGoal?: () => void;
-  /** Shown above the goal button, e.g. the current goal. */
-  goalSlot?: ReactNode;
   onSelect?: (item: DocItem) => void;
 };
 
@@ -18,7 +15,6 @@ export default function DocumentationCard({
   items,
   goalLabel = "Set Your Goal",
   onSetGoal,
-  goalSlot,
   onSelect,
 }: Props) {
   return (
@@ -56,7 +52,6 @@ export default function DocumentationCard({
           );
         })}
       </ul>
-      {goalSlot}
       <button
         type="button"
         onClick={onSetGoal}

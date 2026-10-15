@@ -103,6 +103,7 @@ export default function DashboardPage() {
               profile={mapped.profile}
               onRefresh={handleAnalyzeCompany}
               isRefreshing={isPending}
+              footer={<CurrentGoalSummary onOpen={openGoal} />}
             />
             {!chatOpen && mapped.docs.length ? (
               <DocumentationCard
@@ -110,7 +111,6 @@ export default function DashboardPage() {
                 goalLabel={t("setYourGoal")}
                 onSelect={setOpenDoc}
                 onSetGoal={() => openGoal(null)}
-                goalSlot={<CurrentGoalSummary onOpen={openGoal} />}
               />
             ) : null}
           </div>

@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentExecutionAgentModeApi, ContentExecutionItemsApi, ContentExecutionRunsApi, ContentExecutionSettingsApi, ContentRecommendationResultApi, DnaApi, FacebookProfileContentApi, IntakeApi, IntelligenceJobApi, InstagramProfileIdApi, InstagramProfileInfoApi, LinkedInProfileContentApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi, InstagramProfileContentApi, InstagramProfileReachApi, InstagramProfileInteractionsApi, InstagramProfileDemographicsApi, InstagramProfileFollowsApi, InstagramProfileViewsApi, InstagramProfileActionsApi, InstagramProfileStoriesApi, InstagramLiveStreamApi, CompanyGoalsApi, GoalByIdApi, GoalProgressApi, GoalLessonsApi } from "./bussiness.routes";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentExecutionAgentModeApi, ContentExecutionItemsApi, ContentExecutionRunsApi, ContentExecutionSettingsApi, ContentRecommendationResultApi, DnaApi, FacebookProfileContentApi, IntakeApi, IntelligenceJobApi, InstagramProfileIdApi, InstagramProfileInfoApi, LinkedInProfileContentApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi, InstagramProfileContentApi, InstagramProfileReachApi, InstagramProfileInteractionsApi, InstagramProfileDemographicsApi, InstagramProfileFollowsApi, InstagramProfileViewsApi, InstagramProfileActionsApi, InstagramProfileStoriesApi, InstagramLiveStreamApi, CompanyGoalsApi, GoalByIdApi, GoalProgressApi, GoalLessonsApi, GoalPlanApi, GoalsByCompanyApi } from "./bussiness.routes";
 import {
     AnalyzeCompanyResultsApi,
   AnalyzeCompanyDashboardApi,
@@ -13,6 +13,8 @@ import {
 import type { GoogleTrendQueryParams } from "@/types/bussiness/google-trends-type";
 import { ChatHistoryApi } from "../chatbot/chatbot.routes";
 import { BlogPostDetailsApi, BlogPostsApi, BriefsApi, KeywordsApi } from "./bussiness.routes";
+import { ScheduledPostApi, ScheduledPostsApi } from "./bussiness.routes";
+import type { ScheduledPost, ScheduledPostStatus } from "@/types/bussiness/scheduled-post-type";
 import {
   GoogleAnalyticsConnectionApi,
   GoogleAnalyticsOverviewApi,
@@ -703,5 +705,53 @@ export const SearchConsoleSitemapsQuery = (siteUrl: string | null) => {
     queryFn: () => SearchConsoleSitemapsApi(),
     enabled: Boolean(siteUrl),
     staleTime: SEARCH_CONSOLE_STALE_MS,
+  });
+};
+
+export const GoalPlanQuery = (goal_id?: string | null) => {
+  return useQuery({
+    queryKey: [...goalKey(goal_id), "plan"],
+    queryFn: () => GoalPlanApi(goal_id as string),
+    enabled: Boolean(goal_id),
+    refetchOnWindowFocus: false,
+  });
+};
+
+/** All of a company's goals; keyed under GOALS_KEY so goal mutations refresh it too. */
+export const GoalsByCompanyQuery = (company_id?: string | null) => {
+  return useQuery({
+    queryKey: [...GOALS_KEY, "company", company_id],
+    queryFn: () => GoalsByCompanyApi(company_id as string),
+    enabled: Boolean(company_id),
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const SCHEDULED_POSTS_KEY = ["scheduled-posts"];
+export const scheduledPostKey = (post_id?: string | null) => [...SCHEDULED_POSTS_KEY, "detail", post_id];
+const SCHEDULED_POSTS_POLL_MS = 15000;
+
+/** A post is in flight while publishing, or when its time has passed but it hasn't moved on yet. */
+const isScheduledPostInFlight = (post: ScheduledPost) =>
+  post.status === "publishing" ||
+  (post.status === "scheduled" && new Date(post.scheduled_at).getTime() <= Date.now());
+
+/** Soonest first; polls while any post is going out so its status updates by itself. */
+export const ScheduledPostsQuery = (status?: ScheduledPostStatus) => {
+  return useQuery({
+    queryKey: [...SCHEDULED_POSTS_KEY, "list", status ?? "all"],
+    queryFn: () => ScheduledPostsApi(status),
+    refetchInterval: (query) =>
+      query.state.data?.some(isScheduledPostInFlight) ? SCHEDULED_POSTS_POLL_MS : false,
+  });
+};
+
+export const ScheduledPostQuery = (post_id?: string | null) => {
+  return useQuery({
+    queryKey: scheduledPostKey(post_id),
+    queryFn: () => ScheduledPostApi(post_id as string),
+    enabled: Boolean(post_id),
+    refetchInterval: (query) =>
+      query.state.data && isScheduledPostInFlight(query.state.data) ? SCHEDULED_POSTS_POLL_MS : false,
   });
 };

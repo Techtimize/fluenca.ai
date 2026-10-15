@@ -1,4 +1,4 @@
-import type { CreateGoalRequest, Goal } from "@/types/bussiness/goal-type";
+import type { CreateGoalRequest, Goal, GoalProgressResponse } from "@/types/bussiness/goal-type";
 
 export type GoalPlatform =
   | "instagram"
@@ -240,10 +240,53 @@ export function goalToForm(goal: Goal): GoalFormValues {
 /** Progress (0–100) toward the goal's own metric, when the backend measures it. */
 export function goalMetricProgress(
   metric: GoalMetric,
-  progress?: { followers?: number; engagement?: number } | null,
+  progress?: Record<string, unknown> | null,
 ) {
   if (!progress) return null;
-  if (metric === "followers") return progress.followers ?? null;
-  if (metric === "engagement_rate") return progress.engagement ?? null;
+  const value =
+    metric === "followers" ? progress.followers : metric === "engagement_rate" ? progress.engagement : null;
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+/** GET /goal/{id}/progress may return the measurements flat or nested under goal_progress / progress. */
+export function flattenGoalProgress(raw?: GoalProgressResponse | null): Record<string, unknown> {
+  if (!raw) return {};
+  const nested = raw.goal_progress ?? raw.progress;
+  return nested && typeof nested === "object" ? { ...raw, ...nested } : raw;
+}
+
+const PROGRESS_PCT_KEYS = ["progress_pct", "progress_percent", "percent_complete", "pct_complete"];
+const EXPECTED_PCT_KEYS = ["expected_pct", "expected_progress_pct", "expected_percent", "expected_progress"];
+
+function firstPercent(source: Record<string, unknown>, keys: string[]) {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === "number" && Number.isFinite(value)) return Math.min(100, Math.max(0, value));
+  }
   return null;
+}
+
+/**
+ * Actual vs expected progress (0–100) for a goal. Prefers the backend's progress_pct / expected_pct;
+ * falls back to the goal metric's progress, and to time elapsed between creation and deadline.
+ */
+export function goalProgressPercents(goal: Goal, raw?: GoalProgressResponse | null) {
+  const source = flattenGoalProgress(raw);
+  const progress = firstPercent(source, PROGRESS_PCT_KEYS) ?? goalMetricProgress(goal.metric, source);
+
+  let expected = firstPercent(source, EXPECTED_PCT_KEYS);
+  const expectedIsEstimate = expected == null;
+  if (expected == null && goal.created_at) {
+    const start = new Date(goal.created_at).getTime();
+    const end = new Date(goal.deadline).getTime();
+    if (Number.isFinite(start) && Number.isFinite(end) && end > start) {
+      expected = Math.min(100, Math.max(0, ((Date.now() - start) / (end - start)) * 100));
+    }
+  }
+
+  return {
+    progress: progress != null ? Math.round(progress) : null,
+    expected: expected != null ? Math.round(expected) : null,
+    expectedIsEstimate,
+  };
 }
