@@ -22,12 +22,11 @@ const INLINE = /\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)\s]+)\)/g;
 const BULLET = /^[-*]\s+/;
 const NUMBERED = /^\d+\.\s+/;
 const LINK_CLASS = "font-medium text-[#5B57E6] underline underline-offset-2 hover:text-[#4642c9]";
-const TABLE_ROW = /^\|.*\|$/;
-const TABLE_RULE = /^\|[\s:|-]+\|$/;
+const TABLE_RULE = /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?$/;
 
 function cells(line: string): string[] {
   return line
-    .slice(1, -1)
+    .replace(/^\||\|$/g, "")
     .split("|")
     .map((cell) => cell.trim());
 }
@@ -47,16 +46,21 @@ function parseBlocks(markdown: string): Block[] {
     table = null;
   };
 
-  for (const raw of markdown.split(/\r?\n/)) {
-    const line = raw.trim();
+  const lines = markdown.split(/\r?\n/).map((raw) => raw.trim());
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index];
     if (!line) {
       flush();
       continue;
     }
-    if (TABLE_ROW.test(line)) {
-      if (!table) flush();
-      if (!TABLE_RULE.test(line)) (table ??= []).push(cells(line));
-      else table ??= [];
+    if (table && line.includes("|")) {
+      table.push(cells(line));
+      continue;
+    }
+    if (line.includes("|") && TABLE_RULE.test(lines[index + 1] ?? "")) {
+      flush();
+      table = [cells(line)];
+      index++;
       continue;
     }
     if (table) flush();
