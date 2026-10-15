@@ -8,7 +8,8 @@ type Block =
   | { kind: "heading"; level: 2 | 3; text: string }
   | { kind: "paragraph"; text: string }
   | { kind: "list"; ordered: boolean; items: string[] }
-  | { kind: "image"; alt: string; src: string };
+  | { kind: "image"; alt: string; src: string }
+  | { kind: "table"; head: string[]; rows: string[][] };
 
 type Props = {
   markdown: string;
@@ -21,17 +22,29 @@ const INLINE = /\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)\s]+)\)/g;
 const BULLET = /^[-*]\s+/;
 const NUMBERED = /^\d+\.\s+/;
 const LINK_CLASS = "font-medium text-[#5B57E6] underline underline-offset-2 hover:text-[#4642c9]";
+const TABLE_ROW = /^\|.*\|$/;
+const TABLE_RULE = /^\|[\s:|-]+\|$/;
+
+function cells(line: string): string[] {
+  return line
+    .slice(1, -1)
+    .split("|")
+    .map((cell) => cell.trim());
+}
 
 function parseBlocks(markdown: string): Block[] {
   const blocks: Block[] = [];
   let paragraph: string[] = [];
   let list: { ordered: boolean; items: string[] } | null = null;
+  let table: string[][] | null = null;
 
   const flush = () => {
     if (paragraph.length) blocks.push({ kind: "paragraph", text: paragraph.join(" ") });
     if (list) blocks.push({ kind: "list", ...list });
+    if (table?.length) blocks.push({ kind: "table", head: table[0], rows: table.slice(1) });
     paragraph = [];
     list = null;
+    table = null;
   };
 
   for (const raw of markdown.split(/\r?\n/)) {
@@ -40,6 +53,13 @@ function parseBlocks(markdown: string): Block[] {
       flush();
       continue;
     }
+    if (TABLE_ROW.test(line)) {
+      if (!table) flush();
+      if (!TABLE_RULE.test(line)) (table ??= []).push(cells(line));
+      else table ??= [];
+      continue;
+    }
+    if (table) flush();
     const image = IMAGE.exec(line);
     if (image) {
       flush();
@@ -144,6 +164,34 @@ export function BlogMarkdown({ markdown, resolveHref, headingAction }: Props) {
             <div key={key} className="flex flex-wrap items-end justify-between gap-2">
               {title}
               {action}
+            </div>
+          );
+        }
+        if (block.kind === "table") {
+          return (
+            <div key={key} className="overflow-x-auto rounded-xl ring-1 ring-[#E6E8F5]">
+              <table className="w-full border-collapse text-left text-[14px]">
+                <thead className="bg-[#F8F9FD] text-neutral-900">
+                  <tr>
+                    {block.head.map((cell, cellIndex) => (
+                      <th key={`${key}-h${cellIndex}`} className="px-3 py-2 font-semibold">
+                        {renderInline(cell, resolveHref, `${key}-h${cellIndex}`)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {block.rows.map((row, rowIndex) => (
+                    <tr key={`${key}-r${rowIndex}`} className="border-t border-[#EEF0F7] align-top">
+                      {row.map((cell, cellIndex) => (
+                        <td key={`${key}-r${rowIndex}-${cellIndex}`} className="px-3 py-2">
+                          {renderInline(cell, resolveHref, `${key}-r${rowIndex}-${cellIndex}`)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           );
         }

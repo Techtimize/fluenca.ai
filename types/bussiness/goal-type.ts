@@ -92,9 +92,25 @@ export type UpdateGoalTaskRequest = {
   status: GoalTaskStatus;
 };
 
-export type GoalProgressResponse = GoalProgress;
+/** GET /goal/{id}/progress: measured progress (0–100 per metric) plus whatever else the backend reports. */
+export type GoalProgressResponse = Partial<GoalProgress> & {
+  goal_progress?: Partial<GoalProgress> & Record<string, unknown>;
+  progress?: Partial<GoalProgress> & Record<string, unknown>;
+  [key: string]: unknown;
+};
 
 /** What the agent has learned across all of the company's goals. */
 export type GoalLesson = Record<string, unknown>;
 
 export type GoalLessonsResponse = GoalLesson[];
+
+/**
+ * GET /goal/{id}/plan: the goal's plan. Shaped like the diagnosis (strategy, content_plan, tasks…),
+ * either at the top level or nested under plan / growth_result.
+ */
+export type GoalPlanResponse = {
+  plan?: Record<string, unknown> | null;
+  growth_result?: Record<string, unknown> | null;
+  tasks?: GoalTask[];
+  [key: string]: unknown;
+};

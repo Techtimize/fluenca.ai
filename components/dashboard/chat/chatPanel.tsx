@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowRight,
   History,
@@ -88,6 +88,8 @@ const CAPABILITIES: Capability[] = [
   },
 ];
 
+const FOLLOW_DISTANCE_PX = 120;
+
 type Props = {
   messages: ChatMessage[];
   onSend: (message: string) => void;
@@ -119,6 +121,15 @@ const DECISION_LABELS: Record<string, string> = {
 function actionDecision(m: ChatMessage) {
   const action = m.toolResult?.pending_action as { decision?: string } | undefined;
   return action?.decision && action.decision in DECISION_LABELS ? action.decision : null;
+}
+
+function chatLinks(m: ChatMessage): { label: string; path: string }[] {
+  const links = m.toolResult?.links;
+  if (!Array.isArray(links)) return [];
+  return links.filter(
+    (link): link is { label: string; path: string } =>
+      typeof link?.label === "string" && typeof link?.path === "string" && link.path.startsWith("/"),
+  );
 }
 
 function pendingAction(m: ChatMessage) {
@@ -159,10 +170,12 @@ export default function ChatPanel({
   placeholder = "Ask anything about marketing ...",
 }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const [draft, setDraft] = useState("");
   const [voiceBaseText, setVoiceBaseText] = useState("");
   const [capabilitiesOpen, setCapabilitiesOpen] = useState(false);
-  const endRef = useRef<HTMLDivElement>(null);
+  const logRef = useRef<HTMLDivElement>(null);
+  const followRef = useRef(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Grows with the text up to ~5 lines, then scrolls internally instead of clipping.
@@ -188,8 +201,9 @@ export default function ChatPanel({
   const speech = useSpeechInput(handleTranscript);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, isAwaitingReply, isToolRunning]);
+    const log = logRef.current;
+    if (log && followRef.current) log.scrollTop = log.scrollHeight;
+  }, [messages, isAwaitingReply, isToolRunning, currentStep]);
 
   return (
     <Card
@@ -294,7 +308,16 @@ export default function ChatPanel({
         </button>
       </div>
 
-      <div role="log" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+      <div
+        ref={logRef}
+        onScroll={(event) => {
+          const log = event.currentTarget;
+          followRef.current = log.scrollHeight - log.scrollTop - log.clientHeight < FOLLOW_DISTANCE_PX;
+        }}
+        role="log"
+        aria-live="polite"
+        className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
+      >
         {messages.length === 0 && !isAwaitingReply ? (
           <div className="mt-8 space-y-3 text-center">
             <p className="text-xs text-neutral-500">Ask me anything, or try one of these:</p>
@@ -365,7 +388,29 @@ export default function ChatPanel({
                   </button>
                 </span>
               ) : null}
-              {typeof m.toolResult?.path === "string" && m.toolResult.path.startsWith("/") ? (
+              {chatLinks(m).length ? (
+                <span className="mt-2 flex flex-col gap-1">
+                  {chatLinks(m).map((link) => (
+                    <button
+                      key={`${link.label}-${link.path}`}
+                      type="button"
+                      onClick={() => (link.path === pathname ? undefined : router.push(link.path))}
+                      disabled={link.path === pathname}
+                      className="group inline-flex w-fit max-w-full items-center gap-1.5 rounded-lg border border-[#E6E8F5] bg-white px-2.5 py-1 text-left text-xs text-[#5B57E6] transition-colors hover:border-[#C8C6F5] hover:bg-[#F6F5FF] disabled:cursor-default disabled:text-neutral-500"
+                    >
+                      <span className="truncate">{link.label}</span>
+                      {link.path === pathname ? (
+                        <span className="shrink-0 text-[11px] text-neutral-400">on this page</span>
+                      ) : (
+                        <ArrowRight className="size-3 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                      )}
+                    </button>
+                  ))}
+                </span>
+              ) : null}
+              {typeof m.toolResult?.path === "string" &&
+              m.toolResult.path.startsWith("/") &&
+              m.toolResult.path !== pathname ? (
                 <BrandButton
                   type="button"
                   size="xs"
@@ -398,7 +443,6 @@ export default function ChatPanel({
           <p className="text-center text-xs text-neutral-500">Working on it. This can take a while.</p>
         ) : null}
 
-        <div ref={endRef} />
       </div>
 
       {speech.isListening ? (
@@ -432,6 +476,7 @@ export default function ChatPanel({
           const text = draft.trim();
           if (isSending) return;
           if (!text) return;
+          followRef.current = true;
           onSend(text);
           setDraft("");
         }}

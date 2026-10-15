@@ -26,6 +26,7 @@ export const PAGE_ROUTES = {
     CONNECTORS: '/connectors',
     GOOGLE_ANALYTICS: '/googleanalytics',
     WEBSITE_SPEED: '/websitespeed',
+    AI_VISIBILITY: '/ai-visibility',
     GOOGLE_SEARCH_CONSOLE: '/googleconsole',
     SOCIAL: '/social',
     SOCIAL_INSTAGRAM: '/instagram',
