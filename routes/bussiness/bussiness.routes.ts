@@ -941,6 +941,7 @@ export const CreateScheduledPostApi = async (
   body.platforms.forEach((platform) => formData.append("platforms", platform));
   formData.append("scheduled_at", body.scheduled_at);
   if (body.caption) formData.append("caption", body.caption);
+  if (body.generation_id) formData.append("generation_id", body.generation_id);
   const response = await api.post(BUSSINESSENDPOINT.SCHEDULED_POSTS.CREATE, formData, {
     headers: { "Content-Type": "multipart/form-data" },
     onUploadProgress: (event) => {
