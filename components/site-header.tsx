@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -55,7 +56,8 @@ export function SiteHeader({
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const mounted = useHydrated();
 
-  const loggedIn = mounted && (isAuthenticated || Boolean(accessToken?.trim()));
+  const loggedIn =
+    mounted && (isAuthenticated || Boolean(accessToken?.trim()));
 
   const handleLogout = () => {
     clearAuthTokenProvider();
@@ -63,13 +65,16 @@ export function SiteHeader({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full">
-      <div className="flex h-11 w-full items-center justify-between gap-3 border-b border-black/5 bg-white px-3 shadow-sm sm:h-12 sm:gap-4 sm:px-4 lg:h-14 lg:px-5">
-        {/* Logo — start */}
+    <header className="sticky top-0 z-50 flex w-full justify-center pt-4">
+      <nav
+        aria-label="Main navigation"
+        className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between rounded-full bg-white/80 px-4 pr-2 transition-[background-color,box-shadow] duration-300 md:h-[60px] md:pl-5 backdrop-blur-xl shadow-sm"
+      >
+        {/* Logo */}
         <Link
           href="/"
           aria-label="Fluenca home"
-          className="flex shrink-0 items-center gap-2 pl-1 sm:gap-2.5 sm:pl-2"
+          className="flex shrink-0 items-center gap-2"
         >
           <Image
             src="/assets/Logo.svg"
@@ -77,45 +82,45 @@ export function SiteHeader({
             width={40}
             height={48}
             priority
-            className="h-9 w-auto sm:h-10 lg:h-11"
+            className="h-10 w-auto"
           />
-          <span className="text-[17px] font-semibold tracking-tight">
-            Fluenca
-            <span className="text-[#5452F6]">.ai</span>
+
+          <span className="text-lg font-semibold tracking-tight">
+            Fluenca<span className="text-[#5452F6]">.ai</span>
           </span>
         </Link>
 
-        {/* Pages — center */}
-        <nav
-          aria-label="Main navigation"
-          className="min-w-0 flex-1 overflow-x-auto"
-        >
-          <ul className="mx-auto flex w-max max-w-full items-center justify-center gap-0.5 sm:gap-1">
-            {navigationItems.map(({ label, href, hasMenu }) => {
-              const isActive = href === pathname;
-              return (
-                <li key={label}>
-                  <Link
-                    href={href ?? "#"}
-                    aria-current={isActive ? "page" : undefined}
-                    className={`flex h-10 items-center gap-1 whitespace-nowrap rounded-full px-3 font-body text-sm font-medium transition-colors sm:h-11 sm:px-4 lg:px-5 ${
-                      isActive
-                        ? "bg-[#5452F6]/10 text-[#5452F6]"
-                        : "text-ink hover:bg-black/5"
-                    }`}
-                  >
-                    {label}
-                    {hasMenu && (
-                      <ChevronDown aria-hidden="true" className="size-3.5" />
-                    )}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+        {/* Navigation links */}
+        <ul className="flex items-center gap-3 overflow-x-auto sm:gap-6">
+          {navigationItems.map(({ label, href, hasMenu }) => {
+            const isActive = href === pathname;
 
-        {/* Auth actions — end */}
+            return (
+              <li key={label} className="shrink-0">
+                <Link
+                  href={href ?? "#"}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`flex items-center gap-1 py-2 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "text-[#5452F6]"
+                      : "text-gray-700 hover:text-[#5452F6]"
+                  }`}
+                >
+                  {label}
+
+                  {hasMenu && (
+                    <ChevronDown
+                      aria-hidden="true"
+                      className="size-4"
+                    />
+                  )}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* Authentication buttons */}
         <div className="flex shrink-0 items-center gap-2">
           {loggedIn ? (
             <>
@@ -127,13 +132,18 @@ export function SiteHeader({
               >
                 Logout
               </BrandButton>
-              <BrandButton href={PAGE_ROUTES.DASHBOARD}>Dashboard</BrandButton>
+
+              <BrandButton href={PAGE_ROUTES.DASHBOARD}>
+                Dashboard
+              </BrandButton>
             </>
           ) : (
-            <BrandButton href={signupHref}>{signupLabel}</BrandButton>
+            <BrandButton href={signupHref}>
+              {signupLabel}
+            </BrandButton>
           )}
         </div>
-      </div>
+      </nav>
     </header>
   );
 }
