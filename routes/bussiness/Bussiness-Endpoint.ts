@@ -188,6 +188,8 @@ export const BUSSINESSENDPOINT = {
         DISCONNECT: '/search-console',
     },
 
+    NEWS: '/news',
+
     SCHEDULED_POSTS: {
         LIST: '/scheduled-posts',
         CREATE: '/scheduled-posts',
