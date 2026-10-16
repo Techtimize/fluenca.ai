@@ -4,9 +4,7 @@ export type GoalPlatform =
   | "instagram"
   | "linkedin"
   | "facebook"
-  | "x"
-  | "tiktok"
-  | "reddit";
+  | "x";
 
 export type GoalMetric = "followers" | "engagement_rate" | "leads";
 
@@ -31,8 +29,6 @@ export const GOAL_PLATFORMS: {
   { id: "linkedin", label: "LinkedIn", iconSrc: "/assets/linkedin.png" },
   { id: "facebook", label: "Facebook" },
   { id: "x", label: "X", iconSrc: "/assets/x.png" },
-  { id: "tiktok", label: "TikTok", iconSrc: "/assets/tik-tok.png" },
-  { id: "reddit", label: "Reddit", iconSrc: "/assets/reddit.png" },
 ];
 
 export const GOAL_METRICS: {
