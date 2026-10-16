@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FocusEvent } from "react";
+import { useEffect, useRef, useState, type FocusEvent } from "react";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { LogOut, Menu, X } from "lucide-react";
+import { Menu, Power, X } from "lucide-react";
 import AssetImage from "@/components/shared/assetImage";
 import SidebarProfile from "@/components/dashboard/sidebarProfile";
 import type { NavItem } from "@/types/dashboard";
@@ -14,6 +14,12 @@ import { FOCUS_RING } from "@/utils/ui-classes";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { clearAuthTokenProvider } from "@/provider/auth-provider";
 
+
+/** Same blue-to-violet gradient as the Fluenca logo. */
+const LOGOUT_BG =
+  "bg-[#4F5BFF] shadow-[0_6px_16px_-8px_rgba(84,90,255,0.7)] transition-opacity hover:opacity-90";
+/** Set inline so the gradient always renders; the solid class above is the fallback. */
+const LOGOUT_STYLE = { backgroundImage: "linear-gradient(135deg, #3659FF 0%, #8157F7 100%)" };
 
 export const DEFAULT_NAV: NavItem[] = [
   { id: "home", label: "Home", icon: "home", href: PAGE_ROUTES.DASHBOARD },
@@ -49,12 +55,6 @@ export const DEFAULT_NAV: NavItem[] = [
     href: PAGE_ROUTES.CALENDAR,
   },
   {
-    id: "controls",
-    label: "Controls",
-    icon: "sliders",
-    href: PAGE_ROUTES.CONTROLS,
-  },
-  {
     id: "connectors",
     label: "Connectors",
     icon: "plug",
@@ -67,6 +67,7 @@ export const DEFAULT_NAV: NavItem[] = [
     icon: "activity",
     href: PAGE_ROUTES.ANALYTICS,
   },
+  { id: "news", label: "News", icon: "news", href: PAGE_ROUTES.NEWS },
 ];
 
 type Props = {
@@ -79,9 +80,17 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+/** Hover intent: open after a short pause and close a little later, so brushing the edge doesn't flicker. */
+const OPEN_DELAY_MS = 80;
+const CLOSE_DELAY_MS = 180;
+
+/** Fades labels in once the rail is wide enough, and out straight away when it closes. */
+const railLabel = (expanded: boolean) =>
+  `min-w-0 truncate whitespace-nowrap transition-opacity duration-200 ${expanded ? "opacity-100 delay-100" : "opacity-0"}`;
+
 export const DASHBOARD_CONTENT_OFFSET =
   // The rail is always collapsed in the layout; on hover it expands over the content, so this never changes.
-  "max-w-full overflow-x-clip px-3 pb-10 pt-[4.5rem] sm:px-6 md:pt-4 md:ps-[5.5rem] lg:pe-8";
+  "max-w-full overflow-x-clip px-3 pb-10 pt-[4.5rem] sm:px-6 md:pt-4 md:ps-24 lg:pe-8";
 
 export default function SidebarRail({
   items = DEFAULT_NAV,
@@ -94,7 +103,18 @@ export default function SidebarRail({
   // Open while the pointer is over the rail or keyboard focus is inside it.
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
-  const collapsed = !(hovered || focused);
+  const expanded = hovered || focused;
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleHover = (next: boolean) => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setHovered(next), next ? OPEN_DELAY_MS : CLOSE_DELAY_MS);
+  };
+  useEffect(
+    () => () => {
+      if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    },
+    [],
+  );
   const onBlur = (event: FocusEvent<HTMLElement>) => {
     if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false);
   };
@@ -208,62 +228,84 @@ export default function SidebarRail({
             <button
               type="button"
               onClick={handleLogout}
-              className={`mt-3 flex w-full items-center gap-3 rounded-2xl bg-[#5B57E6] px-3 py-3 text-sm font-medium text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
+              style={LOGOUT_STYLE}
+              className={`mt-3 flex w-full items-center gap-3 rounded-2xl ${LOGOUT_BG} px-3 py-3 text-sm font-medium text-white ${FOCUS_RING}`}
             >
-              <LogOut className="size-4.5" />
+              <Power className="size-4.5" aria-hidden="true" />
               {t("logout")}
             </button>
           </DialogPrimitive.Popup>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
 
+      {/*
+        Desktop rail. Its shape and row layout never change: every row keeps its icon in a fixed
+        46px column, so widening the rail only reveals the labels. Only the width animates.
+      */}
       <nav
         aria-label="Main"
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseEnter={() => scheduleHover(true)}
+        onMouseLeave={() => scheduleHover(false)}
         onFocus={() => setFocused(true)}
         onBlur={onBlur}
-        className={`fixed bottom-4 inset-s-4 top-4 z-40 hidden flex-col overflow-hidden border border-[#E6E8F5] bg-white py-4 transition-[width,border-radius,padding,box-shadow] duration-200 ease-out md:flex ${
-          collapsed
-            ? "w-14 items-center rounded-full px-0"
-            : "w-56 rounded-3xl px-3 shadow-[0_16px_40px_-12px_rgba(15,23,42,0.25)]"
+        className={`fixed bottom-4 inset-s-4 top-4 z-40 hidden flex-col overflow-hidden rounded-[32px] border border-[#E6E8F5] bg-white px-2 py-4 transition-[width,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[width] motion-reduce:transition-none md:flex ${
+          expanded ? "w-60 shadow-[0_16px_40px_-12px_rgba(15,23,42,0.25)]" : "w-16 shadow-none"
         }`}
       >
-        <div
-          className={`flex items-center ${collapsed ? "justify-center" : "gap-3 px-1"}`}
-        >
-          <AssetImage src={logoSrc} alt={t("brand")} width={28} height={28} />
-          {!collapsed ? (
-            <span className="truncate text-sm font-semibold text-neutral-900">
-              {t("brand")}
-            </span>
-          ) : null}
+        <div className="flex h-10 shrink-0 items-center">
+          <span className="grid w-11.5 shrink-0 place-items-center">
+            <AssetImage src={logoSrc} alt={t("brand")} width={28} height={28} />
+          </span>
+          <span className={`text-sm font-semibold text-neutral-900 ${railLabel(expanded)}`} aria-hidden="true">
+            {t("brand")}
+          </span>
         </div>
 
-        <ul
-          className={`mt-8 flex-1 space-y-1.5 overflow-y-auto ${collapsed ? "" : "w-full"}`}
-        >
-          {renderLinks({ showLabels: !collapsed })}
+        <ul className="mt-6 min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {items.map((item) => {
+            const Icon = getIcon(item.icon);
+            const active = isActivePath(pathname, item.href);
+            const label = resolveLabel(item);
+            return (
+              <li key={item.id}>
+                <Link
+                  href={item.href}
+                  aria-label={label}
+                  aria-current={active ? "page" : undefined}
+                  title={expanded ? undefined : label}
+                  className={`flex h-11 w-full items-center rounded-full text-sm font-medium transition-colors ${FOCUS_RING} ${
+                    active
+                      ? "bg-[#ECEBFF] text-[#5B57E6]"
+                      : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+                  }`}
+                >
+                  <span className="grid w-11.5 shrink-0 place-items-center">
+                    <Icon className="size-4.5" />
+                  </span>
+                  <span className={`pe-3 ${railLabel(expanded)}`} aria-hidden="true">
+                    {label}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
 
-        <div
-          className={`mt-auto flex gap-2 ${collapsed ? "flex-col items-center" : "w-full flex-col"}`}
-        >
-          <div className={`mb-1 border-t border-[#EEF0F6] pt-3 ${collapsed ? "flex w-full justify-center" : "w-full"}`}>
-            <SidebarProfile compact={collapsed} active={onProfile} />
-          </div>
+        <div className="mt-3 shrink-0 space-y-2 border-t border-[#EEF0F6] pt-3">
+          <SidebarProfile rail expanded={expanded} active={onProfile} />
           <button
             type="button"
             onClick={handleLogout}
             aria-label={t("logout")}
-            className={`${FOCUS_RING} ${
-              collapsed
-                ? "grid size-10 cursor-pointer place-items-center rounded-full bg-[#5B57E6] text-white hover:bg-[#4A46D0]"
-                : "flex w-full items-center gap-3 rounded-2xl bg-[#5B57E6] px-3 py-2.5 text-sm font-medium text-white hover:bg-[#4A46D0]"
-            }`}
+            style={LOGOUT_STYLE}
+            className={`flex h-11 w-full cursor-pointer items-center rounded-full text-sm font-medium text-white ${LOGOUT_BG} ${FOCUS_RING}`}
           >
-            <LogOut className="size-4.5" />
-            {!collapsed ? <span>{t("logout")}</span> : null}
+            <span className="grid w-11.5 shrink-0 place-items-center">
+              <Power className="size-4.5" aria-hidden="true" />
+            </span>
+            <span className={`pe-3 ${railLabel(expanded)}`} aria-hidden="true">
+              {t("logout")}
+            </span>
           </button>
         </div>
       </nav>
