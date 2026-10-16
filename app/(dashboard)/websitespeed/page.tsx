@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Gauge, Link2, Loader2, Monitor, RotateCw, Smartphone } from "lucide-react";
-import TopBar from "@/components/dashboard/topBar";
 import { PageSpeedReport } from "@/components/dashboard/website-speed/PageSpeedReport";
 import { Button } from "@/components/ui/button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
@@ -11,7 +10,6 @@ import { getApiErrorMessage } from "@/errors/error-utils";
 import { OnboardingDetailsQuery } from "@/routes/bussiness/Bussiness-Query";
 import { PageSpeedQuery } from "@/routes/page-speed/PageSpeed-Query";
 import type { PageSpeedStrategy } from "@/routes/page-speed/page-speed.routes";
-import useAuthStore from "@/store/AuthsStore";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
 const STRATEGIES: { id: PageSpeedStrategy; label: string; icon: typeof Smartphone }[] = [
@@ -20,7 +18,6 @@ const STRATEGIES: { id: PageSpeedStrategy; label: string; icon: typeof Smartphon
 ];
 
 export default function WebsiteSpeedPage() {
-  const companyName = useAuthStore((s) => s.company_name);
   const { data: company, isSuccess } = OnboardingDetailsQuery();
   const companyUrl = company?.website_url?.trim() ?? "";
 
@@ -45,8 +42,6 @@ export default function WebsiteSpeedPage() {
 
   return (
     <main className="min-w-0 space-y-4 pb-6">
-      <TopBar user={{ name: companyName || "User" }} placeholder="Search..." />
-
       <section className="rounded-[28px] border border-[#E6E8F5] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] p-5 sm:p-7">
         <Link
           href={PAGE_ROUTES.DASHBOARD}

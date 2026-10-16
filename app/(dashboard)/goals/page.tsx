@@ -5,7 +5,6 @@ import { Loader2, Lock, Plus, Target } from "lucide-react";
 import { hasOpenGoal } from "@/lib/goals/goal-form";
 import GoalCard from "@/components/dashboard/goals/GoalCard";
 import GoalsDialog from "@/components/dashboard/goals/GoalsDialog";
-import TopBar from "@/components/dashboard/topBar";
 import { Button } from "@/components/ui/button";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { GoalsByCompanyQuery } from "@/routes/bussiness/Bussiness-Query";
@@ -26,7 +25,6 @@ const FILTERS: { id: Filter; label: string }[] = [
 
 export default function GoalsPage() {
   const companyId = useAuthStore((s) => s.company_id);
-  const companyName = useAuthStore((s) => s.company_name);
   const { data: goals = [], isLoading, isError, error, isFetching } = GoalsByCompanyQuery(companyId);
   const [filter, setFilter] = useState<Filter>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -45,8 +43,6 @@ export default function GoalsPage() {
 
   return (
     <main className="min-w-0 space-y-4 pb-6">
-      <TopBar user={{ name: companyName || "User" }} placeholder="Search goals..." />
-
       <section className="rounded-[28px] border border-[#E6E8F5] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] p-5 sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">

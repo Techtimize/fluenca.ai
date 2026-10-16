@@ -2,13 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import TopBar from "@/components/dashboard/topBar";
 import TrendsExploreCard from "@/components/dashboard/trends/TrendsExploreCard";
 import TrendsFiltersBar from "@/components/dashboard/trends/TrendsFiltersBar";
 import TrendsListCard from "@/components/dashboard/trends/TrendsListCard";
 import TrendsStatsRow from "@/components/dashboard/trends/TrendsStatsRow";
 import Card from "@/components/shared/card";
-import useAuthStore from "@/store/AuthsStore";
 import {
   normalizeExploreData,
   normalizeNowResponse,
@@ -25,8 +23,6 @@ import {
 
 export default function TrendsPage() {
   const t = useTranslations("trends");
-  const tTop = useTranslations("topBar");
-  const companyName = useAuthStore((s) => s.company_name);
   const [geo, setGeo] = useState("US");
   const [category, setCategory] = useState("0");
   const [time, setTime] = useState("now 1-d");
@@ -101,16 +97,6 @@ export default function TrendsPage() {
 
   return (
     <main className="min-w-0 space-y-4 pb-28">
-          <TopBar
-            user={{ name: companyName || "" }}
-            placeholder={tTop("searchTrends")}
-            onSearch={(query) => {
-              if (!query.trim()) return;
-              setExploreInput(query);
-              setExploreQuery(query.trim());
-            }}
-          />
-
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
               {t("title")}
