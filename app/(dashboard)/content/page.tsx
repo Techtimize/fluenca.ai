@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ArrowDownWideNarrow, CalendarClock, ChevronDown, Loader2, Sparkles } from "lucide-react";
+import {
+  ArrowDownWideNarrow,
+  CalendarClock,
+  ChevronDown,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
 import { ContentResultsGrid } from "@/components/dashboard/content/contentResultGrid";
 import { normalizeContentPlatform } from "@/components/dashboard/content/resultcard";
 import ScheduledPostsList from "@/components/dashboard/content/scheduled/scheduledPostsList";
@@ -15,6 +21,11 @@ import TopBar from "@/components/dashboard/topBar";
 import ApiNotFoundCard from "@/components/notfound";
 import Card from "@/components/shared/card";
 import { getApiErrorMessage, isApiNotFoundError } from "@/errors/error-utils";
+import {
+  isPostedResponse,
+  markContentPosted,
+  usePostedContent,
+} from "@/lib/content/posted-content";
 import {
   FacebookPublishMutation,
   InstagramPublishMutation,
@@ -89,12 +100,31 @@ export default function ContentPage() {
   const isPublishing =
     isPublishingInstagram || isPublishingFacebook || isPublishingLinkedIn;
 
+  const posted = usePostedContent();
+
   const handlePublish = (item: ContentGenerationResultItem) => {
+    // Each item is published once; the card shows it as posted afterwards.
+    if (posted[item.id]) return;
     const platform = platformKey(item.platform);
     setPublishingId(item.id);
+    const recordPost = (response: unknown) => {
+      if (!isPostedResponse(response)) return;
+      const result = response as {
+        platform?: string;
+        media_id?: string | null;
+        username?: string | null;
+      };
+      markContentPosted(item.id, {
+        platform: result.platform || platform || "instagram",
+        postedAt: new Date().toISOString(),
+        mediaId: result.media_id ?? null,
+        username: result.username ?? null,
+      });
+    };
 
     if (platform === "linkedin") {
       publishLinkedIn(linkedInPayload(item), {
+        onSuccess: recordPost,
         onSettled: () => setPublishingId(null),
       });
       return;
@@ -116,11 +146,13 @@ export default function ContentPage() {
     };
     if (platform === "facebook") {
       publishFacebook(payload, {
+        onSuccess: recordPost,
         onSettled: () => setPublishingId(null),
       });
       return;
     }
     publishInstagram(payload, {
+      onSuccess: recordPost,
       onSettled: () => setPublishingId(null),
     });
   };
@@ -144,7 +176,7 @@ export default function ContentPage() {
         placeholder="Search content..."
       />
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#ECEBFF] text-[#5B57E6]">
@@ -160,11 +192,13 @@ export default function ContentPage() {
               : "Upload your own images and videos and choose when they go out on each platform."}
           </p>
         </div>
+      </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div
           role="tablist"
           aria-label="Content mode"
-          className="inline-flex shrink-0 gap-1 self-start rounded-2xl border border-[#E6E8F5] bg-white p-1 lg:self-auto"
+          className="inline-flex shrink-0 gap-1 rounded-2xl border border-[#E6E8F5] bg-white p-1"
         >
           {MODES.map((item) => {
             const active = mode === item.id;
@@ -189,71 +223,75 @@ export default function ContentPage() {
             );
           })}
         </div>
+
+        {showGenerated ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              role="tablist"
+              aria-label="Filter by platform"
+              className="inline-flex flex-wrap gap-1.5 rounded-full border border-[#E6E8F5] bg-white p-1"
+            >
+              {FILTERS.map((filter) => {
+                const active = platformFilter === filter.id;
+                return (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setPlatformFilter(filter.id)}
+                    className={cn(
+                      `inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold transition-colors ${FOCUS_RING}`,
+                      active
+                        ? "bg-[#5B57E6] text-white shadow-sm"
+                        : "text-neutral-600 hover:bg-[#F6F7FD]",
+                    )}
+                  >
+                    {filter.icon ? (
+                      <Image
+                        src={filter.icon}
+                        alt=""
+                        width={14}
+                        height={14}
+                        className="size-3.5 object-contain"
+                      />
+                    ) : null}
+                    {filter.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <label className="relative inline-flex">
+              <span className="sr-only">Sort content</span>
+              <ArrowDownWideNarrow
+                className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-neutral-400"
+                aria-hidden="true"
+              />
+              <select
+                value={sortOrder}
+                onChange={(event) =>
+                  setSortOrder(event.target.value as SortOrder)
+                }
+                className={`h-10 appearance-none rounded-full border border-[#E6E8F5] bg-white py-0 pl-9 pr-9 text-[12px] font-semibold text-neutral-700 outline-none ${FOCUS_RING}`}
+              >
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+              </select>
+              <ChevronDown
+                className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-neutral-400"
+                aria-hidden="true"
+              />
+            </label>
+          </div>
+        ) : null}
       </div>
 
-      {showGenerated ? (
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <div
-            role="tablist"
-            aria-label="Filter by platform"
-            className="inline-flex flex-wrap gap-1.5 rounded-full border border-[#E6E8F5] bg-white p-1"
-          >
-            {FILTERS.map((filter) => {
-              const active = platformFilter === filter.id;
-              return (
-                <button
-                  key={filter.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setPlatformFilter(filter.id)}
-                  className={cn(
-                    `inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold transition-colors ${FOCUS_RING}`,
-                    active
-                      ? "bg-[#5B57E6] text-white shadow-sm"
-                      : "text-neutral-600 hover:bg-[#F6F7FD]",
-                  )}
-                >
-                  {filter.icon ? (
-                    <Image
-                      src={filter.icon}
-                      alt=""
-                      width={14}
-                      height={14}
-                      className="size-3.5 object-contain"
-                    />
-                  ) : null}
-                  {filter.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <label className="relative inline-flex">
-            <span className="sr-only">Sort content</span>
-            <ArrowDownWideNarrow
-              className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-neutral-400"
-              aria-hidden="true"
-            />
-            <select
-              value={sortOrder}
-              onChange={(event) =>
-                setSortOrder(event.target.value as SortOrder)
-              }
-              className={`h-10 appearance-none rounded-full border border-[#E6E8F5] bg-white py-0 pl-9 pr-9 text-[12px] font-semibold text-neutral-700 outline-none ${FOCUS_RING}`}
-            >
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
-            <ChevronDown
-              className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-neutral-400"
-              aria-hidden="true"
-            />
-          </label>
-        </div>
-      ) : null}
-
-      {showGenerated && companyId && (isLoading || isFetching) && !hasResults && !notFound ? (
+      {showGenerated &&
+      companyId &&
+      (isLoading || isFetching) &&
+      !hasResults &&
+      !notFound ? (
         <Card className="flex items-center justify-center gap-3 p-8 text-neutral-500">
           <Loader2 className="size-5 animate-spin text-[#5B57E6]" />
           <span className="text-sm">Loading content…</span>
@@ -290,6 +328,7 @@ export default function ContentPage() {
         <ContentResultsGrid
           items={gridItems}
           publishingId={isPublishing ? publishingId : null}
+          posted={posted}
           onPublish={handlePublish}
         />
       ) : null}

@@ -1,15 +1,19 @@
 "use client";
 
 import { ResultCard } from "./resultcard";
+import type { PostedContent } from "@/lib/content/posted-content";
 import type { ContentGenerationResultItem } from "./utils";
 
 export function ContentResultsGrid({
   items,
   publishingId,
+  posted,
   onPublish,
 }: {
   items: ContentGenerationResultItem[];
   publishingId?: string | null;
+  /** Items already published, keyed by content id. */
+  posted?: Record<string, PostedContent>;
   onPublish?: (item: ContentGenerationResultItem) => void;
 }) {
   if (!items.length) return null;
@@ -21,6 +25,7 @@ export function ContentResultsGrid({
           key={item.id}
           item={item}
           isPublishing={publishingId === item.id}
+          posted={posted?.[item.id]}
           onPublish={onPublish}
         />
       ))}
