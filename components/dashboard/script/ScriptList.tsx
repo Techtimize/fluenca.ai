@@ -1,22 +1,40 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
+  CheckCircle2,
   Clapperboard,
   Film,
   ImageIcon,
   Loader2,
+  Link2,
+  PenLine,
   Quote,
+  Send,
   Users,
 } from "lucide-react";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { Button } from "@/components/ui/button";
-import { ImageGenerationMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import {
+  isPublishSucceeded,
+  markContentPosted,
+  usePostedContent,
+} from "@/lib/content/posted-content";
+import { TextPostDialog } from "@/components/dashboard/content/textPosts";
+import {
+  CreateTextPostMutation,
+  ImageGenerationMutation,
+  LinkedInPublishMutation,
+} from "@/routes/bussiness/Bussiness-Mutation";
+import { CompanyTextPostsQuery } from "@/routes/bussiness/Bussiness-Query";
+import { isTextPostPosted, type TextPost } from "@/types/bussiness/text-post-type";
 import type { ImageGenerationRequest } from "@/types/bussiness/imagegeneration-type";
 import type { ScriptGenerationResponse } from "@/types/bussiness/script-type";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import { MetaChip, PlatformChip } from "./primitives";
+import ShareArticleDialog from "./ShareArticleDialog";
 import { getScriptFromResult, getScriptResultId } from "./utils";
 
 function toImageGenerationRequest(
@@ -54,6 +72,30 @@ function toImageGenerationRequest(
   };
 }
 
+type PublishMode = "visual" | "text" | "article";
+
+/**
+ * What the script turns into:
+ * - "image" / "video": generate visuals first, then publish with the image.
+ * - "text": POST /generation/text-post builds the post, then LinkedIn publish with its generation_id.
+ * - Article format: share text + link on LinkedIn, which builds the preview card from the link.
+ */
+function publishModeOf(item: ScriptGenerationResponse): PublishMode {
+  const script = getScriptFromResult(item);
+  const format = item.project?.format?.trim().toLowerCase();
+  if (format === "article") return "article";
+  const contentType = (
+    script?.content_type ||
+    item.content_type ||
+    item.project?.content_type ||
+    item.meta?.content_type ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
+  return contentType === "text" ? "text" : "visual";
+}
+
 function ScriptListItem({
   item,
   index,
@@ -75,6 +117,44 @@ function ScriptListItem({
   const previewScenes = (item.scenes ?? []).slice(0, featured ? 4 : 3);
 
   const { mutate: generateImage, isPending } = ImageGenerationMutation();
+  const publishLinkedIn = LinkedInPublishMutation();
+  const posted = usePostedContent();
+  const [shareOpen, setShareOpen] = useState(false);
+  const mode = publishModeOf(item);
+  const postKey = id ? `script:${id}` : null;
+  // Articles are tracked in this browser; text posts carry their own publish_status from the backend.
+  const postedInfo = mode === "article" && postKey ? posted[postKey] : undefined;
+  const postText = (script?.caption || script?.body || script?.hook || "").trim();
+
+  const companyId = item.company_id || item.meta?.company_id || null;
+  const textPosts = CompanyTextPostsQuery(mode === "text" ? companyId : null);
+  const existingPost = id ? (textPosts.data ?? []).find((post) => post.script_id === id) ?? null : null;
+  const createTextPost = CreateTextPostMutation();
+  const [draft, setDraft] = useState<TextPost | null>(null);
+  // The dialog shows the freshest copy: the saved post once the list has it, else the one just created.
+  const dialogPost = draft ? (existingPost ?? draft) : null;
+
+  const writeTextPost = () => {
+    if (existingPost) {
+      setDraft(existingPost);
+      return;
+    }
+    if (!companyId || !id) return;
+    createTextPost.mutate({ company_id: companyId, script_id: id }, { onSuccess: setDraft });
+  };
+
+  const recordPost = (response: unknown) => {
+    if (!postKey || !isPublishSucceeded(response)) return false;
+    markContentPosted(postKey, { platform: "linkedin", postedAt: new Date().toISOString() });
+    return true;
+  };
+
+  const shareArticle = (body: { text: string; link: string }) =>
+    publishLinkedIn.mutate(body, {
+      onSuccess: (response) => {
+        if (recordPost(response)) setShareOpen(false);
+      },
+    });
 
   return (
     <li
@@ -146,23 +226,55 @@ function ScriptListItem({
               </span>
             </div>
 
-            <Button
-              type="button"
-              size="sm"
-              disabled={!payload || isPending}
-              
-              onClick={() => {
-                if (!payload) return;
-                generateImage(payload);
-              }}
-            >
-              {isPending ? (
-                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-              ) : (
-                <ImageIcon className="size-3.5" aria-hidden="true" />
-              )}
-              {isPending ? "Generating…" : "Generate visuals"}
-            </Button>
+            {(mode === "article" && postedInfo) || (mode === "text" && isTextPostPosted(existingPost)) ? (
+              <button
+                type="button"
+                onClick={mode === "text" ? writeTextPost : undefined}
+                disabled={mode !== "text"}
+                className={`inline-flex h-8 items-center gap-1.5 rounded-full bg-emerald-50 px-3 text-[12px] font-semibold text-emerald-700 ring-1 ring-emerald-200 disabled:cursor-default ${FOCUS_RING}`}
+              >
+                <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                Posted on LinkedIn
+              </button>
+            ) : mode === "text" ? (
+              <Button
+                type="button"
+                size="sm"
+                disabled={!companyId || !id || createTextPost.isPending || textPosts.isLoading}
+                onClick={writeTextPost}
+              >
+                {createTextPost.isPending ? (
+                  <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                ) : existingPost ? (
+                  <Send className="size-3.5" aria-hidden="true" />
+                ) : (
+                  <PenLine className="size-3.5" aria-hidden="true" />
+                )}
+                {createTextPost.isPending ? "Writing post…" : existingPost ? "Review & publish" : "Generate post"}
+              </Button>
+            ) : mode === "article" ? (
+              <Button type="button" size="sm" onClick={() => setShareOpen(true)}>
+                <Link2 className="size-3.5" aria-hidden="true" />
+                Share article
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                size="sm"
+                disabled={!payload || isPending}
+                onClick={() => {
+                  if (!payload) return;
+                  generateImage(payload);
+                }}
+              >
+                {isPending ? (
+                  <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                ) : (
+                  <ImageIcon className="size-3.5" aria-hidden="true" />
+                )}
+                {isPending ? "Generating…" : "Generate post"}
+              </Button>
+            )}
           </div>
         </div>
 
@@ -205,6 +317,20 @@ function ScriptListItem({
           </div>
         ) : null}
       </div>
+
+      {mode === "text" ? (
+        <TextPostDialog post={dialogPost} open={dialogPost !== null} onOpenChange={(open) => !open && setDraft(null)} />
+      ) : null}
+
+      {mode === "article" ? (
+        <ShareArticleDialog
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+          defaultText={postText}
+          isPending={publishLinkedIn.isPending}
+          onShare={shareArticle}
+        />
+      ) : null}
     </li>
   );
 }

@@ -44,7 +44,7 @@ export const STEP_LABELS: Record<string, string> = {
   analyze_company: "Company analysis",
   discover_competitors: "Competitor discovery",
   competitor_analysis: "Competitor analysis",
-  planner: "30-day content plan",
+  planner: "7-day content plan",
   content_recommendation: "Content recommendation",
   script_generation: "Scripts",
 };

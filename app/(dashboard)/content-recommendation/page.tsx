@@ -3,7 +3,6 @@
 import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import ContentRecommendations from "@/components/dashboard/contentrecommendation/contentRecommendations";
-import TopBar from "@/components/dashboard/topBar";
 import ApiNotFoundCard from "@/components/notfound";
 import Card from "@/components/shared/card";
 import { getApiErrorMessage, isApiNotFoundError } from "@/errors/error-utils";
@@ -15,7 +14,6 @@ import useAuthStore from "@/store/AuthsStore";
 
 export default function ContentRecommendationPage() {
   const companyId = useAuthStore((s) => s.company_id);
-  const companyName = useAuthStore((s) => s.company_name);
   const { data, isLoading, isError, error, refetch, isRefetching } =
     ContentRecommendationResultQuery(companyId);
   const { mutate: recommend, isPending } = ContentRecommendationMutation();
@@ -34,11 +32,6 @@ export default function ContentRecommendationPage() {
 
   return (
     <main className="min-w-0 space-y-5 pb-6">
-      <TopBar
-        user={{ name: companyName || "User" }}
-        placeholder="Search recommendations..."
-      />
-
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 sm:text-[28px]">

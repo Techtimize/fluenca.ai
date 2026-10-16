@@ -1,4 +1,7 @@
-export const SCHEDULED_POST_PLATFORMS = ["instagram", "facebook"] as const;
+export const SCHEDULED_POST_PLATFORMS = ["instagram", "facebook", "linkedin"] as const;
+
+/** Text-only posts (no file) are supported on these platforms. */
+export const TEXT_POST_PLATFORMS: readonly ScheduledPostPlatform[] = ["linkedin"];
 export type ScheduledPostPlatform = (typeof SCHEDULED_POST_PLATFORMS)[number];
 
 export type ScheduledPostStatus =
@@ -44,11 +47,14 @@ export interface ScheduledPost {
 }
 
 export interface CreateScheduledPostRequest {
-  file: File;
+  /** Omitted for a LinkedIn text post. */
+  file?: File | null;
   platforms: ScheduledPostPlatform[];
   /** ISO 8601 with an explicit offset, e.g. 2026-10-20T18:00:00+05:00. */
   scheduled_at: string;
   caption?: string;
+  /** The saved text post being scheduled, so the backend can update its publish_status. */
+  generation_id?: string;
 }
 
 export interface UpdateScheduledPostRequest {

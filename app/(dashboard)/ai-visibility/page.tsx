@@ -13,7 +13,6 @@ import {
   TrendLine,
   TrustedSources,
 } from "@/components/dashboard/ai-visibility/AiVisibilityPanels";
-import TopBar from "@/components/dashboard/topBar";
 import { Button } from "@/components/ui/button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { getApiErrorMessage } from "@/errors/error-utils";
@@ -49,8 +48,6 @@ export default function AiVisibilityPage() {
 
   return (
     <main className="min-w-0 space-y-4 pb-32">
-      <TopBar user={{ name: companyName || "User" }} placeholder="Search..." />
-
       <section className="rounded-[28px] border border-[#E6E8F5] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] p-5 sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">

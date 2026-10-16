@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CalendarClock, CloudUpload, Film, ImageIcon, Loader2, X } from "lucide-react";
+import { CalendarClock, CloudUpload, Film, ImageIcon, Loader2, Type, X } from "lucide-react";
 import { initialDate } from "@/components/dashboard/content/schedulePostDialog";
 import {
   PlatformPicker,
@@ -12,6 +12,7 @@ import Card from "@/components/shared/card";
 import { CreateScheduledPostMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import {
   SCHEDULED_POST_LIMITS,
+  TEXT_POST_PLATFORMS,
   toOffsetIso,
   type ScheduledPostPlatform,
 } from "@/types/bussiness/scheduled-post-type";
@@ -19,6 +20,10 @@ import { FOCUS_RING } from "@/utils/ui-classes";
 import { cn } from "@/lib/utils";
 
 const CAPTION_LIMIT = 2200;
+/** LinkedIn allows longer posts than Instagram captions. */
+const TEXT_POST_LIMIT = 3000;
+
+type PostKind = "media" | "text";
 const ACCEPT = [...SCHEDULED_POST_LIMITS.image.types, ...SCHEDULED_POST_LIMITS.video.types].join(",");
 
 function validateFile(file: File) {
@@ -45,7 +50,14 @@ export default function UploadSchedulePanel() {
   // null until the user picks; until then the first connected platform is preselected.
   const [picked, setPicked] = useState<ScheduledPostPlatform[] | null>(null);
   const { connected, isLoading: platformsLoading } = useConnectedPlatforms();
-  const platforms = (picked ?? connected.slice(0, 1)).filter((p) => connected.includes(p));
+  const [kind, setKind] = useState<PostKind>("media");
+  // Text posts only go to platforms that accept them (LinkedIn), so only those are offered.
+  const textPlatforms = connected.filter((p) => TEXT_POST_PLATFORMS.includes(p));
+  const canTextPost = textPlatforms.length > 0;
+  const isText = kind === "text" && canTextPost;
+  const offered = isText ? textPlatforms : connected;
+  const platforms = (picked ?? offered.slice(0, 1)).filter((p) => offered.includes(p));
+  const textLimit = isText ? TEXT_POST_LIMIT : CAPTION_LIMIT;
   const [scheduledAt, setScheduledAt] = useState(() => initialDate());
   const [caption, setCaption] = useState("");
   const [progress, setProgress] = useState(0);
@@ -60,7 +72,15 @@ export default function UploadSchedulePanel() {
 
   const isVideo = Boolean(file?.type.startsWith("video/"));
   const inPast = scheduledAt <= new Date();
-  const canSubmit = Boolean(file) && platforms.length > 0 && !inPast && !isPending;
+  const hasContent = isText ? caption.trim().length > 0 : Boolean(file);
+  const canSubmit = hasContent && platforms.length > 0 && !inPast && !isPending;
+
+  const switchKind = (next: PostKind) => {
+    setKind(next);
+    // The platform choice differs per kind; fall back to the default for the new one.
+    setPicked(null);
+    if (next === "media") setCaption((text) => text.slice(0, CAPTION_LIMIT));
+  };
 
   const pickFile = (next: File | undefined) => {
     if (!next) return;
@@ -79,12 +99,12 @@ export default function UploadSchedulePanel() {
   };
 
   const submit = () => {
-    if (!file || !canSubmit) return;
+    if (!canSubmit) return;
     setProgress(0);
     mutate(
       {
         body: {
-          file,
+          file: isText ? null : file,
           platforms,
           scheduled_at: toOffsetIso(scheduledAt),
           caption: caption.trim() || undefined,
@@ -115,9 +135,44 @@ export default function UploadSchedulePanel() {
         </div>
       </div>
 
+      {canTextPost ? (
+        <div
+          role="radiogroup"
+          aria-label="Post type"
+          className="mt-4 inline-flex gap-1 rounded-2xl border border-[#E6E8F5] bg-white p-1"
+        >
+          {(
+            [
+              { id: "media", label: "Media post", icon: ImageIcon },
+              { id: "text", label: "Text post · LinkedIn", icon: Type },
+            ] as const
+          ).map((option) => {
+            const active = (isText ? "text" : "media") === option.id;
+            const Icon = option.icon;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => switchKind(option.id)}
+                disabled={isPending}
+                className={cn(
+                  `inline-flex h-9 items-center gap-1.5 rounded-xl px-3.5 text-[13px] font-semibold transition-colors ${FOCUS_RING}`,
+                  active ? "bg-[#5B57E6] text-white shadow-sm" : "text-neutral-600 hover:bg-[#F6F7FD]",
+                )}
+              >
+                <Icon className="size-4" aria-hidden="true" />
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
       <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)]">
         <div className="min-w-0 space-y-4">
-          {file && previewUrl ? (
+          {isText ? null : file && previewUrl ? (
             <div className="relative overflow-hidden rounded-2xl border border-[#E6E8F5] bg-neutral-950">
               {isVideo ? (
                 <video src={previewUrl} controls className="mx-auto max-h-80 w-full object-contain" />
@@ -179,21 +234,22 @@ export default function UploadSchedulePanel() {
               />
             </label>
           )}
-          {fileError ? <p className="text-[12px] text-rose-600">{fileError}</p> : null}
+          {!isText && fileError ? <p className="text-[12px] text-rose-600">{fileError}</p> : null}
 
           <label className="block">
             <span className="flex items-center justify-between text-[13px] font-medium text-neutral-700">
-              Caption <span className="font-normal text-neutral-400">Optional</span>
+              {isText ? "Post text" : "Caption"}
+              <span className="font-normal text-neutral-400">{isText ? "Required" : "Optional"}</span>
             </span>
             <textarea
               value={caption}
-              onChange={(event) => setCaption(event.target.value.slice(0, CAPTION_LIMIT))}
-              rows={4}
-              placeholder="Write a caption…"
+              onChange={(event) => setCaption(event.target.value.slice(0, textLimit))}
+              rows={isText ? 10 : 4}
+              placeholder={isText ? "What do you want to share on LinkedIn?" : "Write a caption…"}
               className="mt-2 w-full resize-y rounded-2xl border border-[#E6E8F5] bg-white px-3.5 py-2.5 text-[13px] text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-[#5B57E6] focus:ring-2 focus:ring-[#5B57E6]/20"
             />
             <span className="mt-1 block text-end text-[11px] text-neutral-400">
-              {caption.length}/{CAPTION_LIMIT}
+              {caption.length}/{textLimit}
             </span>
           </label>
         </div>
@@ -202,7 +258,7 @@ export default function UploadSchedulePanel() {
           <PlatformPicker
             value={platforms}
             onChange={setPicked}
-            connected={connected}
+            connected={offered}
             isLoading={platformsLoading}
           />
           <ScheduleDateTime value={scheduledAt} onChange={setScheduledAt} />
@@ -218,9 +274,13 @@ export default function UploadSchedulePanel() {
             ) : (
               <CalendarClock className="size-4" aria-hidden="true" />
             )}
-            {isPending ? (progress < 100 ? `Uploading ${progress}%` : "Scheduling…") : "Schedule post"}
+            {isPending
+              ? isText || progress >= 100
+                ? "Scheduling…"
+                : `Uploading ${progress}%`
+              : "Schedule post"}
           </button>
-          {isPending ? (
+          {isPending && !isText ? (
             <div
               className="h-1.5 overflow-hidden rounded-full bg-[#ECEBFF]"
               role="progressbar"
@@ -231,8 +291,10 @@ export default function UploadSchedulePanel() {
             >
               <div className="h-full rounded-full bg-[#5B57E6] transition-[width]" style={{ width: `${progress}%` }} />
             </div>
-          ) : !file ? (
-            <p className="text-center text-[12px] text-neutral-500">Add a file to schedule it.</p>
+          ) : isPending ? null : !hasContent ? (
+            <p className="text-center text-[12px] text-neutral-500">
+              {isText ? "Write the post text to schedule it." : "Add a file to schedule it."}
+            </p>
           ) : platforms.length === 0 && connected.length ? (
             <p className="text-center text-[12px] text-rose-600">Pick at least one platform.</p>
           ) : null}

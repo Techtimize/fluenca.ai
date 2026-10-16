@@ -4,9 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sparkles, Users } from "lucide-react";
-import TopBar from "@/components/dashboard/topBar";
 import { PAGE_ROUTES } from "@/constant/page-routes";
-import useAuthStore from "@/store/AuthsStore";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
 const MODE_TABS = [
@@ -30,17 +28,11 @@ export default function CompetitorAnalysisShell({
   children: ReactNode;
 }) {
   const pathname = usePathname();
-  const companyName = useAuthStore((s) => s.company_name);
   const activeTab =
     MODE_TABS.find((tab) => pathname?.startsWith(tab.href))?.id ?? "ai";
 
   return (
     <main className="min-w-0 space-y-3 overflow-x-clip pb-4 sm:space-y-4">
-      <TopBar
-        user={{ name: companyName || "User" }}
-        placeholder="Search competitors..."
-      />
-
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div
           role="tablist"

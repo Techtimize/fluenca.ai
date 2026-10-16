@@ -11,6 +11,7 @@ import {
   Loader2,
   Pencil,
   Trash2,
+  Type,
 } from "lucide-react";
 import EditScheduledPostDialog from "@/components/dashboard/content/scheduled/editScheduledPostDialog";
 import { PlatformIcon, platformLabel } from "@/components/dashboard/content/scheduled/scheduleFields";
@@ -81,7 +82,9 @@ function Thumbnail({ post }: { post: ScheduledPost }) {
           url ? "bottom-1 right-1 size-5 rounded-md bg-black/55 text-white" : "inset-0",
         )}
       >
-        {video ? (
+        {!url ? (
+          <Type className="size-6" aria-hidden="true" />
+        ) : video ? (
           <Film className={url ? "size-3" : "size-6"} aria-hidden="true" />
         ) : (
           <ImageIcon className={url ? "size-3" : "size-6"} aria-hidden="true" />

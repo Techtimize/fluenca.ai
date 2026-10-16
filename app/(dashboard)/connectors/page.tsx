@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import GoogleAnalyticsCard from "@/components/dashboard/integrations/googleAnalyticsCard";
 import SearchConsoleCard from "@/components/dashboard/integrations/searchConsoleCard";
 import XComposer from "@/components/dashboard/social/XComposer";
-import TopBar from "@/components/dashboard/topBar";
 import { FacebookIcon } from "@/components/shared/brandIcons";
 import Card from "@/components/shared/card";
 import { Button } from "@/components/ui/button";
@@ -23,7 +22,6 @@ import {
   XConnectMutation,
 } from "@/routes/bussiness/Bussiness-Mutation";
 import { SocialAccountsQuery } from "@/routes/bussiness/Bussiness-Query";
-import useAuthStore from "@/store/AuthsStore";
 import {
   findSocialAccount,
   isSocialAccountConnected,
@@ -271,7 +269,6 @@ function PlatformCard({
 function IntegrationsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const companyName = useAuthStore((s) => s.company_name);
   const handledReturn = useRef(false);
 
   const {
@@ -328,11 +325,6 @@ function IntegrationsPageContent() {
 
   return (
     <main className="min-w-0 space-y-4 pb-6">
-      <TopBar
-        user={{ name: companyName || "User" }}
-        placeholder="Search integrations..."
-      />
-
       <section className="rounded-[28px] border border-[#E6E8F5] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] p-5 sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">

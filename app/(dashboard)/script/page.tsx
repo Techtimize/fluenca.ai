@@ -10,7 +10,6 @@ import {
   normalizeScriptResults,
 } from "@/components/dashboard/script/utils";
 import ApiNotFoundCard from "@/components/notfound";
-import TopBar from "@/components/dashboard/topBar";
 import Card from "@/components/shared/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,7 +20,6 @@ import { ScriptLibrarySkeleton } from "@/components/dashboard/script/scriptskelt
 
 export default function ScriptPage() {
   const companyId = useAuthStore((s) => s.company_id);
-  const companyName = useAuthStore((s) => s.company_name);
   const [offset, setOffset] = useState(0);
   const limit = SCRIPT_PAGE_LIMIT;
 
@@ -48,10 +46,6 @@ export default function ScriptPage() {
 
   return (
     <main className="min-w-0 space-y-5 pb-6">
-      <TopBar
-        user={{ name: companyName || "User" }}
-        placeholder="Search scripts..."
-      />
       <ScriptJourney
         scriptCount={hasResults ? libraryCount : 0}
         showCta={Boolean(companyId)}
