@@ -1,8 +1,4 @@
 "use client";
-
-// app/(auth)/verify-otp/page.tsx
-// URL: /verify-otp?email=someone@example.com
-
 import {
   Suspense,
   useEffect,
@@ -20,7 +16,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 24;
 
-// All text on this page (same as the design). No messages file needed.
 const TEXT = {
   back: "Back to login",
   title: "Check your email",
