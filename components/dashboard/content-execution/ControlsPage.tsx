@@ -396,7 +396,7 @@ export function ControlsPageContent({ companyId }: { companyId?: string | null }
                   How it runs
                 </p>
                 <p className="mt-1 text-[12px] leading-5 text-neutral-500">
-                  Agent mode must be ON. Daily cron and â€œRun todayâ€ queue this
+                  Agent mode must be ON. Daily cron and Run today's queue this
                   company; OFF skips with <code>agent_mode_disabled</code>.
                 </p>
               </div>

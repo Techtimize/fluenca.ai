@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Plus, Target } from "lucide-react";
+import { Loader2, Lock, Plus, Target } from "lucide-react";
+import { hasOpenGoal } from "@/lib/goals/goal-form";
 import GoalCard from "@/components/dashboard/goals/GoalCard";
 import GoalsDialog from "@/components/dashboard/goals/GoalsDialog";
 import TopBar from "@/components/dashboard/topBar";
@@ -34,6 +35,7 @@ export default function GoalsPage() {
   const counts: Partial<Record<Filter, number>> = { all: goals.length };
   for (const goal of goals) counts[goal.status] = (counts[goal.status] ?? 0) + 1;
 
+  const goalLocked = hasOpenGoal(goals);
   const visible = filter === "all" ? goals : goals.filter((goal) => goal.status === filter);
 
   const openGoal = (goalId: string | null) => {
@@ -57,10 +59,22 @@ export default function GoalsPage() {
               Every goal for your company, with its plan, performance and status.
             </p>
           </div>
-          <Button type="button" onClick={() => openGoal(null)} className="h-10 gap-2 rounded-full px-5">
-            <Plus className="size-4" aria-hidden="true" />
-            Set a goal
-          </Button>
+          {goalLocked ? (
+            <div className="flex max-w-56 flex-col items-end gap-1.5 text-end">
+              <Button type="button" disabled className="h-10 gap-2 rounded-full px-5">
+                <Lock className="size-4" aria-hidden="true" />
+                Goal set
+              </Button>
+              <p className="text-[11px] leading-4 text-neutral-500">
+                Complete or delete your current goal to set a new one.
+              </p>
+            </div>
+          ) : (
+            <Button type="button" onClick={() => openGoal(null)} className="h-10 gap-2 rounded-full px-5">
+              <Plus className="size-4" aria-hidden="true" />
+              Set a goal
+            </Button>
+          )}
         </div>
       </section>
 

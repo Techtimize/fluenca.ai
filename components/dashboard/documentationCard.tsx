@@ -1,4 +1,4 @@
-import { ChevronRight, Target } from "lucide-react";
+import { ChevronRight, Lock, Target } from "lucide-react";
 import Card from "@/components/shared/card";
 import type { DocItem } from "@/types/dashboard";
 import { getIcon } from "@/utils/icon-utils";
@@ -8,6 +8,10 @@ type Props = {
   items: DocItem[];
   goalLabel?: string;
   onSetGoal?: () => void;
+  /** A goal is already in progress, so a new one can't be set. */
+  goalLocked?: boolean;
+  lockedLabel?: string;
+  lockedHint?: string;
   onSelect?: (item: DocItem) => void;
 };
 
@@ -15,6 +19,9 @@ export default function DocumentationCard({
   items,
   goalLabel = "Set Your Goal",
   onSetGoal,
+  goalLocked = false,
+  lockedLabel = "Goal set",
+  lockedHint,
   onSelect,
 }: Props) {
   return (
@@ -52,14 +59,33 @@ export default function DocumentationCard({
           );
         })}
       </ul>
-      <button
-        type="button"
-        onClick={onSetGoal}
-        className={`mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] px-3 text-sm font-medium text-white shadow-[0_6px_16px_-6px_rgba(99,70,240,0.6)] transition-opacity hover:opacity-95 sm:text-[15px] ${FOCUS_RING}`}
-      >
-        <Target className="size-4.5 shrink-0" aria-hidden="true" />
-        <span className="truncate">{goalLabel}</span>
-      </button>
+      {goalLocked ? (
+        <div className="mt-4 space-y-1.5">
+          <button
+            type="button"
+            disabled
+            aria-describedby={lockedHint ? "goal-locked-hint" : undefined}
+            className="flex h-11 w-full cursor-not-allowed items-center justify-center gap-2 rounded-full border border-[#E6E8F5] bg-[#F6F7FB] px-3 text-sm font-medium text-neutral-500 sm:text-[15px]"
+          >
+            <Lock className="size-4 shrink-0" aria-hidden="true" />
+            <span className="truncate">{lockedLabel}</span>
+          </button>
+          {lockedHint ? (
+            <p id="goal-locked-hint" className="text-center text-[11px] leading-4 text-neutral-500">
+              {lockedHint}
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={onSetGoal}
+          className={`mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-[#4F46E5] to-[#8B5CF6] px-3 text-sm font-medium text-white shadow-[0_6px_16px_-6px_rgba(99,70,240,0.6)] transition-opacity hover:opacity-95 sm:text-[15px] ${FOCUS_RING}`}
+        >
+          <Target className="size-4.5 shrink-0" aria-hidden="true" />
+          <span className="truncate">{goalLabel}</span>
+        </button>
+      )}
     </Card>
   );
 }
