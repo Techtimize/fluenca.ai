@@ -43,7 +43,8 @@ type Props = {
   goal: Goal;
   /** Small caption above the goal, e.g. "Current goal". */
   label?: string;
-  onOpen: (goalId: string) => void;
+  /** Opens the goal for editing; without it the card is read-only. */
+  onOpen?: (goalId: string) => void;
   className?: string;
 };
 
@@ -72,16 +73,18 @@ export default function GoalCard({
   const waiting = goal.tasks_waiting_for_approval ?? 0;
   // A draft has no plan until it has been diagnosed.
   const hasPlan = goal.status !== "draft";
+  const SummaryTag = onOpen ? "button" : "div";
 
   return (
     <div
       className={`overflow-hidden rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] ${className}`}
     >
       <div className="flex flex-wrap items-stretch gap-3 p-3.5">
-        <button
-          type="button"
-          onClick={() => onOpen(goal.id)}
-          className={`group block min-w-[180px] flex-1 rounded-xl text-left transition-colors hover:bg-[#F1F2FD] ${FOCUS_RING}`}
+        <SummaryTag
+          {...(onOpen ? { type: "button" as const, onClick: () => onOpen(goal.id) } : {})}
+          className={`group block min-w-[180px] flex-1 rounded-xl text-left ${
+            onOpen ? `transition-colors hover:bg-[#F1F2FD] ${FOCUS_RING}` : ""
+          }`}
         >
           <span className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
@@ -119,10 +122,12 @@ export default function GoalCard({
                   Due {new Date(goal.deadline).toLocaleDateString()}
                 </span>
               </span>
-              <ChevronRight
-                className="size-4 shrink-0 text-neutral-500 transition-transform group-hover:translate-x-0.5"
-                aria-hidden="true"
-              />
+              {onOpen ? (
+                <ChevronRight
+                  className="size-4 shrink-0 text-neutral-500 transition-transform group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
+              ) : null}
             </span>
 
             {waiting > 0 ? (
@@ -132,7 +137,7 @@ export default function GoalCard({
               </span>
             ) : null}
           </span>
-        </button>
+        </SummaryTag>
         {measured ? (
           <div className="w-full shrink-0 sm:w-40">
             <GoalProgressMini

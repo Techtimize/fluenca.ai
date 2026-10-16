@@ -103,7 +103,7 @@ export default function DashboardPage() {
               profile={mapped.profile}
               onRefresh={handleAnalyzeCompany}
               isRefreshing={isPending}
-              footer={<CurrentGoalSummary onOpen={openGoal} />}
+              footer={<CurrentGoalSummary />}
             />
             {!chatOpen && mapped.docs.length ? (
               <DocumentationCard

@@ -1,5 +1,11 @@
+"use client";
+
 import type { ComponentType, ReactNode } from "react";
-import { ExternalLink, Globe, Info, RefreshCcw } from "lucide-react";
+import { ExternalLink, GitCompareArrows, Globe, Info, Loader2, RefreshCcw } from "lucide-react";
+import CompetitorCompareDialog, {
+  competitorInputs,
+  useCompetitorCompare,
+} from "@/components/dashboard/competitors/CompetitorCompareDialog";
 import AssetImage from "@/components/shared/assetImage";
 import Card from "@/components/shared/card";
 import {
@@ -46,6 +52,8 @@ const COMPETITOR_SWATCHES = [
   "#7C4FF0",
 ];
 
+const COMPARE_BUTTON = `inline-flex items-center gap-1.5 rounded-full border border-[#D9DCF7] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#5B57E6] transition-colors hover:bg-[#F0F1FF] disabled:pointer-events-none disabled:opacity-50 ${FOCUS_RING}`;
+
 const initials = (name: string) =>
   name
     .split(/\s+/)
@@ -78,10 +86,15 @@ function SocialThumb({
 function CompetitorRow({
   competitor,
   index,
+  onCompare,
+  compareDisabled,
 }: {
   competitor: Competitor;
   index: number;
+  onCompare: () => void;
+  compareDisabled: boolean;
 }) {
+  const canCompare = competitorInputs(competitor).length > 0;
   const logo = competitor.logoSrc;
   const website = competitor.websiteUrl || competitor.href;
   const links = [
@@ -140,24 +153,32 @@ function CompetitorRow({
         <p className="min-w-0 truncate text-sm font-semibold text-neutral-900">
           {competitor.name}
         </p>
-        {competitor.whyCompetitor ? (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <button
-                  type="button"
-                  aria-label={`Why ${competitor.name} is a competitor`}
-                  className={`ml-auto shrink-0  cursor-pointer rounded-full text-neutral-400 hover:text-[#5452F6] ${FOCUS_RING}`}
-                >
-                  <Info className="size-4" />
-                </button>
-              }
-            />
-            <TooltipContent className="max-w-64 text-xs leading-5">
-              {competitor.whyCompetitor}
-            </TooltipContent>
-          </Tooltip>
-        ) : null}
+        <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          {canCompare ? (
+            <button type="button" onClick={onCompare} disabled={compareDisabled} className={COMPARE_BUTTON}>
+              <GitCompareArrows className="size-3.5" aria-hidden="true" />
+              Compare
+            </button>
+          ) : null}
+          {competitor.whyCompetitor ? (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <button
+                    type="button"
+                    aria-label={`Why ${competitor.name} is a competitor`}
+                    className={`shrink-0 cursor-pointer rounded-full text-neutral-400 hover:text-[#5452F6] ${FOCUS_RING}`}
+                  >
+                    <Info className="size-4" />
+                  </button>
+                }
+              />
+              <TooltipContent className="max-w-64 text-xs leading-5">
+                {competitor.whyCompetitor}
+              </TooltipContent>
+            </Tooltip>
+          ) : null}
+        </div>
       </div>
 
       {links.length ? (
@@ -195,6 +216,8 @@ export default function CompanyCard({
 }: Props) {
   const website = company.links.find((link) => link.id === "web");
   const logoUrl = company.logoUrl || company.logoSrc;
+  const compare = useCompetitorCompare();
+  const comparable = company.competitors.filter((c) => competitorInputs(c).length > 0);
 
   return (
     <Card className="flex h-full min-w-0 flex-col p-4 sm:p-5 md:p-6">
@@ -308,21 +331,41 @@ export default function CompanyCard({
 
       {company.competitors.length > 0 && (
         <div className="mt-5">
-          <h3 className="mb-2.5 text-sm font-semibold text-neutral-900">
-            Competitors
-          </h3>
+          <div className="mb-2.5 flex items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold text-neutral-900">
+              Competitors
+            </h3>
+            {comparable.length > 1 ? (
+              <button
+                type="button"
+                onClick={() => compare.start(comparable)}
+                disabled={compare.isStarting}
+                className={COMPARE_BUTTON}
+              >
+                {compare.isStarting ? (
+                  <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                ) : (
+                  <GitCompareArrows className="size-3.5" aria-hidden="true" />
+                )}
+                Compare all
+              </button>
+            ) : null}
+          </div>
           <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             {company.competitors.map((competitor, index) => (
               <CompetitorRow
                 key={competitor.id}
                 competitor={competitor}
                 index={index}
+                onCompare={() => compare.start([competitor])}
+                compareDisabled={compare.isStarting}
               />
             ))}
           </ul>
         </div>
       )}
       {footer}
+      <CompetitorCompareDialog {...compare.dialogProps} />
     </Card>
   );
 }
