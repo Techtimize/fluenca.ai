@@ -65,10 +65,10 @@ export function SiteHeader({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white">
+    <header className="sticky top-0 z-50 flex w-full justify-center pt-4">
       <nav
         aria-label="Main navigation"
-        className="flex min-h-16 w-full items-center justify-between gap-6 px-4 py-2 sm:px-8 lg:px-12"
+        className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between rounded-full bg-white/80 px-4 pr-2 transition-[background-color,box-shadow] duration-300 md:h-[60px] md:pl-5 backdrop-blur-xl shadow-sm"
       >
         {/* Logo */}
         <Link

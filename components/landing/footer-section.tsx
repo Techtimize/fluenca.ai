@@ -31,7 +31,6 @@ const DEFAULT_COLUMNS: FooterColumn[] = [
       { label: "Instagram Agent", href: "#" },
       { label: "LinkedIn Agent", href: "#" },
       { label: "Content Planner", href: "#" },
-      { label: "UGC Agent", href: "#" },
     ],
   },
 ];
