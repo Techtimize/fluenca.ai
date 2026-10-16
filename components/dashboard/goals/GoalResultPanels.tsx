@@ -5,7 +5,6 @@ import {
   AlertTriangle,
   ArrowRight,
   CheckCircle2,
-  Circle,
   Lightbulb,
   Loader2,
   Sparkles,
@@ -223,7 +222,7 @@ export function GoalPlanPanel({
   return (
     <PanelShell
       title="Measurable plan"
-      description="Weekly targets, content themes, posting frequency, and experiments — approve before Fluenca executes."
+      description="Weekly targets, content themes, posting frequency, and experiments — approve to put Fluenca to work."
       footer={
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Button
@@ -237,7 +236,7 @@ export function GoalPlanPanel({
           <Button
             type="button"
             onClick={onApprove}
-            disabled={isApproving}
+            disabled={isApproving || approved}
           >
             {isApproving ? (
               <>
@@ -247,7 +246,7 @@ export function GoalPlanPanel({
             ) : approved ? (
               <>
                 <CheckCircle2 className="size-4" />
-                Plan approved — continue
+                Plan approved
               </>
             ) : (
               <>
@@ -376,160 +375,3 @@ export function GoalPlanPanel({
     </PanelShell>
   );
 }
-
-export function GoalExecutePanel({
-  data,
-  completedTasks,
-  onToggleTask,
-  onRestart,
-  onBack,
-}: {
-  data?: SocialGrowthResponse | null;
-  completedTasks: Set<string>;
-  onToggleTask: (key: string, done: boolean) => void;
-  onRestart: () => void;
-  onBack: () => void;
-}) {
-  const tasks = data?.tasks || [];
-  const ideas = (data?.content_plan?.ideas || []).slice(0, 6);
-  const results = data?.execution_results || [];
-  const pending = data?.pending_approvals || [];
-
-  return (
-    <PanelShell
-      title="Execute the plan"
-      description="Track content prep, creatives, scheduling, and task completion. Publish where integrations allow."
-      footer={
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            className="h-10 rounded-full px-4"
-          >
-            Back
-          </Button>
-          <Button type="button" onClick={onRestart}>
-            Set a new goal
-          </Button>
-        </div>
-      }
-    >
-      {pending.length ? (
-        <div className="rounded-2xl border border-[#F3E7DC] bg-[#FFFBF7] px-3.5 py-3 text-[13px] text-neutral-700">
-          {pending.length} item{pending.length === 1 ? "" : "s"} waiting for
-          approval before publish.
-        </div>
-      ) : null}
-
-      {ideas.length ? (
-        <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
-            Content ready to prepare
-          </p>
-          <ul className="grid gap-2 sm:grid-cols-2">
-            {ideas.map((idea, index) => (
-              <li
-                key={`${idea.topic}-${index}`}
-                className="rounded-2xl border border-[#E6E8F5] p-3.5"
-              >
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="rounded-full bg-[#F0F1F8] px-2 py-0.5 text-[10px] font-semibold uppercase text-neutral-600">
-                    {idea.platform || "Social"}
-                  </span>
-                  <span className="rounded-full bg-[#ECEBFF] px-2 py-0.5 text-[10px] font-semibold uppercase text-[#5B57E6]">
-                    {idea.type || "Post"}
-                  </span>
-                </div>
-                <p className="mt-2 text-[13px] font-semibold text-neutral-900">
-                  {idea.topic}
-                </p>
-                {idea.hook ? (
-                  <p className="mt-1 text-[12px] leading-5 text-neutral-600">
-                    {idea.hook}
-                  </p>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      <div>
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
-          Tasks
-        </p>
-        {tasks.length ? (
-          <ul className="space-y-2">
-            {tasks.map((task, index) => {
-              const key = task.id || `${task.task}-${index}`;
-              const done =
-                completedTasks.has(key) ||
-                task.status === "completed" ||
-                task.status === "done";
-              return (
-                <li key={key}>
-                  <button
-                    type="button"
-                    onClick={() => onToggleTask(key, !done)}
-                    className={`flex w-full items-start gap-3 rounded-2xl border px-3.5 py-3 text-left transition-colors ${
-                      done
-                        ? "border-[#D1FAE5] bg-[#F7FFFB]"
-                        : "border-[#E6E8F5] bg-white hover:bg-[#F8F9FF]"
-                    }`}
-                  >
-                    {done ? (
-                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#047857]" />
-                    ) : (
-                      <Circle className="mt-0.5 size-4 shrink-0 text-neutral-300" />
-                    )}
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[13px] font-medium text-neutral-900">
-                        {task.task}
-                      </span>
-                      <span className="mt-1 flex flex-wrap gap-2 text-[11px] text-neutral-500">
-                        {task.platform ? <span>{task.platform}</span> : null}
-                        {task.priority ? <span>Priority · {task.priority}</span> : null}
-                        {task.due_at ? (
-                          <span>
-                            Due {new Date(task.due_at).toLocaleDateString()}
-                          </span>
-                        ) : null}
-                      </span>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="rounded-xl border border-dashed border-[#E6E8F5] px-3 py-4 text-center text-[13px] text-neutral-500">
-            No execution tasks returned yet.
-          </p>
-        )}
-      </div>
-
-      {results.length ? (
-        <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
-            Execution log
-          </p>
-          <ul className="space-y-2">
-            {results.map((item, index) => (
-              <li
-                key={`${item.task}-${index}`}
-                className="rounded-xl border border-[#E6E8F5] px-3 py-2.5 text-[12px] text-neutral-700"
-              >
-                <span className="font-semibold text-neutral-900">{item.status}</span>
-                {" · "}
-                {item.task}
-                {item.message ? ` — ${item.message}` : ""}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-    </PanelShell>
-  );
-}
-

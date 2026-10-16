@@ -108,10 +108,10 @@ function PasswordField({ label, placeholder, value, onChange, autoComplete, inva
 
   return (
     <div>
-      <label htmlFor={id} className="block text-[12px] font-medium leading-[1.5] text-slate-900">
+      <label htmlFor={id} className="block text-[12px] font-medium leading-normal text-slate-900">
         {label}
       </label>
-      <div className="relative mt-[6px]">
+      <div className="relative mt-1.5">
         <input
           id={id}
           type={visible ? "text" : "password"}
@@ -120,7 +120,7 @@ function PasswordField({ label, placeholder, value, onChange, autoComplete, inva
           placeholder={placeholder}
           autoComplete={autoComplete}
           aria-invalid={invalid}
-          className={`h-[43px] w-full rounded-full border bg-white ps-4 pe-11 text-[12px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-4 ${
+          className={`h-10.75 w-full rounded-full border bg-white ps-4 pe-11 text-[12px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-4 ${
             invalid
               ? "border-red-500 focus:border-red-500 focus:ring-red-500/10"
               : "border-[#E6E8F5] focus:border-[#4361FF] focus:ring-[#4361FF]/10"
@@ -187,7 +187,7 @@ export default function ChangePasswordPage() {
       <button
         type="button"
         onClick={() => router.back()}
-        className="inline-flex items-center gap-2 text-[13px] leading-[1.5] text-slate-900 hover:text-[#4361FF]"
+        className="inline-flex items-center gap-2 text-[13px] leading-normal text-slate-900 hover:text-[#4361FF]"
       >
         <ArrowLeftIcon />
         {TEXT.back}

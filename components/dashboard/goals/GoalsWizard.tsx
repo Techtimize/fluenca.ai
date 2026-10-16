@@ -1,14 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import GoalSetupForm from "@/components/dashboard/goals/GoalSetupForm";
 import GoalStepRail from "@/components/dashboard/goals/GoalStepRail";
-import {
-  GoalDiagnosePanel,
-  GoalExecutePanel,
-  GoalPlanPanel,
-} from "@/components/dashboard/goals/GoalResultPanels";
+import { GoalDiagnosePanel, GoalPlanPanel } from "@/components/dashboard/goals/GoalResultPanels";
 import {
   buildCreateGoalRequest,
   createInitialGoalForm,
@@ -21,9 +17,7 @@ import {
   ApproveGoalMutation,
   CreateGoalMutation,
   DiagnoseGoalMutation,
-  UpdateGoalTaskMutation,
 } from "@/routes/bussiness/Bussiness-Mutation";
-import { GoalByIdQuery } from "@/routes/bussiness/Bussiness-Query";
 import type { GoalDetailResponse, GoalStatus } from "@/types/bussiness/goal-type";
 import type { SocialGrowthResponse } from "@/types/bussiness/socail-growth-type";
 
@@ -36,7 +30,7 @@ function stateFromGoal(detail: GoalDetailResponse) {
   const approved =
     Boolean(detail.goal.approved_at) ||
     APPROVED_STATUSES.includes(detail.goal.status);
-  const step = approved ? 4 : result ? 3 : 1;
+  const step = result ? 3 : 1;
   return {
     form,
     result,
@@ -64,9 +58,6 @@ export default function GoalsWizard({ initialGoal }: Props) {
     initial?.result ?? null,
   );
   const [planApproved, setPlanApproved] = useState(initial?.approved ?? false);
-  const [completedTasks, setCompletedTasks] = useState<Set<string>>(
-    () => new Set(),
-  );
 
   // The goal created for the current form; reused when re-diagnosing an unchanged form.
   const [goal, setGoal] = useState<{ id: string; formKey: string } | null>(
@@ -78,24 +69,8 @@ export default function GoalsWizard({ initialGoal }: Props) {
   const { mutate: diagnoseGoal, isPending: isDiagnosing } =
     DiagnoseGoalMutation();
   const { mutate: approveGoal, isPending: isApproving } = ApproveGoalMutation();
-  const { mutate: updateTask } = UpdateGoalTaskMutation();
-  const { data: goalDetail } = GoalByIdQuery(planApproved ? goal?.id : null);
 
   const isPending = isCreating || isDiagnosing;
-
-  // After approval the goal holds live tasks and measured progress.
-  const liveResult = useMemo(() => {
-    if (!planApproved || !goalDetail) return result;
-    const growth =
-      normalizeSocialGrowthResponse(goalDetail.growth_result) || result;
-    if (!growth) return null;
-    return {
-      ...growth,
-      tasks: goalDetail.tasks?.length ? goalDetail.tasks : growth.tasks,
-      goal_progress: goalDetail.goal_progress || growth.goal_progress,
-      goal_status: goalDetail.goal?.status || growth.goal_status,
-    };
-  }, [planApproved, goalDetail, result]);
 
   const goTo = (next: number) => {
     setStep(next);
@@ -143,44 +118,8 @@ export default function GoalsWizard({ initialGoal }: Props) {
   };
 
   const handleApprovePlan = () => {
-    if (planApproved) {
-      goTo(4);
-      return;
-    }
-    if (!goal) return;
-    approveGoal(goal.id, {
-      onSuccess: () => {
-        setPlanApproved(true);
-        goTo(4);
-      },
-    });
-  };
-
-  const handleRestart = () => {
-    setForm(createInitialGoalForm());
-    setResult(null);
-    setGoal(null);
-    setPlanApproved(false);
-    setCompletedTasks(new Set());
-    setStep(1);
-    setMaxReached(1);
-  };
-
-  const toggleTask = (key: string, done: boolean) => {
-    setCompletedTasks((prev) => {
-      const next = new Set(prev);
-      if (done) next.add(key);
-      else next.delete(key);
-      return next;
-    });
-
-    const isLiveTask = liveResult?.tasks?.some((task) => task.id === key);
-    if (!goal || !isLiveTask) return;
-    updateTask({
-      goal_id: goal.id,
-      task_id: key,
-      status: done ? "done" : "pending",
-    });
+    if (planApproved || !goal) return;
+    approveGoal(goal.id, { onSuccess: () => setPlanApproved(true) });
   };
 
   return (
@@ -190,7 +129,6 @@ export default function GoalsWizard({ initialGoal }: Props) {
         maxReached={maxReached}
         onSelect={(next: number) => {
           if (next === 3 && !result) return;
-          if (next === 4 && !planApproved && next > step) return;
           if (next >= 2 && !result && !isPending) return;
           setStep(next);
         }}
@@ -222,16 +160,6 @@ export default function GoalsWizard({ initialGoal }: Props) {
           isApproving={isApproving}
           onApprove={handleApprovePlan}
           onBack={() => setStep(2)}
-        />
-      ) : null}
-
-      {step === 4 ? (
-        <GoalExecutePanel
-          data={liveResult}
-          completedTasks={completedTasks}
-          onToggleTask={toggleTask}
-          onRestart={handleRestart}
-          onBack={() => setStep(3)}
         />
       ) : null}
     </div>

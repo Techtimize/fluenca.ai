@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Activity,
   Check,
   ClipboardList,
   Search,
@@ -27,12 +26,6 @@ export const GOAL_STEPS = [
     description: "Weekly targets & experiments",
     icon: ClipboardList,
   },
-  {
-    id: 4,
-    label: "Execute",
-    description: "Content, schedule, tasks",
-    icon: Activity,
-  },
 ] as const;
 
 type Props = {
@@ -47,7 +40,7 @@ export default function GoalStepRail({
   onSelect,
 }: Props) {
   return (
-    <ol className="grid gap-2 sm:grid-cols-4">
+    <ol className="grid gap-2 sm:grid-cols-3">
       {GOAL_STEPS.map((step, index) => {
         const Icon = step.icon;
         const done = currentStep > step.id;
