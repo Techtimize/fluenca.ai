@@ -11,6 +11,7 @@ import {
   Trash2,
   TrendingUp,
 } from "lucide-react";
+import GoalApprovalTasks from "@/components/dashboard/goals/GoalApprovalTasks";
 import GoalPlanDialog from "@/components/dashboard/goals/GoalPlanDialog";
 import { GoalProgressMini } from "@/components/dashboard/goals/GoalProgressRing";
 import GoalProgressDialog from "@/components/dashboard/goals/GoalProgressDialog";
@@ -43,7 +44,8 @@ type Props = {
   goal: Goal;
   /** Small caption above the goal, e.g. "Current goal". */
   label?: string;
-  onOpen: (goalId: string) => void;
+  /** Opens the goal for editing; without it the card is read-only. */
+  onOpen?: (goalId: string) => void;
   className?: string;
 };
 
@@ -72,16 +74,18 @@ export default function GoalCard({
   const waiting = goal.tasks_waiting_for_approval ?? 0;
   // A draft has no plan until it has been diagnosed.
   const hasPlan = goal.status !== "draft";
+  const SummaryTag = onOpen ? "button" : "div";
 
   return (
     <div
       className={`overflow-hidden rounded-2xl border border-[#E6E8F5] bg-[#F8F9FF] ${className}`}
     >
       <div className="flex flex-wrap items-stretch gap-3 p-3.5">
-        <button
-          type="button"
-          onClick={() => onOpen(goal.id)}
-          className={`group block min-w-[180px] flex-1 rounded-xl text-left transition-colors hover:bg-[#F1F2FD] ${FOCUS_RING}`}
+        <SummaryTag
+          {...(onOpen ? { type: "button" as const, onClick: () => onOpen(goal.id) } : {})}
+          className={`group block min-w-[180px] flex-1 rounded-xl text-left ${
+            onOpen ? `transition-colors hover:bg-[#F1F2FD] ${FOCUS_RING}` : ""
+          }`}
         >
           <span className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
@@ -119,20 +123,16 @@ export default function GoalCard({
                   Due {new Date(goal.deadline).toLocaleDateString()}
                 </span>
               </span>
-              <ChevronRight
-                className="size-4 shrink-0 text-neutral-500 transition-transform group-hover:translate-x-0.5"
-                aria-hidden="true"
-              />
+              {onOpen ? (
+                <ChevronRight
+                  className="size-4 shrink-0 text-neutral-500 transition-transform group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
+              ) : null}
             </span>
 
-            {waiting > 0 ? (
-              <span className="mt-3 block rounded-xl border border-[#F3E7DC] bg-[#FFFBF7] px-2.5 py-1.5 text-[12px] text-neutral-700">
-                {waiting} task{waiting === 1 ? "" : "s"} waiting for your
-                approval
-              </span>
-            ) : null}
           </span>
-        </button>
+        </SummaryTag>
         {measured ? (
           <div className="w-full shrink-0 sm:w-40">
             <GoalProgressMini
@@ -144,6 +144,7 @@ export default function GoalCard({
           </div>
         ) : null}
       </div>
+      {waiting > 0 ? <GoalApprovalTasks goalId={goal.id} count={waiting} /> : null}
       <div className="flex items-center border-t border-[#E6E8F5] bg-white">
         {confirmingDelete ? (
           <div

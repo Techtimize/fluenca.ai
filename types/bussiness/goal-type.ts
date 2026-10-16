@@ -23,7 +23,7 @@ export type GoalTaskType =
   | "growth"
   | "analytics";
 
-export type GoalTaskStatus = "done" | "pending" | "approved";
+export type GoalTaskStatus = "done" | "pending" | "approved" | "rejected";
 
 export type GoalConstraints = {
   posts_per_week: number;

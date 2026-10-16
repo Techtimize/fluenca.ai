@@ -818,8 +818,12 @@ export function UpdateGoalTaskMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: UpdateGoalTaskRequest) => UpdateGoalTaskApi(data),
-    onSuccess: (_response, { goal_id }) => {
+    onSuccess: (_response, { goal_id, status }) => {
       void queryClient.invalidateQueries({ queryKey: goalKey(goal_id) });
+      // The goal list carries tasks_waiting_for_approval, so refresh it too.
+      void queryClient.invalidateQueries({ queryKey: GOALS_KEY });
+      if (status === "approved") toast.success("Task approved");
+      if (status === "rejected") toast.success("Task rejected");
     },
     onError: (error: unknown) => {
       toast.error(getApiErrorMessage(error, "Failed to update task"));

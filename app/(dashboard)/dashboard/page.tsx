@@ -12,7 +12,8 @@ import CurrentGoalSummary from "@/components/dashboard/goals/CurrentGoalSummary"
 import GoalsDialog from "@/components/dashboard/goals/GoalsDialog";
 import TopBar from "@/components/dashboard/topBar";
 import { mapDashboard } from "@/lib/dashboard/map-dashboard";
-import { AnalyzeCompanyDashboardQuery } from "@/routes/bussiness/Bussiness-Query";
+import { hasOpenGoal } from "@/lib/goals/goal-form";
+import { AnalyzeCompanyDashboardQuery, CompanyGoalsQuery } from "@/routes/bussiness/Bussiness-Query";
 import { AnalyzeCompanyMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import useAuthStore from "@/store/AuthsStore";
 import type { Device, DocItem } from "@/types/dashboard";
@@ -23,6 +24,9 @@ export default function DashboardPage() {
   const companyName = useAuthStore((s) => s.company_name);
   const [goalsOpen, setGoalsOpen] = useState(false);
   const [openGoalId, setOpenGoalId] = useState<string | null>(null);
+
+  const { data: goals } = CompanyGoalsQuery();
+  const goalLocked = hasOpenGoal(goals);
 
   const openGoal = (goalId: string | null) => {
     setOpenGoalId(goalId);
@@ -103,7 +107,7 @@ export default function DashboardPage() {
               profile={mapped.profile}
               onRefresh={handleAnalyzeCompany}
               isRefreshing={isPending}
-              footer={<CurrentGoalSummary onOpen={openGoal} />}
+              footer={<CurrentGoalSummary />}
             />
             {!chatOpen && mapped.docs.length ? (
               <DocumentationCard
@@ -111,6 +115,9 @@ export default function DashboardPage() {
                 goalLabel={t("setYourGoal")}
                 onSelect={setOpenDoc}
                 onSetGoal={() => openGoal(null)}
+                goalLocked={goalLocked}
+                lockedLabel={t("goalSet")}
+                lockedHint={t("goalLockedHint")}
               />
             ) : null}
           </div>
