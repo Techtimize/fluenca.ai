@@ -30,8 +30,7 @@ export default function TopBar({
 
   return (
     <header className="mb-3 flex items-center gap-2 sm:mb-4 sm:gap-3">
-      {/* Leaves room for the fixed mobile menu button on the start edge */}
-      <div className="min-w-0 flex-1 ps-12 md:ps-0 md:max-w-xl">
+      <div className="min-w-0 flex-1 md:max-w-xl">
         <form
           role="search"
           className="relative hidden md:block"
