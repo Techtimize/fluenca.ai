@@ -1,6 +1,7 @@
 
 export const BUSSINESSENDPOINT = {
     WAITLIST: '/waitlist',
+    CONTACT_US: '/contact-us',
     ONBOARDING: '/onboarding',
     
     INTELLIGENCE_RUN: '/intelligence/run',
