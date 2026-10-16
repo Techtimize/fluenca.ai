@@ -18,12 +18,12 @@ const faqs = [
   {
     question: "What is Fluenca.ai?",
     answer:
-      "Fluenca.ai is an AI marketing office — specialist agent teams research your business, lock Company DNA, then plan, create, and prove content against your goals.",
+      "Fluenca.ai is an AI marketing office, specialist agent teams research your business, lock Company DNA, then plan, create, and prove content against your goals.",
   },
   {
     question: "How does Fluenca understand my business?",
     answer:
-      "hassnain’s Intake team crawls your site; Ilsa maps rivals; Raheel locks DNA from answers you confirm. SEO, media, and analytics then work from that shared truth.",
+      "Intake team crawls your site; maps rivals; locks DNA from answers you confirm. SEO, media, and analytics then work from that shared truth.",
   },
   {
     question: "Can I review the information Fluenca collects?",
@@ -33,17 +33,17 @@ const faqs = [
   {
     question: "What can I create with Fluenca?",
     answer:
-      "Talha’s SEO and Sayyam’s Media teams turn DNA into topical plans, blog posts, social posts, case studies, campaigns, and more — all on-brand.",
+      "SEO and Media teams turn DNA into topical plans, blog posts, social posts, case studies, campaigns, and more, all on-brand.",
   },
   {
     question: "Can Fluenca analyze my competitors?",
     answer:
-      "Yes. Ilsa’s Competitor team discovers relevant rivals automatically and also lets you add competitors you want analyzed.",
+      "Yes. Competitor team discovers relevant rivals automatically and also lets you add competitors you want analyzed.",
   },
   {
     question: "Can I set marketing goals?",
     answer:
-      "Yes. You define the goal (like the hub in the office), and every floor — research through analytics — executes and measures against it.",
+      "Yes. You define the goal (like the hub in the office), and every floor, research through analytics, executes and measures against it.",
   },
 ];
 
