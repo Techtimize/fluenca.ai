@@ -173,7 +173,7 @@ export function ResultCard({
       </div>
 
       <div className="relative overflow-hidden rounded-xl bg-[#F6F7FD]">
-        <div className="relative aspect-[4/3]">
+        <div className="relative aspect-4/3">
           {cover ? (
             <Image
               src={cover.thumbnailUrl || cover.imageUrl}
