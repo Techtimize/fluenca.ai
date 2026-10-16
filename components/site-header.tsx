@@ -27,7 +27,7 @@ export interface SiteHeaderProps {
 const DEFAULT_NAV: readonly SiteNavigationItem[] = [
   { label: "Home", href: "/" },
   { label: "Agents", href: PAGE_ROUTES.AGENTS },
-  { label: "Blog", href: PAGE_ROUTES.BLOG },
+  // { label: "Blog", href: PAGE_ROUTES.BLOG },
   { label: "Plans", href: PAGE_ROUTES.PLANS },
 ];
 

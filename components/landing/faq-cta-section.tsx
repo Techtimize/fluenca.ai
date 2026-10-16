@@ -1,46 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import { useState, type FormEvent } from "react";
 
 // Enough cells to fill the grid at any width; extra cells are clipped by overflow-hidden
 const X_CELLS = 30 * 14;
 
 type FaqCtaSectionProps = {
-  badge?: string;
   title?: string;
   description?: string;
-  placeholder?: string;
-  buttonLabel?: string;
   /** Your exported circle image from Figma (inside /public). */
   arcsSrc?: string;
-  /** Called with the email when the form is submitted. */
-  onSubscribe?: (email: string) => void | Promise<void>;
 };
 
 export default function FaqCtaSection({
-  badge = "Frequently Asked Questions",
   title = "Smart Agent-Powered Marketing Intelligence",
-  description = "Fluenca’s AI agents research your business, connect data from multiple sources, and turn complex information into clear insights, strategies, and personalized marketing actions.",
-  placeholder = "Enter Your Email",
-  buttonLabel = "Subscribe",
-  arcsSrc = "/assets/faq-arcs.svg", // <- change to your exported file name
-  onSubscribe,
+  description = "Fluenca's AI agents research your business, connect data from multiple sources, and turn complex information into clear insights, strategies, and personalized marketing actions.",
+  arcsSrc = "/assets/faq-arcs.svg",
 }: FaqCtaSectionProps) {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!email.trim()) return;
-    try {
-      setLoading(true);
-      await onSubscribe?.(email.trim());
-      setEmail("");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <section
@@ -103,11 +79,6 @@ export default function FaqCtaSection({
 
           {/* Content: lets the mouse pass through so every X reacts to hover */}
           <div className="pointer-events-none relative z-10 px-6 py-10 text-white sm:px-10 md:px-[60px] md:py-0">
-            {/* Frame 217: 227 x 34, px 20 / py 4, #FFFFFF1A */}
-            <span className="inline-flex h-[34px] w-fit items-center justify-center rounded-full border border-white/40 bg-white/10 px-5 py-1 text-sm font-normal backdrop-blur-sm md:min-w-[227px]">
-              {badge}
-            </span>
-
             {/* 595 wide, 50/60, weight 500 */}
             <h2 className="mt-5 max-w-[595px] text-[32px] font-medium leading-[1.2] sm:text-4xl md:text-[50px] md:leading-[60px]">
               {title}
@@ -118,28 +89,6 @@ export default function FaqCtaSection({
               {description}
             </p>
 
-            {/* Form needs events back so typing and clicking work */}
-            <form
-              onSubmit={handleSubmit}
-              className="pointer-events-auto mt-7 flex w-full max-w-[420px] flex-col items-stretch gap-2 rounded-2xl border border-white/30 bg-white/10 p-3 backdrop-blur-sm sm:flex-row sm:items-center sm:rounded-full sm:p-1.5"
-            >
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={placeholder}
-                aria-label="Email address"
-                className="min-w-0 flex-1 rounded-xl bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/70 focus:outline-none sm:rounded-none sm:bg-transparent sm:py-0"
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="shrink-0 rounded-xl bg-white px-6 py-3 text-sm font-medium text-[#3659FF] transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:opacity-60 sm:rounded-full"
-              >
-                {loading ? "Sending..." : buttonLabel}
-              </button>
-            </form>
           </div>
         </div>
       </div>
