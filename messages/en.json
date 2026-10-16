@@ -138,7 +138,9 @@
     "error": "Failed to load company analysis.",
     "chatPlaceholder": "Ask anything about marketing ...",
     "documentation": "Documentation",
-    "setYourGoal": "Set Your Goal"
+    "setYourGoal": "Set Your Goal",
+    "goalSet": "Goal set",
+    "goalLockedHint": "You already have a goal. Complete or delete it to set a new one."
   },
   "dna": {
     "title": "Company DNA",

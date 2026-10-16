@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { Globe, X } from "lucide-react";
+import { Building2, Check, Globe, UserRound, X } from "lucide-react";
 import AssetImage from "@/components/shared/assetImage";
 import { FacebookIcon, InstagramIcon, LinkedInIcon } from "@/components/shared/brandIcons";
 import AnalyticsChartsRow from "@/components/dashboard/cards/analyticsCharts";
@@ -113,12 +113,60 @@ function CompanyDetails({ details }: { details: CompanyDocumentationDetails }) {
           ["Maturity", details.business_maturity],
         ]}
       />
-      <Section title="What It Does">
-        {details.core_offering ? <Paragraph>{details.core_offering}</Paragraph> : null}
-        <Tags items={details.services} />
-      </Section>
-      <TagSection title="Target Audience" items={details.target_audience} />
-      <TagSection title="Industries Targeted" items={details.industries_targeted} />
+      {details.industries_targeted?.length ? (
+        <section className="space-y-2">
+          <ListHeading title="Industries targeted" count={details.industries_targeted.length} />
+          <ul className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+            {details.industries_targeted.map((industry) => (
+              <li
+                key={industry}
+                className="flex items-start gap-2.5 border-b border-[#EEF0F6] py-2.5 text-sm leading-6 text-neutral-800"
+              >
+                <Building2 className="mt-1 size-4 shrink-0 text-neutral-400" aria-hidden="true" />
+                {industry}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {details.core_offering || details.services?.length ? (
+        <section className="space-y-3">
+          <h3 className="text-sm font-semibold text-neutral-900">What it does</h3>
+          {details.core_offering ? (
+            <p className="border-l-2 border-[#5452F6] pl-3 text-sm leading-6 text-neutral-800">
+              {details.core_offering}
+            </p>
+          ) : null}
+          {details.services?.length ? (
+            <div className="space-y-1 pt-1">
+              <ListHeading title="Services" count={details.services.length} small />
+              <ul className="divide-y divide-[#EEF0F6]">
+                {details.services.map((service) => (
+                  <li key={service} className="flex items-start gap-3 py-2.5 text-sm leading-6 text-neutral-800">
+                    <Check className="mt-1 size-4 shrink-0 text-[#5452F6]" strokeWidth={2.5} aria-hidden="true" />
+                    {service}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      {details.target_audience?.length ? (
+        <section className="space-y-1">
+          <ListHeading title="Target audience" count={details.target_audience.length} />
+          <ul className="divide-y divide-[#EEF0F6]">
+            {details.target_audience.map((audience) => (
+              <li key={audience} className="flex items-start gap-3 py-2.5 text-sm leading-6 text-neutral-800">
+                <UserRound className="mt-1 size-4 shrink-0 text-neutral-400" aria-hidden="true" />
+                {audience}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </>
   );
 }
@@ -202,26 +250,74 @@ function MarketingDetails({ details }: { details: MarketingDocumentationDetails 
   );
 }
 
-function PainPointsDetails({ details }: { details: PainPointsDocumentationDetails }) {
+/** A section heading with a quiet count, used by the pain points sheet. */
+function ListHeading({ title, count, small }: { title: string; count: number; small?: boolean }) {
+  const Heading = small ? "h4" : "h3";
   return (
-    <>
-      {details.pain_points?.length ? (
-        <Section title="Pain Points">
-          <ol className="space-y-2">
-            {details.pain_points.map((point, index) => (
-              <li key={point} className="flex gap-3 rounded-xl bg-[#F8F9FF] px-3 py-2.5 text-sm text-neutral-800">
-                <span className="grid size-5 shrink-0 place-items-center rounded-full bg-[#EEF0FF] text-[11px] font-semibold text-[#5452F6]">
-                  {index + 1}
+    <div className="flex items-baseline justify-between gap-3">
+      <Heading className={small ? "text-xs font-medium text-neutral-500" : "text-sm font-semibold text-neutral-900"}>
+        {title}
+      </Heading>
+      <span className="text-xs tabular-nums text-neutral-400">{count}</span>
+    </div>
+  );
+}
+
+function PainPointsDetails({ details }: { details: PainPointsDocumentationDetails }) {
+  const problems = details.pain_points ?? [];
+  const people = details.who_feels_it ?? [];
+  const solutions = details.how_you_solve_it ?? [];
+
+  if (!problems.length && !people.length && !solutions.length) {
+    return <p className="text-sm text-neutral-500">No pain points identified yet.</p>;
+  }
+
+  return (
+    <div className="space-y-7">
+      {problems.length ? (
+        <section className="space-y-1">
+          <ListHeading title="The problem" count={problems.length} />
+          <ol className="divide-y divide-[#EEF0F6]">
+            {problems.map((point, index) => (
+              <li key={point} className="flex gap-3 py-3 text-sm leading-6 text-neutral-800">
+                <span className="w-5 shrink-0 pt-px text-xs font-medium tabular-nums text-neutral-400">
+                  {String(index + 1).padStart(2, "0")}
                 </span>
                 {point}
               </li>
             ))}
           </ol>
-        </Section>
+        </section>
       ) : null}
-      <TagSection title="Who Feels It" items={details.who_feels_it} />
-      <TagSection title="How You Solve It" items={details.how_you_solve_it} />
-    </>
+
+      {people.length ? (
+        <section className="space-y-1">
+          <ListHeading title="Who feels it" count={people.length} />
+          <ul className="divide-y divide-[#EEF0F6]">
+            {people.map((person) => (
+              <li key={person} className="flex items-start gap-3 py-2.5 text-sm leading-6 text-neutral-800">
+                <UserRound className="mt-1 size-4 shrink-0 text-neutral-400" aria-hidden="true" />
+                {person}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {solutions.length ? (
+        <section className="space-y-2">
+          <ListHeading title="How you solve it" count={solutions.length} />
+          <ul className="space-y-3 rounded-2xl bg-[#F6F7FB] p-4">
+            {solutions.map((solution) => (
+              <li key={solution} className="flex items-start gap-3 text-sm leading-6 text-neutral-800">
+                <Check className="mt-1 size-4 shrink-0 text-[#5452F6]" strokeWidth={2.5} aria-hidden="true" />
+                {solution}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+    </div>
   );
 }
 

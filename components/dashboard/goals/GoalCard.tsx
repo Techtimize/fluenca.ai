@@ -11,6 +11,7 @@ import {
   Trash2,
   TrendingUp,
 } from "lucide-react";
+import GoalApprovalTasks from "@/components/dashboard/goals/GoalApprovalTasks";
 import GoalPlanDialog from "@/components/dashboard/goals/GoalPlanDialog";
 import { GoalProgressMini } from "@/components/dashboard/goals/GoalProgressRing";
 import GoalProgressDialog from "@/components/dashboard/goals/GoalProgressDialog";
@@ -130,12 +131,6 @@ export default function GoalCard({
               ) : null}
             </span>
 
-            {waiting > 0 ? (
-              <span className="mt-3 block rounded-xl border border-[#F3E7DC] bg-[#FFFBF7] px-2.5 py-1.5 text-[12px] text-neutral-700">
-                {waiting} task{waiting === 1 ? "" : "s"} waiting for your
-                approval
-              </span>
-            ) : null}
           </span>
         </SummaryTag>
         {measured ? (
@@ -149,6 +144,7 @@ export default function GoalCard({
           </div>
         ) : null}
       </div>
+      {waiting > 0 ? <GoalApprovalTasks goalId={goal.id} count={waiting} /> : null}
       <div className="flex items-center border-t border-[#E6E8F5] bg-white">
         {confirmingDelete ? (
           <div
