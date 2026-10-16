@@ -57,12 +57,14 @@ export function MonthCalendar({
   selected,
   onSelect,
 }: {
-  selected: Date;
+  /** null = nothing picked yet; the calendar opens on the current month */
+  selected: Date | null;
   onSelect: (day: Date) => void;
 }) {
-  const [month, setMonth] = useState(
-    () => new Date(selected.getFullYear(), selected.getMonth(), 1),
-  );
+  const [month, setMonth] = useState(() => {
+    const base = selected ?? new Date();
+    return new Date(base.getFullYear(), base.getMonth(), 1);
+  });
   const today = new Date();
   const startOfToday = new Date(
     today.getFullYear(),
@@ -126,10 +128,10 @@ export function MonthCalendar({
               type="button"
               disabled={day < startOfToday}
               onClick={() => onSelect(day)}
-              aria-pressed={sameDay(day, selected)}
+              aria-pressed={selected ? sameDay(day, selected) : false}
               className={cn(
                 `grid h-9 place-items-center rounded-lg text-[13px] transition-colors disabled:cursor-not-allowed disabled:text-neutral-300 ${FOCUS_RING}`,
-                sameDay(day, selected)
+                selected && sameDay(day, selected)
                   ? "bg-[#5B57E6] font-semibold text-white"
                   : sameDay(day, today)
                     ? "font-semibold text-[#5B57E6] hover:bg-[#F0F1FF]"

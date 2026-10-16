@@ -1,4 +1,5 @@
 import { BUSSINESSENDPOINT } from "./Bussiness-Endpoint";
+import type { ContactUsRequest, ContactUsResponse } from "@/types/bussiness/contact-type";
 import type {
   GoogleAnalyticsConnection,
   GoogleAnalyticsOverview,
@@ -124,6 +125,12 @@ function toQueryParams(params?: GoogleTrendQueryParams) {
     ([, value]) => value !== undefined && value !== null && value !== "",
   );
   return entries.length ? Object.fromEntries(entries) : undefined;
+}
+
+/** POST /contact-us — demo / sales requests */
+export const ContactUsApi = async (data: ContactUsRequest): Promise<ContactUsResponse> => {
+    const response = await api.post(BUSSINESSENDPOINT.CONTACT_US, data);
+    return response.data;
 }
 
 export const WaitlistApi = async (email: string) => {
