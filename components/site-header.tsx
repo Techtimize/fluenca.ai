@@ -122,6 +122,15 @@ export function SiteHeader({
 
         {/* Authentication buttons */}
         <div className="flex shrink-0 items-center gap-2">
+          {pathname !== PAGE_ROUTES.DEMO ? (
+            <BrandButton
+              href={PAGE_ROUTES.DEMO}
+              variant="outline"
+              className="hidden sm:inline-flex"
+            >
+              Book a Demo
+            </BrandButton>
+          ) : null}
           {loggedIn ? (
             <>
               <BrandButton
