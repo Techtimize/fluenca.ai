@@ -11,13 +11,10 @@ function pickCurrentGoal(goals?: Goal[]) {
   return goals?.find((goal) => !HIDDEN_STATUSES.includes(goal.status));
 }
 
-type Props = {
-  onOpen: (goalId: string) => void;
-};
-
-export default function CurrentGoalSummary({ onOpen }: Props) {
+/** Read-only: the goal can't be reopened or edited from the dashboard. */
+export default function CurrentGoalSummary() {
   const { data: goals } = CompanyGoalsQuery();
   const goal = pickCurrentGoal(goals);
   if (!goal) return null;
-  return <GoalCard goal={goal} label="Current goal" onOpen={onOpen} className="mt-4" />;
+  return <GoalCard goal={goal} label="Current goal" className="mt-4" />;
 }

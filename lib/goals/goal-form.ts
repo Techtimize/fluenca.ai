@@ -8,6 +8,13 @@ export type GoalPlatform =
 
 export type GoalMetric = "followers" | "engagement_rate" | "leads";
 
+/** Goals still in progress; while one exists a new goal can't be set. */
+const OPEN_GOAL_STATUSES: Goal["status"][] = ["draft", "diagnosed", "active", "paused"];
+
+export function hasOpenGoal(goals?: Goal[] | null) {
+  return Boolean(goals?.some((goal) => OPEN_GOAL_STATUSES.includes(goal.status)));
+}
+
 /** What the user picks; buildCreateGoalRequest turns it into the POST /goal payload. */
 export type GoalFormValues = {
   platform: GoalPlatform;
