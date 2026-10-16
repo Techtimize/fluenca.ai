@@ -27,10 +27,7 @@ export default function Home() {
           description="Set your goal and let AI agents analyze what’s working across your market. Get ready-to-use insights, content, and campaigns without the guesswork."
           imageSrc="/assets/flowcircle.svg"
           imageAlt="Fluenca workflow diagram connecting research, planning, publishing, analytics, and content creation agents."
-          actions={[
-            { label: "Get Started", href: "/signup", variant: "primary" },
-            { label: "Sign Up Now", href: "/signup", variant: "secondary" },
-          ]}
+          actions={[]}
         />
         <DemoVideoSection />
         <HowItWorks />
