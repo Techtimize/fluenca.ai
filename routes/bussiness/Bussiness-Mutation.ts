@@ -35,7 +35,9 @@ import { IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussine
 import useAuthStore from "@/store/AuthsStore";
 import type { EditProfileRequest } from "@/types/bussiness/user-profile-type";
 import type { CreateGoalRequest, UpdateGoalTaskRequest } from "@/types/bussiness/goal-type";
-import { GOALS_KEY, GOOGLE_ANALYTICS_KEY, SCHEDULED_POSTS_KEY, SEARCH_CONSOLE_KEY, goalKey, scheduledPostKey } from "./Bussiness-Query";
+import { GOALS_KEY, GOOGLE_ANALYTICS_KEY, SCHEDULED_POSTS_KEY, SEARCH_CONSOLE_KEY, TEXT_POSTS_KEY, goalKey, scheduledPostKey } from "./Bussiness-Query";
+import type { CreateTextPostRequest } from "@/types/bussiness/text-post-type";
+import { CreateTextPostApi } from "./bussiness.routes";
 import type { CreateScheduledPostRequest, UpdateScheduledPostRequest } from "@/types/bussiness/scheduled-post-type";
 import {
   GoogleAnalyticsConnectApi,
@@ -748,9 +750,14 @@ export function ContentExecutionDailyMutation() {
 
 
 export function LinkedInPublishMutation() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: LinkedInPublishRequest) => LinkedInPublishApi(data),
-    onSuccess: (response) => {
+    onSuccess: (response, data) => {
+      // A text post's publish_status changes either way, so refresh the list.
+      if ("generation_id" in data && data.generation_id) {
+        void queryClient.invalidateQueries({ queryKey: TEXT_POSTS_KEY });
+      }
       if (response?.success === false) {
         toast.error(
           response.error || response.message || "Failed to publish to LinkedIn",
@@ -1054,6 +1061,19 @@ export function DeleteScheduledPostMutation() {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to delete scheduled post"));
+    },
+  });
+}
+
+export function CreateTextPostMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: CreateTextPostRequest) => CreateTextPostApi(body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: TEXT_POSTS_KEY });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to write the post"));
     },
   });
 }

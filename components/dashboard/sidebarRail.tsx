@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { ChevronLeft, ChevronRight, LogOut, Menu, X } from "lucide-react";
 import AssetImage from "@/components/shared/assetImage";
+import SidebarProfile from "@/components/dashboard/sidebarProfile";
 import type { NavItem } from "@/types/dashboard";
 import { getIcon } from "@/utils/icon-utils";
 import { FOCUS_RING } from "@/utils/ui-classes";
@@ -64,6 +65,12 @@ export const DEFAULT_NAV: NavItem[] = [
     href: PAGE_ROUTES.CONNECTORS,
   },
   // { id: "trends", label: "Trends", icon: "trending", href: PAGE_ROUTES.TRENDS },
+  {
+    id: "analytics",
+    label: "Analytics",
+    icon: "activity",
+    href: PAGE_ROUTES.ANALYTICS,
+  },
 ];
 
 type Props = {
@@ -133,6 +140,7 @@ export default function SidebarRail({
   };
 
   const toggleCollapsed = () => writeCollapsed(!collapsed);
+  const onProfile = isActivePath(pathname, PAGE_ROUTES.PROFILE);
 
   const resolveLabel = (item: NavItem) =>
     tNav.has(item.id) ? tNav(item.id as "home") : item.label;
@@ -228,6 +236,9 @@ export default function SidebarRail({
                 })}
               </ul>
             </nav>
+            <div className="mt-3 border-t border-[#EEF0F6] pt-3">
+              <SidebarProfile active={onProfile} onNavigate={() => setMobileOpen(false)} />
+            </div>
             <button
               type="button"
               onClick={handleLogout}
@@ -268,6 +279,9 @@ export default function SidebarRail({
         <div
           className={`mt-auto flex gap-2 ${collapsed ? "flex-col items-center" : "w-full flex-col"}`}
         >
+          <div className={`mb-1 border-t border-[#EEF0F6] pt-3 ${collapsed ? "flex w-full justify-center" : "w-full"}`}>
+            <SidebarProfile compact={collapsed} active={onProfile} />
+          </div>
           <button
             type="button"
             aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}

@@ -10,7 +10,6 @@ import {
   normalizePlannerVersions,
   unwrapPlannerResult,
 } from "@/components/dashboard/calendar/plannerUtils";
-import TopBar from "@/components/dashboard/topBar";
 import ApiNotFoundCard from "@/components/notfound";
 import Card from "@/components/shared/card";
 import { BrandButton } from "@/components/ui/brand-button";
@@ -33,7 +32,6 @@ import useAuthStore from "@/store/AuthsStore";
 
 export default function CalendarPage() {
   const companyId = useAuthStore((s) => s.company_id);
-  const companyName = useAuthStore((s) => s.company_name);
   const [selectedVersion, setSelectedVersion] = useState(LATEST_PLANNER_VERSION);
 
   const {
@@ -115,11 +113,6 @@ export default function CalendarPage() {
 
   return (
     <main className="min-w-0 space-y-5 pb-6">
-      <TopBar
-        user={{ name: companyName || "User" }}
-        placeholder="Search content, ideas, or goals..."
-      />
-
       {companyId && (isLoading || isFetching) && !hasPlan && !notFound ? (
         <Card className="flex items-center justify-center gap-3 p-12 text-neutral-500">
           <Loader2 className="size-5 animate-spin text-[#5B57E6]" />

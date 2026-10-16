@@ -19,6 +19,12 @@ import type {
   ScheduledPostStatus,
   UpdateScheduledPostRequest,
 } from "@/types/bussiness/scheduled-post-type";
+import {
+  unwrapTextPost,
+  unwrapTextPosts,
+  type CreateTextPostRequest,
+  type TextPost,
+} from "@/types/bussiness/text-post-type";
 import api from "../apiClient";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import type { DashboardResponse } from "@/types/bussiness/dashboard-type";
@@ -931,7 +937,7 @@ export const CreateScheduledPostApi = async (
   onProgress?: (percent: number) => void,
 ): Promise<ScheduledPost> => {
   const formData = new FormData();
-  formData.append("file", body.file);
+  if (body.file) formData.append("file", body.file);
   body.platforms.forEach((platform) => formData.append("platforms", platform));
   formData.append("scheduled_at", body.scheduled_at);
   if (body.caption) formData.append("caption", body.caption);
@@ -959,4 +965,14 @@ export const CancelScheduledPostApi = async (post_id: string): Promise<Scheduled
 
 export const DeleteScheduledPostApi = async (post_id: string): Promise<void> => {
   await api.delete(BUSSINESSENDPOINT.SCHEDULED_POSTS.BY_ID(post_id));
+};
+
+export const CreateTextPostApi = async (body: CreateTextPostRequest): Promise<TextPost> => {
+  const response = await api.post(BUSSINESSENDPOINT.GENERATION.TEXT_POST, body);
+  return unwrapTextPost(response.data);
+};
+
+export const CompanyTextPostsApi = async (company_id: string): Promise<TextPost[]> => {
+  const response = await api.get(BUSSINESSENDPOINT.GENERATION.COMPANY_TEXT_POSTS(company_id));
+  return unwrapTextPosts(response.data);
 };

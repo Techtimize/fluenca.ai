@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 const PLATFORM_LABELS: Record<string, string> = {
   instagram: "Instagram",
   facebook: "Facebook",
+  linkedin: "LinkedIn",
 };
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -32,6 +33,9 @@ export function platformLabel(platform: string) {
 export function PlatformIcon({ platform, className = "size-4" }: { platform: string; className?: string }) {
   if (platform === "instagram") {
     return <Image src="/assets/insta.png" alt="" width={16} height={16} className={cn("object-contain", className)} />;
+  }
+  if (platform === "linkedin") {
+    return <Image src="/assets/linkedin.png" alt="" width={16} height={16} className={cn("object-contain", className)} />;
   }
   if (platform === "facebook") {
     return (
@@ -95,7 +99,7 @@ export function PlatformPicker({
             href={PAGE_ROUTES.CONNECTORS}
             className={`rounded font-medium text-[#5B57E6] hover:underline ${FOCUS_RING}`}
           >
-            Connect Instagram or Facebook
+            Connect Instagram, Facebook or LinkedIn
           </Link>{" "}
           to schedule posts.
         </p>

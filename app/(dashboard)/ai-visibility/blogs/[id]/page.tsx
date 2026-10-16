@@ -7,7 +7,6 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ImagePlus, Loader2, RotateCcw } from "lucide-react";
 import { BlogMarkdown } from "@/components/dashboard/blogs/blogMarkdown";
 import { BlogStatusChip } from "@/components/dashboard/blogs/blogStatusChip";
-import TopBar from "@/components/dashboard/topBar";
 import ApiNotFoundCard from "@/components/notfound";
 import Card from "@/components/shared/card";
 import { Badge } from "@/components/ui/Badge";
@@ -16,7 +15,6 @@ import { PAGE_ROUTES } from "@/constant/page-routes";
 import { getApiErrorMessage, isApiNotFoundError } from "@/errors/error-utils";
 import { BlogImageMutation, BlogPostMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { BlogPostDetailsQuery, BlogPostsQuery } from "@/routes/bussiness/Bussiness-Query";
-import useAuthStore from "@/store/AuthsStore";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
 const BLOG_LINK_PREFIX = "/blog/";
@@ -26,7 +24,6 @@ const HERO_HEIGHT = "h-48 sm:h-60 lg:h-72";
 export default function BlogPostPage() {
   const params = useParams<{ id?: string }>();
   const postId = typeof params?.id === "string" ? params.id : "";
-  const companyName = useAuthStore((s) => s.company_name);
   const { data: post, isLoading, isError, error, refetch, isRefetching } = BlogPostDetailsQuery(postId);
   const { data: list } = BlogPostsQuery();
   const writePost = BlogPostMutation();
@@ -56,8 +53,6 @@ export default function BlogPostPage() {
 
   return (
     <main className="min-w-0 space-y-4 pb-4">
-      <TopBar user={{ name: companyName || "User" }} placeholder="Search blog posts..." />
-
       <Link
         href={PAGE_ROUTES.BLOGS}
         className={`inline-flex items-center gap-1.5 text-[13px] font-medium text-[#5B57E6] hover:underline ${FOCUS_RING}`}

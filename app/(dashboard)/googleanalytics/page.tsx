@@ -3,18 +3,13 @@
 import Link from "next/link";
 import { ArrowLeft, BarChart3 } from "lucide-react";
 import GoogleAnalyticsCard from "@/components/dashboard/integrations/googleAnalyticsCard";
-import TopBar from "@/components/dashboard/topBar";
 import { PAGE_ROUTES } from "@/constant/page-routes";
-import useAuthStore from "@/store/AuthsStore";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
 export default function GoogleAnalyticsPage() {
-  const companyName = useAuthStore((s) => s.company_name);
 
   return (
     <main className="min-w-0 space-y-4 pb-6">
-      <TopBar user={{ name: companyName || "User" }} placeholder="Search analytics..." />
-
       <section className="rounded-[28px] border border-[#E6E8F5] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] p-5 sm:p-7">
         <Link
           href={PAGE_ROUTES.DASHBOARD}

@@ -40,6 +40,7 @@ export function proxy(request: NextRequest) {
             path.startsWith('/content') ||
             path.startsWith('/social') ||
             path.startsWith('/connectors') ||
+            path.startsWith('/analytics') ||
             path.startsWith('/googleanalytics') ||
             path.startsWith('/websitespeed') ||
             path.startsWith('/googleconsole') ||
@@ -73,6 +74,7 @@ export const config = {
         '/content/:path*',
         '/social/:path*',
         '/connectors/:path*',
+        '/analytics/:path*',
         '/googleanalytics/:path*',
         '/websitespeed/:path*',
         '/googleconsole/:path*',

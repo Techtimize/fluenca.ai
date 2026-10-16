@@ -43,7 +43,8 @@
     "social": "Social profiles",
     "integrations": "Integrations",
     "blogs": "Blogs",
-    "users": "Users"
+    "users": "Users",
+    "analytics": "Analytics"
   },
   "auth": {
     "email": "Email Address",
