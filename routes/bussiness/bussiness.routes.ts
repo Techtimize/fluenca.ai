@@ -25,6 +25,7 @@ import {
   type CreateTextPostRequest,
   type TextPost,
 } from "@/types/bussiness/text-post-type";
+import type { NewsParams, NewsResponse } from "@/types/bussiness/news-type";
 import api from "../apiClient";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
 import type { DashboardResponse } from "@/types/bussiness/dashboard-type";
@@ -976,4 +977,12 @@ export const CreateTextPostApi = async (body: CreateTextPostRequest): Promise<Te
 export const CompanyTextPostsApi = async (company_id: string): Promise<TextPost[]> => {
   const response = await api.get(BUSSINESSENDPOINT.GENERATION.COMPANY_TEXT_POSTS(company_id));
   return unwrapTextPosts(response.data);
+};
+
+export const NewsApi = async (params?: NewsParams): Promise<NewsResponse> => {
+  const topic = params?.topic?.trim();
+  const response = await api.get(BUSSINESSENDPOINT.NEWS, {
+    params: { ...(topic ? { topic } : {}), ...(params?.size ? { size: params.size } : {}) },
+  });
+  return response.data;
 };

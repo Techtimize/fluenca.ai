@@ -14,7 +14,8 @@ import type { GoogleTrendQueryParams } from "@/types/bussiness/google-trends-typ
 import { ChatHistoryApi } from "../chatbot/chatbot.routes";
 import { BlogPostDetailsApi, BlogPostsApi, BriefsApi, KeywordsApi } from "./bussiness.routes";
 import { ScheduledPostApi, ScheduledPostsApi } from "./bussiness.routes";
-import { CompanyTextPostsApi } from "./bussiness.routes";
+import { CompanyTextPostsApi, NewsApi } from "./bussiness.routes";
+import type { NewsParams } from "@/types/bussiness/news-type";
 import type { ScheduledPost, ScheduledPostStatus } from "@/types/bussiness/scheduled-post-type";
 import {
   GoogleAnalyticsConnectionApi,
@@ -765,6 +766,18 @@ export const CompanyTextPostsQuery = (company_id?: string | null) => {
     queryKey: [...TEXT_POSTS_KEY, company_id],
     queryFn: () => CompanyTextPostsApi(company_id as string),
     enabled: Boolean(company_id),
+    refetchOnWindowFocus: false,
+  });
+};
+
+const NEWS_STALE_MS = 10 * 60 * 1000;
+
+/** News for the company's niche, or for `topic` when given. */
+export const NewsQuery = (params?: NewsParams) => {
+  return useQuery({
+    queryKey: ["news", params?.topic?.trim() || null, params?.size ?? null],
+    queryFn: () => NewsApi(params),
+    staleTime: NEWS_STALE_MS,
     refetchOnWindowFocus: false,
   });
 };
