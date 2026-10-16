@@ -19,15 +19,13 @@ export interface SiteNavigationItem {
 
 export interface SiteHeaderProps {
   navigationItems?: readonly SiteNavigationItem[];
-  signupHref?: string;
-  signupLabel?: string;
   variant?: "light" | "dark";
 }
 
 const DEFAULT_NAV: readonly SiteNavigationItem[] = [
   { label: "Home", href: "/" },
   { label: "Agents", href: PAGE_ROUTES.AGENTS },
-  { label: "Blog", href: PAGE_ROUTES.BLOG },
+  // { label: "Blog", href: PAGE_ROUTES.BLOG },
   { label: "Plans", href: PAGE_ROUTES.PLANS },
 ];
 
@@ -48,8 +46,6 @@ function useHydrated() {
 
 export function SiteHeader({
   navigationItems = DEFAULT_NAV,
-  signupHref = PAGE_ROUTES.SIGNUP,
-  signupLabel = "Sign up",
 }: SiteHeaderProps) {
   const pathname = usePathname();
   const accessToken = useAuthStore((s) => s.access_token);
@@ -132,16 +128,11 @@ export function SiteHeader({
               >
                 Logout
               </BrandButton>
-
-              <BrandButton href={PAGE_ROUTES.DASHBOARD}>
-                Dashboard
-              </BrandButton>
+              <BrandButton href={PAGE_ROUTES.DASHBOARD}>Dashboard</BrandButton>
             </>
-          ) : (
-            <BrandButton href={signupHref}>
-              {signupLabel}
-            </BrandButton>
-          )}
+          ) : pathname !== PAGE_ROUTES.DEMO ? (
+            <BrandButton href={PAGE_ROUTES.DEMO}>Book a Demo</BrandButton>
+          ) : null}
         </div>
       </nav>
     </header>

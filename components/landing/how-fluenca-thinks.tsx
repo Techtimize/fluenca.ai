@@ -33,14 +33,14 @@ export default function HowFluencaThinks() {
             </span>
 
             <h2 className="mt-3 max-w-[595px] font-display text-[24px] font-medium leading-[32px] tracking-normal text-[#1C1C1E] sm:text-[32px] sm:leading-[40px] md:text-[40px] md:leading-[48px]">
-              One picture of your business —
+              One picture of your business
               <br />
               <span className="text-indigo-500">shared by every floor</span>
             </h2>
           </div>
 
           <p className="max-w-[510px] font-body text-[15px] font-normal leading-[24px] tracking-normal text-[#62625F] sm:text-[16px] sm:leading-[26px] md:text-[17px] md:leading-[28px] lg:mt-10">
-            Intake, rivals, DNA, SEO, media, and analytics feed one living model —
+            Intake, rivals, DNA, SEO, media, and analytics feed one living model
             so the office never invents a second brand story.
           </p>
         </div>
