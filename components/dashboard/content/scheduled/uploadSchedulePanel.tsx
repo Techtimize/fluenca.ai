@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { CalendarClock, CloudUpload, Film, ImageIcon, Loader2, X } from "lucide-react";
 import { initialDate } from "@/components/dashboard/content/schedulePostDialog";
-import { PlatformPicker, ScheduleDateTime } from "@/components/dashboard/content/scheduled/scheduleFields";
+import {
+  PlatformPicker,
+  ScheduleDateTime,
+  useConnectedPlatforms,
+} from "@/components/dashboard/content/scheduled/scheduleFields";
 import Card from "@/components/shared/card";
 import { CreateScheduledPostMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import {
@@ -38,7 +42,10 @@ export default function UploadSchedulePanel() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [platforms, setPlatforms] = useState<ScheduledPostPlatform[]>(["instagram"]);
+  // null until the user picks; until then the first connected platform is preselected.
+  const [picked, setPicked] = useState<ScheduledPostPlatform[] | null>(null);
+  const { connected, isLoading: platformsLoading } = useConnectedPlatforms();
+  const platforms = (picked ?? connected.slice(0, 1)).filter((p) => connected.includes(p));
   const [scheduledAt, setScheduledAt] = useState(() => initialDate());
   const [caption, setCaption] = useState("");
   const [progress, setProgress] = useState(0);
@@ -192,7 +199,12 @@ export default function UploadSchedulePanel() {
         </div>
 
         <div className="min-w-0 space-y-4">
-          <PlatformPicker value={platforms} onChange={setPlatforms} />
+          <PlatformPicker
+            value={platforms}
+            onChange={setPicked}
+            connected={connected}
+            isLoading={platformsLoading}
+          />
           <ScheduleDateTime value={scheduledAt} onChange={setScheduledAt} />
 
           <button
@@ -221,7 +233,7 @@ export default function UploadSchedulePanel() {
             </div>
           ) : !file ? (
             <p className="text-center text-[12px] text-neutral-500">Add a file to schedule it.</p>
-          ) : platforms.length === 0 ? (
+          ) : platforms.length === 0 && connected.length ? (
             <p className="text-center text-[12px] text-rose-600">Pick at least one platform.</p>
           ) : null}
         </div>

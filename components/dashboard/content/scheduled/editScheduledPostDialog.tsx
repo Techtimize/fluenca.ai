@@ -7,6 +7,7 @@ import {
   PlatformPicker,
   ScheduleDateTime,
   isScheduledPostPlatform,
+  useConnectedPlatforms,
 } from "@/components/dashboard/content/scheduled/scheduleFields";
 import {
   Dialog,
@@ -28,13 +29,16 @@ type Props = {
 
 /** Mounted fresh on each open, so the form always starts from the post's current values. */
 function EditForm({ post, onDone }: { post: ScheduledPost; onDone: () => void }) {
-  const [platforms, setPlatforms] = useState(() => post.platforms.filter(isScheduledPostPlatform));
+  const [picked, setPicked] = useState(() => post.platforms.filter(isScheduledPostPlatform));
+  const { connected, isLoading: platformsLoading } = useConnectedPlatforms();
+  // A platform disconnected since scheduling can't be posted to, so it isn't offered or kept.
+  const platforms = platformsLoading ? picked : picked.filter((p) => connected.includes(p));
   const [scheduledAt, setScheduledAt] = useState(() => initialDate(post.scheduled_at));
   const [caption, setCaption] = useState(post.caption ?? "");
   const { mutate, isPending } = UpdateScheduledPostMutation();
 
   const inPast = scheduledAt <= new Date();
-  const canSave = platforms.length > 0 && !inPast && !isPending;
+  const canSave = platforms.length > 0 && !inPast && !isPending && !platformsLoading;
 
   const save = () => {
     if (!canSave) return;
@@ -50,7 +54,12 @@ function EditForm({ post, onDone }: { post: ScheduledPost; onDone: () => void })
   return (
     <>
       <div className="max-h-[60vh] space-y-4 overflow-y-auto pe-1">
-        <PlatformPicker value={platforms} onChange={setPlatforms} />
+        <PlatformPicker
+          value={platforms}
+          onChange={setPicked}
+          connected={connected}
+          isLoading={platformsLoading}
+        />
         <ScheduleDateTime value={scheduledAt} onChange={setScheduledAt} />
         <label className="block">
           <span className="text-[13px] font-medium text-neutral-700">Caption</span>
