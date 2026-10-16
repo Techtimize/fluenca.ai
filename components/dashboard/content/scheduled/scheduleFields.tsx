@@ -1,8 +1,16 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Check } from "lucide-react";
 import { MonthCalendar, formatSchedule } from "@/components/dashboard/content/schedulePostDialog";
+import { PAGE_ROUTES } from "@/constant/page-routes";
+import { SocialAccountsQuery } from "@/routes/bussiness/Bussiness-Query";
+import {
+  findSocialAccount,
+  isSocialAccountConnected,
+  normalizeSocialAccounts,
+} from "@/types/bussiness/social-accounts-type";
 import {
   SCHEDULED_POST_PLATFORMS,
   type ScheduledPostPlatform,
@@ -42,12 +50,32 @@ export function isScheduledPostPlatform(value: string): value is ScheduledPostPl
   return (SCHEDULED_POST_PLATFORMS as readonly string[]).includes(value);
 }
 
+/**
+ * Platforms with a connected social account. If the accounts can't be loaded, every platform is offered
+ * rather than blocking scheduling; the backend still rejects a platform that isn't connected.
+ */
+export function useConnectedPlatforms() {
+  const { data, isLoading, isError } = SocialAccountsQuery();
+  const accounts = normalizeSocialAccounts(data);
+  const connected: ScheduledPostPlatform[] = isError
+    ? [...SCHEDULED_POST_PLATFORMS]
+    : SCHEDULED_POST_PLATFORMS.filter((platform) =>
+        isSocialAccountConnected(findSocialAccount(accounts, platform)),
+      );
+  return { connected, isLoading };
+}
+
 export function PlatformPicker({
   value,
   onChange,
+  connected,
+  isLoading = false,
 }: {
   value: ScheduledPostPlatform[];
   onChange: (next: ScheduledPostPlatform[]) => void;
+  /** Only these platforms are offered. */
+  connected: ScheduledPostPlatform[];
+  isLoading?: boolean;
 }) {
   const toggle = (platform: ScheduledPostPlatform) =>
     onChange(value.includes(platform) ? value.filter((p) => p !== platform) : [...value, platform]);
@@ -55,8 +83,25 @@ export function PlatformPicker({
   return (
     <fieldset>
       <legend className="text-[13px] font-medium text-neutral-700">Post to</legend>
+      {isLoading ? (
+        <div className="mt-2 flex gap-2" aria-busy="true">
+          <span className="h-9 w-28 animate-pulse rounded-full bg-[#F1F2F8]" />
+          <span className="h-9 w-28 animate-pulse rounded-full bg-[#F1F2F8]" />
+        </div>
+      ) : !connected.length ? (
+        <p className="mt-2 rounded-xl border border-dashed border-[#E6E8F5] px-3 py-2.5 text-[12px] leading-5 text-neutral-600">
+          No social account is connected.{" "}
+          <Link
+            href={PAGE_ROUTES.CONNECTORS}
+            className={`rounded font-medium text-[#5B57E6] hover:underline ${FOCUS_RING}`}
+          >
+            Connect Instagram or Facebook
+          </Link>{" "}
+          to schedule posts.
+        </p>
+      ) : (
       <div className="mt-2 flex flex-wrap gap-2">
-        {SCHEDULED_POST_PLATFORMS.map((platform) => {
+        {connected.map((platform) => {
           const active = value.includes(platform);
           return (
             <button
@@ -78,6 +123,7 @@ export function PlatformPicker({
           );
         })}
       </div>
+      )}
     </fieldset>
   );
 }
