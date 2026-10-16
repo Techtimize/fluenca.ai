@@ -28,6 +28,8 @@ export type FacebookPublishResponse = InstagramPublishResponse;
 /** LinkedIn publish (requires connected account with w_member_social). */
 export type LinkedInPublishTextRequest = {
   text: string;
+  /** A saved text post; the backend records its publish_status. */
+  generation_id?: string;
 };
 
 export type LinkedInPublishLinkRequest = {

@@ -14,6 +14,7 @@ import type { GoogleTrendQueryParams } from "@/types/bussiness/google-trends-typ
 import { ChatHistoryApi } from "../chatbot/chatbot.routes";
 import { BlogPostDetailsApi, BlogPostsApi, BriefsApi, KeywordsApi } from "./bussiness.routes";
 import { ScheduledPostApi, ScheduledPostsApi } from "./bussiness.routes";
+import { CompanyTextPostsApi } from "./bussiness.routes";
 import type { ScheduledPost, ScheduledPostStatus } from "@/types/bussiness/scheduled-post-type";
 import {
   GoogleAnalyticsConnectionApi,
@@ -753,5 +754,17 @@ export const ScheduledPostQuery = (post_id?: string | null) => {
     enabled: Boolean(post_id),
     refetchInterval: (query) =>
       query.state.data && isScheduledPostInFlight(query.state.data) ? SCHEDULED_POSTS_POLL_MS : false,
+  });
+};
+
+export const TEXT_POSTS_KEY = ["text-posts"];
+
+/** LinkedIn text posts built from scripts, each with its publish_status. */
+export const CompanyTextPostsQuery = (company_id?: string | null) => {
+  return useQuery({
+    queryKey: [...TEXT_POSTS_KEY, company_id],
+    queryFn: () => CompanyTextPostsApi(company_id as string),
+    enabled: Boolean(company_id),
+    refetchOnWindowFocus: false,
   });
 };

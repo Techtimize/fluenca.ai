@@ -30,13 +30,12 @@ import {
   Users,
   X,
 } from "lucide-react";
-import TopBar from "@/components/dashboard/topBar";
 import AssetImage from "@/components/shared/assetImage";
+import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import Card from "@/components/shared/card";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { EditUserProfileMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { UserProfileQuery } from "@/routes/bussiness/Bussiness-Query";
-import useAuthStore from "@/store/AuthsStore";
 import type {
   EditProfileCompany,
   EditProfileRequest,
@@ -82,14 +81,11 @@ function formatDate(value: string | null, opts: Intl.DateTimeFormatOptions) {
 }
 
 export default function ProfilePage() {
-  const companyName = useAuthStore((s) => s.company_name);
   const { data, isLoading, isError, error, refetch } = UserProfileQuery();
   const profile = data?.data;
 
   return (
     <main className="min-w-0 space-y-4 pb-28">
-      <TopBar user={{ name: companyName || profile?.company?.name || "" }} />
-
       {isLoading ? (
         <ProfileSkeleton />
       ) : isError || !profile ? (
@@ -532,6 +528,17 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
                 input={userInput("language")}
               />
             </dl>
+          </Card>
+
+          <Card className="p-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <SectionHeader
+                icon={<Languages />}
+                title="App language"
+                subtitle="The language Fluenca is shown in"
+              />
+              <LanguageSwitcher variant="muted" className="mb-4" />
+            </div>
           </Card>
         </div>
 

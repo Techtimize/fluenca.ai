@@ -10,7 +10,6 @@ import DocumentationCard from "@/components/dashboard/documentationCard";
 import DocumentationSheet from "@/components/dashboard/documentation/documentationSheet";
 import CurrentGoalSummary from "@/components/dashboard/goals/CurrentGoalSummary";
 import GoalsDialog from "@/components/dashboard/goals/GoalsDialog";
-import TopBar from "@/components/dashboard/topBar";
 import { mapDashboard } from "@/lib/dashboard/map-dashboard";
 import { hasOpenGoal } from "@/lib/goals/goal-form";
 import { AnalyzeCompanyDashboardQuery, CompanyGoalsQuery } from "@/routes/bussiness/Bussiness-Query";
@@ -75,7 +74,6 @@ export default function DashboardPage() {
   const sources = mapped?.sources ?? [];
   const channels = mapped?.channels ?? {};
   const defaultSource = mapped?.defaultSource || sources[0]?.id || "";
-  const user = { name: companyName || mapped?.company.name || "" };
   const [selectedSource, setSource] = useState<string | null>(null);
   const source =
     selectedSource && channels[selectedSource] ? selectedSource : defaultSource;
@@ -87,7 +85,6 @@ export default function DashboardPage() {
   return (
     <>
       <main className="min-w-0 max-w-full space-y-3 overflow-x-clip sm:space-y-4">
-        <TopBar user={user} />
         {isError ? (
           <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 sm:rounded-3xl sm:px-5 sm:py-4">
             {error instanceof Error ? error.message : t("error")}

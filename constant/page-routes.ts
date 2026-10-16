@@ -25,6 +25,7 @@ export const PAGE_ROUTES = {
     DASHBOARD: '/dashboard',
     GOALS: '/goals',
     CONNECTORS: '/connectors',
+    ANALYTICS: '/analytics',
     GOOGLE_ANALYTICS: '/googleanalytics',
     WEBSITE_SPEED: '/websitespeed',
     AI_VISIBILITY: '/ai-visibility',
@@ -46,8 +47,8 @@ export const PAGE_ROUTES = {
     SCRIPT: '/script',
     SCRIPT_DETAIL: (id: string) => `/script/${id}`,
     CONTENT: '/content',
-    BLOGS: '/blogs',
-    BLOG_DETAIL: (id: string) => `/blogs/${id}`,
+    BLOGS: '/ai-visibility/blogs',
+    BLOG_DETAIL: (id: string) => `/ai-visibility/blogs/${id}`,
 
     SUPERADMIN: '/superadmin',
     SUPERADMIN_USERS: '/superadmin',

@@ -1,27 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useSyncExternalStore } from "react";
+import { useState, type FocusEvent } from "react";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { ChevronLeft, ChevronRight, LogOut, Menu, X } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 import AssetImage from "@/components/shared/assetImage";
+import SidebarProfile from "@/components/dashboard/sidebarProfile";
 import type { NavItem } from "@/types/dashboard";
 import { getIcon } from "@/utils/icon-utils";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { clearAuthTokenProvider } from "@/provider/auth-provider";
 
-const STORAGE_KEY = "fluenca-sidebar-collapsed";
-const COLLAPSED_PAD = "5.5rem";
-const EXPANDED_PAD = "15.5rem";
 
 export const DEFAULT_NAV: NavItem[] = [
   { id: "home", label: "Home", icon: "home", href: PAGE_ROUTES.DASHBOARD },
   {
-    id: "content-recommendation",
-    label: "Content recommendation",
+    id: "content",
+    label: "Content",
     icon: "lightbulb",
     href: PAGE_ROUTES.CONTENT_RECOMMENDATION,
   },
@@ -32,7 +30,6 @@ export const DEFAULT_NAV: NavItem[] = [
     icon: "layers",
     href: PAGE_ROUTES.CONTENT,
   },
-  { id: "blogs", label: "Blogs", icon: "clipboard", href: PAGE_ROUTES.BLOGS },
   {
     id: "ai-visibility",
     label: "AI visibility",
@@ -64,6 +61,12 @@ export const DEFAULT_NAV: NavItem[] = [
     href: PAGE_ROUTES.CONNECTORS,
   },
   // { id: "trends", label: "Trends", icon: "trending", href: PAGE_ROUTES.TRENDS },
+  {
+    id: "analytics",
+    label: "Analytics",
+    icon: "activity",
+    href: PAGE_ROUTES.ANALYTICS,
+  },
 ];
 
 type Props = {
@@ -76,36 +79,9 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-const COLLAPSED_EVENT = "sidebar-collapsed";
-
-function readCollapsed() {
-  try {
-    return localStorage.getItem(STORAGE_KEY) !== "false";
-  } catch {
-    return true;
-  }
-}
-
-function subscribeCollapsed(onChange: () => void) {
-  window.addEventListener("storage", onChange);
-  window.addEventListener(COLLAPSED_EVENT, onChange);
-  return () => {
-    window.removeEventListener("storage", onChange);
-    window.removeEventListener(COLLAPSED_EVENT, onChange);
-  };
-}
-
-function writeCollapsed(collapsed: boolean) {
-  try {
-    localStorage.setItem(STORAGE_KEY, String(collapsed));
-  } catch {
-    console.error("Error saving sidebar collapsed state");
-  }
-  window.dispatchEvent(new Event(COLLAPSED_EVENT));
-}
-
 export const DASHBOARD_CONTENT_OFFSET =
-  "max-w-full overflow-x-clip px-3 pb-10 pt-[4.5rem] sm:px-6 md:pt-4 md:ps-[var(--sidebar-content-pad,5.5rem)] lg:pe-8 transition-[padding] duration-200";
+  // The rail is always collapsed in the layout; on hover it expands over the content, so this never changes.
+  "max-w-full overflow-x-clip px-3 pb-10 pt-[4.5rem] sm:px-6 md:pt-4 md:ps-[5.5rem] lg:pe-8";
 
 export default function SidebarRail({
   items = DEFAULT_NAV,
@@ -115,11 +91,13 @@ export default function SidebarRail({
   const locale = useLocale();
   const t = useTranslations("common");
   const tNav = useTranslations("nav");
-  const collapsed = useSyncExternalStore(
-    subscribeCollapsed,
-    readCollapsed,
-    () => true,
-  );
+  // Open while the pointer is over the rail or keyboard focus is inside it.
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const collapsed = !(hovered || focused);
+  const onBlur = (event: FocusEvent<HTMLElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false);
+  };
 
   const [mobileOpenedAt, setMobileOpenedAt] = useState<string | null>(null);
   const mobileOpen = mobileOpenedAt === pathname;
@@ -132,7 +110,7 @@ export default function SidebarRail({
     window.location.replace(PAGE_ROUTES.LOGIN);
   };
 
-  const toggleCollapsed = () => writeCollapsed(!collapsed);
+  const onProfile = isActivePath(pathname, PAGE_ROUTES.PROFILE);
 
   const resolveLabel = (item: NavItem) =>
     tNav.has(item.id) ? tNav(item.id as "home") : item.label;
@@ -170,12 +148,8 @@ export default function SidebarRail({
       );
     });
 
-  const ExpandIcon = isRtl ? ChevronLeft : ChevronRight;
-  const CollapseIcon = isRtl ? ChevronRight : ChevronLeft;
-
   return (
     <>
-      <style>{`:root{--sidebar-content-pad:${collapsed ? COLLAPSED_PAD : EXPANDED_PAD}}`}</style>
       {/* Mobile: a fixed bar so the menu button never floats over scrolling content */}
       <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-[#E6E8F5] bg-white/90 px-3 backdrop-blur-md md:hidden">
         <button
@@ -228,6 +202,9 @@ export default function SidebarRail({
                 })}
               </ul>
             </nav>
+            <div className="mt-3 border-t border-[#EEF0F6] pt-3">
+              <SidebarProfile active={onProfile} onNavigate={() => setMobileOpen(false)} />
+            </div>
             <button
               type="button"
               onClick={handleLogout}
@@ -242,10 +219,14 @@ export default function SidebarRail({
 
       <nav
         aria-label="Main"
-        className={`fixed bottom-4 inset-s-4 top-4 z-20 hidden flex-col border border-[#E6E8F5] bg-white py-4 transition-[width,border-radius,padding] duration-200 md:flex ${
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onFocus={() => setFocused(true)}
+        onBlur={onBlur}
+        className={`fixed bottom-4 inset-s-4 top-4 z-40 hidden flex-col overflow-hidden border border-[#E6E8F5] bg-white py-4 transition-[width,border-radius,padding,box-shadow] duration-200 ease-out md:flex ${
           collapsed
             ? "w-14 items-center rounded-full px-0"
-            : "w-56 rounded-3xl px-3"
+            : "w-56 rounded-3xl px-3 shadow-[0_16px_40px_-12px_rgba(15,23,42,0.25)]"
         }`}
       >
         <div
@@ -268,24 +249,9 @@ export default function SidebarRail({
         <div
           className={`mt-auto flex gap-2 ${collapsed ? "flex-col items-center" : "w-full flex-col"}`}
         >
-          <button
-            type="button"
-            aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
-            onClick={toggleCollapsed}
-            className={`${FOCUS_RING} ${
-              collapsed
-                ? "grid size-10 place-items-center rounded-full text-neutral-600 hover:bg-neutral-100"
-                : "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100"
-            }`}
-          >
-            {collapsed ? (
-              <ExpandIcon className="size-4" />
-            ) : (
-              <CollapseIcon className="size-4.5" />
-            )}
-            {!collapsed ? <span>{t("collapse")}</span> : null}
-          </button>
-
+          <div className={`mb-1 border-t border-[#EEF0F6] pt-3 ${collapsed ? "flex w-full justify-center" : "w-full"}`}>
+            <SidebarProfile compact={collapsed} active={onProfile} />
+          </div>
           <button
             type="button"
             onClick={handleLogout}

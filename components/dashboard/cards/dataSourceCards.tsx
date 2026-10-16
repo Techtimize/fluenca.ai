@@ -13,8 +13,10 @@ import {
   Monitor,
   Plug,
   RotateCw,
+  Search,
   Smartphone,
 } from "lucide-react";
+import { FacebookIcon } from "@/components/shared/brandIcons";
 import { scoreColor } from "@/components/dashboard/website-speed/PageSpeedReport";
 import {
   Select,
@@ -30,7 +32,7 @@ import {
   GoogleAnalyticsSelectPropertyMutation,
   InstagramConnectMutation,
 } from "@/routes/bussiness/Bussiness-Mutation";
-import { accountHandle } from "@/components/dashboard/social/socialUtils";
+import { accountDisplayName, accountHandle } from "@/components/dashboard/social/socialUtils";
 import {
   GoogleAnalyticsConnectionQuery,
   GoogleAnalyticsOverviewQuery,
@@ -38,9 +40,19 @@ import {
   InstagramProfileContentQuery,
   InstagramProfileInfoQuery,
   InstagramProfileInteractionsQuery,
+  FacebookProfileContentQuery,
+  LinkedInProfileContentQuery,
   OnboardingDetailsQuery,
+  SearchConsoleConnectionQuery,
+  SearchConsoleOverviewQuery,
   SocialAccountsQuery,
 } from "@/routes/bussiness/Bussiness-Query";
+import {
+  normalizeLinkedInProfileContent,
+  normalizeSocialProfileContent,
+  socialMediaComments,
+  socialMediaLikes,
+} from "@/types/bussiness/social-profile-content-type";
 import { metricTotal, normalizeInsightMetrics } from "@/types/bussiness/instagram-insights-type";
 import { normalizeInstagramProfileContent, normalizeInstagramProfileInfo } from "@/types/bussiness/instagram-type";
 import { engagementRate } from "@/utils/insta-utils";
@@ -445,4 +457,160 @@ export function InstagramSourceCard() {
       ) : null}
     </SourceCard>
   );
+}
+
+function ManageLink({ href, label = "Open report" }: { href: string; label?: string }) {
+  return (
+    <Link href={href} className={SECONDARY_ACTION}>
+      {label}
+      <ArrowRight className="size-4" aria-hidden="true" />
+    </Link>
+  );
+}
+
+function sumOf(values: (number | null)[]) {
+  const numbers = values.filter((v): v is number => v != null);
+  return numbers.length ? numbers.reduce((total, v) => total + v, 0) : null;
+}
+
+/** Posts returned plus their likes and comments, from the profile-content endpoints. */
+function postStats(raw: Parameters<typeof normalizeSocialProfileContent>[0]) {
+  const posts = normalizeSocialProfileContent(raw);
+  return {
+    posts: posts.length,
+    likes: sumOf(posts.map(socialMediaLikes)),
+    comments: sumOf(posts.map(socialMediaComments)),
+  };
+}
+
+const formatStat = (value: number | null) => (value != null ? compactNumber.format(value) : null);
+
+export function FacebookSourceCard() {
+  const { data, isLoading } = SocialAccountsQuery();
+  const account = findSocialAccount(normalizeSocialAccounts(data), "facebook");
+  const connected = isSocialAccountConnected(account);
+  const state: ConnectionState = isLoading ? "checking" : connected ? "connected" : "disconnected";
+  const contentQ = FacebookProfileContentQuery(connected);
+  const stats = postStats(contentQ.data);
+  const followers = typeof account?.followers_count === "number" ? account.followers_count : null;
+
+  return (
+    <SourceCard
+      icon={<FacebookIcon className="size-6 text-[#1877F2]" />}
+      title="Facebook"
+      description="Page audience and how your recent posts performed."
+      status={<StatusPill state={state} />}
+      detail={connected ? accountDisplayName(account) : null}
+      action={<ManageLink href={PAGE_ROUTES.CONNECTORS} label="Manage account" />}
+    >
+      {connected ? (
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <StatTile label="Followers" value={formatStat(followers)} loading={false} />
+          <StatTile label="Recent posts" value={formatStat(stats.posts)} loading={contentQ.isLoading} />
+          <StatTile label="Likes" value={formatStat(stats.likes)} loading={contentQ.isLoading} />
+          <StatTile label="Comments" value={formatStat(stats.comments)} loading={contentQ.isLoading} />
+        </div>
+      ) : null}
+    </SourceCard>
+  );
+}
+
+export function LinkedInSourceCard() {
+  const { data, isLoading } = SocialAccountsQuery();
+  const account = findSocialAccount(normalizeSocialAccounts(data), "linkedin");
+  const connected = isSocialAccountConnected(account);
+  const state: ConnectionState = isLoading ? "checking" : connected ? "connected" : "disconnected";
+  const contentQ = LinkedInProfileContentQuery(connected);
+  const profile = normalizeLinkedInProfileContent(contentQ.data);
+  const stats = postStats(contentQ.data);
+  const posts = profile.postsCountReturned ?? stats.posts;
+
+  return (
+    <SourceCard
+      icon={<Image src="/assets/linkedin.png" alt="" width={24} height={24} className="size-6 object-contain" />}
+      title="LinkedIn"
+      description="Your recent LinkedIn posts and the reactions they got."
+      status={<StatusPill state={state} />}
+      detail={connected ? profile.name || accountDisplayName(account) : null}
+      action={<ManageLink href={PAGE_ROUTES.SOCIAL_LINKEDIN} label="Open LinkedIn" />}
+    >
+      {connected ? (
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <StatTile label="Recent posts" value={formatStat(posts)} loading={contentQ.isLoading} />
+          <StatTile label="Reactions" value={formatStat(stats.likes)} loading={contentQ.isLoading} />
+          <StatTile label="Comments" value={formatStat(stats.comments)} loading={contentQ.isLoading} />
+          <StatTile
+            label="Avg. reactions"
+            value={stats.likes != null && posts ? (stats.likes / posts).toFixed(1) : null}
+            loading={contentQ.isLoading}
+          />
+        </div>
+      ) : null}
+    </SourceCard>
+  );
+}
+
+export function SearchConsoleSourceCard() {
+  const { data: connection, isLoading } = SearchConsoleConnectionQuery();
+  const state = connectionState(isLoading, connection);
+  const siteUrl = state === "connected" ? (connection?.site_url ?? null) : null;
+  const overview = SearchConsoleOverviewQuery(siteUrl, GA_OVERVIEW_DAYS);
+  const totals = overview.data?.totals;
+  const loading = overview.isLoading;
+
+  return (
+    <SourceCard
+      icon={<Search className="size-6 text-[#1A73E8]" aria-hidden="true" />}
+      title="Search Console"
+      description={`How people found you on Google in the last ${GA_OVERVIEW_DAYS} days.`}
+      status={<StatusPill state={state} />}
+      detail={siteUrl}
+      action={<ManageLink href={PAGE_ROUTES.GOOGLE_SEARCH_CONSOLE} />}
+    >
+      {siteUrl ? (
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <StatTile label="Clicks" value={totals ? compactNumber.format(totals.clicks) : null} loading={loading} />
+          <StatTile
+            label="Impressions"
+            value={totals ? compactNumber.format(totals.impressions) : null}
+            loading={loading}
+          />
+          <StatTile label="CTR" value={totals ? `${(totals.ctr * 100).toFixed(1)}%` : null} loading={loading} />
+          <StatTile label="Avg. position" value={totals ? totals.position.toFixed(1) : null} loading={loading} />
+        </div>
+      ) : null}
+    </SourceCard>
+  );
+}
+
+export type AnalyticsSourceId =
+  | "instagram"
+  | "facebook"
+  | "linkedin"
+  | "google-analytics"
+  | "search-console"
+  | "website-speed";
+
+/** Which sources are connected, so the analytics page can show only those. */
+export function useAnalyticsSources() {
+  const accounts = SocialAccountsQuery();
+  const ga = GoogleAnalyticsConnectionQuery();
+  const sc = SearchConsoleConnectionQuery();
+  const company = OnboardingDetailsQuery();
+  const list = normalizeSocialAccounts(accounts.data);
+  const social = (platform: string) => isSocialAccountConnected(findSocialAccount(list, platform));
+
+  const connected: Record<AnalyticsSourceId, boolean> = {
+    instagram: social("instagram"),
+    facebook: social("facebook"),
+    linkedin: social("linkedin"),
+    "google-analytics": connectionState(false, ga.data) === "connected",
+    "search-console": connectionState(false, sc.data) === "connected",
+    // The backend checks the company website itself, so speed is available once onboarding is loaded.
+    "website-speed": company.isSuccess,
+  };
+  return {
+    connected,
+    isLoading: accounts.isLoading || ga.isLoading || sc.isLoading || company.isLoading,
+  };
 }

@@ -12,12 +12,12 @@ import {
 import { ContentResultsGrid } from "@/components/dashboard/content/contentResultGrid";
 import { normalizeContentPlatform } from "@/components/dashboard/content/resultcard";
 import ScheduledPostsList from "@/components/dashboard/content/scheduled/scheduledPostsList";
+import { TextPostsSection } from "@/components/dashboard/content/textPosts";
 import UploadSchedulePanel from "@/components/dashboard/content/scheduled/uploadSchedulePanel";
 import {
   normalizeCompanyContent,
   type ContentGenerationResultItem,
 } from "@/components/dashboard/content/utils";
-import TopBar from "@/components/dashboard/topBar";
 import ApiNotFoundCard from "@/components/notfound";
 import Card from "@/components/shared/card";
 import { getApiErrorMessage, isApiNotFoundError } from "@/errors/error-utils";
@@ -79,7 +79,6 @@ const FILTERS: {
 
 export default function ContentPage() {
   const companyId = useAuthStore((s) => s.company_id);
-  const companyName = useAuthStore((s) => s.company_name);
   const { data, isLoading, isError, error, isFetching, refetch, isRefetching } =
     CompanyImageGenerationResultsQuery(companyId);
   const { mutate: publishInstagram, isPending: isPublishingInstagram } =
@@ -171,11 +170,6 @@ export default function ContentPage() {
 
   return (
     <main className="min-w-0 space-y-5 pb-6">
-      <TopBar
-        user={{ name: companyName || "User" }}
-        placeholder="Search content..."
-      />
-
       <div className="flex flex-col gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
@@ -331,6 +325,10 @@ export default function ContentPage() {
           posted={posted}
           onPublish={handlePublish}
         />
+      ) : null}
+
+      {showGenerated && companyId && platformFilter !== "instagram" ? (
+        <TextPostsSection companyId={companyId} />
       ) : null}
 
       {showGenerated ? null : (

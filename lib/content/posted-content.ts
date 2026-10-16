@@ -78,3 +78,13 @@ export function isPostedResponse(response: unknown) {
   const status = (response as { status?: unknown } | null)?.status;
   return typeof status === "string" && status.toLowerCase() === "posted";
 }
+
+/**
+ * LinkedIn may answer without a status; treat it as published unless it says otherwise.
+ * A status, when present, must be "posted".
+ */
+export function isPublishSucceeded(response: unknown) {
+  const body = response as { success?: unknown; status?: unknown } | null;
+  if (!body || body.success === false) return false;
+  return typeof body.status === "string" ? isPostedResponse(body) : true;
+}

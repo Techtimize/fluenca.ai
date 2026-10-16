@@ -10,7 +10,6 @@ import {
   normalizeScriptResults,
 } from "@/components/dashboard/script/utils";
 import ApiNotFoundCard from "@/components/notfound";
-import TopBar from "@/components/dashboard/topBar";
 import Card from "@/components/shared/card";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { getApiErrorMessage, isApiNotFoundError } from "@/errors/error-utils";
@@ -22,7 +21,6 @@ export default function ScriptDetailPage() {
   const params = useParams<{ Id?: string }>();
   const scriptId = typeof params?.Id === "string" ? params.Id : "";
   const companyId = useAuthStore((s) => s.company_id);
-  const companyName = useAuthStore((s) => s.company_name);
 
   const { data, isLoading, isError, error, refetch, isRefetching } =
     ScriptGenerationResultsByCompanyIdQuery(companyId);
@@ -34,8 +32,6 @@ export default function ScriptDetailPage() {
 
   return (
     <main className="min-w-0 space-y-4 pb-4">
-      <TopBar user={{ name: companyName || "User" }} placeholder="Search scripts..." />
-
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href={PAGE_ROUTES.SCRIPT}
