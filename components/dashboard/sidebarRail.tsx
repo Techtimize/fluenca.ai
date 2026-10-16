@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { ChevronLeft, ChevronRight, LogOut, Menu, X } from "lucide-react";
 import AssetImage from "@/components/shared/assetImage";
 import type { NavItem } from "@/types/dashboard";
@@ -104,7 +105,7 @@ function writeCollapsed(collapsed: boolean) {
 }
 
 export const DASHBOARD_CONTENT_OFFSET =
-  "max-w-full overflow-x-clip px-3 pb-10 pt-16 sm:px-6 md:pt-4 md:ps-[var(--sidebar-content-pad,5.5rem)] lg:pe-8 transition-[padding] duration-200";
+  "max-w-full overflow-x-clip px-3 pb-10 pt-[4.5rem] sm:px-6 md:pt-4 md:ps-[var(--sidebar-content-pad,5.5rem)] lg:pe-8 transition-[padding] duration-200";
 
 export default function SidebarRail({
   items = DEFAULT_NAV,
@@ -175,65 +176,69 @@ export default function SidebarRail({
   return (
     <>
       <style>{`:root{--sidebar-content-pad:${collapsed ? COLLAPSED_PAD : EXPANDED_PAD}}`}</style>
-      <button
-        type="button"
-        aria-label={t("openNav")}
-        onClick={() => setMobileOpen(true)}
-        className={`fixed inset-s-4 top-4 z-30 grid size-10 place-items-center rounded-full border border-[#E6E8F5] bg-white text-neutral-700 shadow-sm md:hidden ${FOCUS_RING}`}
-      >
-        <Menu className="size-4" />
-      </button>
+      {/* Mobile: a fixed bar so the menu button never floats over scrolling content */}
+      <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-[#E6E8F5] bg-white/90 px-3 backdrop-blur-md md:hidden">
+        <button
+          type="button"
+          aria-label={t("openNav")}
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen(true)}
+          className={`grid size-10 place-items-center rounded-full text-neutral-700 hover:bg-neutral-100 ${FOCUS_RING}`}
+        >
+          <Menu className="size-5" />
+        </button>
+        <Link
+          href={PAGE_ROUTES.DASHBOARD}
+          className={`flex min-w-0 items-center gap-2 rounded-lg ${FOCUS_RING}`}
+        >
+          <AssetImage src={logoSrc} alt="" width={26} height={26} />
+          <span className="truncate text-sm font-semibold text-neutral-900">
+            {t("brand")}
+          </span>
+        </Link>
+      </header>
 
-      {mobileOpen ? (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <button
-            type="button"
-            aria-label={t("closeNav")}
-            className="absolute inset-0 bg-neutral-950/30"
-            onClick={() => setMobileOpen(false)}
-          />
-          <nav
-            aria-label="Main"
-            className="absolute bottom-4 inset-s-4 top-4 flex w-[min(18rem,calc(100vw-2rem))] flex-col rounded-3xl border border-[#E6E8F5] bg-white p-4 shadow-xl"
+      <DialogPrimitive.Root open={mobileOpen} onOpenChange={setMobileOpen}>
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Backdrop className="fixed inset-0 z-40 bg-neutral-950/30 duration-150 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 md:hidden" />
+          <DialogPrimitive.Popup
+            className={`fixed inset-y-0 inset-s-0 z-50 flex w-[min(18rem,calc(100vw-3rem))] flex-col bg-white px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 shadow-xl outline-none duration-200 data-open:animate-in data-closed:animate-out md:hidden ${
+              isRtl
+                ? "data-open:slide-in-from-right data-closed:slide-out-to-right"
+                : "data-open:slide-in-from-left data-closed:slide-out-to-left"
+            }`}
           >
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <AssetImage
-                  src={logoSrc}
-                  alt={t("brand")}
-                  width={28}
-                  height={28}
-                />
-                <span className="text-sm font-semibold text-neutral-900">
-                  {t("brand")}
-                </span>
-              </div>
-              <button
-                type="button"
+            <div className="mb-3 flex h-11 items-center justify-between gap-3 px-1">
+              <DialogPrimitive.Title className="flex min-w-0 items-center gap-2.5 text-sm font-semibold text-neutral-900">
+                <AssetImage src={logoSrc} alt="" width={26} height={26} />
+                <span className="truncate">{t("brand")}</span>
+              </DialogPrimitive.Title>
+              <DialogPrimitive.Close
                 aria-label={t("closeNav")}
-                onClick={() => setMobileOpen(false)}
-                className={`grid size-8 place-items-center rounded-full text-neutral-600 hover:bg-neutral-100 ${FOCUS_RING}`}
+                className={`grid size-10 place-items-center rounded-full text-neutral-600 hover:bg-neutral-100 ${FOCUS_RING}`}
               >
-                <X className="size-4" />
-              </button>
+                <X className="size-5" />
+              </DialogPrimitive.Close>
             </div>
-            <ul className="flex-1 space-y-1.5 overflow-y-auto">
-              {renderLinks({
-                showLabels: true,
-                onNavigate: () => setMobileOpen(false),
-              })}
-            </ul>
+            <nav aria-label="Main" className="min-h-0 flex-1 overflow-y-auto">
+              <ul className="space-y-1">
+                {renderLinks({
+                  showLabels: true,
+                  onNavigate: () => setMobileOpen(false),
+                })}
+              </ul>
+            </nav>
             <button
               type="button"
               onClick={handleLogout}
-              className={`mt-3 flex w-full items-center gap-3 rounded-2xl bg-[#5B57E6] px-3 py-2.5 text-sm font-medium text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
+              className={`mt-3 flex w-full items-center gap-3 rounded-2xl bg-[#5B57E6] px-3 py-3 text-sm font-medium text-white hover:bg-[#4A46D0] ${FOCUS_RING}`}
             >
               <LogOut className="size-4.5" />
               {t("logout")}
             </button>
-          </nav>
-        </div>
-      ) : null}
+          </DialogPrimitive.Popup>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
 
       <nav
         aria-label="Main"
