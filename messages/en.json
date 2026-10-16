@@ -44,7 +44,8 @@
     "integrations": "Integrations",
     "blogs": "Blogs",
     "users": "Users",
-    "analytics": "Analytics"
+    "analytics": "Analytics",
+    "news": "News"
   },
   "auth": {
     "email": "Email Address",
