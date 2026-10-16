@@ -5,6 +5,7 @@ export const PAGE_ROUTES = {
     PLANS: '/plans',
     BLOG: '/blog',
     USE_CASES: '/use-cases',
+    DEMO: '/demo',
 
     LOGIN: '/login',
     SIGNUP: '/signup',
