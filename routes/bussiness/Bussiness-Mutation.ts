@@ -14,6 +14,7 @@ import type {
   ContentExecutionSettingsRequest,
 } from "@/types/bussiness/content-execution-type";
 import { toast } from "sonner";
+import { isPostedResponse } from "@/lib/content/posted-content";
 import type { ContactUsRequest } from "@/types/bussiness/contact-type";
 import type { StreamStart } from "@/routes/chatbot/chatbot.routes";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -576,6 +577,11 @@ export function InstagramPublishMutation() {
         );
         return;
       }
+      // A status other than "posted" (e.g. "failed") means the post did not go live.
+      if (typeof response?.status === "string" && !isPostedResponse(response)) {
+        toast.error(response.error || `Instagram post ${response.status}`);
+        return;
+      }
       toast.success(response?.message || "Published to Instagram");
     },
     onError: (error) => {
@@ -592,6 +598,11 @@ export function FacebookPublishMutation() {
         toast.error(
           response.error || response.message || "Failed to publish to Facebook",
         );
+        return;
+      }
+      // A status other than "posted" (e.g. "failed") means the post did not go live.
+      if (typeof response?.status === "string" && !isPostedResponse(response)) {
+        toast.error(response.error || `Facebook post ${response.status}`);
         return;
       }
       toast.success(response?.message || "Published to Facebook");
@@ -744,6 +755,11 @@ export function LinkedInPublishMutation() {
         toast.error(
           response.error || response.message || "Failed to publish to LinkedIn",
         );
+        return;
+      }
+      // A status other than "posted" (e.g. "failed") means the post did not go live.
+      if (typeof response?.status === "string" && !isPostedResponse(response)) {
+        toast.error(response.error || `LinkedIn post ${response.status}`);
         return;
       }
       toast.success(response?.message || "Published to LinkedIn");

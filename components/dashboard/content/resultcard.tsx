@@ -1,18 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import {
   ArrowUpRight,
   CalendarClock,
   CalendarDays,
+  CheckCircle2,
   ImageIcon,
   ImageOff,
   Loader2,
+  Maximize2,
   Send,
 } from "lucide-react";
 import { FacebookIcon } from "@/components/shared/brandIcons";
+import type { PostedContent } from "@/lib/content/posted-content";
 import { formatDate } from "@/utils/format-date";
 import { FOCUS_RING } from "@/utils/ui-classes";
+import ContentPreviewDialog, { ContentDetailsList, contentDetails } from "./contentPreviewDialog";
 import { DeleteImageControls } from "./deleteImageControl";
 import { formatSchedule, SchedulePostButton } from "./schedulePostDialog";
 import type { ContentGenerationResultItem } from "./utils";
@@ -106,13 +111,6 @@ function PlatformHeader({ platform }: { platform?: string }) {
   );
 }
 
-function cardTags(item: ContentGenerationResultItem): string[] {
-  const raw = [item.purpose, item.style, item.tone, item.aspectRatio]
-    .filter((v): v is string => Boolean(v && String(v).trim()))
-    .map((v) => String(v).trim());
-  return raw.filter((v, i, arr) => arr.indexOf(v) === i).slice(0, 4);
-}
-
 function PublishButton({
   platform,
   isPublishing,
@@ -132,32 +130,67 @@ function PublishButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-[#4F46E5] via-[#5B57E6] to-[#7C3AED] px-4 text-[13px] font-semibold text-white shadow-[0_6px_16px_rgba(91,87,230,0.28)] transition hover:brightness-105 disabled:pointer-events-none disabled:opacity-55 ${FOCUS_RING}`}
+      aria-label={isPublishing ? `Publishing on ${label}` : `Publish on ${label}`}
+      className={`inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-[#4F46E5] via-[#5B57E6] to-[#7C3AED] px-4 text-[13px] font-semibold text-white shadow-[0_6px_16px_rgba(91,87,230,0.28)] transition hover:brightness-105 disabled:pointer-events-none disabled:opacity-55 ${FOCUS_RING}`}
     >
       {isPublishing ? (
         <Loader2 className="size-4 animate-spin" aria-hidden="true" />
       ) : (
         <Send className="size-4" aria-hidden="true" />
       )}
-      {isPublishing ? `Publishing on ${label}…` : `Publish on ${label}`}
+      <span className="truncate">{isPublishing ? "Publishing…" : "Publish"}</span>
     </button>
+  );
+}
+
+/** Replaces the schedule/publish buttons once the item has gone live, so it can't be posted twice. */
+function PostedNotice({ posted }: { posted: PostedContent }) {
+  const key = normalizeContentPlatform(posted.platform);
+  const label = key ? PLATFORM_UI[key].label : posted.platform;
+  const when = formatDate(posted.postedAt);
+  const profileUrl =
+    posted.username && key === "instagram" ? `https://www.instagram.com/${posted.username}/` : null;
+
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/70 px-3.5 py-2.5">
+      <CheckCircle2 className="size-4.5 shrink-0 text-emerald-600" aria-hidden="true" />
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] font-semibold text-emerald-800">Posted on {label}</p>
+        {when ? <p className="text-[11px] text-emerald-700/80">{when}</p> : null}
+      </div>
+      {profileUrl ? (
+        <a
+          href={profileUrl}
+          target="_blank"
+          rel="noreferrer"
+          className={`inline-flex shrink-0 items-center gap-1 rounded text-[12px] font-medium text-emerald-800 hover:underline ${FOCUS_RING}`}
+        >
+          @{posted.username}
+          <ArrowUpRight className="size-3.5" aria-hidden="true" />
+        </a>
+      ) : null}
+    </div>
   );
 }
 
 export function ResultCard({
   item,
   isPublishing = false,
+  posted,
   onPublish,
 }: {
   item: ContentGenerationResultItem;
   isPublishing?: boolean;
+  /** Set once the item has been published; it can't be published or scheduled again. */
+  posted?: PostedContent;
   onPublish?: (item: ContentGenerationResultItem) => void;
 }) {
   const cover = item.images[0];
   const created = formatDate(item.createdAt);
   const canPublish = Boolean(cover?.imageUrl && onPublish);
   const caption = item.caption?.trim() || "";
-  const tags = cardTags(item);
+  const details = contentDetails(item);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const imageCount = item.imagesCount || item.images.length || 0;
   const scheduledFor = formatSchedule(item.schedule);
 
@@ -175,14 +208,24 @@ export function ResultCard({
       <div className="relative overflow-hidden rounded-xl bg-[#F6F7FD]">
         <div className="relative aspect-4/3">
           {cover ? (
-            <Image
-              src={cover.thumbnailUrl || cover.imageUrl}
-              alt={item.title || cover.headline || "Generated content"}
-              className="size-full object-cover"
-              width={500}
-              height={500}
-              loading="lazy"
-            />
+            <button
+              type="button"
+              onClick={() => setPreviewOpen(true)}
+              aria-label="View full image"
+              className={`group block size-full cursor-zoom-in ${FOCUS_RING}`}
+            >
+              <Image
+                src={cover.thumbnailUrl || cover.imageUrl}
+                alt={item.title || cover.headline || "Generated content"}
+                className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                width={500}
+                height={500}
+                loading="lazy"
+              />
+              <span className="absolute right-2.5 top-2.5 grid size-8 place-items-center rounded-full bg-black/55 text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                <Maximize2 className="size-3.5" aria-hidden="true" />
+              </span>
+            </button>
           ) : (
             <div className="flex size-full flex-col items-center justify-center gap-2 text-neutral-400">
               <ImageOff className="size-8" aria-hidden="true" />
@@ -215,17 +258,7 @@ export function ResultCard({
           </div>
         ) : null}
 
-        {tags.length > 0 ? (
-          <ul className="flex flex-wrap gap-1.5">
-            {tags.map((tag) => (
-              <li key={tag}>
-                <span className="inline-flex items-center rounded-full bg-[#F0F1F8] px-2.5 py-1 text-[11px] font-medium text-[#5B57E6]">
-                  {tag}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
+        <ContentDetailsList details={details} />
 
         {scheduledFor ? (
           <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#ECEBFF] px-2.5 py-1 text-[12px] font-medium text-[#5B57E6]">
@@ -244,33 +277,40 @@ export function ResultCard({
             {imageCount} {imageCount === 1 ? "image" : "images"}
           </span>
           {cover ? (
-            <a
-              href={cover.imageUrl}
-              target="_blank"
-              rel="noreferrer"
-              className={`ml-auto inline-flex items-center gap-1 font-medium text-neutral-500 transition-colors hover:text-[#5B57E6] ${FOCUS_RING}`}
+            <button
+              type="button"
+              onClick={() => setPreviewOpen(true)}
+              className={`ml-auto inline-flex items-center gap-1 rounded font-medium text-neutral-500 transition-colors hover:text-[#5B57E6] ${FOCUS_RING}`}
             >
-              Open image
-              <ArrowUpRight className="size-3.5" aria-hidden="true" />
-            </a>
+              View image
+              <Maximize2 className="size-3" aria-hidden="true" />
+            </button>
           ) : null}
         </div>
 
-        <SchedulePostButton
-          runId={item.id}
-          platform={normalizeContentPlatform(item.platform)}
-          schedule={item.schedule}
-        />
+        {posted ? (
+          <PostedNotice posted={posted} />
+        ) : (
+          <div className={`grid gap-2 ${onPublish ? "grid-cols-2" : "grid-cols-1"}`}>
+            <SchedulePostButton
+              runId={item.id}
+              platform={normalizeContentPlatform(item.platform)}
+              schedule={item.schedule}
+            />
 
-        {onPublish ? (
-          <PublishButton
-            platform={item.platform}
-            isPublishing={isPublishing}
-            disabled={!canPublish || isPublishing}
-            onClick={() => onPublish(item)}
-          />
-        ) : null}
+            {onPublish ? (
+              <PublishButton
+                platform={item.platform}
+                isPublishing={isPublishing}
+                disabled={!canPublish || isPublishing}
+                onClick={() => onPublish(item)}
+              />
+            ) : null}
+          </div>
+        )}
       </div>
+
+      {cover ? <ContentPreviewDialog item={item} open={previewOpen} onOpenChange={setPreviewOpen} /> : null}
     </li>
   );
 }
