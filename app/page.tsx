@@ -8,13 +8,16 @@ import TestimonialsSection from "@/components/landing/testimonials-section";
 import CaseStudiesSection from "@/components/landing/case-studies-section";
 import FaqCtaSection from "@/components/landing/faq-cta-section";
 import FooterSection from "@/components/landing/footer-section";
+import { SiteHeader } from "@/components/site-header";
 import { LandingHero } from "@/components/landing-hero";
 import { ComingSoonPage } from "./coming-soon/ComingSoonPage";
+import DemoVideoSection from "@/components/landing/demo-video-section";
 
 export default function Home() {
   return (
     // <ComingSoonPage/>
     <div className="flex min-h-dvh flex-col overflow-x-clip bg-white">
+      <SiteHeader />
       <main className="relative z-10 flex flex-1 flex-col bg-white">
       <LandingHero
           eyebrow="Say the goal. Get the plan."
@@ -29,7 +32,9 @@ export default function Home() {
             { label: "Sign Up Now", href: "/signup", variant: "secondary" },
           ]}
         />
+        <DemoVideoSection />
         <HowItWorks />
+        {/* <DemoVideoSection /> */}
         <WhyFluenca />
         <HowFluencaThinks />
         <CaseStudiesSection />
