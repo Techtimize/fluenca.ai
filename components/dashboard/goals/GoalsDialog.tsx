@@ -55,7 +55,7 @@ export default function GoalsDialog({ open, onOpenChange, goalId }: Props) {
             {goalId ? "Your goal" : "Set your goal"}
           </DialogTitle>
           <DialogDescription className="mt-1 text-[13px] leading-5 text-neutral-500">
-            Pick a target, diagnose the gap, approve a plan, and execute tasks.
+            Pick a target, diagnose the gap, and approve a plan.
           </DialogDescription>
         </DialogHeader>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6">

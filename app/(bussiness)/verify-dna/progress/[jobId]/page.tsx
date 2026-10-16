@@ -54,7 +54,7 @@ function stepState(
       : statuses.length && statuses.every((st) => st === "completed")
         ? "completed"
         : statuses.includes("completed")
-          ? "running" // a sub-step finished, the main one is next
+          ? "running"
           : "pending";
   const seconds = parts.reduce((sum, p) => sum + (p!.duration_sec ?? 0), 0);
   return { status, seconds: seconds ? Math.round(seconds) : null };
@@ -107,7 +107,7 @@ export default function IntelligenceProgressPage() {
     if (handled.current) return;
     if (isReady) {
       handled.current = true;
-      queryClient.invalidateQueries(); // pages refetch the freshly saved results
+      queryClient.invalidateQueries();
       toast.success("Your workspace is ready!");
       router.replace(PAGE_ROUTES.DASHBOARD);
     } else if (isFailed) {
@@ -192,8 +192,6 @@ export default function IntelligenceProgressPage() {
                     {s === "running" ? (
                       <>
                         <span className="absolute -inset-1 animate-ping rounded-full border-2 border-[#5452F6]/30" />
-                        {/* The mascot works on the current step; done steps go back to their icon.
-                            n_mascot_3_head.gif is the robot cropped from n_mascot_3.gif at 3x this size, so it stays sharp. */}
                         <span className="absolute inset-0.5 overflow-hidden rounded-full">
                           <Mascot
                             src="/mascots/n_mascot_3_head.gif"
