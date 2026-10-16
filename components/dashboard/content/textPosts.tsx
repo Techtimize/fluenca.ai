@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { AlertCircle, CheckCircle2, Loader2, Send } from "lucide-react";
+import { AlertCircle, CalendarClock, CheckCircle2, Loader2, Send } from "lucide-react";
+import { initialDate } from "@/components/dashboard/content/schedulePostDialog";
+import { ScheduleDateTime } from "@/components/dashboard/content/scheduled/scheduleFields";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,7 +15,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { isPublishSucceeded } from "@/lib/content/posted-content";
-import { LinkedInPublishMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import { CreateScheduledPostMutation, LinkedInPublishMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import { toOffsetIso } from "@/types/bussiness/scheduled-post-type";
 import { CompanyTextPostsQuery } from "@/routes/bussiness/Bussiness-Query";
 import {
   isTextPostPosted,
@@ -27,6 +30,8 @@ import { FOCUS_RING } from "@/utils/ui-classes";
 import { cn } from "@/lib/utils";
 
 const LINKEDIN_LIMIT = 3000;
+
+type When = "now" | "later";
 
 export function TextPostStatus({ post }: { post: TextPost }) {
   if (isTextPostPosted(post)) {
@@ -50,13 +55,34 @@ export function TextPostStatus({ post }: { post: TextPost }) {
 /** Mounted fresh on each open, so the text starts from the saved post. */
 function TextPostForm({ post, onDone }: { post: TextPost; onDone: () => void }) {
   const [text, setText] = useState(() => textPostText(post));
+  const [when, setWhen] = useState<When>("now");
+  const [scheduledAt, setScheduledAt] = useState(() => initialDate());
   const publish = LinkedInPublishMutation();
+  const schedule = CreateScheduledPostMutation();
+  const busy = publish.isPending || schedule.isPending;
+  const inPast = scheduledAt <= new Date();
   const posted = isTextPostPosted(post);
   const id = textPostId(post);
   const error = textPostError(post);
 
   const submit = () => {
     if (!id || !text.trim() || posted) return;
+    if (when === "later") {
+      if (inPast) return;
+      // Same text-only LinkedIn post the Upload & schedule screen sends: no file.
+      schedule.mutate(
+        {
+          body: {
+            platforms: ["linkedin"],
+            scheduled_at: toOffsetIso(scheduledAt),
+            caption: text.trim(),
+            generation_id: id,
+          },
+        },
+        { onSuccess: onDone },
+      );
+      return;
+    }
     publish.mutate(
       { text: text.trim(), generation_id: id },
       { onSuccess: (response) => isPublishSucceeded(response) && onDone() },
@@ -85,18 +111,65 @@ function TextPostForm({ post, onDone }: { post: TextPost; onDone: () => void }) 
           className="mt-2 w-full resize-y rounded-xl border border-[#E6E8F5] bg-white px-3.5 py-2.5 text-[14px] leading-6 text-neutral-900 outline-none read-only:bg-[#F8F9FC] focus:border-[#5B57E6] focus:ring-2 focus:ring-[#5B57E6]/20"
         />
       </label>
+
+      {posted ? null : (
+        <fieldset className="space-y-3">
+          <legend className="text-[13px] font-medium text-neutral-700">When</legend>
+          <div role="radiogroup" aria-label="When to post" className="inline-flex gap-1 rounded-xl border border-[#E6E8F5] bg-white p-1">
+            {(
+              [
+                { id: "now", label: "Post now", icon: Send },
+                { id: "later", label: "Schedule", icon: CalendarClock },
+              ] as const
+            ).map((option) => {
+              const active = when === option.id;
+              const Icon = option.icon;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => setWhen(option.id)}
+                  disabled={busy}
+                  className={cn(
+                    `inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-semibold transition-colors ${FOCUS_RING}`,
+                    active ? "bg-[#5B57E6] text-white shadow-sm" : "text-neutral-600 hover:bg-[#F6F7FD]",
+                  )}
+                >
+                  <Icon className="size-3.5" aria-hidden="true" />
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+          {when === "later" ? <ScheduleDateTime value={scheduledAt} onChange={setScheduledAt} /> : null}
+        </fieldset>
+      )}
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={onDone} disabled={publish.isPending}>
+        <Button type="button" variant="outline" onClick={onDone} disabled={busy}>
           {posted ? "Close" : "Cancel"}
         </Button>
         {posted ? null : (
-          <Button type="button" onClick={submit} disabled={!id || !text.trim() || publish.isPending}>
-            {publish.isPending ? (
+          <Button
+            type="button"
+            onClick={submit}
+            disabled={!id || !text.trim() || busy || (when === "later" && inPast)}
+          >
+            {busy ? (
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : when === "later" ? (
+              <CalendarClock className="size-4" aria-hidden="true" />
             ) : (
               <Send className="size-4" aria-hidden="true" />
             )}
-            {publish.isPending ? "Publishing…" : "Publish on LinkedIn"}
+            {when === "later"
+              ? schedule.isPending
+                ? "Scheduling…"
+                : "Schedule post"
+              : publish.isPending
+                ? "Publishing…"
+                : "Publish on LinkedIn"}
           </Button>
         )}
       </DialogFooter>
@@ -117,14 +190,16 @@ export function TextPostDialog({
   const posted = isTextPostPosted(post);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Image src="/assets/linkedin.png" alt="" width={18} height={18} className="size-4.5 object-contain" />
             {posted ? "Posted on LinkedIn" : "LinkedIn text post"}
           </DialogTitle>
           <DialogDescription>
-            {posted ? "This post is live on LinkedIn." : "Check the post, edit anything you like, then publish."}
+            {posted
+              ? "This post is live on LinkedIn."
+              : "Check the post, edit anything you like, then publish now or pick a time."}
           </DialogDescription>
         </DialogHeader>
         {open && post ? <TextPostForm post={post} onDone={() => onOpenChange(false)} /> : null}
