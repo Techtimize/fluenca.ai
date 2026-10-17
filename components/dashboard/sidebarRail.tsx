@@ -14,17 +14,15 @@ import { FOCUS_RING } from "@/utils/ui-classes";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { clearAuthTokenProvider } from "@/provider/auth-provider";
 
-
-/** Same blue-to-violet gradient as the Fluenca logo. */
 const LOGOUT_BG =
   "bg-[#4F5BFF] shadow-[0_6px_16px_-8px_rgba(84,90,255,0.7)] transition-opacity hover:opacity-90";
-/** Set inline so the gradient always renders; the solid class above is the fallback. */
+
 const LOGOUT_STYLE = { backgroundImage: "linear-gradient(135deg, #3659FF 0%, #8157F7 100%)" };
 
 export const DEFAULT_NAV: NavItem[] = [
   { id: "home", label: "Home", icon: "home", href: PAGE_ROUTES.DASHBOARD },
   {
-    id: "content",
+    id: "content-ideas",
     label: "Content",
     icon: "lightbulb",
     href: PAGE_ROUTES.CONTENT_RECOMMENDATION,
@@ -80,16 +78,13 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** Hover intent: open after a short pause and close a little later, so brushing the edge doesn't flicker. */
 const OPEN_DELAY_MS = 80;
 const CLOSE_DELAY_MS = 180;
 
-/** Fades labels in once the rail is wide enough, and out straight away when it closes. */
 const railLabel = (expanded: boolean) =>
   `min-w-0 truncate whitespace-nowrap transition-opacity duration-200 ${expanded ? "opacity-100 delay-100" : "opacity-0"}`;
 
 export const DASHBOARD_CONTENT_OFFSET =
-  // The rail is always collapsed in the layout; on hover it expands over the content, so this never changes.
   "max-w-full overflow-x-clip px-3 pb-10 pt-[4.5rem] sm:px-6 md:pt-4 md:ps-24 lg:pe-8";
 
 export default function SidebarRail({
@@ -100,7 +95,7 @@ export default function SidebarRail({
   const locale = useLocale();
   const t = useTranslations("common");
   const tNav = useTranslations("nav");
-  // Open while the pointer is over the rail or keyboard focus is inside it.
+
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const expanded = hovered || focused;
