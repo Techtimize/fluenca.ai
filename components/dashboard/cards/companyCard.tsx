@@ -154,12 +154,14 @@ function CompetitorRow({
           {competitor.name}
         </p>
         <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          {/* Compare is turned off for now; uncomment to bring it back.
           {canCompare ? (
             <button type="button" onClick={onCompare} disabled={compareDisabled} className={COMPARE_BUTTON}>
               <GitCompareArrows className="size-3.5" aria-hidden="true" />
               Compare
             </button>
           ) : null}
+          */}
           {competitor.whyCompetitor ? (
             <Tooltip>
               <TooltipTrigger
@@ -335,6 +337,7 @@ export default function CompanyCard({
             <h3 className="text-sm font-semibold text-neutral-900">
               Competitors
             </h3>
+            {/* Compare all is turned off for now; uncomment to bring it back.
             {comparable.length > 1 ? (
               <button
                 type="button"
@@ -350,6 +353,7 @@ export default function CompanyCard({
                 Compare all
               </button>
             ) : null}
+            */}
           </div>
           <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             {company.competitors.map((competitor, index) => (
