@@ -36,6 +36,23 @@ export const SITE_HEADER_ROUTES: readonly string[] = [
 
 const subscribeNoop = () => () => {};
 
+// Logs a header navigation and falls back to a full page load if it stalls
+function trackNavigation(href: string) {
+  const start = performance.now();
+  console.log("[nav] start", { from: location.pathname, to: href });
+  const timer = setInterval(() => {
+    const ms = Math.round(performance.now() - start);
+    if (location.pathname === href) {
+      clearInterval(timer);
+      console.log("[nav] done", { to: href, ms });
+    } else if (ms > 3000) {
+      clearInterval(timer);
+      console.warn("[nav] stalled, forcing full load", { to: href, ms });
+      location.assign(href);
+    }
+  }, 100);
+}
+
 function useHydrated() {
   return useSyncExternalStore(
     subscribeNoop,
@@ -51,7 +68,7 @@ export function SiteHeader({
   const accessToken = useAuthStore((s) => s.access_token);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const mounted = useHydrated();
-  // Keyed to the path so navigating closes the mobile menu without an effect.
+
   const [menuOpenedAt, setMenuOpenedAt] = useState<string | null>(null);
   const menuOpen = menuOpenedAt === pathname;
   const setMenuOpen = (open: boolean) => setMenuOpenedAt(open ? pathname : null);
@@ -145,7 +162,7 @@ export function SiteHeader({
               <BrandButton href={PAGE_ROUTES.DASHBOARD}>Dashboard</BrandButton>
             </>
           ) : pathname !== PAGE_ROUTES.DEMO ? (
-            <BrandButton href={PAGE_ROUTES.DEMO} prefetch={false}>
+            <BrandButton href={PAGE_ROUTES.DEMO} onNavigate={() => trackNavigation(PAGE_ROUTES.DEMO)}>
               Book a Demo
             </BrandButton>
           ) : null}
@@ -204,7 +221,11 @@ export function SiteHeader({
                   </BrandButton>
                 </>
               ) : pathname !== PAGE_ROUTES.DEMO ? (
-                <BrandButton href={PAGE_ROUTES.DEMO} prefetch={false} className="w-full">
+                <BrandButton
+                  href={PAGE_ROUTES.DEMO}
+                  onNavigate={() => trackNavigation(PAGE_ROUTES.DEMO)}
+                  className="w-full"
+                >
                   Book a Demo
                 </BrandButton>
               ) : null}
