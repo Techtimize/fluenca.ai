@@ -57,6 +57,15 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Stale tab after a redeploy: its JS chunks are gone, so load the new build
+    if (
+      error.name === "ChunkLoadError" ||
+      /loading chunk/i.test(error.message)
+    ) {
+      window.location.reload();
+      return;
+    }
+
     toast.error("ErrorBoundary caught an error. Please try again.", {
       description: error.message + " " + errorInfo.componentStack,
     });
