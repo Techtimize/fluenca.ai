@@ -106,7 +106,7 @@ export default function AgentsPage() {
 
               <div className="absolute inset-0 m-auto flex size-32 flex-col items-center justify-center rounded-full border border-[#D9DCF7] bg-white text-center shadow-[0_20px_50px_-24px_rgba(79,70,229,0.55)] sm:size-36">
                 <Image
-                  src="/assets/logo.svg"
+                  src="/assets/Logo.svg"
                   alt="Fluenca"
                   width={80}
                   height={80}
@@ -137,6 +137,7 @@ export default function AgentsPage() {
                         className={`relative size-full rounded-full border-2 object-cover bg-transparent shadow-xl ${accentStyles[agent.accent].ring}`}
                         width={100}
                         height={100}
+                        loading="eager"
                       />
                       <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#E6E8F5] bg-white px-2 py-0.5 text-[10px] font-semibold text-neutral-700 shadow-sm">
                         {agent.role}

@@ -45,7 +45,7 @@ type FooterSectionProps = {
 };
 
 export default function FooterSection({
-  logoSrc = "/assets/logo.svg",
+  logoSrc = "/assets/Logo.svg",
   columns = DEFAULT_COLUMNS,
   wordmark = "fluenca.ai",
   copyright = "Copyright © 2026 Techtimize Ltd. All rights reserved.",
@@ -70,7 +70,7 @@ export default function FooterSection({
                 width={117}
                 height={125}
                 priority
-                className="h-auto w-20 md:w-[117px]"
+                className="h-[86px] w-20 object-contain md:h-[125px] md:w-[117px]"
               />
             </Link>
           </div>
