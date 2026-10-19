@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
-const LOGO_SRC = "/assets/logo.svg";
+const LOGO_SRC = "/assets/Logo.svg";
 
 // Pages that use the small card. Every other auth page (login, signup) is shown full size.
 const CARD_PAGES = [
