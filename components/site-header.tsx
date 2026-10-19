@@ -108,6 +108,7 @@ export function SiteHeader({
               <li key={label} className="shrink-0">
                 <Link
                   href={href ?? "#"}
+                  prefetch={false}
                   aria-current={isActive ? "page" : undefined}
                   className={`flex items-center gap-1 py-2 text-sm font-medium transition-colors ${
                     isActive
@@ -144,7 +145,9 @@ export function SiteHeader({
               <BrandButton href={PAGE_ROUTES.DASHBOARD}>Dashboard</BrandButton>
             </>
           ) : pathname !== PAGE_ROUTES.DEMO ? (
-            <BrandButton href={PAGE_ROUTES.DEMO}>Book a Demo</BrandButton>
+            <BrandButton href={PAGE_ROUTES.DEMO} prefetch={false}>
+              Book a Demo
+            </BrandButton>
           ) : null}
         </div>
 
@@ -201,7 +204,7 @@ export function SiteHeader({
                   </BrandButton>
                 </>
               ) : pathname !== PAGE_ROUTES.DEMO ? (
-                <BrandButton href={PAGE_ROUTES.DEMO} className="w-full">
+                <BrandButton href={PAGE_ROUTES.DEMO} prefetch={false} className="w-full">
                   Book a Demo
                 </BrandButton>
               ) : null}
