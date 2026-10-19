@@ -106,7 +106,7 @@ export default function AgentsPage() {
 
               <div className="absolute inset-0 m-auto flex size-32 flex-col items-center justify-center rounded-full border border-[#D9DCF7] bg-white text-center shadow-[0_20px_50px_-24px_rgba(79,70,229,0.55)] sm:size-36">
                 <Image
-                  src="/assets/logo.svg"
+                  src="/assets/Logo.svg"
                   alt="Fluenca"
                   width={80}
                   height={80}
