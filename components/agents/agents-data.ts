@@ -52,7 +52,7 @@ export const AGENTS: AgentStory[] = [
     name: "Competitor",
     role: "Competitor Analysis",
     accent: "indigo",
-    image: "/assets/Avatars/talha-mascot.png",
+    image: "/assets/Avatars/Talha-mascot.png",
     label: "02. Competitor Agent",
     title: "The One Who Finds the Gaps",
     chapter: "CHAPTER 02 · THE STRATEGIC OBSERVER",
