@@ -137,6 +137,7 @@ export default function AgentsPage() {
                         className={`relative size-full rounded-full border-2 object-cover bg-transparent shadow-xl ${accentStyles[agent.accent].ring}`}
                         width={100}
                         height={100}
+                        loading="eager"
                       />
                       <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#E6E8F5] bg-white px-2 py-0.5 text-[10px] font-semibold text-neutral-700 shadow-sm">
                         {agent.role}
