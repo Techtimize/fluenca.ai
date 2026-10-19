@@ -45,7 +45,7 @@ type FooterSectionProps = {
 };
 
 export default function FooterSection({
-  logoSrc = "/assets/logo.svg",
+  logoSrc = "/assets/Logo.svg",
   columns = DEFAULT_COLUMNS,
   wordmark = "fluenca.ai",
   copyright = "Copyright © 2026 Techtimize Ltd. All rights reserved.",
