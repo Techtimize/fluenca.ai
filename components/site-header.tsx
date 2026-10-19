@@ -10,6 +10,7 @@ import { BrandButton } from "@/components/ui/brand-button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { clearAuthTokenProvider } from "@/provider/auth-provider";
 import useAuthStore from "@/store/AuthsStore";
+import { useRouter } from 'next/navigation'
 
 export interface SiteNavigationItem {
   label?: string;
@@ -36,23 +37,6 @@ export const SITE_HEADER_ROUTES: readonly string[] = [
 
 const subscribeNoop = () => () => {};
 
-// Logs a header navigation and falls back to a full page load if it stalls
-function trackNavigation(href: string) {
-  const start = performance.now();
-  console.log("[nav] start", { from: location.pathname, to: href });
-  const timer = setInterval(() => {
-    const ms = Math.round(performance.now() - start);
-    if (location.pathname === href) {
-      clearInterval(timer);
-      console.log("[nav] done", { to: href, ms });
-    } else if (ms > 3000) {
-      clearInterval(timer);
-      console.warn("[nav] stalled, forcing full load", { to: href, ms });
-      location.assign(href);
-    }
-  }, 100);
-}
-
 function useHydrated() {
   return useSyncExternalStore(
     subscribeNoop,
@@ -68,6 +52,7 @@ export function SiteHeader({
   const accessToken = useAuthStore((s) => s.access_token);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const mounted = useHydrated();
+  const router = useRouter();
 
   const [menuOpenedAt, setMenuOpenedAt] = useState<string | null>(null);
   const menuOpen = menuOpenedAt === pathname;
@@ -94,7 +79,7 @@ export function SiteHeader({
     <header className="sticky top-0 z-50 flex w-full justify-center px-3 pt-3 sm:px-4 md:pt-4">
       <nav
         aria-label="Main navigation"
-        className="relative mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 rounded-full bg-white/80 pl-3 pr-2 shadow-sm backdrop-blur-xl transition-[background-color,box-shadow] duration-300 sm:pl-4 md:h-[60px] md:pl-5"
+        className="relative mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 rounded-full bg-white/80 pl-3 pr-2 shadow-sm backdrop-blur-xl transition-[background-color,box-shadow] duration-300 sm:pl-4 md:h-15 md:pl-5"
       >
         {/* Logo */}
         <Link
@@ -162,7 +147,9 @@ export function SiteHeader({
               <BrandButton href={PAGE_ROUTES.DASHBOARD}>Dashboard</BrandButton>
             </>
           ) : pathname !== PAGE_ROUTES.DEMO ? (
-            <BrandButton href={PAGE_ROUTES.DEMO} onNavigate={() => trackNavigation(PAGE_ROUTES.DEMO)}>
+            <BrandButton
+              onClick={() => router.push(PAGE_ROUTES.DEMO)}
+            >
               Book a Demo
             </BrandButton>
           ) : null}
@@ -222,8 +209,7 @@ export function SiteHeader({
                 </>
               ) : pathname !== PAGE_ROUTES.DEMO ? (
                 <BrandButton
-                  href={PAGE_ROUTES.DEMO}
-                  onNavigate={() => trackNavigation(PAGE_ROUTES.DEMO)}
+                 onClick={() => router.push(PAGE_ROUTES.DEMO)}
                   className="w-full"
                 >
                   Book a Demo
