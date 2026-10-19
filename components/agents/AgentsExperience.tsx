@@ -221,7 +221,6 @@ export function AgentsExperience() {
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    if (reduceMotion) return;
     const orbit = orbitRef.current;
     const nodes = nodesRef.current.filter(Boolean);
     if (!orbit || nodes.length === 0) return;
@@ -229,6 +228,7 @@ export function AgentsExperience() {
     const radius = window.innerWidth < 640 ? 118 : 168;
     const duration = fast ? 14 : 36;
 
+    // Always position the avatars, even with reduced motion
     nodes.forEach((node, i) => {
       const angle = (i / nodes.length) * Math.PI * 2 - Math.PI / 2;
       gsap.set(node, {
@@ -238,6 +238,9 @@ export function AgentsExperience() {
         yPercent: -50,
       });
     });
+
+    // Only animate if motion is allowed
+    if (reduceMotion) return;
 
     const orbitTween = gsap.to(orbit, {
       rotation: 360,
@@ -289,7 +292,7 @@ export function AgentsExperience() {
               alt="Fluenca"
               width={28}
               height={28}
-              className="size-7"
+              className="size-7 shrink-0"
             />
             <span className="text-[17px] font-semibold tracking-tight">
               Fluenca
@@ -384,7 +387,7 @@ export function AgentsExperience() {
                   alt="Fluenca"
                   width={80}
                   height={80}
-                  className="size-20"
+                  className="size-20 shrink-0"
                 />
               </div>
 

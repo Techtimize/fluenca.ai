@@ -70,7 +70,7 @@ export default function FooterSection({
                 width={117}
                 height={125}
                 priority
-                className="h-auto w-20 md:w-[117px]"
+                className="h-[86px] w-20 object-contain md:h-[125px] md:w-[117px]"
               />
             </Link>
           </div>
