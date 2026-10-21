@@ -35,8 +35,11 @@ export default function DemoVideoSection() {
         </p>
       </div>
 
-      {/* Player: the poster sets the height, so it is never cropped */}
-      <div className={PLAYER_CLASS} style={{ maxWidth: "46rem" }}>
+      {/* Player: aspectRatio sets the height (make the second number bigger for a taller video) */}
+      <div
+        className={PLAYER_CLASS}
+        style={{ maxWidth: "46rem", aspectRatio: "16 / 11" }}
+      >
         {/* Poster stays in the layout (hidden while playing) to hold the size */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -47,7 +50,7 @@ export default function DemoVideoSection() {
 
         <video
           ref={videoRef}
-          className="absolute inset-0 h-full w-full object-contain"
+          className="absolute inset-0 h-full w-full object-cover"
           src="/videos/demo.mp4"
           controls={playing}
           preload="metadata"
@@ -68,7 +71,7 @@ export default function DemoVideoSection() {
               src="/videos/demo-poster.jpg"
               alt=""
               aria-hidden
-              className="absolute inset-0 h-full w-full object-fill"
+              className="absolute inset-0 h-full w-full object-cover"
             />
             <span className="absolute inset-0 bg-black/10 transition group-hover:bg-black/20" />
             <span className="absolute inset-0 flex items-center justify-center">
