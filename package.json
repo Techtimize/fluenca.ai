@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node api.js && next dev",
+    "dev": "next dev",
     "build": "next build",
-    "start": "node api.js && next start",
+    "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
