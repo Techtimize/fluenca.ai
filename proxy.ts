@@ -16,6 +16,11 @@ export function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
+    const isAdmin = role === 'super_admin' || role === 'superadmin' || role === 'admin';
+    if (path.startsWith('/clarity') && (!accessToken || !isAdmin)) {
+        return NextResponse.redirect(new URL(accessToken ? '/dashboard' : '/login', request.url));
+    }
+
     if (accessToken) {
         if (path.startsWith('/login') || path.startsWith('/signup')) {
             const isSuperAdmin =
@@ -84,5 +89,6 @@ export const config = {
         '/googleconsole/:path*',
         '/competitor-analysis/:path*',
         '/superadmin/:path*',
+        '/clarity/:path*',
     ],
 };

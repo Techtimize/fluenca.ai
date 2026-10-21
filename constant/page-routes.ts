@@ -53,4 +53,5 @@ export const PAGE_ROUTES = {
 
     SUPERADMIN: '/superadmin',
     SUPERADMIN_USERS: '/superadmin',
+    SUPERADMIN_CLARITY: '/clarity',
 } as const;
