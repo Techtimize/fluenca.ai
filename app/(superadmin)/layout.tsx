@@ -7,6 +7,7 @@ import type { NavItem } from "@/types/dashboard";
 
 const SUPERADMIN_NAV: NavItem[] = [
   { id: "users", label: "Users", icon: "users", href: PAGE_ROUTES.SUPERADMIN_USERS },
+  { id: "clarity", label: "Clarity", icon: "activity", href: PAGE_ROUTES.SUPERADMIN_CLARITY },
 ];
 
 export default function SuperAdminLayout({ children }: { children: ReactNode }) {

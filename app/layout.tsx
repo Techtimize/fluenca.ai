@@ -7,6 +7,7 @@ import QueryProvider from "@/provider/query-provider";
 import ErrorBoundary from "@/errors/ErrorBoundary";
 import localFont from "next/font/local";
 import { Toaster } from "@/components/ui/sonner";
+import ClarityTracking from "@/components/analytics/ClarityTracking";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -107,6 +108,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <NextIntlClientProvider locale={locale} messages={messages}>
           <QueryProvider>
             <Toaster position={isArabic ? "bottom-left" : "bottom-right"} />
+            <ClarityTracking />
             <ErrorBoundary>
               {children}
             </ErrorBoundary>
