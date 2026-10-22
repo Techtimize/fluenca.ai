@@ -1,5 +1,4 @@
 
-var module = { exports: {} };
 
 const config = {
   plugins: {
