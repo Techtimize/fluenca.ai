@@ -58,7 +58,7 @@ export function CompetitorsDetailTable({ competitors }: CompetitorsDetailTablePr
         </p>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[920px] text-left text-[12px]">
+        <table className="w-full min-w-230 text-left text-[12px]">
           <thead>
             <tr className="border-b border-[#EEF0F8] text-neutral-400">
               <th className="px-5 py-3 font-medium sm:px-6">Competitor</th>

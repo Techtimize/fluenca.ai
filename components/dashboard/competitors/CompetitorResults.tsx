@@ -265,7 +265,7 @@ function KvGrid({
           <dt className="text-[11px] font-medium uppercase tracking-[0.04em] text-neutral-500">
             {item.label}
           </dt>
-          <dd className="mt-1 break-words text-[13px] font-medium text-neutral-900">
+          <dd className="mt-1 wrap-break-word text-[13px] font-medium text-neutral-900">
             {String(item.value)}
           </dd>
         </div>
