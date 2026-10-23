@@ -3,6 +3,7 @@
 import type { ComponentType, ReactNode } from "react";
 import { ExternalLink, GitCompareArrows, Globe, Info, Loader2, RefreshCcw } from "lucide-react";
 import CompetitorCompareDialog, {
+  COMPARE_ALL_ID,
   competitorInputs,
   useCompetitorCompare,
 } from "@/components/dashboard/competitors/CompetitorCompareDialog";
@@ -88,11 +89,13 @@ function CompetitorRow({
   index,
   onCompare,
   compareDisabled,
+  isComparing,
 }: {
   competitor: Competitor;
   index: number;
   onCompare: () => void;
   compareDisabled: boolean;
+  isComparing: boolean;
 }) {
   const canCompare = competitorInputs(competitor).length > 0;
   const logo = competitor.logoSrc;
@@ -154,14 +157,16 @@ function CompetitorRow({
           {competitor.name}
         </p>
         <div className="ml-auto flex shrink-0 items-center gap-1.5">
-          {/* Compare is turned off for now; uncomment to bring it back.
           {canCompare ? (
             <button type="button" onClick={onCompare} disabled={compareDisabled} className={COMPARE_BUTTON}>
-              <GitCompareArrows className="size-3.5" aria-hidden="true" />
-              Compare
+              {isComparing ? (
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+              ) : (
+                <GitCompareArrows className="size-3.5" aria-hidden="true" />
+              )}
+              {isComparing ? "Comparing…" : "Compare"}
             </button>
           ) : null}
-          */}
           {competitor.whyCompetitor ? (
             <Tooltip>
               <TooltipTrigger
@@ -337,23 +342,21 @@ export default function CompanyCard({
             <h3 className="text-sm font-semibold text-neutral-900">
               Competitors
             </h3>
-            {/* Compare all is turned off for now; uncomment to bring it back.
             {comparable.length > 1 ? (
               <button
                 type="button"
-                onClick={() => compare.start(comparable)}
-                disabled={compare.isStarting}
+                onClick={() => compare.start(comparable, COMPARE_ALL_ID)}
+                disabled={compare.isBusy}
                 className={COMPARE_BUTTON}
               >
-                {compare.isStarting ? (
+                {compare.isComparing(COMPARE_ALL_ID) ? (
                   <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
                 ) : (
                   <GitCompareArrows className="size-3.5" aria-hidden="true" />
                 )}
-                Compare all
+                {compare.isComparing(COMPARE_ALL_ID) ? "Comparing…" : "Compare all"}
               </button>
             ) : null}
-            */}
           </div>
           <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             {company.competitors.map((competitor, index) => (
@@ -361,8 +364,9 @@ export default function CompanyCard({
                 key={competitor.id}
                 competitor={competitor}
                 index={index}
-                onCompare={() => compare.start([competitor])}
-                compareDisabled={compare.isStarting}
+                onCompare={() => compare.start([competitor], competitor.id)}
+                compareDisabled={compare.isBusy}
+                isComparing={compare.isComparing(competitor.id)}
               />
             ))}
           </ul>

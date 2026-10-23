@@ -496,8 +496,12 @@ export const BlogImageApi = async (blog_post_id: string, body: BlogImageRequest)
     return response.data;
 }
 
-export const InstagramLoginApi = async (): Promise<InstagramAuthorizeResponse> => {
-    const response = await api.get(BUSSINESSENDPOINT.CONNECTORS.INSTAGRAM_LOGIN);
+export const InstagramLoginApi = async (
+  context?: string,
+): Promise<InstagramAuthorizeResponse> => {
+    const response = await api.get(BUSSINESSENDPOINT.CONNECTORS.INSTAGRAM_LOGIN, {
+      params: { context },
+    });
     return response.data;
 }
 
@@ -508,9 +512,11 @@ export const SocialAccountsApi = async (): Promise<SocialAccountsResponse> => {
 
 export const SocialAccountConnectApi = async (
   platform: string,
+  context?: string,
 ): Promise<InstagramAuthorizeResponse> => {
     const response = await api.get(
       BUSSINESSENDPOINT.CONNECTORS.SOCIAL_ACCOUNTS_CONNECT(platform),
+      { params: { context } },
     );
     return response.data;
 }
@@ -568,8 +574,12 @@ export const LinkedInPublishApi = async (
   return response.data;
 }
 
-export const XLoginApi = async (): Promise<InstagramAuthorizeResponse> => {
-  const response = await api.get(BUSSINESSENDPOINT.CONNECTORS.X_LOGIN);
+export const XLoginApi = async (
+  context?: string,
+): Promise<InstagramAuthorizeResponse> => {
+  const response = await api.get(BUSSINESSENDPOINT.CONNECTORS.X_LOGIN, {
+    params: { context },
+  });
   return response.data;
 }
 
@@ -817,8 +827,12 @@ export const GoogleAnalyticsConnectionApi = async (): Promise<GoogleAnalyticsCon
   return response.data;
 };
 
-export const GoogleAnalyticsConnectApi = async (): Promise<{ authorize_url: string }> => {
-  const response = await api.get(BUSSINESSENDPOINT.GOOGLE_ANALYTICS.CONNECT);
+export const GoogleAnalyticsConnectApi = async (
+  context?: string,
+): Promise<{ authorize_url: string }> => {
+  const response = await api.get(BUSSINESSENDPOINT.GOOGLE_ANALYTICS.CONNECT, {
+    params: { context },
+  });
   return response.data;
 };
 
@@ -848,8 +862,12 @@ export const SearchConsoleConnectionApi = async (): Promise<SearchConsoleConnect
   return response.data;
 };
 
-export const SearchConsoleConnectApi = async (): Promise<{ authorize_url: string }> => {
-  const response = await api.get(BUSSINESSENDPOINT.SEARCH_CONSOLE.CONNECT);
+export const SearchConsoleConnectApi = async (
+  context?: string,
+): Promise<{ authorize_url: string }> => {
+  const response = await api.get(BUSSINESSENDPOINT.SEARCH_CONSOLE.CONNECT, {
+    params: { context },
+  });
   return response.data;
 };
 
