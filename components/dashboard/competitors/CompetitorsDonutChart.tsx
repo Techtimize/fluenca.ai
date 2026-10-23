@@ -12,7 +12,7 @@ export function CompetitorsDonutChart({ segments, centerLabel = "Mix" }: Props) 
 
   if (!segments.length || total <= 0) {
     return (
-      <div className="grid min-h-[180px] place-items-center text-[13px] text-neutral-500">
+      <div className="grid min-h-45 place-items-center text-[13px] text-neutral-500">
         No chart data yet
       </div>
     );

@@ -111,12 +111,10 @@ export function WaitlistMutation() {
 }
 
 export function OnboardingMutation() {
-    const router = useRouter();
     return useMutation({
         mutationFn: (data: OnboardingRequestProps) => OnboardingApi(data),
         onSuccess: (response: OnboardingResponseProps) => {
             toast.success(`${response.company_name ?? "Company"} details saved successfully`);
-            router.push(PAGE_ROUTES.COMPANY_DETAIL);
         },
         onError: (error) => {
             toast.error(getApiErrorMessage(error, "Failed to save onboarding"));
@@ -486,8 +484,8 @@ function getAuthorizeUrl(data: { authorize_url?: string } | null | undefined) {
 
 export function InstagramConnectMutation() {
   return useMutation({
-    mutationFn: async () => {
-      const response = await InstagramLoginApi();
+    mutationFn: async (context?: string) => {
+      const response = await InstagramLoginApi(context);
       return getAuthorizeUrl(response);
     },
     onSuccess: (authorizeUrl) => {
@@ -518,8 +516,8 @@ export function FacebookConnectMutation() {
 
 export function LinkedInConnectMutation() {
   return useMutation({
-    mutationFn: async () => {
-      const response = await SocialAccountConnectApi("linkedin");
+    mutationFn: async (context?: string) => {
+      const response = await SocialAccountConnectApi("linkedin", context);
       return getAuthorizeUrl(response);
     },
     onSuccess: (authorizeUrl) => {
@@ -534,8 +532,8 @@ export function LinkedInConnectMutation() {
 
 export function XConnectMutation() {
   return useMutation({
-    mutationFn: async () => {
-      const response = await XLoginApi();
+    mutationFn: async (context?: string) => {
+      const response = await XLoginApi(context);
       return getAuthorizeUrl(response);
     },
     onSuccess: (authorizeUrl) => {
@@ -857,7 +855,7 @@ export function UpdateGoalTaskMutation() {
 /** Sends the browser to Google's sign-in; Google returns via the backend callback. */
 export function GoogleAnalyticsConnectMutation() {
   return useMutation({
-    mutationFn: () => GoogleAnalyticsConnectApi(),
+    mutationFn: (context?: string) => GoogleAnalyticsConnectApi(context),
     onSuccess: ({ authorize_url }) => {
       window.location.assign(authorize_url);
     },
@@ -897,7 +895,7 @@ export function GoogleAnalyticsDisconnectMutation() {
 /** Sends the browser to Google's sign-in; Google returns via the backend callback. */
 export function SearchConsoleConnectMutation() {
   return useMutation({
-    mutationFn: () => SearchConsoleConnectApi(),
+    mutationFn: (context?: string) => SearchConsoleConnectApi(context),
     onSuccess: ({ authorize_url }) => {
       window.location.assign(authorize_url);
     },
