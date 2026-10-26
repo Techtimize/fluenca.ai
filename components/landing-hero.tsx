@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { ChevronDown, Target } from "lucide-react";
+import { ArrowRight, ChevronDown, Play, ShieldCheck, Sparkles, TrendingUp, Zap } from "lucide-react";
 import { Button, Input } from "@base-ui/react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { waitlistPlaceholders } from "@/constant/waitlist";
@@ -36,6 +36,12 @@ const navLinks = [
   { label: "Use cases", href: "/use-case" },
 ] as const;
 
+const highlights = [
+  { icon: Zap, label: "Save hours of research" },
+  { icon: TrendingUp, label: "Data-driven decisions" },
+  { icon: ShieldCheck, label: "Built for growth" },
+] as const;
+
 export function LandingHero({
   eyebrow,
   titleLead,
@@ -56,7 +62,24 @@ export function LandingHero({
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-48 bg-linear-to-t from-[#E4E6FF] via-[#F1F2FF] to-transparent"
       />
-      {/* <header className="fixed inset-x-0 top-0 z-50 w-full bg-white/80 backdrop-blur-md">
+      {/* Lavender wave, bottom-left */}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 600 420"
+        preserveAspectRatio="none"
+        className="pointer-events-none absolute bottom-0 left-0 -z-10 h-[260px] w-[75%] sm:h-[320px] sm:w-[55%] lg:h-[420px] lg:w-[42%]"
+      >
+        <defs>
+          <linearGradient id="hero-wave" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#DCDDFB" />
+            <stop offset="100%" stopColor="#ECEBFD" stopOpacity="0.6" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M0 0 C120 10 190 90 250 190 C310 290 400 370 600 420 L0 420 Z"
+          fill="url(#hero-wave)"
+        />
+      </svg>      {/* <header className="fixed inset-x-0 top-0 z-50 w-full bg-white/80 backdrop-blur-md">
         <div className="mx-auto grid h-16 w-full max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-6 md:px-8 lg:px-10">
           <Link href="/" className="flex h-10 w-[138px] items-center gap-2">
             <Image
@@ -94,36 +117,54 @@ export function LandingHero({
         </div>
       </header> */}
 
-      <section className="mx-auto grid w-full max-w-[1440px] flex-1 items-center gap-6 px-4 pb-12 pt-[84px] sm:gap-8 sm:px-6 sm:pt-[92px] md:px-8 md:pb-16 md:pt-[96px] lg:grid-cols-[0.9fr_1.1fr] lg:gap-12 lg:px-10 lg:pb-16 lg:pt-16">
+      <section className="mx-auto grid w-full max-w-360 flex-1 items-center gap-6 px-4 pb-12 pt-[84px] sm:gap-8 sm:px-6 sm:pt-[92px] md:px-8 md:pb-16 md:pt-[96px] lg:grid-cols-[0.9fr_1.1fr] lg:gap-12 lg:px-10 lg:pb-16 lg:pt-16">
         <div className="relative flex flex-col items-start lg:-top-8">
           {/* Eyebrow */}
-          <p className="mb-3 inline-flex h-[38px] items-center gap-[10px] rounded-[40px] border border-[#E3E8FF] bg-white/20 px-4 py-[7px] font-body text-[13px] text-brand sm:mb-4 sm:h-[42px] sm:px-5 sm:text-caption">
-            <Target aria-hidden="true" className="size-4 shrink-0" />
+          <p className="mb-5 inline-flex h-9.5 items-center gap-2 rounded-full bg-[#EEF0FF] px-4 font-body text-[13px] font-medium text-brand sm:mb-6 sm:h-[40px] sm:px-5 sm:text-caption">
+            <Sparkles aria-hidden="true" className="size-4 shrink-0" />
             {eyebrow}
           </p>
-          <h1 className="w-full font-display text-[28px] font-medium leading-[36px] tracking-normal text-ink sm:text-[32px] sm:leading-[40px] md:max-w-[520px] md:text-[40px] md:leading-[48px] lg:max-w-[449px] lg:text-[44px] lg:leading-[53px]">
+          <h1 className="w-full font-display text-[34px] font-bold leading-[1.15] tracking-tight text-[#14163A] sm:text-[42px] md:max-w-[560px] md:text-[48px] lg:max-w-[540px] lg:text-[52px]">
             {titleLead}
             <span className="text-brand">{titleHighlight}</span>
             {titleTail}
           </h1>
-          <p className="mt-3 w-full font-body text-[15px] font-normal leading-[24px] tracking-normal text-[#1C1C1E] sm:mt-4 md:max-w-[520px] md:text-[16px] md:leading-[26px] lg:max-w-[449px]">
+          <p className="mt-4 w-full font-body text-[15px] leading-[26px] text-[#5B5F7A] sm:mt-5 md:max-w-[500px] md:text-[17px] md:leading-[28px]">
             {description}
           </p>
-          <div className="mt-5 flex w-fit flex-wrap items-center gap-3 sm:mt-6">
+          <div className="mt-7 flex flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
             {actions.map(({ label, href, variant }) => (
               <Link
                 key={label}
                 href={href}
-                className={`inline-flex h-12 min-w-[144px] items-center justify-center gap-[10px] rounded-[50px] px-5 py-[14px] font-body text-caption font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:w-[144px] sm:px-7 ${
+                className={`group inline-flex h-14 items-center justify-center gap-2 rounded-full px-7 font-body text-[15px] font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:px-8 ${
                   variant === "primary"
-                    ? "bg-linear-to-r from-brand to-[#7B5CF5] text-white shadow-[0_3px_0_#bfc1ff] hover:opacity-90"
-                    : "border border-transparent text-brand [background:linear-gradient(#fff,#fff)_padding-box,linear-gradient(to_right,#4F60FF,#7B5CF5)_border-box] hover:text-brand-700 sm:w-[150px]"
+                    ? "bg-linear-to-r from-[#4F46E5] to-[#6D5DF6] text-white shadow-[0_12px_28px_-10px_rgba(79,70,229,0.7)] hover:opacity-95"
+                    : "border border-[#E3E5F5] bg-white/70 text-brand hover:border-brand/40 hover:bg-white"
                 }`}
               >
+                {variant === "secondary" && <Play aria-hidden="true" className="size-4 fill-current" />}
                 {label}
+                {variant === "primary" && (
+                  <ArrowRight aria-hidden="true" className="size-4 transition-transform group-hover:translate-x-0.5" />
+                )}
               </Link>
             ))}
           </div>
+
+          <ul className="mt-9 flex flex-wrap items-center gap-y-4 sm:mt-10">
+            {highlights.map(({ icon: Icon, label }, index) => (
+              <li
+                key={label}
+                className={`flex items-center gap-3 pr-5 sm:pr-6 ${index > 0 ? "border-l border-[#E3E5F5] pl-5 sm:pl-6" : ""}`}
+              >
+                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#EEF0FF] text-brand">
+                  <Icon aria-hidden="true" className="size-4" />
+                </span>
+                <span className="max-w-22.5 font-body text-[13px] leading-4.5 text-[#5B5F7A]">{label}</span>
+              </li>
+            ))}
+          </ul>
 
           <div className="mt-6 w-full max-w-lg">
             {/* <div className="relative w-full max-w-md">
@@ -155,7 +196,7 @@ export function LandingHero({
         {/* Diagram side: Lottie animation (square). The animation file has empty space around the circles,
             so on large screens the box is moved UP (lg:-top-12 / xl:-top-16). `top` only moves it visually:
             it does not change the height of the section, so the spacing at the end stays the same. */}
-        <div className="relative mx-auto aspect-square w-full max-w-[380px] sm:max-w-[460px] md:max-w-[520px] lg:-top-12 lg:max-w-[560px] xl:-top-16 xl:max-w-[612px]">
+        <div className="relative mx-auto aspect-square w-full max-w-95 sm:max-w-115 md:max-w-130 lg:-top-12 lg:max-w-140 xl:-top-16 xl:max-w-153">
           <Lottie
             animationData={heroAnimation}
             loop

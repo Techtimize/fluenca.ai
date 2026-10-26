@@ -27,7 +27,7 @@ export default function CompetitorVersionSelect({
   disabled = false,
 }: Props) {
   return (
-    <div className="flex w-full min-w-0 flex-col gap-1.5">
+    <div className="flex w-1/2 min-w-0 flex-col gap-1.5">
       <label className="text-[12px] font-medium text-neutral-500">Analysis version</label>
       <Select
         value={value}

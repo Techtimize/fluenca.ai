@@ -102,8 +102,10 @@ export default function DashboardPage() {
             <CompanyCard
               company={mapped.company}
               profile={mapped.profile}
+              companyId={companyId}
               onRefresh={handleAnalyzeCompany}
               isRefreshing={isPending}
+              onCompetitorsFound={() => void refetch()}
               footer={<CurrentGoalSummary />}
             />
             {!chatOpen && mapped.docs.length ? (

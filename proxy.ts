@@ -16,6 +16,11 @@ export function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
+    const isAdmin = role === 'super_admin' || role === 'superadmin' || role === 'admin';
+    if (path.startsWith('/clarity') && (!accessToken || !isAdmin)) {
+        return NextResponse.redirect(new URL(accessToken ? '/dashboard' : '/login', request.url));
+    }
+
     if (accessToken) {
         if (path.startsWith('/login') || path.startsWith('/signup')) {
             const isSuperAdmin =
@@ -42,6 +47,7 @@ export function proxy(request: NextRequest) {
             path.startsWith('/connectors') ||
             path.startsWith('/analytics') ||
             path.startsWith('/news') ||
+            path.startsWith('/prospects') ||
             path.startsWith('/ai-visibility') ||
             path.startsWith('/googleanalytics') ||
             path.startsWith('/websitespeed') ||
@@ -78,11 +84,13 @@ export const config = {
         '/connectors/:path*',
         '/analytics/:path*',
         '/news/:path*',
+        '/prospects/:path*',
         '/ai-visibility/:path*',
         '/googleanalytics/:path*',
         '/websitespeed/:path*',
         '/googleconsole/:path*',
         '/competitor-analysis/:path*',
         '/superadmin/:path*',
+        '/clarity/:path*',
     ],
 };

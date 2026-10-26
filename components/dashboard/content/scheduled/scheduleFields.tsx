@@ -54,10 +54,6 @@ export function isScheduledPostPlatform(value: string): value is ScheduledPostPl
   return (SCHEDULED_POST_PLATFORMS as readonly string[]).includes(value);
 }
 
-/**
- * Platforms with a connected social account. If the accounts can't be loaded, every platform is offered
- * rather than blocking scheduling; the backend still rejects a platform that isn't connected.
- */
 export function useConnectedPlatforms() {
   const { data, isLoading, isError } = SocialAccountsQuery();
   const accounts = normalizeSocialAccounts(data);
@@ -132,7 +128,6 @@ export function PlatformPicker({
   );
 }
 
-/** Day picker plus time input; reports a Date in the browser's local time. */
 export function ScheduleDateTime({ value, onChange }: { value: Date; onChange: (next: Date) => void }) {
   const inPast = value <= new Date();
 

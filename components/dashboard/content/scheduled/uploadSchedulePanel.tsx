@@ -20,7 +20,6 @@ import { FOCUS_RING } from "@/utils/ui-classes";
 import { cn } from "@/lib/utils";
 
 const CAPTION_LIMIT = 2200;
-/** LinkedIn allows longer posts than Instagram captions. */
 const TEXT_POST_LIMIT = 3000;
 
 type PostKind = "media" | "text";
@@ -40,18 +39,17 @@ function formatBytes(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-/** Upload your own image or video and schedule it to one or more platforms. */
 export default function UploadSchedulePanel() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-  // null until the user picks; until then the first connected platform is preselected.
+  
   const [picked, setPicked] = useState<ScheduledPostPlatform[] | null>(null);
   const { connected, isLoading: platformsLoading } = useConnectedPlatforms();
   const [kind, setKind] = useState<PostKind>("media");
-  // Text posts only go to platforms that accept them (LinkedIn), so only those are offered.
+  
   const textPlatforms = connected.filter((p) => TEXT_POST_PLATFORMS.includes(p));
   const canTextPost = textPlatforms.length > 0;
   const isText = kind === "text" && canTextPost;
@@ -63,7 +61,6 @@ export default function UploadSchedulePanel() {
   const [progress, setProgress] = useState(0);
   const { mutate, isPending } = CreateScheduledPostMutation();
 
-  // Free the previous preview whenever it is replaced, and on unmount.
   useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -77,7 +74,6 @@ export default function UploadSchedulePanel() {
 
   const switchKind = (next: PostKind) => {
     setKind(next);
-    // The platform choice differs per kind; fall back to the default for the new one.
     setPicked(null);
     if (next === "media") setCaption((text) => text.slice(0, CAPTION_LIMIT));
   };
@@ -212,7 +208,7 @@ export default function UploadSchedulePanel() {
                 pickFile(event.dataTransfer.files[0]);
               }}
               className={cn(
-                "flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-12 text-center transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#5B57E6]/40",
+                "flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-12 text-center transition-colors has-focus-visible:ring-2 has-focus-visible:ring-[#5B57E6]/40",
                 dragging ? "border-[#5B57E6] bg-[#F0F1FF]" : "border-[#D9DCF7] bg-[#FAFAFF] hover:bg-[#F6F7FD]",
               )}
             >

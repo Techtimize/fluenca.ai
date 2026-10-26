@@ -34,6 +34,8 @@ export const PAGE_ROUTES = {
     SOCIAL_INSTAGRAM: '/instagram',
     SOCIAL_FACEBOOK: '/facebook',
     SOCIAL_LINKEDIN: '/linkedin',
+    LINKEDIN_GROWTH: '/linkedin/growth',
+    LINKEDIN_COACH: '/linkedin/coach',
     COMPANY_OVERVIEW: '/company-overview',
     PROFILE: '/profile',
     TRENDS: '/trends',
@@ -44,6 +46,7 @@ export const PAGE_ROUTES = {
     CALENDAR: '/calendar',
     CONTROLS: '/connectors/controls',
     NEWS: '/news',
+    PROSPECTS: '/prospects',
     CONTENT_RECOMMENDATION: '/content-recommendation',
     SCRIPT: '/script',
     SCRIPT_DETAIL: (id: string) => `/script/${id}`,
@@ -53,4 +56,5 @@ export const PAGE_ROUTES = {
 
     SUPERADMIN: '/superadmin',
     SUPERADMIN_USERS: '/superadmin',
+    SUPERADMIN_CLARITY: '/clarity',
 } as const;

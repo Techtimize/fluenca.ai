@@ -424,13 +424,13 @@ function CompetitorVsCompanyTable({
       <table className="min-w-full border-collapse text-left">
         <thead>
           <tr className="bg-[#F8F9FF]">
-            <th className="sticky left-0 z-[1] bg-[#F8F9FF] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+            <th className="sticky left-0 z-1 bg-[#F8F9FF] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
               Metric
             </th>
             <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-500">
               <span className="inline-flex items-center gap-2 normal-case tracking-normal">
                 <Avatar name={yourName} size="sm" />
-                <span className="max-w-[140px] truncate text-[12px] font-semibold text-[#5B57E6]">
+                <span className="max-w-35 truncate text-[12px] font-semibold text-[#5B57E6]">
                   {yourName}
                 </span>
               </span>
@@ -448,7 +448,7 @@ function CompetitorVsCompanyTable({
                 >
                   <span className="inline-flex items-center gap-2 normal-case tracking-normal">
                     <Avatar name={name} imageUrl={image} size="sm" />
-                    <span className="max-w-[140px] truncate text-[12px] font-semibold text-neutral-700">
+                    <span className="max-w-35 truncate text-[12px] font-semibold text-neutral-700">
                       {name}
                     </span>
                   </span>
@@ -463,7 +463,7 @@ function CompetitorVsCompanyTable({
               key={row.id}
               className="border-t border-[#EEF0F8] align-top odd:bg-white even:bg-[#FCFCFF]"
             >
-              <td className="sticky left-0 z-[1] bg-inherit px-4 py-3 text-[12px] font-semibold text-neutral-900">
+              <td className="sticky left-0 z-1 bg-inherit px-4 py-3 text-[12px] font-semibold text-neutral-900">
                 {row.label}
               </td>
               <td className="px-4 py-3 text-[12px] leading-5 text-neutral-700">
@@ -969,7 +969,7 @@ function GapsTable({
                       ? toDisplayLabel(item.competitor || item.competitor_name)
                       : "—"}
                 </td>
-                <td className="max-w-[280px] px-4 py-3 text-[12px] leading-5 text-neutral-600">
+                <td className="max-w-70 px-4 py-3 text-[12px] leading-5 text-neutral-600">
                   {detail || "—"}
                 </td>
               </tr>
