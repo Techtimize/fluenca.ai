@@ -1,11 +1,39 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { ArrowUpRight, Loader2, Newspaper, RotateCw, Search, X } from "lucide-react";
+import { ArrowUpRight, Loader2, MessagesSquare, Newspaper, RotateCw, Search, X } from "lucide-react";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { NewsQuery } from "@/routes/bussiness/Bussiness-Query";
 import { NEWS_MAX_SIZE, type NewsArticle } from "@/types/bussiness/news-type";
 import { FOCUS_RING } from "@/utils/ui-classes";
+
+type View = "all" | "news" | "reddit" | "x";
+type Platform = "reddit" | "x";
+
+const INTERNAL_CATEGORIES = new Set(["social", "reddit", "x"]);
+
+/** The backend tags Reddit and X posts with "social" plus "reddit" or "x" in `categories`. */
+function platformOf(article: NewsArticle): Platform | null {
+  const categories = article.categories ?? [];
+  if (categories.includes("reddit")) return "reddit";
+  if (categories.includes("x")) return "x";
+  return null;
+}
+
+function isSocial(article: NewsArticle) {
+  return platformOf(article) !== null || (article.categories?.includes("social") ?? false);
+}
+
+function matchesView(article: NewsArticle, view: View) {
+  if (view === "all") return true;
+  if (view === "news") return !isSocial(article);
+  return platformOf(article) === view;
+}
+
+/** Reddit sometimes sends words like "self" instead of an image address. */
+function validImage(url: string | null) {
+  return url && /^https?:\/\//.test(url) ? url : null;
+}
 
 /** published_at comes as "2026-10-16 10:12:45" with no zone; read it as UTC. */
 function parsePublished(value: string | null) {
@@ -27,9 +55,38 @@ function timeAgo(value: string | null) {
   return days < 7 ? `${days}d ago` : date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
+function PlatformBadge({ platform }: { platform: Platform | null }) {
+  if (platform === "reddit") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-[#FFF1EA] px-2.5 py-0.5 text-[11px] font-semibold text-[#C2410C]">
+        <MessagesSquare className="size-3" aria-hidden="true" />
+        Reddit
+      </span>
+    );
+  }
+  if (platform === "x") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-neutral-900 px-2.5 py-0.5 text-[11px] font-semibold text-white">
+        <X className="size-3" aria-hidden="true" />
+        X
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-[#F1F2FB] px-2.5 py-0.5 text-[11px] font-semibold text-[#4544C9]">
+      <MessagesSquare className="size-3" aria-hidden="true" />
+      Social
+    </span>
+  );
+}
+
 function ArticleCard({ article }: { article: NewsArticle }) {
   const when = timeAgo(article.published_at);
   const published = parsePublished(article.published_at);
+  const social = isSocial(article);
+  const image = validImage(article.image_url);
+  const categories = (article.categories ?? []).filter((c) => !INTERNAL_CATEGORIES.has(c));
+
   return (
     <a
       href={article.url}
@@ -37,23 +94,37 @@ function ArticleCard({ article }: { article: NewsArticle }) {
       rel="noreferrer"
       className={`group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E6E8F5] bg-white transition-[border-color,box-shadow] hover:border-[#C8C6F5] hover:shadow-[0_12px_32px_rgba(91,87,230,0.08)] ${FOCUS_RING}`}
     >
-      <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-[linear-gradient(135deg,#EEF0FF,#F6F4FF)]">
-        {article.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element -- images come from any news site, not a configured host
-          <img
-            src={article.image_url}
-            alt=""
-            loading="lazy"
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-          />
-        ) : (
-          <span className="absolute inset-0 grid place-items-center text-[#A5A8F5]">
-            <Newspaper className="size-8" aria-hidden="true" />
-          </span>
-        )}
-      </div>
+      {/* News always gets a picture area. A social post only gets one when it has a real image. */}
+      {!social || image ? (
+        <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-[linear-gradient(135deg,#EEF0FF,#F6F4FF)]">
+          {image ? (
+            // eslint-disable-next-line @next/next/no-img-element -- images come from any site, not a configured host
+            <img
+              src={image}
+              alt=""
+              loading="lazy"
+              className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            />
+          ) : (
+            <span className="absolute inset-0 grid place-items-center text-[#A5A8F5]">
+              <Newspaper className="size-8" aria-hidden="true" />
+            </span>
+          )}
+          {social ? (
+            <span className="absolute start-3 top-3">
+              <PlatformBadge platform={platformOf(article)} />
+            </span>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="flex flex-1 flex-col p-4">
+        {social && !image ? (
+          <div className="mb-2">
+            <PlatformBadge platform={platformOf(article)} />
+          </div>
+        ) : null}
+
         <div className="flex items-center gap-2 text-[12px] text-neutral-500">
           {article.source_icon ? (
             // eslint-disable-next-line @next/next/no-img-element -- source favicon from the news provider
@@ -75,12 +146,14 @@ function ArticleCard({ article }: { article: NewsArticle }) {
           {article.title}
         </h2>
         {article.description ? (
-          <p className="mt-1.5 line-clamp-2 text-[13px] leading-5 text-neutral-500">{article.description}</p>
+          <p className={`mt-1.5 text-[13px] leading-5 text-neutral-500 ${social ? "line-clamp-4" : "line-clamp-2"}`}>
+            {article.description}
+          </p>
         ) : null}
 
-        {article.categories?.length ? (
+        {categories.length ? (
           <ul className="mt-auto flex flex-wrap gap-1.5 pt-3">
-            {article.categories.slice(0, 3).map((category) => (
+            {categories.slice(0, 3).map((category) => (
               <li key={category} className="rounded-full bg-[#F1F2FB] px-2 py-0.5 text-[11px] capitalize text-[#4544C9]">
                 {category}
               </li>
@@ -92,14 +165,37 @@ function ArticleCard({ article }: { article: NewsArticle }) {
   );
 }
 
-/** News for the company's niche from GET /news, or for a topic the user searches. */
+const TABS: { id: View; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "news", label: "News" },
+  { id: "reddit", label: "Reddit" },
+  { id: "x", label: "X" },
+];
+
+const EMPTY_TITLE: Record<View, string> = {
+  all: "No results for this search",
+  news: "No news for this search",
+  reddit: "No Reddit posts for this search",
+  x: "No X posts for this search",
+};
+
+/** News for the company's niche from GET /news (news, Reddit and X posts), or for a topic the user searches. */
 export default function NewsPage() {
   const [input, setInput] = useState("");
   const [topic, setTopic] = useState("");
+  const [view, setView] = useState<View>("all");
   const news = NewsQuery({ topic, size: NEWS_MAX_SIZE });
   const data = news.data;
   const articles = data?.articles ?? [];
   const searching = Boolean(topic);
+
+  const counts: Record<View, number> = {
+    all: articles.length,
+    news: articles.filter((a) => matchesView(a, "news")).length,
+    reddit: articles.filter((a) => matchesView(a, "reddit")).length,
+    x: articles.filter((a) => matchesView(a, "x")).length,
+  };
+  const shown = articles.filter((a) => matchesView(a, view));
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -121,7 +217,8 @@ export default function NewsPage() {
           {searching ? `News about “${topic}”` : "News for your niche"}
         </h1>
         <p className="mt-2 max-w-2xl text-[14px] leading-6 text-neutral-600">
-          Fresh stories you can react to, comment on or turn into a post.
+          Fresh stories, plus what people are saying on Reddit and X. React to them, comment on them or turn them into
+          a post.
         </p>
 
         {data?.niche?.length || data?.country ? (
@@ -177,6 +274,31 @@ export default function NewsPage() {
         ) : null}
       </section>
 
+      {articles.length ? (
+        <div role="tablist" aria-label="Filter results" className="flex flex-wrap gap-2">
+          {TABS.map((tab) => {
+            const active = view === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setView(tab.id)}
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium ring-1 transition-colors ${FOCUS_RING} ${
+                  active
+                    ? "bg-[#5B57E6] text-white ring-[#5B57E6]"
+                    : "bg-white text-neutral-700 ring-[#E6E8F5] hover:bg-[#F8F9FF]"
+                }`}
+              >
+                {tab.label}
+                <span className={`text-[11px] ${active ? "text-white/80" : "text-neutral-400"}`}>{counts[tab.id]}</span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
       {data?.broadened && articles.length ? (
         <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-[13px] text-amber-800">
           Nothing matched exactly, so these are from a wider search.
@@ -202,9 +324,9 @@ export default function NewsPage() {
             Try again
           </button>
         </div>
-      ) : articles.length ? (
+      ) : shown.length ? (
         <ul className={`grid gap-4 sm:grid-cols-2 xl:grid-cols-3 ${news.isFetching ? "opacity-60" : ""}`}>
-          {articles.map((article) => (
+          {shown.map((article) => (
             <li key={article.url}>
               <ArticleCard article={article} />
             </li>
@@ -214,10 +336,18 @@ export default function NewsPage() {
         <div className="flex flex-col items-center rounded-2xl border border-dashed border-[#E6E8F5] bg-white px-6 py-12 text-center">
           <Newspaper className="size-6 text-[#A5A8F5]" aria-hidden="true" />
           <p className="mt-3 text-[14px] font-semibold text-neutral-900">
-            {searching ? `No news about “${topic}” right now` : "No news for your niche right now"}
+            {articles.length
+              ? EMPTY_TITLE[view]
+              : searching
+                ? `No news about “${topic}” right now`
+                : "No news for your niche right now"}
           </p>
           <p className="mt-1 max-w-sm text-[13px] text-neutral-500">
-            {searching ? "Try a broader topic." : "Check back later, or search a related topic above."}
+            {articles.length
+              ? "Try the All tab, or search a broader topic."
+              : searching
+                ? "Try a broader topic."
+                : "Check back later, or search a related topic above."}
           </p>
         </div>
       )}

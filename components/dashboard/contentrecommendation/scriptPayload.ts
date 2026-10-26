@@ -1,4 +1,5 @@
 import type { ContentIdea } from "@/types/bussiness/content-recommendation-type";
+import { normalizeImageGenerationPlatform } from "@/types/bussiness/imagegeneration-type";
 import type {
   ContentSuggestion,
   ScriptGenerationRequest,
@@ -78,7 +79,7 @@ export function ideaToScriptRequest(
     hook,
     image_prompt: asString(item.image_prompt ?? item.visual_prompt ?? item.visual),
     key_points: asStringArray(item.key_points ?? item.hashtags),
-    platform: asString(item.platform ?? item.channel, "instagram"),
+    platform: normalizeImageGenerationPlatform(asString(item.platform ?? item.channel, "instagram")),
     script_brief: scriptBrief,
     slides: slidesSource.map((slide, index) => ({
       slide_number: slide.slide_number ?? index + 1,
