@@ -17,11 +17,9 @@ import {
 } from "@/types/bussiness/social-accounts-type";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
-/** LinkedIn growth: score → profile fixes and rewrite → voice → first week of posts. */
 export default function LinkedInGrowthPage() {
   const { data: accountsData, isLoading } = SocialAccountsQuery();
   const connected = isSocialAccountConnected(findSocialAccount(normalizeSocialAccounts(accountsData), "linkedin"));
-  // The rewrite starts from the last-scored profile, so it needs a profile score first.
   const hasProfileScore = Boolean(ProfileScoreQuery(connected).data);
 
   return (
