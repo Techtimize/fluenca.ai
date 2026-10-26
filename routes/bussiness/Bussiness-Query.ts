@@ -16,6 +16,29 @@ import { BlogPostDetailsApi, BlogPostsApi, BriefsApi, KeywordsApi } from "./buss
 import { ScheduledPostApi, ScheduledPostsApi } from "./bussiness.routes";
 import { CompanyTextPostsApi, NewsApi } from "./bussiness.routes";
 import type { NewsParams } from "@/types/bussiness/news-type";
+import {
+  ProspectApi,
+  ProspectIcpApi,
+  ProspectRunApi,
+  ProspectRunsApi,
+  ProspectsApi,
+} from "./bussiness.routes";
+import { isEnriching, isRunFinished, type ProspectsParams } from "@/types/bussiness/prospect-type";
+import {
+  LinkedInScoreApi,
+  LinkedInScoreHistoryApi,
+  LinkedInVoiceApi,
+  ProfileScoreApi,
+  ProfileScoreHistoryApi,
+  WeekPostsApi,
+} from "./bussiness.routes";
+import {
+  CoachTodayApi,
+  FollowUpsApi,
+  HookFormulasApi,
+  WeeklyReportApi,
+  WeeklyReportHistoryApi,
+} from "./bussiness.routes";
 import type { ScheduledPost, ScheduledPostStatus } from "@/types/bussiness/scheduled-post-type";
 import {
   GoogleAnalyticsConnectionApi,
@@ -781,3 +804,191 @@ export const NewsQuery = (params?: NewsParams) => {
     refetchOnWindowFocus: false,
   });
 };
+
+// ---------- Prospect finder ----------
+
+export const PROSPECTS_KEY = ["prospects"];
+export const PROSPECT_ICP_KEY = [...PROSPECTS_KEY, "icp"];
+export const PROSPECT_RUNS_KEY = [...PROSPECTS_KEY, "runs"];
+export const prospectRunKey = (run_id?: string | null) => [...PROSPECT_RUNS_KEY, "detail", run_id];
+export const prospectKey = (prospect_id?: string | null) => [...PROSPECTS_KEY, "detail", prospect_id];
+const PROSPECT_POLL_MS = 3000;
+
+export const ProspectIcpQuery = () => {
+  return useQuery({
+    queryKey: PROSPECT_ICP_KEY,
+    queryFn: () => ProspectIcpApi(),
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+/** Recent searches; polls while any of them is still going. */
+export const ProspectRunsQuery = () => {
+  return useQuery({
+    queryKey: PROSPECT_RUNS_KEY,
+    queryFn: () => ProspectRunsApi(),
+    refetchInterval: (query) =>
+      query.state.data?.some((run) => !isRunFinished(run.status)) ? PROSPECT_POLL_MS : false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+/** One search's status; polls until it's ready or failed. */
+export const ProspectRunQuery = (run_id?: string | null) => {
+  return useQuery({
+    queryKey: prospectRunKey(run_id),
+    queryFn: () => ProspectRunApi(run_id as string),
+    enabled: Boolean(run_id),
+    refetchInterval: (query) => (isRunFinished(query.state.data?.status) ? false : PROSPECT_POLL_MS),
+    refetchOnWindowFocus: false,
+  });
+};
+
+/** The shortlist for a search, best first. Pass `enabled` once the search is ready. */
+export const ProspectsQuery = (params: ProspectsParams, enabled = true) => {
+  return useQuery({
+    queryKey: [...PROSPECTS_KEY, "list", params.run_id ?? null, params.status ?? "all"],
+    queryFn: () => ProspectsApi(params),
+    enabled,
+    placeholderData: keepPreviousData,
+    refetchOnWindowFocus: false,
+  });
+};
+
+/** One prospect; polls while its emails, brief and drafts are being written. */
+export const ProspectQuery = (prospect_id?: string | null) => {
+  return useQuery({
+    queryKey: prospectKey(prospect_id),
+    queryFn: () => ProspectApi(prospect_id as string),
+    enabled: Boolean(prospect_id),
+    refetchInterval: (query) => (isEnriching(query.state.data?.enrich_status) ? PROSPECT_POLL_MS : false),
+    refetchOnWindowFocus: false,
+  });
+};
+
+// ---------- LinkedIn growth ----------
+
+export const LINKEDIN_GROWTH_KEY = ["linkedin-growth"];
+export const PROFILE_SCORE_KEY = [...LINKEDIN_GROWTH_KEY, "profile-score"];
+export const LINKEDIN_VOICE_KEY = [...LINKEDIN_GROWTH_KEY, "voice"];
+export const WEEK_POSTS_KEY = [...LINKEDIN_GROWTH_KEY, "week-posts"];
+export const LINKEDIN_SCORE_KEY = [...LINKEDIN_GROWTH_KEY, "score"];
+
+export const ProfileScoreQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...PROFILE_SCORE_KEY, "latest"],
+    queryFn: () => ProfileScoreApi(),
+    enabled,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const ProfileScoreHistoryQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...PROFILE_SCORE_KEY, "history"],
+    queryFn: () => ProfileScoreHistoryApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+/** `ready` is false until the story bank has posts. */
+export const LinkedInVoiceQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: LINKEDIN_VOICE_KEY,
+    queryFn: () => LinkedInVoiceApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const WeekPostsQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: WEEK_POSTS_KEY,
+    queryFn: () => WeekPostsApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const LinkedInScoreQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...LINKEDIN_SCORE_KEY, "latest"],
+    queryFn: () => LinkedInScoreApi(),
+    enabled,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+/** Every saved score, for the growth chart. */
+export const LinkedInScoreHistoryQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...LINKEDIN_SCORE_KEY, "history"],
+    queryFn: () => LinkedInScoreHistoryApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+// ---------- LinkedIn coach ----------
+
+export const LINKEDIN_COACH_KEY = ["linkedin-coach"];
+export const COACH_TODAY_KEY = [...LINKEDIN_COACH_KEY, "today"];
+export const FOLLOW_UPS_KEY = [...LINKEDIN_COACH_KEY, "follow-ups"];
+export const WEEKLY_REPORT_KEY = [...LINKEDIN_COACH_KEY, "weekly-report"];
+const COACH_TODAY_STALE_MS = 5 * 60 * 1000;
+
+/** The first call of the day builds the checklist and can take up to a minute, so it's never retried. */
+export const CoachTodayQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: COACH_TODAY_KEY,
+    queryFn: () => CoachTodayApi(),
+    enabled,
+    retry: false,
+    staleTime: COACH_TODAY_STALE_MS,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const FollowUpsQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: FOLLOW_UPS_KEY,
+    queryFn: () => FollowUpsApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const WeeklyReportQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...WEEKLY_REPORT_KEY, "latest"],
+    queryFn: () => WeeklyReportApi(),
+    enabled,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const WeeklyReportHistoryQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...WEEKLY_REPORT_KEY, "history"],
+    queryFn: () => WeeklyReportHistoryApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+/** The 21 hook formulas never change during a session. */
+export const HookFormulasQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...LINKEDIN_COACH_KEY, "hook-formulas"],
+    queryFn: () => HookFormulasApi(),
+    enabled,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+  });
+};
+

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogImageApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, EditUserProfileApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, InstagramPublishApi, IntelligenceRunApi, LinkedInPublishApi, OnboardingApi, XLoginApi, XPublishApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountConnectApi, SocialAccountDisconnectApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi, ContactUsApi, CreateGoalApi, DiagnoseGoalApi, ApproveGoalApi, UpdateGoalTaskApi, ScheduleImageGenerationApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogImageApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, EditUserProfileApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, LinkedInLoginApi, InstagramPublishApi, IntelligenceRunApi, LinkedInPublishApi, OnboardingApi, XLoginApi, XPublishApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountDisconnectApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi, ContactUsApi, CreateGoalApi, DiagnoseGoalApi, ApproveGoalApi, UpdateGoalTaskApi, ScheduleImageGenerationApi, FindCompetitorApi } from "./bussiness.routes";
 import type {
   FacebookPublishRequest,
   InstagramPublishRequest,
@@ -38,6 +38,53 @@ import type { CreateGoalRequest, UpdateGoalTaskRequest } from "@/types/bussiness
 import { GOALS_KEY, GOOGLE_ANALYTICS_KEY, SCHEDULED_POSTS_KEY, SEARCH_CONSOLE_KEY, TEXT_POSTS_KEY, goalKey, scheduledPostKey } from "./Bussiness-Query";
 import type { CreateTextPostRequest } from "@/types/bussiness/text-post-type";
 import { CreateTextPostApi } from "./bussiness.routes";
+import {
+  BuildProspectIcpApi,
+  ExportProspectsCsvApi,
+  RegenerateProspectDraftsApi,
+  SaveProspectApi,
+  StartProspectRunApi,
+  UpdateProspectIcpApi,
+  UpdateProspectStatusApi,
+} from "./bussiness.routes";
+import { PROSPECT_ICP_KEY, PROSPECT_RUNS_KEY, PROSPECTS_KEY, prospectKey, prospectRunKey } from "./Bussiness-Query";
+import type {
+  BuildIcpRequest,
+  SettableProspectStatus,
+  StartProspectRunRequest,
+  UpdateIcpRequest,
+} from "@/types/bussiness/prospect-type";
+import {
+  CancelWeekPostApi,
+  GenerateWeekPostsApi,
+  ProfileRewriteApi,
+  RunLinkedInScoreApi,
+  RunProfileScoreApi,
+  ScheduleWeekPostApi,
+} from "./bussiness.routes";
+import { LINKEDIN_SCORE_KEY, PROFILE_SCORE_KEY, WEEK_POSTS_KEY } from "./Bussiness-Query";
+import type { ProfileScoreRequest, ScheduleWeekPostRequest } from "@/types/bussiness/linkedin-growth-type";
+import {
+  AddFollowUpApi,
+  CarouselApi,
+  CompleteCoachTaskApi,
+  CompleteFollowUpApi,
+  ContentPlanApi,
+  PostCheckApi,
+  PublishCarouselApi,
+  RepurposeApi,
+  UndoCoachTaskApi,
+  WritePostApi,
+} from "./bussiness.routes";
+import { COACH_TODAY_KEY, FOLLOW_UPS_KEY } from "./Bussiness-Query";
+import type {
+  AddFollowUpRequest,
+  CarouselRequest,
+  ContentPlanGoal,
+  PostCheckRequest,
+  PublishCarouselRequest,
+  WritePostRequest,
+} from "@/types/bussiness/linkedin-coach-type";
 import type { CreateScheduledPostRequest, UpdateScheduledPostRequest } from "@/types/bussiness/scheduled-post-type";
 import {
   GoogleAnalyticsConnectApi,
@@ -408,7 +455,6 @@ export const ScheduleImageGenerationMutation = () => {
       });
     },
     onError: (error) => {
-      // 422 (past date / bad platform) and 404 (unknown run) carry readable messages
       toast.error(getApiErrorMessage(error, "Failed to schedule post"));
     },
   });
@@ -517,7 +563,7 @@ export function FacebookConnectMutation() {
 export function LinkedInConnectMutation() {
   return useMutation({
     mutationFn: async (context?: string) => {
-      const response = await SocialAccountConnectApi("linkedin", context);
+      const response = await LinkedInLoginApi(context);
       return getAuthorizeUrl(response);
     },
     onSuccess: (authorizeUrl) => {
@@ -577,7 +623,7 @@ export function InstagramPublishMutation() {
         );
         return;
       }
-      // A status other than "posted" (e.g. "failed") means the post did not go live.
+
       if (typeof response?.status === "string" && !isPostedResponse(response)) {
         toast.error(response.error || `Instagram post ${response.status}`);
         return;
@@ -600,7 +646,7 @@ export function FacebookPublishMutation() {
         );
         return;
       }
-      // A status other than "posted" (e.g. "failed") means the post did not go live.
+
       if (typeof response?.status === "string" && !isPostedResponse(response)) {
         toast.error(response.error || `Facebook post ${response.status}`);
         return;
@@ -659,7 +705,6 @@ export function UpdateContentExecutionSettingsMutation() {
   });
 }
 
-/** Agent mode toggle. ON → orchestrator can run; OFF → company skipped. */
 export function UpdateContentExecutionAgentModeMutation() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -762,7 +807,7 @@ export function LinkedInPublishMutation() {
         );
         return;
       }
-      // A status other than "posted" (e.g. "failed") means the post did not go live.
+
       if (typeof response?.status === "string" && !isPostedResponse(response)) {
         toast.error(response.error || `LinkedIn post ${response.status}`);
         return;
@@ -841,7 +886,6 @@ export function UpdateGoalTaskMutation() {
     mutationFn: (data: UpdateGoalTaskRequest) => UpdateGoalTaskApi(data),
     onSuccess: (_response, { goal_id, status }) => {
       void queryClient.invalidateQueries({ queryKey: goalKey(goal_id) });
-      // The goal list carries tasks_waiting_for_approval, so refresh it too.
       void queryClient.invalidateQueries({ queryKey: GOALS_KEY });
       if (status === "approved") toast.success("Task approved");
       if (status === "rejected") toast.success("Task rejected");
@@ -852,7 +896,6 @@ export function UpdateGoalTaskMutation() {
   });
 }
 
-/** Sends the browser to Google's sign-in; Google returns via the backend callback. */
 export function GoogleAnalyticsConnectMutation() {
   return useMutation({
     mutationFn: (context?: string) => GoogleAnalyticsConnectApi(context),
@@ -1075,3 +1118,325 @@ export function CreateTextPostMutation() {
     },
   });
 }
+
+export function FindCompetitorMutation() {
+  return useMutation({
+    mutationFn: (company_id: string) => FindCompetitorApi(company_id),
+    onSuccess: () => {
+      toast.success("Competitor analysis started successfully");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to find competitors"));
+    },
+  });
+}
+// ---------- Prospect finder ----------
+
+const PROSPECT_LIST_KEY = [...PROSPECTS_KEY, "list"];
+
+/** Builds 2–3 profiles from the DNA (takes 10–40 seconds). */
+export function BuildProspectIcpMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body?: BuildIcpRequest) => BuildProspectIcpApi(body),
+    onSuccess: (data) => {
+      queryClient.setQueryData(PROSPECT_ICP_KEY, data);
+      toast.success("Your ideal customer profiles are ready");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to build customer profiles"));
+    },
+  });
+}
+
+/** Saves edited profiles as a new version. */
+export function UpdateProspectIcpMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: UpdateIcpRequest) => UpdateProspectIcpApi(body),
+    onSuccess: (data) => {
+      queryClient.setQueryData(PROSPECT_ICP_KEY, data);
+      toast.success("Profile saved");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to save the profile"));
+    },
+  });
+}
+
+/** Starts a search in the background; ProspectRunQuery polls it from there. */
+export function StartProspectRunMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body?: StartProspectRunRequest) => StartProspectRunApi(body),
+    onSuccess: (run) => {
+      queryClient.setQueryData(prospectRunKey(run.id), run);
+      void queryClient.invalidateQueries({ queryKey: PROSPECT_RUNS_KEY });
+      toast.success("Search started. This can take a few minutes.");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to start the search"));
+    },
+  });
+}
+
+/** Saves a prospect; its emails, brief and drafts are then written in the background. */
+export function SaveProspectMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (prospect_id: string) => SaveProspectApi(prospect_id),
+    onSuccess: (_response, prospect_id) => {
+      void queryClient.invalidateQueries({ queryKey: prospectKey(prospect_id) });
+      void queryClient.invalidateQueries({ queryKey: PROSPECT_LIST_KEY });
+      toast.success("Prospect saved. Writing the brief and drafts now.");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to save the prospect"));
+    },
+  });
+}
+
+export function UpdateProspectStatusMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ prospect_id, status }: { prospect_id: string; status: SettableProspectStatus }) =>
+      UpdateProspectStatusApi(prospect_id, { status }),
+    onSuccess: (_response, { prospect_id }) => {
+      void queryClient.invalidateQueries({ queryKey: prospectKey(prospect_id) });
+      void queryClient.invalidateQueries({ queryKey: PROSPECT_LIST_KEY });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to update the status"));
+    },
+  });
+}
+
+export function RegenerateProspectDraftsMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ prospect_id, person_id }: { prospect_id: string; person_id?: string }) =>
+      RegenerateProspectDraftsApi(prospect_id, person_id),
+    onSuccess: (_response, { prospect_id }) => {
+      void queryClient.invalidateQueries({ queryKey: prospectKey(prospect_id) });
+      toast.success("Drafts rewritten");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to rewrite the drafts"));
+    },
+  });
+}
+
+/** Downloads the saved prospects as a CSV file. */
+export function ExportProspectsCsvMutation() {
+  return useMutation({
+    mutationFn: () => ExportProspectsCsvApi(),
+    onSuccess: (blob) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `prospects-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to export prospects"));
+    },
+  });
+}
+
+// ---------- LinkedIn growth ----------
+
+export function RunProfileScoreMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body?: ProfileScoreRequest) => RunProfileScoreApi(body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: PROFILE_SCORE_KEY });
+      toast.success("Profile scored");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to score your profile"));
+    },
+  });
+}
+
+/** Returns the headline and About options directly; read them from `data`. */
+export function ProfileRewriteMutation() {
+  return useMutation({
+    mutationFn: () => ProfileRewriteApi(),
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to rewrite your headline and About"));
+    },
+  });
+}
+
+export function GenerateWeekPostsMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => GenerateWeekPostsApi(),
+    onSuccess: (data) => {
+      queryClient.setQueryData(WEEK_POSTS_KEY, data);
+      toast.success("Your first week of posts is ready");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to write your posts"));
+    },
+  });
+}
+
+/** Schedules a post, optionally with edited text. */
+export function ScheduleWeekPostMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ post_id, body }: { post_id: string; body: ScheduleWeekPostRequest }) =>
+      ScheduleWeekPostApi(post_id, body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: WEEK_POSTS_KEY });
+      toast.success("Post scheduled");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to schedule the post"));
+    },
+  });
+}
+
+export function CancelWeekPostMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (post_id: string) => CancelWeekPostApi(post_id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: WEEK_POSTS_KEY });
+      toast.success("Scheduled post cancelled");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to cancel the post"));
+    },
+  });
+}
+
+export function RunLinkedInScoreMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => RunLinkedInScoreApi(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: LINKEDIN_SCORE_KEY });
+      toast.success("LinkedIn Score updated");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to update your LinkedIn Score"));
+    },
+  });
+}
+
+// ---------- LinkedIn coach ----------
+
+/** Marks a task done (or undoes it); the response is the updated checklist with streak and points. */
+export function ToggleCoachTaskMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ task_id, done }: { task_id: string; done: boolean }) =>
+      done ? CompleteCoachTaskApi(task_id) : UndoCoachTaskApi(task_id),
+    onSuccess: (data) => {
+      if (data?.tasks) queryClient.setQueryData(COACH_TODAY_KEY, data);
+      else void queryClient.invalidateQueries({ queryKey: COACH_TODAY_KEY });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to update the task"));
+    },
+  });
+}
+
+export function AddFollowUpMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: AddFollowUpRequest) => AddFollowUpApi(body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: FOLLOW_UPS_KEY });
+      toast.success("Follow-up added with a draft reply");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to add the follow-up"));
+    },
+  });
+}
+
+export function CompleteFollowUpMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (follow_up_id: string) => CompleteFollowUpApi(follow_up_id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: FOLLOW_UPS_KEY });
+      void queryClient.invalidateQueries({ queryKey: COACH_TODAY_KEY });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to update the follow-up"));
+    },
+  });
+}
+
+/** The plan comes back on `data`. */
+export function ContentPlanMutation() {
+  return useMutation({
+    mutationFn: (goal: ContentPlanGoal) => ContentPlanApi(goal),
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to plan next week"));
+    },
+  });
+}
+
+/** The slides come back on `data`. */
+export function CarouselMutation() {
+  return useMutation({
+    mutationFn: (body: CarouselRequest) => CarouselApi(body),
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to make the carousel"));
+    },
+  });
+}
+
+export function PublishCarouselMutation() {
+  return useMutation({
+    mutationFn: (body: PublishCarouselRequest) => PublishCarouselApi(body),
+    onSuccess: () => {
+      toast.success("Carousel published to LinkedIn");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to publish the carousel"));
+    },
+  });
+}
+
+/** Saves the drafts on the server; they also come back on `data`. */
+export function RepurposeMutation() {
+  return useMutation({
+    mutationFn: () => RepurposeApi(),
+    onSuccess: () => {
+      toast.success("Your top post was repurposed into 2 drafts");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to repurpose your top post"));
+    },
+  });
+}
+
+export function PostCheckMutation() {
+  return useMutation({
+    mutationFn: (body: PostCheckRequest) => PostCheckApi(body),
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to check the post"));
+    },
+  });
+}
+
+export function WritePostMutation() {
+  return useMutation({
+    mutationFn: (body: WritePostRequest) => WritePostApi(body),
+    onSuccess: () => {
+      toast.success("Post written and saved as a draft");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to write the post"));
+    },
+  });
+}
+

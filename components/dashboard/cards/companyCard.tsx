@@ -1,7 +1,16 @@
 "use client";
 
 import type { ComponentType, ReactNode } from "react";
-import { ExternalLink, GitCompareArrows, Globe, Info, Loader2, RefreshCcw } from "lucide-react";
+import {
+  ExternalLink,
+  GitCompareArrows,
+  Globe,
+  Info,
+  Loader2,
+  RefreshCcw,
+  Search,
+  Sparkles,
+} from "lucide-react";
 import CompetitorCompareDialog, {
   COMPARE_ALL_ID,
   competitorInputs,
@@ -19,14 +28,18 @@ import {
   InstagramIcon,
   LinkedInIcon,
 } from "@/components/shared/brandIcons";
+import { FindCompetitorMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import type { Company, CompanyProfile, Competitor } from "@/types/dashboard";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
 type Props = {
   company: Company;
   profile?: CompanyProfile | null;
+  companyId?: string | null;
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  /** Called after a "find competitors" run starts, so the host can refetch once it finishes. */
+  onCompetitorsFound?: () => void;
   /** Shown below the competitors, e.g. the current goal. */
   footer?: ReactNode;
 };
@@ -214,11 +227,50 @@ function CompetitorRow({
   );
 }
 
+function FindCompetitorsPrompt({
+  companyId,
+  onFound,
+}: {
+  companyId: string;
+  onFound?: () => void;
+}) {
+  const { mutate: findCompetitors, isPending } = FindCompetitorMutation();
+
+  return (
+    <div className="mt-5 rounded-2xl border border-dashed border-[#D9DCF7] bg-[#F8F9FF] p-4 text-center sm:p-5">
+      <span className="mx-auto grid size-10 place-items-center rounded-full bg-[#ECEBFF] text-[#5B57E6]">
+        <Search className="size-5" aria-hidden="true" />
+      </span>
+      <h3 className="mt-3 text-sm font-semibold text-neutral-900">
+        Want Fluenca to find your competitors?
+      </h3>
+      <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-neutral-500">
+        Let our AI agents scan your market and identify the brands you&rsquo;re actually competing with.
+      </p>
+      <button
+        type="button"
+        onClick={() => findCompetitors(companyId, { onSuccess: () => onFound?.() })}
+        disabled={isPending}
+        className={`mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#5B57E6] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#4A46D0] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+      >
+        {isPending ? (
+          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+        ) : (
+          <Sparkles className="size-4" aria-hidden="true" />
+        )}
+        {isPending ? "Finding competitors…" : "Find my competitors"}
+      </button>
+    </div>
+  );
+}
+
 export default function CompanyCard({
   company,
   profile,
+  companyId,
   onRefresh,
   isRefreshing = false,
+  onCompetitorsFound,
   footer,
 }: Props) {
   const website = company.links.find((link) => link.id === "web");
@@ -372,6 +424,9 @@ export default function CompanyCard({
           </ul>
         </div>
       )}
+      {company.competitors.length === 0 && companyId ? (
+        <FindCompetitorsPrompt companyId={companyId} onFound={onCompetitorsFound} />
+      ) : null}
       {footer}
       <CompetitorCompareDialog {...compare.dialogProps} />
     </Card>
