@@ -151,6 +151,49 @@
   will-change: opacity, filter, transform;
 }
 
+/* AI Engine section: dashes flowing from Fluenca out to the platforms */
+@keyframes ai-engine-flow {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+
+.ai-engine-flow {
+  animation: ai-engine-flow 0.9s linear infinite;
+}
+
+/* AI Engine section: analytics cards gently floating above each platform icon */
+@keyframes ai-engine-stat-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.ai-engine-stat {
+  animation: ai-engine-stat-float 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-engine-flow,
+  .ai-engine-stat {
+    animation: none;
+  }
+}
+
+/* Prospect finder: indeterminate progress bar while a search runs */
+@keyframes prospect-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
 /* Agent Orbit Animation CSS */
 .orbit-container {
   position: relative;

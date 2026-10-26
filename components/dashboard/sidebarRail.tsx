@@ -66,6 +66,9 @@ export const DEFAULT_NAV: NavItem[] = [
     href: PAGE_ROUTES.ANALYTICS,
   },
   { id: "news", label: "News", icon: "news", href: PAGE_ROUTES.NEWS },
+  { id: "prospects", label: "Prospects", icon: "target", href: PAGE_ROUTES.PROSPECTS },
+  { id: "linkedin-growth", label: "LinkedIn growth", icon: "trending", href: PAGE_ROUTES.LINKEDIN_GROWTH },
+  { id: "linkedin-coach", label: "LinkedIn coach", icon: "clipboard", href: PAGE_ROUTES.LINKEDIN_COACH },
 ];
 
 type Props = {

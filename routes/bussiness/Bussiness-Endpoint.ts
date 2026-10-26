@@ -22,6 +22,7 @@ export const BUSSINESSENDPOINT = {
     ANALYZE_COMPANY_DASHBOARD_DOCUMENTATION:(company_id: string) => `/analyzeCompany/dashboard/${company_id}/documentation`,
 
     ANALYSIS:{
+    FIND_COMPETITORS: '/competitorAnalysis/find-competitors',
     COMPETITOR_ANALYSIS: '/competitorAnalysis',
     COMPETITOR_ANALYSIS_ASYNC: '/competitorAnalysis/async',
 
@@ -95,6 +96,7 @@ export const BUSSINESSENDPOINT = {
 
     CONNECTORS:{
         INSTAGRAM_LOGIN: '/connector/instagram/login',
+        LINKEDIN_LOGIN: '/connector/linkedin/login',
         SOCIAL_ACCOUNTS: '/social-accounts',
         SOCIAL_ACCOUNTS_CONNECT: (platform: string) => `/social-accounts/${platform}/connect`,
         SOCIAL_ACCOUNTS_DISCONNECT: (platform: string) => `/social-accounts/${platform}`,
@@ -133,6 +135,47 @@ export const BUSSINESSENDPOINT = {
 
     LINKEDIN:{
         PROFILE_CONTENT: '/connector/linkedin/profile-content',
+    },
+
+    LINKEDIN_GROWTH:{
+        PROFILE_SCORE: '/linkedin/growth/profile-score',
+        PROFILE_SCORE_HISTORY: '/linkedin/growth/profile-score/history',
+        PROFILE_REWRITE: '/linkedin/growth/profile-rewrite',
+        VOICE: '/linkedin/growth/voice',
+        WEEK_POSTS: '/linkedin/growth/week-posts',
+        WEEK_POST_SCHEDULE: (post_id: string) => `/linkedin/growth/week-posts/${post_id}/schedule`,
+        WEEK_POST_CANCEL: (post_id: string) => `/linkedin/growth/week-posts/${post_id}/cancel`,
+        SCORE: '/linkedin/growth/score',
+        SCORE_HISTORY: '/linkedin/growth/score/history',
+    },
+
+    LINKEDIN_COACH:{
+        TODAY: '/linkedin/coach/today',
+        TASK_DONE: (task_id: string) => `/linkedin/coach/today/tasks/${task_id}/done`,
+        TASK_UNDO: (task_id: string) => `/linkedin/coach/today/tasks/${task_id}/undo`,
+        FOLLOW_UPS: '/linkedin/coach/follow-ups',
+        FOLLOW_UP_DONE: (follow_up_id: string) => `/linkedin/coach/follow-ups/${follow_up_id}/done`,
+        WEEKLY_REPORT: '/linkedin/coach/weekly-report',
+        WEEKLY_REPORT_HISTORY: '/linkedin/coach/weekly-report/history',
+        CONTENT_PLAN: '/linkedin/coach/content-plan',
+        CAROUSEL: '/linkedin/coach/carousel',
+        REPURPOSE: '/linkedin/coach/repurpose',
+        POST_CHECK: '/linkedin/coach/post-check',
+        WRITE_POST: '/linkedin/coach/write-post',
+        HOOK_FORMULAS: '/linkedin/tools/hook-formulas',
+        PUBLISH_CAROUSEL: '/connector/linkedin/publish-carousel',
+    },
+
+    PROSPECTS:{
+        ICP: '/prospects/icp',
+        RUNS: '/prospects/runs',
+        RUN_BY_ID: (run_id: string) => `/prospects/runs/${run_id}`,
+        LIST: '/prospects',
+        BY_ID: (prospect_id: string) => `/prospects/${prospect_id}`,
+        SAVE: (prospect_id: string) => `/prospects/${prospect_id}/save`,
+        STATUS: (prospect_id: string) => `/prospects/${prospect_id}/status`,
+        DRAFTS: (prospect_id: string) => `/prospects/${prospect_id}/drafts`,
+        EXPORT_CSV: '/prospects/export.csv',
     },
 
     CONTENT_EXECUTION:{

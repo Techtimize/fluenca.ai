@@ -12,6 +12,7 @@ import { SiteHeader } from "@/components/site-header";
 import { LandingHero } from "@/components/landing-hero";
 import { ComingSoonPage } from "./coming-soon/ComingSoonPage";
 import DemoVideoSection from "@/components/landing/demo-video-section";
+import AiEngineSection from "@/components/landing/ai-engine-section";
 
 export default function Home() {
   return (
@@ -27,9 +28,13 @@ export default function Home() {
           description="Set your goal and let AI agents analyze what’s working across your market. Get ready-to-use insights, content, and campaigns without the guesswork."
           imageSrc="/assets/flowcircle.svg"
           imageAlt="Fluenca workflow diagram connecting research, planning, publishing, analytics, and content creation agents."
-          actions={[]}
+          actions={[
+            { label: "Get Started Free", href: "/signup", variant: "primary" },
+            { label: "Watch Demo", href: "#demo", variant: "secondary" },
+          ]}
         />
         <DemoVideoSection />
+        <AiEngineSection />
         <HowItWorks />
         {/* <DemoVideoSection /> */}
         <WhyFluenca />

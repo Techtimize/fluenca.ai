@@ -45,7 +45,10 @@
     "blogs": "Blogs",
     "users": "Users",
     "analytics": "Analytics",
-    "news": "News"
+    "news": "News",
+    "prospects": "Prospects",
+    "linkedin-growth": "LinkedIn growth",
+    "linkedin-coach": "LinkedIn coach"
   },
   "auth": {
     "email": "Email Address",
