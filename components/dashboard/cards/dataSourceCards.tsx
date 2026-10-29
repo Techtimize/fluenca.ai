@@ -15,6 +15,7 @@ import {
   RotateCw,
   Search,
   Smartphone,
+  TrendingUp,
 } from "lucide-react";
 import { FacebookIcon } from "@/components/shared/brandIcons";
 import { scoreColor } from "@/components/dashboard/website-speed/PageSpeedReport";
@@ -27,10 +28,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PAGE_ROUTES } from "@/constant/page-routes";
+import { getApiErrorMessage } from "@/errors/error-utils";
 import {
   GoogleAnalyticsConnectMutation,
   GoogleAnalyticsSelectPropertyMutation,
   InstagramConnectMutation,
+  RefreshOrganicTrafficMutation,
 } from "@/routes/bussiness/Bussiness-Mutation";
 import { accountDisplayName, accountHandle } from "@/components/dashboard/social/socialUtils";
 import {
@@ -43,6 +46,7 @@ import {
   FacebookProfileContentQuery,
   LinkedInProfileContentQuery,
   OnboardingDetailsQuery,
+  OrganicTrafficQuery,
   SearchConsoleConnectionQuery,
   SearchConsoleOverviewQuery,
   SocialAccountsQuery,
@@ -178,7 +182,6 @@ export function GoogleAnalyticsSourceCard() {
   const properties = GoogleAnalyticsPropertiesQuery(connected);
   const chooseProperty = GoogleAnalyticsSelectPropertyMutation();
   const propertyItems = properties.data?.items ?? [];
-  // Same window as the full report, so both share one cached overview.
   const overview = GoogleAnalyticsOverviewQuery(connected ? (connection?.property_id ?? null) : null, GA_OVERVIEW_DAYS);
   const totals = overview.data?.totals;
 
@@ -256,6 +259,113 @@ export function GoogleAnalyticsSourceCard() {
           </p>
         </>
       ) : null}
+    </SourceCard>
+  );
+}
+
+const usdCompact = new Intl.NumberFormat("en", {
+  style: "currency",
+  currency: "USD",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+const monthLabel = (month: string) => {
+  const [year, m] = month.split("-").map(Number);
+  return year && m ? new Date(year, m - 1).toLocaleDateString("en", { month: "short" }) : month;
+};
+
+/** Estimated monthly Google visits to the company website (no connection needed). */
+export function OrganicTrafficSourceCard() {
+  const traffic = OrganicTrafficQuery();
+  const refresh = RefreshOrganicTrafficMutation();
+  const data = traffic.data;
+  const loading = traffic.isLoading;
+  const topCountry = data?.top_countries[0];
+  const history = data?.history ?? [];
+  const peak = Math.max(1, ...history.map((month) => month.organic_traffic));
+
+  return (
+    <SourceCard
+      icon={<TrendingUp className="size-6 text-[#0F9D58]" aria-hidden="true" />}
+      title="Organic traffic"
+      description={
+        loading
+          ? "Estimating your Google traffic… this can take up to 20 seconds."
+          : "Estimated monthly visits from Google, from the keywords you rank for."
+      }
+      detail={data?.domain ?? null}
+      action={
+        <button
+          type="button"
+          onClick={() => refresh.mutate({})}
+          disabled={loading || refresh.isPending}
+          className={SECONDARY_ACTION}
+        >
+          {refresh.isPending ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <RotateCw className="size-4" aria-hidden="true" />
+          )}
+          {refresh.isPending ? "Checking…" : "Check again"}
+        </button>
+      }
+    >
+      {traffic.isError ? (
+        <p className="mt-4 rounded-xl bg-rose-50 px-3 py-2.5 text-xs text-rose-700">
+          {getApiErrorMessage(traffic.error, "Could not load organic traffic.")}
+        </p>
+      ) : (
+        <>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <StatTile
+              label="Monthly visits"
+              value={data ? compactNumber.format(data.organic_traffic) : null}
+              loading={loading}
+            />
+            <StatTile
+              label="Traffic value"
+              value={data ? usdCompact.format(data.traffic_value_usd) : null}
+              loading={loading}
+            />
+            <StatTile label="Keywords" value={data ? compactNumber.format(data.keywords) : null} loading={loading} />
+            <StatTile
+              label="Top country"
+              value={data ? (topCountry ? `${topCountry.country} · ${Math.round(topCountry.share)}%` : "–") : null}
+              loading={loading}
+            />
+          </div>
+
+          {history.length > 1 ? (
+            <div className="mt-3" aria-label={`Organic traffic over the last ${history.length} months`}>
+              <div className="flex h-12 items-end gap-1">
+                {history.map((month) => (
+                  <span
+                    key={month.month}
+                    title={`${monthLabel(month.month)}: ${compactNumber.format(month.organic_traffic)} visits`}
+                    className="flex-1 rounded-t bg-[#C9E9D6] last:bg-[#0F9D58]"
+                    style={{ height: `${Math.max(6, (month.organic_traffic / peak) * 100)}%` }}
+                  />
+                ))}
+              </div>
+              <div className="mt-1 flex gap-1 text-[10px] text-neutral-400">
+                {history.map((month) => (
+                  <span key={month.month} className="flex-1 text-center">
+                    {monthLabel(month.month)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {data ? (
+            <p className="mt-1.5 text-[11px] text-neutral-400">
+              {data.from_cache ? "Saved report · " : ""}Checked {new Date(data.checked_at).toLocaleDateString()}
+              {data.country ? ` · details for ${data.country}` : ""}
+            </p>
+          ) : null}
+        </>
+      )}
     </SourceCard>
   );
 }
@@ -449,7 +559,7 @@ export function InstagramSourceCard() {
             loading={insightsLoading}
           />
           <StatTile
-            label="Accounts engaged"
+            label="Profile Views"
             value={accountsEngaged != null ? compactNumber.format(accountsEngaged) : null}
             loading={insightsLoading}
           />

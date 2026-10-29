@@ -1,4 +1,5 @@
 import { ArrowUp } from "lucide-react";
+import { ScoreGauge } from "@/components/dashboard/overallPerformanceCard";
 import type { Metric, Tone } from "@/types/dashboard";
 import { DynamicIcon } from "@/utils/icon-utils";
 
@@ -33,9 +34,12 @@ export default function MetricCard({ metric }: { metric: Metric }) {
             </p>
           </div>
         </div>
-        <p className="shrink-0 text-xl font-semibold text-neutral-900 sm:text-2xl">
-          {metric.score}
-        </p>
+        <ScoreGauge
+          score={score}
+          label={metric.label}
+          showLabel={false}
+          className="-my-1 w-20 shrink-0 sm:w-24"
+        />
       </div>
       <div
         className="mt-3 h-2 overflow-hidden rounded-full bg-neutral-100 sm:mt-4"

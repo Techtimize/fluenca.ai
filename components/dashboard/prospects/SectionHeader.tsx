@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
 type Props = {
-  step: number;
+  /** A number for the finder's steps, or an icon for standalone tools. */
+  step: ReactNode;
   title: string;
   description: string;
   action?: ReactNode;

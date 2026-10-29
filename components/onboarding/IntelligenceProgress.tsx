@@ -127,7 +127,7 @@ export default function IntelligenceProgress({
   const visibleItems = feed.slice(Math.max(0, shown - VISIBLE_ITEMS), shown);
 
   return (
-    <div className="@container relative mx-auto max-w-6xl">
+    <div className="@container relative mx-auto w-full max-w-6xl">
       {showHeading && (
         <div className="text-center">
           <h1 className="mt-5 text-3xl font-bold tracking-tight text-neutral-900 sm:text-5xl sm:leading-[1.1]">

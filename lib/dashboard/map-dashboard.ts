@@ -2,14 +2,17 @@ import { PAGE_ROUTES } from "@/constant/page-routes";
 import type {
   DashboardChannel,
   DashboardCompanyCard,
+  DashboardCompetitor,
   DashboardDocumentationItem,
   DashboardResponse,
+  SavedCompetitor,
 } from "@/types/bussiness/dashboard-type";
 import type {
   AnalyticsData,
   AnalyticsSource,
   Company,
   CompanyProfile,
+  Competitor,
   DocItem,
   Metric,
   Tone,
@@ -124,18 +127,36 @@ function mapCompany(card: DashboardCompanyCard): Company {
           }
         : null,
     ].filter((link): link is NonNullable<typeof link> => Boolean(link)),
-    competitors: (card.competitors ?? []).map((c) => ({
-      id: c.id,
-      name: c.name,
-      logoSrc: c.logo_url,
-      href: c.website_url ?? c.linkedin_url ?? c.instagram_url,
-      websiteUrl: c.website_url,
-      instagramUrl: c.instagram_url,
-      linkedinUrl: c.linkedin_url,
-      instagramImageUrl: c.instagram_image_url ?? null,
-      whyCompetitor: c.why_competitor ?? null,
-      linkedinImageUrl: c.linkedin_image_url ?? null,
-    })),
+    competitors: (card.competitors ?? []).map(mapCompetitor),
+  };
+}
+
+/** API competitor → the shape the company card shows. */
+export function mapCompetitor(c: DashboardCompetitor): Competitor {
+  return {
+    id: c.id,
+    name: c.name,
+    logoSrc: c.logo_url,
+    href: c.website_url ?? c.linkedin_url ?? c.instagram_url,
+    websiteUrl: c.website_url,
+    instagramUrl: c.instagram_url,
+    linkedinUrl: c.linkedin_url,
+    instagramImageUrl: c.instagram_image_url ?? null,
+    whyCompetitor: c.why_competitor ?? null,
+    linkedinImageUrl: c.linkedin_image_url ?? null,
+  };
+}
+
+/** Saved competitor (find-competitors endpoint) → the shape the company card shows. */
+export function mapSavedCompetitor(c: SavedCompetitor): Competitor {
+  return {
+    id: c.id,
+    name: c.name,
+    href: c.website ?? c.linkedin ?? c.instagram,
+    websiteUrl: c.website,
+    instagramUrl: c.instagram,
+    linkedinUrl: c.linkedin,
+    confirmed: c.confirmed ?? false,
   };
 }
 

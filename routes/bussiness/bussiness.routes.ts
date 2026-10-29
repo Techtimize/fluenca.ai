@@ -28,7 +28,15 @@ import {
 import type { NewsParams, NewsResponse } from "@/types/bussiness/news-type";
 import api from "../apiClient";
 import { AnalyzeCompanyRequest, AnalyzeCompanyResponse } from "@/types/bussiness/analyzecompany-type";
-import type { DashboardResponse } from "@/types/bussiness/dashboard-type";
+import type {
+  ConfirmCompetitorRequest,
+  ConfirmCompetitorResponse,
+  DashboardResponse,
+  SavedCompetitor,
+  SavedCompetitorsResponse,
+  TrackedCompetitorsRequest,
+  TrackedCompetitorsResponse,
+} from "@/types/bussiness/dashboard-type";
 import type { DashboardDocumentationResponse } from "@/types/bussiness/dashboard-documentation-type";
 import type {
   EditProfileRequest,
@@ -130,12 +138,29 @@ import type {
   BuildIcpRequest,
   IcpResponse,
   Prospect,
+  ProspectCandidatesRequest,
+  ProspectCandidatesResponse,
   ProspectRun,
   ProspectsParams,
   StartProspectRunRequest,
   UpdateIcpRequest,
   UpdateProspectStatusRequest,
 } from "@/types/bussiness/prospect-type";
+import type { OrganicTrafficRequest, OrganicTrafficResponse } from "@/types/bussiness/organic-traffic-type";
+import type {
+  LlmsTxtRequest,
+  LlmsTxtResponse,
+  SchemaMarkupResponse,
+  SiteVisibilityResponse,
+} from "@/types/bussiness/site-visibility-type";
+import type {
+  CompanySearchRequest,
+  CompanySearchResponse,
+  PeopleSearchRequest,
+  PeopleSearchResponse,
+  PersonDetailRequest,
+  PersonDetailResponse,
+} from "@/types/bussiness/linkedin-people-type";
 import type {
   LinkedInScore,
   LinkedInVoice,
@@ -147,20 +172,16 @@ import type {
   WeekPostsResponse,
 } from "@/types/bussiness/linkedin-growth-type";
 import type {
-  AddFollowUpRequest,
   Carousel,
   CarouselRequest,
   CoachDraft,
-  CoachToday,
   ContentPlan,
   ContentPlanGoal,
-  FollowUp,
   HookFormula,
   PostCheckRequest,
   PostCheckResponse,
   PublishCarouselRequest,
   RepurposeResponse,
-  WeeklyReport,
   WritePostRequest,
 } from "@/types/bussiness/linkedin-coach-type";
 
@@ -173,7 +194,7 @@ function toQueryParams(params?: GoogleTrendQueryParams) {
   return entries.length ? Object.fromEntries(entries) : undefined;
 }
 
-/** POST /contact-us — demo / sales requests */
+
 export const ContactUsApi = async (data: ContactUsRequest): Promise<ContactUsResponse> => {
     const response = await api.post(BUSSINESSENDPOINT.CONTACT_US, data);
     return response.data;
@@ -439,7 +460,6 @@ export const DeleteImageApi = async (company_id: string, image_id: string) => {
     return response.data;
 }
 
-/** POST /generation/image-generation/schedule — saves (or replaces) the run's schedule. */
 export const ScheduleImageGenerationApi = async (
   data: ImageGenerationScheduleRequest,
 ): Promise<ImageGenerationScheduleResponse> => {
@@ -614,7 +634,6 @@ export const FacebookPublishApi = async (
   return response.data;
 }
 
-/** LinkedIn post — text | link | image. Auth + company; LinkedIn must have w_member_social. */
 export const LinkedInPublishApi = async (
   data: LinkedInPublishRequest,
 ): Promise<LinkedInPublishResponse> => {
@@ -631,7 +650,6 @@ export const XLoginApi = async (
   return response.data;
 }
 
-/** X post — text and/or image_url. 404 = X not connected, 502 = readable upstream error. */
 export const XPublishApi = async (data: XPublishRequest): Promise<XPublishResponse> => {
   const response = await api.post(BUSSINESSENDPOINT.PUBLISH.X_PUBLISH, data);
   return response.data;
@@ -974,13 +992,11 @@ export const ResumeGoalApi = async (goal_id: string): Promise<Goal> => {
 export const GoalsByCompanyApi = async (company_id: string): Promise<GoalListResponse> => {
   const response = await api.get(BUSSINESSENDPOINT.GOAL.GOALS_BY_COMPANY(company_id));
   const data = response.data;
-  // Accept a bare array or a { goals } / { data } / { items } wrapper.
   if (Array.isArray(data)) return data;
   return data?.goals ?? data?.data ?? data?.items ?? [];
 };
 
 const unwrapScheduledPosts = (data: unknown): ScheduledPost[] => {
-  // Accept a bare array or a { scheduled_posts } / { items } / { data } wrapper.
   if (Array.isArray(data)) return data;
   const wrapped = data as { scheduled_posts?: ScheduledPost[]; items?: ScheduledPost[]; data?: ScheduledPost[] } | null;
   return wrapped?.scheduled_posts ?? wrapped?.items ?? wrapped?.data ?? [];
@@ -1060,22 +1076,17 @@ export const FindCompetitorApi = async (company_id: string) => {
   return response.data;
 }
 
-// ---------- Prospect finder ----------
-
-/** The 202 from POST /prospects/runs may name the id `run_id`; keep `id` everywhere else. */
 const normalizeRun = (data: ProspectRun & { run_id?: string }): ProspectRun => ({
   ...data,
   id: data.id ?? data.run_id ?? "",
 });
 
 const unwrapList = <T>(data: unknown, key: string): T[] => {
-  // Accept a bare array or a { [key] } / { items } / { data } wrapper.
   if (Array.isArray(data)) return data;
   const wrapped = data as Record<string, T[] | undefined> | null;
   return wrapped?.[key] ?? wrapped?.items ?? wrapped?.data ?? [];
 };
 
-/** Builds 2–3 profiles from the DNA. Slow (10–40 s). */
 export const BuildProspectIcpApi = async (body?: BuildIcpRequest): Promise<IcpResponse> => {
   const response = await api.post(BUSSINESSENDPOINT.PROSPECTS.ICP, body ?? {});
   return response.data;
@@ -1091,7 +1102,6 @@ export const UpdateProspectIcpApi = async (body: UpdateIcpRequest): Promise<IcpR
   return response.data;
 };
 
-/** Starts a search in the background (202); poll ProspectRunApi until it's ready or failed. */
 export const StartProspectRunApi = async (body?: StartProspectRunRequest): Promise<ProspectRun> => {
   const response = await api.post(BUSSINESSENDPOINT.PROSPECTS.RUNS, body ?? {});
   return normalizeRun(response.data);
@@ -1107,7 +1117,78 @@ export const ProspectRunApi = async (run_id: string): Promise<ProspectRun> => {
   return normalizeRun(response.data);
 };
 
-/** The shortlist, best first. */
+// ---------- Site visibility ----------
+
+/** Reads the company site's robots.txt, sitemap, llms.txt and home page (a few seconds, no AI cost). */
+export const SiteVisibilityApi = async (): Promise<SiteVisibilityResponse> => {
+  const response = await api.get<SiteVisibilityResponse>(BUSSINESSENDPOINT.SITE_VISIBILITY.CHECK);
+  return response.data;
+};
+
+/** Writes a fresh llms.txt from the Company DNA (one AI call). */
+export const WriteLlmsTxtApi = async (): Promise<LlmsTxtResponse> => {
+  const response = await api.post<LlmsTxtResponse>(BUSSINESSENDPOINT.SITE_VISIBILITY.LLMS_TXT);
+  return response.data;
+};
+
+/** Same as WriteLlmsTxtApi, but returns the llms.txt file itself (`download=true`). */
+export const DownloadLlmsTxtApi = async (): Promise<Blob> => {
+  const params: LlmsTxtRequest = { download: true };
+  const response = await api.post(BUSSINESSENDPOINT.SITE_VISIBILITY.LLMS_TXT, null, {
+    params,
+    responseType: "blob",
+  });
+  return response.data;
+};
+
+/** Writes schema.org JSON-LD blocks from the Company DNA (one AI call). */
+export const WriteSchemaMarkupApi = async (): Promise<SchemaMarkupResponse> => {
+  const response = await api.post<SchemaMarkupResponse>(BUSSINESSENDPOINT.SITE_VISIBILITY.SCHEMA_MARKUP);
+  return response.data;
+};
+
+// ---------- Organic traffic ----------
+
+/** Estimated Google traffic for a website (the company's own when `website` is left out). */
+export const OrganicTrafficApi = async (params: OrganicTrafficRequest = {}): Promise<OrganicTrafficResponse> => {
+  const response = await api.get<OrganicTrafficResponse>(BUSSINESSENDPOINT.ORGANIC_TRAFFIC.CHECK, {
+    params: {
+      ...(params.website ? { website: params.website } : {}),
+      ...(params.country ? { country: params.country } : {}),
+      ...(params.refresh ? { refresh: true } : {}),
+    },
+  });
+  return response.data;
+};
+
+// ---------- LinkedIn people & company search ----------
+
+export const SearchPeopleApi = async (body: PeopleSearchRequest): Promise<PeopleSearchResponse> => {
+  const response = await api.post<PeopleSearchResponse>(BUSSINESSENDPOINT.LINKEDIN_PEOPLE.SEARCH, body);
+  return response.data;
+};
+
+export const PersonDetailApi = async (body: PersonDetailRequest): Promise<PersonDetailResponse> => {
+  const response = await api.post<PersonDetailResponse>(BUSSINESSENDPOINT.LINKEDIN_PEOPLE.DETAIL, body);
+  return response.data;
+};
+
+export const SearchCompanyApi = async (body: CompanySearchRequest): Promise<CompanySearchResponse> => {
+  const response = await api.post<CompanySearchResponse>(BUSSINESSENDPOINT.LINKEDIN_PEOPLE.COMPANIES_SEARCH, body);
+  return response.data;
+};
+
+/** Every company the search found, and what happened to each. */
+export const ProspectRunCandidatesApi = async (
+  run_id: string,
+  params?: ProspectCandidatesRequest,
+): Promise<ProspectCandidatesResponse> => {
+  const response = await api.get<ProspectCandidatesResponse>(BUSSINESSENDPOINT.PROSPECTS.RUN_CANDIDATES(run_id), {
+    params: params?.outcome ? { outcome: params.outcome } : {},
+  });
+  return response.data;
+};
+
 export const ProspectsApi = async (params?: ProspectsParams): Promise<Prospect[]> => {
   const response = await api.get(BUSSINESSENDPOINT.PROSPECTS.LIST, {
     params: {
@@ -1118,13 +1199,11 @@ export const ProspectsApi = async (params?: ProspectsParams): Promise<Prospect[]
   return unwrapList<Prospect>(response.data, "prospects");
 };
 
-/** One prospect with its people, brief and drafts. */
 export const ProspectApi = async (prospect_id: string): Promise<Prospect> => {
   const response = await api.get(BUSSINESSENDPOINT.PROSPECTS.BY_ID(prospect_id));
   return response.data;
 };
 
-/** Saves the prospect, then verifies emails and writes the brief and drafts in the background. */
 export const SaveProspectApi = async (prospect_id: string): Promise<Prospect> => {
   const response = await api.post(BUSSINESSENDPOINT.PROSPECTS.SAVE(prospect_id));
   return response.data;
@@ -1138,7 +1217,7 @@ export const UpdateProspectStatusApi = async (
   return response.data;
 };
 
-/** Writes the drafts again, for one person when `person_id` is given. */
+
 export const RegenerateProspectDraftsApi = async (prospect_id: string, person_id?: string): Promise<Prospect> => {
   const response = await api.post(BUSSINESSENDPOINT.PROSPECTS.DRAFTS(prospect_id), undefined, {
     params: person_id ? { person_id } : undefined,
@@ -1146,21 +1225,16 @@ export const RegenerateProspectDraftsApi = async (prospect_id: string, person_id
   return response.data;
 };
 
-/** The saved prospects as a CSV file. */
 export const ExportProspectsCsvApi = async (): Promise<Blob> => {
   const response = await api.get(BUSSINESSENDPOINT.PROSPECTS.EXPORT_CSV, { responseType: "blob" });
   return response.data;
 };
 
-// ---------- LinkedIn growth ----------
-
-/** Judges the 12 checklist items and saves the result. */
 export const RunProfileScoreApi = async (body?: ProfileScoreRequest): Promise<ProfileScore> => {
   const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_GROWTH.PROFILE_SCORE, body ?? {});
   return response.data;
 };
 
-/** The latest profile score. */
 export const ProfileScoreApi = async (): Promise<ProfileScore> => {
   const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_GROWTH.PROFILE_SCORE);
   return response.data;
@@ -1171,19 +1245,16 @@ export const ProfileScoreHistoryApi = async (): Promise<ProfileScore[]> => {
   return unwrapList<ProfileScore>(response.data, "history");
 };
 
-/** 3 headline and 2–3 About options, from the last-scored profile. */
 export const ProfileRewriteApi = async (): Promise<ProfileRewrite> => {
   const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_GROWTH.PROFILE_REWRITE);
   return response.data;
 };
 
-/** Tone, stories, hooks, formats and top posts; `ready` is false until the story bank has posts. */
 export const LinkedInVoiceApi = async (): Promise<LinkedInVoice> => {
   const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_GROWTH.VOICE);
   return response.data;
 };
 
-/** Builds the 3 posts for the first week. */
 export const GenerateWeekPostsApi = async (): Promise<WeekPostsResponse> => {
   const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_GROWTH.WEEK_POSTS);
   return { posts: unwrapList<WeekPost>(response.data, "posts") };
@@ -1194,7 +1265,6 @@ export const WeekPostsApi = async (): Promise<WeekPostsResponse> => {
   return { posts: unwrapList<WeekPost>(response.data, "posts") };
 };
 
-/** Schedules a post, optionally with edited text. It's published once and never retried. */
 export const ScheduleWeekPostApi = async (post_id: string, body: ScheduleWeekPostRequest): Promise<WeekPost> => {
   const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_GROWTH.WEEK_POST_SCHEDULE(post_id), body);
   return response.data;
@@ -1205,7 +1275,7 @@ export const CancelWeekPostApi = async (post_id: string): Promise<WeekPost> => {
   return response.data;
 };
 
-/** Scores profile, posting, engagement and network (25 each) and saves it. */
+
 export const RunLinkedInScoreApi = async (): Promise<LinkedInScore> => {
   const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_GROWTH.SCORE);
   return response.data;
@@ -1216,64 +1286,18 @@ export const LinkedInScoreApi = async (): Promise<LinkedInScore> => {
   return response.data;
 };
 
-/** Every saved score, for the growth chart. */
+
 export const LinkedInScoreHistoryApi = async (): Promise<LinkedInScore[]> => {
   const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_GROWTH.SCORE_HISTORY);
   return unwrapList<LinkedInScore>(response.data, "history");
 };
 
-// ---------- LinkedIn coach ----------
 
-/** Today's checklist. Built once a day; the first call of the day can take up to a minute. */
-export const CoachTodayApi = async (): Promise<CoachToday> => {
-  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_COACH.TODAY);
-  return response.data;
-};
-
-export const CompleteCoachTaskApi = async (task_id: string): Promise<CoachToday> => {
-  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.TASK_DONE(task_id));
-  return response.data;
-};
-
-export const UndoCoachTaskApi = async (task_id: string): Promise<CoachToday> => {
-  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.TASK_UNDO(task_id));
-  return response.data;
-};
-
-export const FollowUpsApi = async (): Promise<FollowUp[]> => {
-  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_COACH.FOLLOW_UPS);
-  return unwrapList<FollowUp>(response.data, "follow_ups");
-};
-
-/** Adds someone who accepted your request or commented; a reply is drafted for them. */
-export const AddFollowUpApi = async (body: AddFollowUpRequest): Promise<FollowUp> => {
-  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.FOLLOW_UPS, body);
-  return response.data;
-};
-
-export const CompleteFollowUpApi = async (follow_up_id: string): Promise<FollowUp> => {
-  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.FOLLOW_UP_DONE(follow_up_id));
-  return response.data;
-};
-
-/** This week's report, worked out from saved data. */
-export const WeeklyReportApi = async (): Promise<WeeklyReport> => {
-  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_COACH.WEEKLY_REPORT);
-  return response.data;
-};
-
-export const WeeklyReportHistoryApi = async (): Promise<WeeklyReport[]> => {
-  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_COACH.WEEKLY_REPORT_HISTORY);
-  return unwrapList<WeeklyReport>(response.data, "reports");
-};
-
-/** 3–5 posts for next week around a goal. */
 export const ContentPlanApi = async (goal: ContentPlanGoal): Promise<ContentPlan> => {
   const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.CONTENT_PLAN, { goal });
   return response.data;
 };
 
-/** Slides in your voice, rendered as images. */
 export const CarouselApi = async (body: CarouselRequest): Promise<Carousel> => {
   const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.CAROUSEL, body);
   return response.data;
@@ -1284,19 +1308,17 @@ export const PublishCarouselApi = async (body: PublishCarouselRequest) => {
   return response.data;
 };
 
-/** Your top post as a new angle and a follow-up, saved as drafts. */
+
 export const RepurposeApi = async (): Promise<RepurposeResponse> => {
   const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.REPURPOSE);
   return { drafts: unwrapList<CoachDraft>(response.data, "drafts") };
 };
 
-/** Removes the AI-written feel, scores the first line and lints the post. */
 export const PostCheckApi = async (body: PostCheckRequest): Promise<PostCheckResponse> => {
   const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.POST_CHECK, body);
   return response.data;
 };
 
-/** One post from a brief, saved as a draft. */
 export const WritePostApi = async (body: WritePostRequest): Promise<CoachDraft> => {
   const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.WRITE_POST, body);
   return response.data;
@@ -1306,3 +1328,33 @@ export const HookFormulasApi = async (): Promise<HookFormula[]> => {
   const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_COACH.HOOK_FORMULAS);
   return unwrapList<HookFormula>(response.data, "formulas");
 };
+
+
+export const GetCompanyCompetitorsApiById = async (company_id: string): Promise<SavedCompetitor[]> => {
+  const response = await api.get<SavedCompetitorsResponse>(
+    BUSSINESSENDPOINT.ANALYSIS.GET_COMPETITORS_BY_ID(company_id),
+  );
+  return response.data.competitors ?? [];
+}
+
+/** The company's competitors and whether each was compared (`compared` filters the list). */
+export const TrackedCompetitorsApi = async (
+  params: TrackedCompetitorsRequest = {},
+): Promise<TrackedCompetitorsResponse> => {
+  const response = await api.get<TrackedCompetitorsResponse>(BUSSINESSENDPOINT.ANALYSIS.TRACKED_COMPETITORS, {
+    params: typeof params.compared === "boolean" ? { compared: params.compared } : {},
+  });
+  return response.data;
+}
+
+/** Marks a found competitor as a real competitor (kept) or not (removed). */
+export const ConfirmCompetitorApi = async (
+  competitor_id: string,
+  body: ConfirmCompetitorRequest,
+): Promise<ConfirmCompetitorResponse> => {
+  const response = await api.put<ConfirmCompetitorResponse>(
+    BUSSINESSENDPOINT.ANALYSIS.CONFIRM_TRACKED_COMPETITOR(competitor_id),
+    body,
+  );
+  return response.data;
+}
