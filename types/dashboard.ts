@@ -24,6 +24,11 @@ export type Competitor = {
   instagramImageUrl?: string | null;
   linkedinImageUrl?: string | null;
   whyCompetitor?: string | null;
+  /** Set for saved competitors: whether the user confirmed it as a real competitor. */
+  confirmed?: boolean;
+  /** From GET /competitorAnalysis/tracked: whether it has been compared, and when. */
+  compared?: boolean;
+  comparedAt?: string | null;
 };
 
 export type Company = {

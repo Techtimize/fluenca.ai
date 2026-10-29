@@ -37,6 +37,9 @@ export const BUSSINESSENDPOINT = {
     COMPETITOR_ANALYSIS_LATEST_MANUAL_RESPONSE: (company_id: string) => `/competitorAnalysis/manual/${company_id}`,
     
     COMPETITOR_ANALYSIS_FIND_COMPETITORS: '/competitorAnalysis/find-competitors',
+    GET_COMPETITORS_BY_ID: (company_id: string) => `/competitorAnalysis/find-competitors/${company_id}`,
+    TRACKED_COMPETITORS: '/competitorAnalysis/tracked',
+    CONFIRM_TRACKED_COMPETITOR:(competitor_id: string) => `/competitorAnalysis/tracked/${competitor_id}/confirm`,
     COMPETITOR_ANALYSIS_JOB: (job_id: string) => `/competitorAnalysis/jobs/${job_id}`,  
     COMPETITOR_ANALYSIS_COMPETITOR: (company_id: string) => `/competitorAnalysis/results/${company_id}`,
     COMPETITOR_ANALYSIS_DISCOVERED: (company_id: string) => `/competitorAnalysis/discovered/${company_id}`,
@@ -150,13 +153,6 @@ export const BUSSINESSENDPOINT = {
     },
 
     LINKEDIN_COACH:{
-        TODAY: '/linkedin/coach/today',
-        TASK_DONE: (task_id: string) => `/linkedin/coach/today/tasks/${task_id}/done`,
-        TASK_UNDO: (task_id: string) => `/linkedin/coach/today/tasks/${task_id}/undo`,
-        FOLLOW_UPS: '/linkedin/coach/follow-ups',
-        FOLLOW_UP_DONE: (follow_up_id: string) => `/linkedin/coach/follow-ups/${follow_up_id}/done`,
-        WEEKLY_REPORT: '/linkedin/coach/weekly-report',
-        WEEKLY_REPORT_HISTORY: '/linkedin/coach/weekly-report/history',
         CONTENT_PLAN: '/linkedin/coach/content-plan',
         CAROUSEL: '/linkedin/coach/carousel',
         REPURPOSE: '/linkedin/coach/repurpose',
@@ -170,12 +166,29 @@ export const BUSSINESSENDPOINT = {
         ICP: '/prospects/icp',
         RUNS: '/prospects/runs',
         RUN_BY_ID: (run_id: string) => `/prospects/runs/${run_id}`,
+        RUN_CANDIDATES: (run_id: string) => `/prospects/runs/${run_id}/candidates`,
         LIST: '/prospects',
         BY_ID: (prospect_id: string) => `/prospects/${prospect_id}`,
         SAVE: (prospect_id: string) => `/prospects/${prospect_id}/save`,
         STATUS: (prospect_id: string) => `/prospects/${prospect_id}/status`,
         DRAFTS: (prospect_id: string) => `/prospects/${prospect_id}/drafts`,
         EXPORT_CSV: '/prospects/export.csv',
+    },
+
+    SITE_VISIBILITY:{
+        CHECK: '/site-visibility',
+        LLMS_TXT: '/site-visibility/llms-txt',
+        SCHEMA_MARKUP: '/site-visibility/schema-markup',
+    },
+
+    ORGANIC_TRAFFIC:{
+        CHECK: '/organic-traffic',
+    },
+
+    LINKEDIN_PEOPLE:{
+        SEARCH: '/linkedin/people/search',
+        DETAIL: '/linkedin/people/detail',
+        COMPANIES_SEARCH: '/linkedin/people/companies/search',
     },
 
     CONTENT_EXECUTION:{

@@ -79,6 +79,51 @@ export interface StartProspectRunRequest {
 
 export const isRunFinished = (status?: ProspectRunStatus) => status === "ready" || status === "failed";
 
+// ---------- Run candidates ----------
+
+/** Every company a search found, in the order the API sends them (shortlisted first). */
+export const CANDIDATE_OUTCOMES = [
+  "shortlisted",
+  "over_limit",
+  "below_fit",
+  "not_a_fit",
+  "check_failed",
+  "not_checked",
+  "pending",
+] as const;
+export type CandidateOutcome = (typeof CANDIDATE_OUTCOMES)[number];
+
+export interface ProspectCandidate {
+  name: string;
+  domain: string | null;
+  source: string;
+  source_url: string | null;
+  signals: string[];
+  city: string | null;
+  country: string | null;
+  outcome: CandidateOutcome;
+  /** Set once the company was checked. */
+  fit_score: number | null;
+  /** Why it is not on the shortlist; null when it is. */
+  reason: string | null;
+  what_they_do: string | null;
+  why_fit: string | null;
+}
+
+/** GET /prospects/runs/{run_id}/candidates query params. */
+export interface ProspectCandidatesRequest {
+  outcome?: CandidateOutcome | null;
+}
+
+/** GET /prospects/runs/{run_id}/candidates */
+export interface ProspectCandidatesResponse {
+  run_id: string;
+  run_status: ProspectRunStatus;
+  /** How many candidates have each outcome, before the `outcome` filter. */
+  counts: Partial<Record<CandidateOutcome, number>>;
+  items: ProspectCandidate[];
+}
+
 // ---------- Prospects ----------
 
 export const PROSPECT_STATUSES = ["new", "saved", "contacted", "replied", "dismissed"] as const;
@@ -104,23 +149,33 @@ export interface ProspectPerson {
   prospect_score?: number | null;
 }
 
+/** A recent fact about the company (news, hiring, funding, launches), with where it came from. */
+export interface HappeningNowItem {
+  fact: string;
+  source_url?: string | null;
+  date?: string | null;
+}
+
 export interface ProspectBrief {
   who_they_are: string;
-  happening_now: string[];
+  happening_now: HappeningNowItem[];
   likely_challenge: string;
   why_they_fit: string;
   opening_angle: string;
+  sources?: string[];
+  generated_at?: string | null;
 }
 
-/** An email draft can come as plain text or with its own subject line. */
-export type EmailDraft = string | { subject?: string; body?: string };
+export type ProspectDraftKind = "linkedin_connect" | "linkedin_message" | "email_first" | "email_follow_up";
 
+/** One outreach draft; a person gets one of each kind. */
 export interface ProspectDraft {
+  id: string;
   person_id?: string | null;
-  linkedin_connect?: string | null;
-  linkedin_message?: string | null;
-  email_first?: EmailDraft | null;
-  email_follow_up?: EmailDraft | null;
+  kind: ProspectDraftKind;
+  /** Only emails have a subject. */
+  subject?: string | null;
+  body: string;
 }
 
 export interface Prospect {
