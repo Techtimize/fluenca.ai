@@ -38,7 +38,7 @@ export interface UserProfilePlan {
   usage: UserProfilePlanUsage[];
 }
 
-export type UserProfilePlatform = "instagram" | "linkedin" | "x";
+export type UserProfilePlatform = "instagram" | "linkedin" | "x" | "facebook";
 
 export interface UserProfileConnectedAccount {
   platform: UserProfilePlatform | string;

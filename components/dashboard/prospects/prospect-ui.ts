@@ -1,4 +1,9 @@
-import type { EmailStatus, ProspectRunStatus, ProspectStatus } from "@/types/bussiness/prospect-type";
+import type {
+  CandidateOutcome,
+  EmailStatus,
+  ProspectRunStatus,
+  ProspectStatus,
+} from "@/types/bussiness/prospect-type";
 
 // Shared labels and badge styles for the prospect finder.
 
@@ -46,9 +51,32 @@ export const RUN_STATUS_STYLE: Record<ProspectRunStatus, string> = {
   failed: "bg-rose-50 text-rose-700",
 };
 
-export const BADGE = "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium";
+export const CANDIDATE_OUTCOME_LABEL: Record<CandidateOutcome, string> = {
+  shortlisted: "Shortlisted",
+  over_limit: "Over limit",
+  below_fit: "Below fit",
+  not_a_fit: "Not a fit",
+  check_failed: "Check failed",
+  not_checked: "Not checked",
+  pending: "Pending",
+};
+
+export const CANDIDATE_OUTCOME_STYLE: Record<CandidateOutcome, string> = {
+  shortlisted: "bg-emerald-50 text-emerald-700",
+  over_limit: "bg-sky-50 text-sky-700",
+  below_fit: "bg-amber-50 text-amber-700",
+  not_a_fit: "bg-rose-50 text-rose-700",
+  check_failed: "bg-rose-50 text-rose-700",
+  not_checked: "bg-neutral-100 text-neutral-500",
+  pending: "bg-[#EEF0FF] text-[#4544C9]",
+};
+
+export const BADGE ="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium";
 
 export const CARD = "rounded-2xl border border-[#E6E8F5] bg-white";
+
+export const FIELD_INPUT =
+  "h-10 w-full rounded-xl border border-[#E6E8F5] bg-white px-3 text-[13px] text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-[#5B57E6] focus:ring-2 focus:ring-[#5B57E6]/20";
 
 export const PRIMARY_BUTTON =
   "inline-flex items-center justify-center gap-2 rounded-full bg-[#5B57E6] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#4A46D0] disabled:opacity-55";

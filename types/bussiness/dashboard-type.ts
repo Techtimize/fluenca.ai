@@ -26,6 +26,73 @@ export interface DashboardCompetitor {
   linkedin_image_url?: string | null;
 }
 
+/** A competitor from GET /competitorAnalysis/find-competitors/{company_id}. */
+export interface SavedCompetitor {
+  id: string;
+  name: string;
+  website: string | null;
+  instagram: string | null;
+  linkedin: string | null;
+  compared?: boolean;
+  /** True once the user confirmed it is a real competitor. */
+  confirmed?: boolean;
+  found_at?: string;
+}
+
+export interface SavedCompetitorsResponse {
+  success: boolean;
+  company_id: string;
+  count: number;
+  competitors: SavedCompetitor[];
+}
+
+/** GET /competitorAnalysis/tracked query params. */
+export interface TrackedCompetitorsRequest {
+  /** Only compared (true) or not yet compared (false); left out, all of them. */
+  compared?: boolean;
+}
+
+export interface TrackedCompetitor {
+  id: string;
+  name: string;
+  website: string | null;
+  instagram: string | null;
+  linkedin: string | null;
+  why_competitor: string | null;
+  source: string | null;
+  confidence: number | null;
+  /** null until the user answers "Is this a competitor?". */
+  confirmed: boolean | null;
+  confirmed_at: string | null;
+  compared: boolean;
+  compared_at: string | null;
+  /** "ai" or "manual". */
+  comparison_mode: string | null;
+  comparison_analysis_id: string | null;
+  comparison_version: number | null;
+  created_at: string;
+}
+
+/** GET /competitorAnalysis/tracked — the company's competitors and whether each was compared. */
+export interface TrackedCompetitorsResponse {
+  success: boolean;
+  company_id: string;
+  count: number;
+  compared_count: number;
+  competitors: TrackedCompetitor[];
+}
+
+/** PUT /competitorAnalysis/tracked/{competitor_id}/confirm */
+export interface ConfirmCompetitorRequest {
+  is_competitor: boolean;
+}
+
+/** `confirmed` when kept (is_competitor: true), `removed` when dropped (is_competitor: false). */
+export interface ConfirmCompetitorResponse {
+  confirmed?: boolean;
+  removed?: boolean;
+}
+
 export interface DashboardCompanyCard {
   name: string;
   tagline: string;

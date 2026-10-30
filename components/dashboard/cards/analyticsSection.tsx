@@ -3,12 +3,12 @@ import Card from "@/components/shared/card";
 import type { AnalyticsData, AnalyticsSource, Device } from "@/types/dashboard";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import {
-  GoogleAnalyticsSourceCard,
+  OrganicTrafficSourceCard,
   InstagramSourceCard,
   WebsiteSpeedSourceCard,
 } from "./dataSourceCards";
 import MetricCard from "./metricCard";
-import OverallPerformanceCard from "../overallPerformanceCard";
+import SiteVisibilityCard from "../site-visibility/SiteVisibilityCard";
 import VitalsCard from "./vitalsCard";
 
 type Props = {
@@ -23,12 +23,7 @@ type Props = {
 
 export default function AnalyticsSection({
   data,
-  sources,
-  source,
-  device,
   compact = false,
-  onSourceChange,
-  onDeviceChange,
 }: Props) {
   return (
     <Card className="mt-0 p-4 sm:mt-4 sm:p-5 md:p-6">
@@ -69,8 +64,8 @@ export default function AnalyticsSection({
           compact ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"
         }`}
       >
-        <OverallPerformanceCard data={data.overall} />
-        <GoogleAnalyticsSourceCard />
+        <SiteVisibilityCard />
+        <OrganicTrafficSourceCard />
         <WebsiteSpeedSourceCard />
         <InstagramSourceCard />
       </div>

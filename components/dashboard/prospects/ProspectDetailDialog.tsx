@@ -14,10 +14,10 @@ import { ProspectQuery } from "@/routes/bussiness/Bussiness-Query";
 import {
   isEnriching,
   SETTABLE_PROSPECT_STATUSES,
-  type EmailDraft,
   type Prospect,
   type ProspectBrief,
   type ProspectDraft,
+  type ProspectDraftKind,
   type ProspectPerson,
   type SettableProspectStatus,
 } from "@/types/bussiness/prospect-type";
@@ -240,8 +240,28 @@ function BriefCard({ brief }: { brief: ProspectBrief }) {
           <div>
             <p className="text-[12px] font-semibold text-neutral-900">Happening now</p>
             <ul className="mt-1 list-disc space-y-0.5 ps-5 text-[13px] leading-5 text-neutral-600">
-              {brief.happening_now.map((item) => (
-                <li key={item}>{item}</li>
+              {brief.happening_now.map((item, index) => (
+                <li key={`${item.fact}-${index}`}>
+                  {item.fact}
+                  {item.date || item.source_url ? (
+                    <span className="text-neutral-400">
+                      {" "}
+                      ({item.date}
+                      {item.date && item.source_url ? " · " : null}
+                      {item.source_url ? (
+                        <a
+                          href={item.source_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`rounded text-[#5B57E6] hover:underline ${FOCUS_RING}`}
+                        >
+                          source
+                        </a>
+                      ) : null}
+                      )
+                    </span>
+                  ) : null}
+                </li>
               ))}
             </ul>
           </div>
@@ -251,24 +271,33 @@ function BriefCard({ brief }: { brief: ProspectBrief }) {
   );
 }
 
-const DRAFT_FIELDS = [
-  { key: "linkedin_connect", label: "LinkedIn connection note" },
-  { key: "linkedin_message", label: "LinkedIn message" },
-  { key: "email_first", label: "First email" },
-  { key: "email_follow_up", label: "Follow-up email" },
-] as const;
+const DRAFT_FIELDS: { kind: ProspectDraftKind; label: string }[] = [
+  { kind: "linkedin_connect", label: "LinkedIn connection note" },
+  { kind: "linkedin_message", label: "LinkedIn message" },
+  { kind: "email_first", label: "First email" },
+  { kind: "email_follow_up", label: "Follow-up email" },
+];
 
-const draftText = (draft?: EmailDraft | null) => {
-  if (!draft) return "";
-  if (typeof draft === "string") return draft;
-  return [draft.subject ? `Subject: ${draft.subject}` : "", draft.body ?? ""].filter(Boolean).join("\n\n");
-};
+const draftText = (draft?: ProspectDraft) =>
+  draft ? [draft.subject ? `Subject: ${draft.subject}` : "", draft.body].filter(Boolean).join("\n\n") : "";
+
+/** The API sends a flat list of drafts; group them per person, keeping the order people first appear. */
+function groupDraftsByPerson(drafts: ProspectDraft[]) {
+  const groups = new Map<string, { personId: string | null; drafts: ProspectDraft[] }>();
+  for (const draft of drafts) {
+    const key = draft.person_id ?? "";
+    const group = groups.get(key) ?? { personId: draft.person_id ?? null, drafts: [] };
+    group.drafts.push(draft);
+    groups.set(key, group);
+  }
+  return [...groups.values()];
+}
 
 /** Drafts per person, with a tab for each when there are several. */
 function DraftsPanel({ prospect }: { prospect: Prospect }) {
-  const drafts = prospect.drafts ?? [];
+  const groups = groupDraftsByPerson(prospect.drafts ?? []);
   const [activeIndex, setActiveIndex] = useState(0);
-  const draft: ProspectDraft | undefined = drafts[activeIndex] ?? drafts[0];
+  const active = groups[activeIndex] ?? groups[0];
   const regenerate = RegenerateProspectDraftsMutation();
   const personName = (personId?: string | null) =>
     prospect.people.find((person) => person.id === personId)?.name ?? "Drafts";
@@ -279,7 +308,7 @@ function DraftsPanel({ prospect }: { prospect: Prospect }) {
         <SectionTitle>Outreach drafts</SectionTitle>
         <button
           type="button"
-          onClick={() => regenerate.mutate({ prospect_id: prospect.id, person_id: draft?.person_id ?? undefined })}
+          onClick={() => regenerate.mutate({ prospect_id: prospect.id, person_id: active?.personId ?? undefined })}
           disabled={regenerate.isPending}
           className={`${SECONDARY_BUTTON} py-1.5 ${FOCUS_RING}`}
         >
@@ -288,11 +317,11 @@ function DraftsPanel({ prospect }: { prospect: Prospect }) {
         </button>
       </div>
 
-      {drafts.length > 1 ? (
+      {groups.length > 1 ? (
         <div className="mt-2 flex flex-wrap gap-1.5" role="tablist" aria-label="Drafts for">
-          {drafts.map((item, index) => (
+          {groups.map((item, index) => (
             <button
-              key={item.person_id ?? index}
+              key={item.personId ?? index}
               type="button"
               role="tab"
               aria-selected={index === activeIndex}
@@ -301,16 +330,16 @@ function DraftsPanel({ prospect }: { prospect: Prospect }) {
                 index === activeIndex ? "bg-[#5B57E6] text-white" : "bg-[#F1F2FB] text-neutral-600 hover:bg-[#E6E8F5]"
               }`}
             >
-              {personName(item.person_id)}
+              {personName(item.personId)}
             </button>
           ))}
         </div>
       ) : null}
 
       <div className="mt-3 space-y-3">
-        {DRAFT_FIELDS.map(({ key, label }) => {
-          const text = draftText(draft?.[key]);
-          return text ? <DraftBlock key={key} label={label} text={text} /> : null;
+        {DRAFT_FIELDS.map(({ kind, label }) => {
+          const text = draftText(active?.drafts.find((d) => d.kind === kind));
+          return text ? <DraftBlock key={kind} label={label} text={text} /> : null;
         })}
       </div>
     </section>

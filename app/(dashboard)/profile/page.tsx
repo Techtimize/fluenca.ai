@@ -31,6 +31,7 @@ import {
   X,
 } from "lucide-react";
 import AssetImage from "@/components/shared/assetImage";
+import { FacebookIcon } from "@/components/shared/brandIcons";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import Card from "@/components/shared/card";
 import { PAGE_ROUTES } from "@/constant/page-routes";
@@ -41,6 +42,7 @@ import type {
   EditProfileRequest,
   EditProfileUser,
   UserProfileCompany,
+  UserProfileConnectedAccount,
   UserProfileData,
   UserProfileUser,
 } from "@/types/bussiness/user-profile-type";
@@ -610,75 +612,94 @@ function ProfileView({ profile }: { profile: UserProfileData }) {
             </section>
           ) : null}
 
-          {/* <Card className="p-5">
+          <Card className="p-5">
             <SectionHeader
               icon={<Link2 />}
               title="Connected Accounts"
               subtitle={`${connectedCount} of ${accounts.length} connected`}
             />
-            <ul className="space-y-2">
-              {accounts.map((account) => {
-                const platform = PLATFORMS[account.platform] ?? {
-                  label:
-                    account.platform.charAt(0).toUpperCase() +
-                    account.platform.slice(1),
-                  iconSrc: "/assets/globe.png",
-                };
-                return (
-                  <li
-                    key={account.platform}
-                    className="flex items-center gap-3 rounded-2xl border border-[#ECEDF5] bg-white px-3 py-2.5 transition-colors hover:bg-[#F8F9FF]"
-                  >
-                    <span className="grid size-10 place-items-center rounded-xl bg-[#F5F6FF]">
-                      <AssetImage
-                        src={platform.iconSrc}
-                        alt=""
-                        width={22}
-                        height={22}
-                        className="size-5.5 object-contain"
-                      />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-medium text-neutral-900">
-                        {platform.label}
-                      </span>
-                      <span className="block truncate text-xs text-neutral-500">
-                        {account.connected && account.handle
-                          ? `@${account.handle}`
-                          : "Not connected"}
-                      </span>
-                    </span>
-                    {account.connected ? (
-                      <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600">
-                        <span
-                          className="size-1.5 rounded-full bg-emerald-500"
-                          aria-hidden="true"
-                        />
-                        Connected
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        className={`rounded-full border border-[#D9DCF7] px-3 py-1 text-xs font-medium text-[#5452F6] hover:bg-[#EEF0FF] ${FOCUS_RING}`}
-                      >
-                        Connect
-                      </button>
-                    )}
-                    <Link
-                      href={PAGE_ROUTES.CONNECTORS}
-                      aria-label={`Manage ${platform.label}`}
-                      className={`grid size-7 shrink-0 place-items-center rounded-full text-neutral-400 transition-colors hover:bg-[#EEF0FF] hover:text-[#4F46E5] ${FOCUS_RING}`}
-                    >
-                      <ChevronRight className="size-4" aria-hidden="true" />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </Card> */}
+            {accounts.length ? (
+              <ul className="space-y-2">
+                {accounts.map((account) => (
+                  <ConnectedAccountRow key={account.platform} account={account} />
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-neutral-500">No accounts to show yet.</p>
+            )}
+          </Card>
         </div>
       </div>
     </form>
+  );
+}
+
+/** Platforms whose handle is a username, shown as "@handle" (LinkedIn returns a display name). */
+const AT_HANDLE_PLATFORMS = new Set(["instagram", "x"]);
+
+function ConnectedAccountRow({ account }: { account: UserProfileConnectedAccount }) {
+  const platform = PLATFORMS[account.platform] ?? {
+    label: account.platform.charAt(0).toUpperCase() + account.platform.slice(1),
+    iconSrc: "/assets/globe.png",
+  };
+  const handle = account.handle
+    ? AT_HANDLE_PLATFORMS.has(account.platform)
+      ? `@${account.handle.replace(/^@/, "")}`
+      : account.handle
+    : null;
+
+  return (
+    <li className="flex items-center gap-3 rounded-2xl border border-[#ECEDF5] bg-white px-3 py-2.5 transition-colors hover:bg-[#F8F9FF]">
+      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#F5F6FF]">
+        {account.platform === "facebook" ? (
+          <FacebookIcon className="size-5.5" />
+        ) : (
+          <AssetImage src={platform.iconSrc} alt="" width={22} height={22} className="size-5.5 object-contain" />
+        )}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium text-neutral-900">{platform.label}</span>
+        {account.connected && handle ? (
+          account.profile_url ? (
+            <a
+              href={encodeURI(account.profile_url)}
+              target="_blank"
+              rel="noreferrer"
+              className={`inline-flex max-w-full items-center gap-1 truncate rounded text-xs text-neutral-500 hover:text-[#4F46E5] hover:underline ${FOCUS_RING}`}
+            >
+              <span className="truncate">{handle}</span>
+              <ExternalLink className="size-3 shrink-0" aria-hidden="true" />
+            </a>
+          ) : (
+            <span className="block truncate text-xs text-neutral-500">{handle}</span>
+          )
+        ) : (
+          <span className="block truncate text-xs text-neutral-500">
+            {account.connected ? "Connected" : "Not connected"}
+          </span>
+        )}
+      </span>
+      {account.connected ? (
+        <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600">
+          <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
+          Connected
+        </span>
+      ) : (
+        <Link
+          href={PAGE_ROUTES.CONNECTORS}
+          className={`shrink-0 rounded-full border border-[#D9DCF7] px-3 py-1 text-xs font-medium text-[#5452F6] hover:bg-[#EEF0FF] ${FOCUS_RING}`}
+        >
+          Connect
+        </Link>
+      )}
+      <Link
+        href={PAGE_ROUTES.CONNECTORS}
+        aria-label={`Manage ${platform.label}`}
+        className={`grid size-7 shrink-0 place-items-center rounded-full text-neutral-400 transition-colors hover:bg-[#EEF0FF] hover:text-[#4F46E5] ${FOCUS_RING}`}
+      >
+        <ChevronRight className="size-4" aria-hidden="true" />
+      </Link>
+    </li>
   );
 }
 

@@ -12,7 +12,19 @@ const CX = 140,
   BAR_WIDTH = 24;
 const TRACK = "#EEF0FD";
 
-function ScoreGauge({ score }: { score: number }) {
+/** The bar meter from the Overall Performance card; also used for the website speed scores. */
+export function ScoreGauge({
+  score,
+  label = "Overall Score",
+  className = "mx-auto w-full max-w-70",
+  showLabel = true,
+}: {
+  score: number;
+  label?: string;
+  className?: string;
+  /** Hide the caption under the score when the meter is drawn small. */
+  showLabel?: boolean;
+}) {
   const gradientId = useId();
   const pct = Math.max(0, Math.min(100, score)) / 100;
   const filledCount = Math.round(pct * (BARS - 1)) + (pct > 0 ? 1 : 0);
@@ -20,9 +32,9 @@ function ScoreGauge({ score }: { score: number }) {
   return (
     <svg
       viewBox="0 0 280 182"
-      className="mx-auto w-full max-w-70"
+      className={className}
       role="img"
-      aria-label={`Overall score ${score}%`}
+      aria-label={`${label} ${score}%`}
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -53,14 +65,16 @@ function ScoreGauge({ score }: { score: number }) {
       >
         {score}%
       </text>
-      <text
-        x={CX}
-        y={CY + 26}
-        textAnchor="middle"
-        className="fill-neutral-700 text-[15px]"
-      >
-        Overall Score
-      </text>
+      {showLabel ? (
+        <text
+          x={CX}
+          y={CY + 26}
+          textAnchor="middle"
+          className="fill-neutral-700 text-[15px]"
+        >
+          {label}
+        </text>
+      ) : null}
     </svg>
   );
 }

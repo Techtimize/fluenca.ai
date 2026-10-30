@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogImageApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, EditUserProfileApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, LinkedInLoginApi, InstagramPublishApi, IntelligenceRunApi, LinkedInPublishApi, OnboardingApi, XLoginApi, XPublishApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountDisconnectApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi, ContactUsApi, CreateGoalApi, DiagnoseGoalApi, ApproveGoalApi, UpdateGoalTaskApi, ScheduleImageGenerationApi, FindCompetitorApi } from "./bussiness.routes";
+import { AnalyzeCompanyApi, AnalyzeCompanyResultsApi, AnswerQuestionApi, BlogImageApi, BlogPostApi, CompetitorAnalysisAiApi, CompetitorAnalysisAsyncApi, CompetitorAnalysisManualApi, ContentExecutionDailyApi, ContentExecutionRunApi, ContentRecommendationApi, DeleteImageApi, EditUserProfileApi, FacebookConnectApi, FacebookPublishApi, ImageGenerationApi, InstagramLoginApi, LinkedInLoginApi, InstagramPublishApi, IntelligenceRunApi, LinkedInPublishApi, OnboardingApi, XLoginApi, XPublishApi, RetryDnaApi, RetryKeywordsApi, ScriptGenerationApi, SocialAccountDisconnectApi, UpdateContentExecutionAgentModeApi, UpdateContentExecutionSettingsApi, WaitlistApi, ContactUsApi, CreateGoalApi, DiagnoseGoalApi, ApproveGoalApi, UpdateGoalTaskApi, ScheduleImageGenerationApi, FindCompetitorApi, ConfirmCompetitorApi } from "./bussiness.routes";
 import type {
   FacebookPublishRequest,
   InstagramPublishRequest,
@@ -17,6 +17,8 @@ import { toast } from "sonner";
 import { isPostedResponse } from "@/lib/content/posted-content";
 import type { ContactUsRequest } from "@/types/bussiness/contact-type";
 import type { StreamStart } from "@/routes/chatbot/chatbot.routes";
+import { ChatMode, SendMessageDoneEvent } from "@/types/chat";
+import { SendMessageApi } from "../chatbot/chatbot.routes";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnswerQuestionRequestProps, IntakeQuestion, IntakeResponseProps } from "@/types/company-details-type";
 import { OnboardingRequestProps, OnboardingResponseProps } from "@/types/bussiness/onboarding-type";
@@ -27,8 +29,6 @@ import { PAGE_ROUTES } from "@/constant/page-routes";
 import { setCompanyIdProvider, setOnboardingCompletedProvider } from "@/provider/auth-provider";
 import { CompetitorAnalysisAsyncResponse, CompetitorAnalysisManualRequest, CompetitorAnalysisRequest } from "@/types/bussiness/competitoranalysis-type";
 import { ContentRecommendationRequest, ContentRecommendationResponse } from "@/types/bussiness/content-recommendation-type";
-import { ChatMode, SendMessageDoneEvent } from "@/types/chat";
-import { SendMessageApi } from "../chatbot/chatbot.routes";
 import { ScriptGenerationRequest, ScriptGenerationResponse } from "@/types/bussiness/script-type";
 import { ImageGenerationRequest, ImageGenerationResponse, ImageGenerationScheduleRequest } from "@/types/bussiness/imagegeneration-type";
 import { IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
@@ -46,7 +46,21 @@ import {
   StartProspectRunApi,
   UpdateProspectIcpApi,
   UpdateProspectStatusApi,
+  SearchPeopleApi,
+  PersonDetailApi,
+  SearchCompanyApi,
+  OrganicTrafficApi,
+  WriteLlmsTxtApi,
+  DownloadLlmsTxtApi,
+  WriteSchemaMarkupApi,
 } from "./bussiness.routes";
+import { organicTrafficKey } from "./Bussiness-Query";
+import type { OrganicTrafficRequest } from "@/types/bussiness/organic-traffic-type";
+import type {
+  CompanySearchRequest,
+  PeopleSearchRequest,
+  PersonDetailRequest,
+} from "@/types/bussiness/linkedin-people-type";
 import { PROSPECT_ICP_KEY, PROSPECT_RUNS_KEY, PROSPECTS_KEY, prospectKey, prospectRunKey } from "./Bussiness-Query";
 import type {
   BuildIcpRequest,
@@ -63,10 +77,12 @@ import {
   ScheduleWeekPostApi,
 } from "./bussiness.routes";
 import { LINKEDIN_SCORE_KEY, PROFILE_SCORE_KEY, WEEK_POSTS_KEY } from "./Bussiness-Query";
+import { FIND_COMPETITORS_KEY, TRACKED_COMPETITORS_KEY } from "./Bussiness-Query";
+import type { ConfirmCompetitorRequest, SavedCompetitor } from "@/types/bussiness/dashboard-type";
 import type { ProfileScoreRequest, ScheduleWeekPostRequest } from "@/types/bussiness/linkedin-growth-type";
 import {
-  AddFollowUpApi,
   CarouselApi,
+  AddFollowUpApi,
   CompleteCoachTaskApi,
   CompleteFollowUpApi,
   ContentPlanApi,
@@ -1130,6 +1146,28 @@ export function FindCompetitorMutation() {
     },
   });
 }
+/** Keeps a found competitor (`is_competitor: true`) or removes it (`false`). */
+export function ConfirmCompetitorMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ competitor_id, is_competitor }: { competitor_id: string } & ConfirmCompetitorRequest) =>
+      ConfirmCompetitorApi(competitor_id, { is_competitor }),
+    onSuccess: (data, { competitor_id, is_competitor }) => {
+      const removed = data.removed ?? !is_competitor;
+      toast.success(removed ? "Competitor removed" : "Competitor confirmed");
+      void queryClient.invalidateQueries({ queryKey: TRACKED_COMPETITORS_KEY });
+      queryClient.setQueriesData<SavedCompetitor[]>({ queryKey: FIND_COMPETITORS_KEY }, (list) =>
+        removed
+          ? list?.filter((c) => c.id !== competitor_id)
+          : list?.map((c) => (c.id === competitor_id ? { ...c, confirmed: true } : c)),
+      );
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to update competitor"));
+    },
+  });
+}
+
 // ---------- Prospect finder ----------
 
 const PROSPECT_LIST_KEY = [...PROSPECTS_KEY, "list"];
@@ -1222,6 +1260,98 @@ export function RegenerateProspectDraftsMutation() {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to rewrite the drafts"));
+    },
+  });
+}
+
+// ---------- Site visibility ----------
+
+const saveFile = (blob: Blob, filename: string) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+/** Writes an llms.txt from the Company DNA (10–40 seconds, counts toward the AI budget). */
+export function WriteLlmsTxtMutation() {
+  return useMutation({
+    mutationFn: () => WriteLlmsTxtApi(),
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not write the llms.txt"));
+    },
+  });
+}
+
+/** Writes an llms.txt and saves it straight to the user's computer. */
+export function DownloadLlmsTxtMutation() {
+  return useMutation({
+    mutationFn: () => DownloadLlmsTxtApi(),
+    onSuccess: (blob) => saveFile(blob, "llms.txt"),
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not download the llms.txt"));
+    },
+  });
+}
+
+/** Writes schema.org JSON-LD blocks from the Company DNA (10–40 seconds, counts toward the AI budget). */
+export function WriteSchemaMarkupMutation() {
+  return useMutation({
+    mutationFn: () => WriteSchemaMarkupApi(),
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not write the schema markup"));
+    },
+  });
+}
+
+// ---------- Organic traffic ----------
+
+/** Runs a fresh traffic check (uses the monthly research budget) and replaces the saved report. */
+export function RefreshOrganicTrafficMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (params: Omit<OrganicTrafficRequest, "refresh"> = {}) =>
+      OrganicTrafficApi({ ...params, refresh: true }),
+    onSuccess: (data, params) => {
+      queryClient.setQueryData(organicTrafficKey(params?.website, params?.country), data);
+      toast.success("Organic traffic updated");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not check organic traffic"));
+    },
+  });
+}
+
+// ---------- LinkedIn people & company search ----------
+
+/** Finds people from a plain-English description; send `cursor` for the next page. */
+export function SearchPeopleMutation() {
+  return useMutation({
+    mutationFn: (body: PeopleSearchRequest) => SearchPeopleApi(body),
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "People search failed"));
+    },
+  });
+}
+
+/** One person's full details from an email, profile URL, or name with a company. */
+export function PersonDetailMutation() {
+  return useMutation({
+    mutationFn: (body: PersonDetailRequest) => PersonDetailApi(body),
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not load this person's details"));
+    },
+  });
+}
+
+/** Finds companies from a plain-English description; send `cursor` for the next page. */
+export function SearchCompanyMutation() {
+  return useMutation({
+    mutationFn: (body: CompanySearchRequest) => SearchCompanyApi(body),
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Company search failed"));
     },
   });
 }

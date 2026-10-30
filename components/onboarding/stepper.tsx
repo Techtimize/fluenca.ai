@@ -15,10 +15,10 @@ export default function OnboardingStepper({
   stepLabels: Record<OnboardingStep, string>;
   onStepClick: (step: OnboardingStep) => void;
 }) {
-  const steps: OnboardingStep[] = [1, 2, 3, 4];
+  const steps: OnboardingStep[] = [1, 2, 3, 4, 5];
 
   return (
-    <div className="mx-auto flex w-full max-w-md items-start">
+    <div className="mx-auto flex w-full max-w-lg items-start">
       {steps.map((id, index) => {
         const isDone = id < step;
         const isCurrent = id === step;

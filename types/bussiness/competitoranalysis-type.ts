@@ -361,6 +361,11 @@ export interface CompetitiveBriefCompetitor {
   talking_about?: CompetitiveBriefTalkingPoint[];
   threat_reason?: string;
   why_competitor?: string;
+  logo_url?: string | null;
+  linkedin_image_url?: string | null;
+  instagram_image_url?: string | null;
+  /** Topics they post about on LinkedIn, e.g. "Thought Leadership". */
+  linkedin_content_themes?: string[];
   target_audience?: string[];
   competition_type?: string;
   evidence_quality?: string;
@@ -408,6 +413,8 @@ export interface CompetitiveBriefCustomerProblem {
 
 export interface CompetitiveBriefGapItem {
   gap?: string;
+  /** "high" | "medium" | "low". */
+  priority?: string;
   evidence?: string;
   competitors_involved?: string[];
 }
@@ -421,7 +428,13 @@ export interface CompetitiveBriefOpportunityItem {
 }
 
 export interface CompetitiveBriefRecommendedAction {
+  /** e.g. "action", "positioning", "seo", "content", "format". */
+  type?: string;
   action?: string;
+  /** Longer explanation of the action. */
+  detail?: string;
+  /** "high" | "medium" | "low". */
+  priority?: string;
   why?: string;
   how?: string;
   effort?: string;

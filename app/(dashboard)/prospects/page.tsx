@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Download, Loader2, Target } from "lucide-react";
+import CandidatesSection from "@/components/dashboard/prospects/CandidatesSection";
+import LinkedInSearchSection from "@/components/dashboard/prospects/LinkedInSearchSection";
 import IcpSection from "@/components/dashboard/prospects/IcpSection";
 import ProspectDetailDialog from "@/components/dashboard/prospects/ProspectDetailDialog";
 import { SECONDARY_BUTTON } from "@/components/dashboard/prospects/prospect-ui";
@@ -58,9 +60,11 @@ export default function ProspectsPage() {
         </button>
       </section>
 
+      <LinkedInSearchSection />
       <IcpSection onFind={findProspects} searchBusy={searchBusy} />
       <SearchSection runs={runs} run={run} selectedRunId={runId} onSelectRun={setSelectedRunId} />
       <ShortlistSection runId={runId} ready={run?.status === "ready"} onOpen={setOpenProspectId} />
+      <CandidatesSection runId={runId} />
 
       <ProspectDetailDialog prospectId={openProspectId} onClose={() => setOpenProspectId(null)} />
     </main>
