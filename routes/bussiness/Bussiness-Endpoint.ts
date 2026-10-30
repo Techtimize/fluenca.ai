@@ -23,7 +23,6 @@ export const BUSSINESSENDPOINT = {
 
     ANALYSIS:{
     FIND_COMPETITORS: '/competitorAnalysis/find-competitors',
-    FIND_COMPETITORS: '/competitorAnalysis/find-competitors',
     COMPETITOR_ANALYSIS: '/competitorAnalysis',
     COMPETITOR_ANALYSIS_ASYNC: '/competitorAnalysis/async',
 
@@ -101,7 +100,6 @@ export const BUSSINESSENDPOINT = {
     CONNECTORS:{
         INSTAGRAM_LOGIN: '/connector/instagram/login',
         LINKEDIN_LOGIN: '/connector/linkedin/login',
-        LINKEDIN_LOGIN: '/connector/linkedin/login',
         SOCIAL_ACCOUNTS: '/social-accounts',
         SOCIAL_ACCOUNTS_CONNECT: (platform: string) => `/social-accounts/${platform}/connect`,
         SOCIAL_ACCOUNTS_DISCONNECT: (platform: string) => `/social-accounts/${platform}`,
@@ -155,6 +153,13 @@ export const BUSSINESSENDPOINT = {
     },
 
     LINKEDIN_COACH:{
+        TODAY: '/linkedin/coach/today',
+        TASK_DONE: (task_id: string) => `/linkedin/coach/today/tasks/${task_id}/done`,
+        TASK_UNDO: (task_id: string) => `/linkedin/coach/today/tasks/${task_id}/undo`,
+        FOLLOW_UPS: '/linkedin/coach/follow-ups',
+        FOLLOW_UP_DONE: (follow_up_id: string) => `/linkedin/coach/follow-ups/${follow_up_id}/done`,
+        WEEKLY_REPORT: '/linkedin/coach/weekly-report',
+        WEEKLY_REPORT_HISTORY: '/linkedin/coach/weekly-report/history',
         CONTENT_PLAN: '/linkedin/coach/content-plan',
         CAROUSEL: '/linkedin/coach/carousel',
         REPURPOSE: '/linkedin/coach/repurpose',

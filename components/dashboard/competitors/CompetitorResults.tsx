@@ -116,7 +116,6 @@ function toDisplayLabel(value: unknown): string {
   }
   if (typeof value === "object") {
     const record = value as Record<string, unknown>;
-    // API sometimes returns posting cadence as an object
     if (
       "posts_per_week" in record ||
       "avg_days_between_posts" in record ||
@@ -138,7 +137,6 @@ function toDisplayLabel(value: unknown): string {
       }
       if (parts.length) return parts.join(" · ");
     }
-    // API sometimes returns numeric ranges as { min, max }
     if ("min" in record || "max" in record) {
       const min = record.min;
       const max = record.max;
@@ -1441,3 +1439,5 @@ export default function ManualCompetitorResults({
     </div>
   );
 }
+
+

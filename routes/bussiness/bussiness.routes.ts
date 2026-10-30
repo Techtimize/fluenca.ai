@@ -172,9 +172,13 @@ import type {
   WeekPostsResponse,
 } from "@/types/bussiness/linkedin-growth-type";
 import type {
+  AddFollowUpRequest,
   Carousel,
   CarouselRequest,
   CoachDraft,
+  CoachToday,
+  FollowUp,
+  WeeklyReport,
   ContentPlan,
   ContentPlanGoal,
   HookFormula,
@@ -1081,6 +1085,48 @@ export const LinkedInScoreApi = async (): Promise<LinkedInScore> => {
   return response.data;
 };
 
+
+export const CoachTodayApi = async (): Promise<CoachToday> => {
+  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_COACH.TODAY);
+  return response.data;
+};
+
+export const CompleteCoachTaskApi = async (task_id: string): Promise<CoachToday> => {
+  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.TASK_DONE(task_id));
+  return response.data;
+};
+
+export const UndoCoachTaskApi = async (task_id: string): Promise<CoachToday> => {
+  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.TASK_UNDO(task_id));
+  return response.data;
+};
+
+export const FollowUpsApi = async (): Promise<FollowUp[]> => {
+  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_COACH.FOLLOW_UPS);
+  return unwrapList<FollowUp>(response.data, "follow_ups");
+};
+
+/** Adds someone who accepted your request or commented; a reply is drafted for them. */
+export const AddFollowUpApi = async (body: AddFollowUpRequest): Promise<FollowUp> => {
+  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.FOLLOW_UPS, body);
+  return response.data;
+};
+
+export const CompleteFollowUpApi = async (follow_up_id: string): Promise<FollowUp> => {
+  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.FOLLOW_UP_DONE(follow_up_id));
+  return response.data;
+};
+
+/** This week's report, worked out from saved data. */
+export const WeeklyReportApi = async (): Promise<WeeklyReport> => {
+  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_COACH.WEEKLY_REPORT);
+  return response.data;
+};
+
+export const WeeklyReportHistoryApi = async (): Promise<WeeklyReport[]> => {
+  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_COACH.WEEKLY_REPORT_HISTORY);
+  return unwrapList<WeeklyReport>(response.data, "reports");
+};
 
 /** 3–5 posts for next week around a goal. */
 export const ContentPlanApi = async (goal: ContentPlanGoal): Promise<ContentPlan> => {
