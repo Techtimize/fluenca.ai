@@ -53,6 +53,7 @@ import {
   WriteLlmsTxtApi,
   DownloadLlmsTxtApi,
   WriteSchemaMarkupApi,
+  RefreshStoryBankApi,
 } from "./bussiness.routes";
 import { organicTrafficKey } from "./Bussiness-Query";
 import type { OrganicTrafficRequest } from "@/types/bussiness/organic-traffic-type";
@@ -76,7 +77,7 @@ import {
   RunProfileScoreApi,
   ScheduleWeekPostApi,
 } from "./bussiness.routes";
-import { LINKEDIN_SCORE_KEY, PROFILE_SCORE_KEY, WEEK_POSTS_KEY } from "./Bussiness-Query";
+import { LINKEDIN_SCORE_KEY, LINKEDIN_VOICE_KEY, PROFILE_SCORE_KEY, STORY_BANK_KEY, STORY_BANK_WEEKLY_KEY, WEEK_POSTS_KEY } from "./Bussiness-Query";
 import { FIND_COMPETITORS_KEY, TRACKED_COMPETITORS_KEY } from "./Bussiness-Query";
 import type { ConfirmCompetitorRequest, SavedCompetitor } from "@/types/bussiness/dashboard-type";
 import type { ProfileScoreRequest, ScheduleWeekPostRequest } from "@/types/bussiness/linkedin-growth-type";
@@ -1260,6 +1261,35 @@ export function RegenerateProspectDraftsMutation() {
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Failed to rewrite the drafts"));
+    },
+  });
+}
+
+// ---------- Story bank ----------
+
+/** Re-reads the posts and relearns the voice; the voice and weekly reports reload after it. */
+export function RefreshStoryBankMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => RefreshStoryBankApi(),
+    onSuccess: (data) => {
+      if (data.status === "failed") {
+        toast.error(data.error_message || "Could not refresh your story bank");
+        return;
+      }
+      toast.success(
+        data.status === "importing" || data.status === "learning"
+          ? "Refreshing your story bank — this can take a few minutes"
+          : "Story bank refreshed",
+      );
+      // Same shape as GET /story-bank; while it's importing/learning the story bank query polls.
+      queryClient.setQueryData(STORY_BANK_KEY, data);
+      void queryClient.invalidateQueries({ queryKey: STORY_BANK_WEEKLY_KEY });
+      void queryClient.invalidateQueries({ queryKey: [...STORY_BANK_KEY, "weekly-history"] });
+      void queryClient.invalidateQueries({ queryKey: LINKEDIN_VOICE_KEY });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Could not refresh your story bank"));
     },
   });
 }

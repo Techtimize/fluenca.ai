@@ -35,7 +35,7 @@ export default function ContentRecommendationPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 sm:text-[28px]">
-            Content recommendations
+            Ideas recommendations
           </h1>
           <p className="mt-1.5 text-[14px] text-neutral-500">
             AI-generated ideas, themes, and post plans for your brand.
@@ -59,12 +59,6 @@ export default function ContentRecommendationPage() {
           </BrandButton>
         ) : null}
       </div>
-      {companyId && isLoading ? (
-        <Card className="flex items-center gap-3 p-4">
-          <Loader2 className="size-4 animate-spin text-[#5B57E6]" />
-          <p className="text-sm text-neutral-600">Loading recommendations…</p>
-        </Card>
-      ) : null}
 
       {companyId && notFound ? (
         <ApiNotFoundCard
