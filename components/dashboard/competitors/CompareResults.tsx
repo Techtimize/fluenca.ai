@@ -44,11 +44,8 @@ function sourceLabel(why?: string) {
   return source === "linkedin" ? "LinkedIn" : source === "instagram" ? "Instagram" : source === "website" ? "Website" : "";
 }
 
-/** Drops placeholder patterns the backend sometimes leaves in, e.g. "\b(hiring|career)\b". */
 const cleanThemes = (themes?: string[]) =>
   [...new Set((themes ?? []).filter((theme) => theme && !theme.includes("\\") && !theme.includes("|")))];
-
-/** "Headline: CEO at Albert" → "CEO at Albert". */
 const cleanTitle = (title?: string) => (title ?? "").replace(/^headline:\s*/i, "").trim();
 
 const initials = (name: string) =>
@@ -61,7 +58,6 @@ const initials = (name: string) =>
 
 type Rival = {
   key: string;
-  /** Name shown in the UI; same-named competitors get their source added. */
   label: string;
   data: CompetitiveBriefCompetitor;
   logo: string | null;
@@ -145,7 +141,6 @@ export default function CompareResults({
   );
 }
 
-// ---------- Shared bits ----------
 
 function Block({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
@@ -189,8 +184,6 @@ function PriorityBadge({ value }: { value?: string }) {
   const p = priorityOf(value);
   return <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${p.className}`}>{p.label}</span>;
 }
-
-// ---------- Overview ----------
 
 type MetricRow = {
   label: string;
@@ -247,8 +240,6 @@ function OverviewTab({
   ].filter((row) => row.you !== dash || row.values.some((v) => v !== dash));
 
   const youMissing = rows.length > 0 && rows.every((row) => row.you === dash);
-
-  // Plain-language takeaways from the comparison, plus the gaps you could fill.
   const takeaways = (brief.linkedin_comparison?.rows ?? [])
     .map((row) => row.insight?.trim())
     .filter((text): text is string => Boolean(text));

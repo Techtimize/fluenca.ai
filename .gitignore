@@ -38,3 +38,10 @@ next-env.d.ts
 
 .package-lock.json
 
+
+# local AI tooling (skills/config used only for development)
+.agents/skills/
+.aider-desk/skills/
+.claude/skills/
+.cursor/skills/
+.21st/

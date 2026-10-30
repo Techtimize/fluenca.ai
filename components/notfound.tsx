@@ -80,9 +80,9 @@ const RESOURCE_CONFIG: Record<NotFoundResource, ResourceConfig> = {
   },
   recommendations: {
     icon: Lightbulb,
-    title: "No recommendations found",
+    title: "No Idea found",
     description:
-      "Content recommendations are missing for this company. Generate a fresh set to get started.",
+      "Content Ideas are missing for this company. Generate a fresh set to get started.",
     guidance: [
       "Make sure company DNA and analysis are complete",
       "Press Generate to create recommendations",

@@ -23,14 +23,14 @@ export const DEFAULT_NAV: NavItem[] = [
   { id: "home", label: "Home", icon: "home", href: PAGE_ROUTES.DASHBOARD },
   {
     id: "content-ideas",
-    label: "Content",
+    label: "Ideas",
     icon: "lightbulb",
     href: PAGE_ROUTES.CONTENT_RECOMMENDATION,
   },
   { id: "script", label: "Script", icon: "file", href: PAGE_ROUTES.SCRIPT },
   {
-    id: "content",
-    label: "Content",
+    id: "visuals",
+    label: "Visuals",
     icon: "layers",
     href: PAGE_ROUTES.CONTENT,
   },
@@ -67,8 +67,8 @@ export const DEFAULT_NAV: NavItem[] = [
   },
   { id: "news", label: "News", icon: "news", href: PAGE_ROUTES.NEWS },
   { id: "prospects", label: "Prospects", icon: "target", href: PAGE_ROUTES.PROSPECTS },
-  { id: "linkedin-growth", label: "LinkedIn growth", icon: "trending", href: PAGE_ROUTES.LINKEDIN_GROWTH },
-  { id: "linkedin-coach", label: "LinkedIn coach", icon: "clipboard", href: PAGE_ROUTES.LINKEDIN_COACH },
+  // { id: "linkedin-growth", label: "LinkedIn growth", icon: "trending", href: PAGE_ROUTES.LINKEDIN_GROWTH },
+  // { id: "linkedin-coach", label: "LinkedIn coach", icon: "clipboard", href: PAGE_ROUTES.LINKEDIN_COACH },
 ];
 
 type Props = {

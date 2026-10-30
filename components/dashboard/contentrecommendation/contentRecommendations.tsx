@@ -1,5 +1,4 @@
 "use client";
-
 import { useMemo } from "react";
 import { normalizeContentRecommendation } from "@/lib/dashboard/normalize-content-recommendation";
 import { ContentRecommendationMutation } from "@/routes/bussiness/Bussiness-Mutation";
@@ -8,7 +7,6 @@ import CalendarSection from "./CalendarSection";
 import { EmptyState } from "./Emptystate";
 import IdeasSection from "./IdeasSection";
 import {
-  InstagramPerformanceSection,
   OpportunityScoresSection,
   TrendSignalsSection,
 } from "./InsightSections";
