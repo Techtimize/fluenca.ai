@@ -10,7 +10,6 @@ import { BrandButton } from "@/components/ui/brand-button";
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { clearAuthTokenProvider } from "@/provider/auth-provider";
 import useAuthStore from "@/store/AuthsStore";
-import { useRouter } from 'next/navigation'
 
 export interface SiteNavigationItem {
   label?: string;
@@ -52,8 +51,7 @@ export function SiteHeader({
   const accessToken = useAuthStore((s) => s.access_token);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const mounted = useHydrated();
-  const router = useRouter();
-
+  // Keyed to the path so navigating closes the mobile menu without an effect.
   const [menuOpenedAt, setMenuOpenedAt] = useState<string | null>(null);
   const menuOpen = menuOpenedAt === pathname;
   const setMenuOpen = (open: boolean) => setMenuOpenedAt(open ? pathname : null);
@@ -79,7 +77,7 @@ export function SiteHeader({
     <header className="sticky top-0 z-50 flex w-full justify-center px-3 pt-3 sm:px-4 md:pt-4">
       <nav
         aria-label="Main navigation"
-        className="relative mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 rounded-full bg-white/80 pl-3 pr-2 shadow-sm backdrop-blur-xl transition-[background-color,box-shadow] duration-300 sm:pl-4 md:h-15 md:pl-5"
+        className="relative mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 rounded-full bg-white/80 pl-3 pr-2 shadow-sm backdrop-blur-xl transition-[background-color,box-shadow] duration-300 sm:pl-4 md:h-[60px] md:pl-5"
       >
         {/* Logo */}
         <Link
@@ -110,7 +108,6 @@ export function SiteHeader({
               <li key={label} className="shrink-0">
                 <Link
                   href={href ?? "#"}
-                  prefetch={false}
                   aria-current={isActive ? "page" : undefined}
                   className={`flex items-center gap-1 py-2 text-sm font-medium transition-colors ${
                     isActive
@@ -146,11 +143,7 @@ export function SiteHeader({
               <BrandButton href={PAGE_ROUTES.DASHBOARD}>Dashboard</BrandButton>
             </>
           ) : pathname !== PAGE_ROUTES.DEMO ? (
-            <BrandButton
-              onClick={() => router.push(PAGE_ROUTES.DEMO)}
-            >
-              Book a Demo
-            </BrandButton>
+            <BrandButton href={PAGE_ROUTES.DEMO}>Book a Demo</BrandButton>
           ) : null}
         </div>
 
@@ -207,10 +200,7 @@ export function SiteHeader({
                   </BrandButton>
                 </>
               ) : pathname !== PAGE_ROUTES.DEMO ? (
-                <BrandButton
-                 onClick={() => router.push(PAGE_ROUTES.DEMO)}
-                  className="w-full"
-                >
+                <BrandButton href={PAGE_ROUTES.DEMO} className="w-full">
                   Book a Demo
                 </BrandButton>
               ) : null}

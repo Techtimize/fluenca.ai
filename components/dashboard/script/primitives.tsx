@@ -8,6 +8,11 @@ const PLATFORM_ASSET_ICONS: Record<string, string> = {
   linkedin: "/assets/linkedin.png",
   "linked-in": "/assets/linkedin.png",
   li: "/assets/linkedin.png",
+  tiktok: "/assets/tik-tok.png",
+  "tik-tok": "/assets/tik-tok.png",
+  tt: "/assets/tik-tok.png",
+  x: "/assets/x.png",
+  twitter: "/assets/x.png",
 };
 
 function platformAssetSrc(platform?: string | null) {
@@ -20,6 +25,10 @@ function platformLabel(platform: string) {
   const key = platform.trim().toLowerCase().replace(/\s+/g, "");
   if (key === "instagram" || key === "insta" || key === "ig") return "Instagram";
   if (key === "linkedin" || key === "linked-in" || key === "li") return "LinkedIn";
+  if (key === "facebook" || key === "fb") return "Facebook";
+  if (key === "tiktok" || key === "tik-tok" || key === "tt") return "TikTok";
+  if (key === "twitter") return "Twitter";
+  if (key === "x") return "X";
   return platform;
 }
 
