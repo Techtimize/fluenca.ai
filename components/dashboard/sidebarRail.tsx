@@ -67,6 +67,7 @@ export const DEFAULT_NAV: NavItem[] = [
   },
   { id: "news", label: "News", icon: "news", href: PAGE_ROUTES.NEWS },
   { id: "prospects", label: "Prospects", icon: "target", href: PAGE_ROUTES.PROSPECTS },
+  { id: "story-bank", label: "Story bank", icon: "book", href: PAGE_ROUTES.STORY_BANK },
   // { id: "linkedin-growth", label: "LinkedIn growth", icon: "trending", href: PAGE_ROUTES.LINKEDIN_GROWTH },
   // { id: "linkedin-coach", label: "LinkedIn coach", icon: "clipboard", href: PAGE_ROUTES.LINKEDIN_COACH },
 ];

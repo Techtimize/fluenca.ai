@@ -34,6 +34,8 @@ import {
   type ProspectsParams,
 } from "@/types/bussiness/prospect-type";
 import type { OrganicTrafficRequest } from "@/types/bussiness/organic-traffic-type";
+import { isStoryBankBusy, type StoryBankWeeklyRequest } from "@/types/bussiness/story-bank-type";
+import { StoryBankApi, StoryBankWeeklyApi, StoryBankWeeklyHistoryApi } from "./bussiness.routes";
 import {
   LinkedInScoreApi,
   LinkedInScoreHistoryApi,
@@ -845,6 +847,43 @@ export const ProspectRunQuery = (run_id?: string | null) => {
     queryFn: () => ProspectRunApi(run_id as string),
     enabled: Boolean(run_id),
     refetchInterval: (query) => (isRunFinished(query.state.data?.status) ? false : PROSPECT_POLL_MS),
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const STORY_BANK_KEY = ["story-bank"];
+export const STORY_BANK_WEEKLY_KEY = [...STORY_BANK_KEY, "weekly"];
+
+const STORY_BANK_POLL_MS = 5000;
+
+/** Voice and stories; polls every 5 s while the posts are being imported or learned from. */
+export const StoryBankQuery = () => {
+  return useQuery({
+    queryKey: STORY_BANK_KEY,
+    queryFn: () => StoryBankApi(),
+    retry: false,
+    refetchInterval: (query) => (isStoryBankBusy(query.state.data?.status) ? STORY_BANK_POLL_MS : false),
+    refetchOnWindowFocus: false,
+  });
+};
+
+/** The weekly "what's working" report; no `week_start` = the last full week. */
+export const StoryBankWeeklyQuery = (params: StoryBankWeeklyRequest = {}) => {
+  return useQuery({
+    queryKey: [...STORY_BANK_WEEKLY_KEY, params.week_start ?? "latest"],
+    queryFn: () => StoryBankWeeklyApi(params),
+    placeholderData: keepPreviousData,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+/** Earlier weekly reports (up to 8), newest first. */
+export const StoryBankWeeklyHistoryQuery = () => {
+  return useQuery({
+    queryKey: [...STORY_BANK_KEY, "weekly-history"],
+    queryFn: () => StoryBankWeeklyHistoryApi(),
+    retry: false,
     refetchOnWindowFocus: false,
   });
 };

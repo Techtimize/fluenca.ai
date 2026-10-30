@@ -150,6 +150,11 @@ import type {
 } from "@/types/bussiness/prospect-type";
 import type { OrganicTrafficRequest, OrganicTrafficResponse } from "@/types/bussiness/organic-traffic-type";
 import type {
+  StoryBankResponse,
+  StoryBankWeeklyReport,
+  StoryBankWeeklyRequest,
+} from "@/types/bussiness/story-bank-type";
+import type {
   LlmsTxtRequest,
   LlmsTxtResponse,
   SchemaMarkupResponse,
@@ -1261,6 +1266,34 @@ export const DownloadLlmsTxtApi = async (): Promise<Blob> => {
 /** Writes schema.org JSON-LD blocks from the Company DNA (one AI call). */
 export const WriteSchemaMarkupApi = async (): Promise<SchemaMarkupResponse> => {
   const response = await api.post<SchemaMarkupResponse>(BUSSINESSENDPOINT.SITE_VISIBILITY.SCHEMA_MARKUP);
+  return response.data;
+};
+
+// ---------- Story bank ----------
+
+/** The company's voice and stories, best posts and formats, learned from its own posts. */
+export const StoryBankApi = async (): Promise<StoryBankResponse> => {
+  const response = await api.get<StoryBankResponse>(BUSSINESSENDPOINT.STORY_BANK.GET);
+  return response.data;
+};
+
+/** Re-reads the posts and relearns the voice now (normally done daily / weekly on its own). */
+export const RefreshStoryBankApi = async (): Promise<StoryBankResponse> => {
+  const response = await api.post<StoryBankResponse>(BUSSINESSENDPOINT.STORY_BANK.REFRESH);
+  return response.data;
+};
+
+/** What's working this week; `week_start` picks another week. */
+export const StoryBankWeeklyApi = async (params: StoryBankWeeklyRequest = {}): Promise<StoryBankWeeklyReport> => {
+  const response = await api.get<StoryBankWeeklyReport>(BUSSINESSENDPOINT.STORY_BANK.WEEKLY, {
+    params: params.week_start ? { week_start: params.week_start } : {},
+  });
+  return response.data;
+};
+
+/** Up to 8 earlier weekly reports, newest first. */
+export const StoryBankWeeklyHistoryApi = async (): Promise<StoryBankWeeklyReport[]> => {
+  const response = await api.get<StoryBankWeeklyReport[]>(BUSSINESSENDPOINT.STORY_BANK.WEEKLY_HISTORY);
   return response.data;
 };
 

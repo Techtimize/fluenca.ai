@@ -47,6 +47,7 @@ export const PAGE_ROUTES = {
     CONTROLS: '/connectors/controls',
     NEWS: '/news',
     PROSPECTS: '/prospects',
+    STORY_BANK: '/story-bank',
     CONTENT_RECOMMENDATION: '/content-recommendation',
     SCRIPT: '/script',
     SCRIPT_DETAIL: (id: string) => `/script/${id}`,
