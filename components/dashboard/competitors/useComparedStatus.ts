@@ -20,7 +20,15 @@ export function useComparedStatus() {
 
       return competitors.map((competitor) => {
         const row = byId.get(competitor.id) ?? byName.get(normalize(competitor.name));
-        return row ? { ...competitor, compared: row.compared, comparedAt: row.compared_at } : competitor;
+        return row
+          ? {
+              ...competitor,
+              compared: row.compared,
+              comparedAt: row.compared_at,
+              comparisonMode: row.comparison_mode,
+              comparisonVersion: row.comparison_version,
+            }
+          : competitor;
       });
     },
     [data],

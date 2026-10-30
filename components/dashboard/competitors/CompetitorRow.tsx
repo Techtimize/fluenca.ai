@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Check, CheckCircle2, GitCompareArrows, Globe, Info, Loader2, X } from "lucide-react";
+import { Check, CheckCircle2, Eye, GitCompareArrows, Globe, Info, Loader2, X } from "lucide-react";
 import { competitorInputs } from "@/components/dashboard/competitors/CompetitorCompareDialog";
 import AssetImage from "@/components/shared/assetImage";
 import { InstagramIcon, LinkedInIcon } from "@/components/shared/brandIcons";
@@ -61,6 +61,8 @@ export default function CompetitorRow({
   compareDisabled,
   isComparing,
   confirmable = false,
+  onView,
+  isViewing = false,
 }: {
   competitor: Competitor;
   index: number;
@@ -68,8 +70,14 @@ export default function CompetitorRow({
   compareDisabled: boolean;
   isComparing: boolean;
   confirmable?: boolean;
+  /** Opens the saved comparison; shown instead of Compare once the competitor was compared. */
+  onView?: () => void;
+  isViewing?: boolean;
 }) {
   const canCompare = competitorInputs(competitor).length > 0;
+  const canView = Boolean(
+    onView && competitor.compared && competitor.comparisonMode && competitor.comparisonVersion != null,
+  );
   const logo = competitor.logoSrc;
   const website = competitor.websiteUrl || competitor.href;
   const links = [
@@ -145,7 +153,22 @@ export default function CompetitorRow({
           ) : null}
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-1.5">
-          {canCompare ? (
+          {canView ? (
+            <button
+              type="button"
+              onClick={onView}
+              disabled={compareDisabled}
+              aria-label={`View comparison with ${competitor.name}`}
+              className={COMPARE_BUTTON}
+            >
+              {isViewing ? (
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+              ) : (
+                <Eye className="size-3.5" aria-hidden="true" />
+              )}
+              {isViewing ? "Opening…" : "View"}
+            </button>
+          ) : canCompare ? (
             <button type="button" onClick={onCompare} disabled={compareDisabled} className={COMPARE_BUTTON}>
               {isComparing ? (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />

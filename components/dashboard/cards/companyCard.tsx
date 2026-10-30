@@ -242,6 +242,8 @@ export default function CompanyCard({
                 onCompare={() => compare.start([competitor], competitor.id)}
                 compareDisabled={compare.isBusy}
                 isComparing={compare.isComparing(competitor.id)}
+                onView={() => void compare.view(competitor)}
+                isViewing={compare.isViewing(competitor.id)}
                 confirmable={competitor.confirmed !== undefined}
               />
             ))}

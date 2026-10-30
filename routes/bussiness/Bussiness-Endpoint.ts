@@ -34,6 +34,7 @@ export const BUSSINESSENDPOINT = {
     COMPETITOR_ANALYSIS_MANUAL: '/competitorAnalysis/manual',
     COMPETITOR_ANALYSIS_MANUAL_VERSIONS: (company_id: string) => `/competitorAnalysis/manual/${company_id}/versions`,
     COMPETITOR_ANALYSIS_MANUAL_SPECIFIC_VERSIONS: (company_id: string, version: string) => `/competitorAnalysis/manual/${company_id}/versions/${version}`,
+    COMPETITOR_ANALYSIS_VERSION: (mode: string, company_id: string, version: string | number) => `/competitorAnalysis/${mode}/${company_id}/versions/${version}`,
     COMPETITOR_ANALYSIS_LATEST_MANUAL_RESPONSE: (company_id: string) => `/competitorAnalysis/manual/${company_id}`,
     
     COMPETITOR_ANALYSIS_FIND_COMPETITORS: '/competitorAnalysis/find-competitors',
