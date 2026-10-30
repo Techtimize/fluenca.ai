@@ -42,7 +42,13 @@ import {
   ProfileScoreHistoryApi,
   WeekPostsApi,
 } from "./bussiness.routes";
-import { HookFormulasApi } from "./bussiness.routes";
+import {
+  CoachTodayApi,
+  FollowUpsApi,
+  HookFormulasApi,
+  WeeklyReportApi,
+  WeeklyReportHistoryApi,
+} from "./bussiness.routes";
 import type { ScheduledPost, ScheduledPostStatus } from "@/types/bussiness/scheduled-post-type";
 import {
   GoogleAnalyticsConnectionApi,
@@ -804,6 +810,8 @@ export const NewsQuery = (params?: NewsParams) => {
   });
 };
 
+// ---------- Prospect finder ----------
+
 export const PROSPECTS_KEY = ["prospects"];
 export const PROSPECT_ICP_KEY = [...PROSPECTS_KEY, "icp"];
 export const PROSPECT_RUNS_KEY = [...PROSPECTS_KEY, "runs"];
@@ -971,6 +979,52 @@ export const LinkedInScoreHistoryQuery = (enabled = true) => {
 
 
 export const LINKEDIN_COACH_KEY = ["linkedin-coach"];
+export const COACH_TODAY_KEY = [...LINKEDIN_COACH_KEY, "today"];
+export const FOLLOW_UPS_KEY = [...LINKEDIN_COACH_KEY, "follow-ups"];
+export const WEEKLY_REPORT_KEY = [...LINKEDIN_COACH_KEY, "weekly-report"];
+const COACH_TODAY_STALE_MS = 5 * 60 * 1000;
+
+/** The first call of the day builds the checklist and can take up to a minute, so it's never retried. */
+export const CoachTodayQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: COACH_TODAY_KEY,
+    queryFn: () => CoachTodayApi(),
+    enabled,
+    retry: false,
+    staleTime: COACH_TODAY_STALE_MS,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const FollowUpsQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: FOLLOW_UPS_KEY,
+    queryFn: () => FollowUpsApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const WeeklyReportQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...WEEKLY_REPORT_KEY, "latest"],
+    queryFn: () => WeeklyReportApi(),
+    enabled,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const WeeklyReportHistoryQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...WEEKLY_REPORT_KEY, "history"],
+    queryFn: () => WeeklyReportHistoryApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+/** The 21 hook formulas never change during a session. */
 export const HookFormulasQuery = (enabled = true) => {
   return useQuery({
     queryKey: [...LINKEDIN_COACH_KEY, "hook-formulas"],

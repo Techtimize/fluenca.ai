@@ -23,6 +23,7 @@ export const BUSSINESSENDPOINT = {
 
     ANALYSIS:{
     FIND_COMPETITORS: '/competitorAnalysis/find-competitors',
+    FIND_COMPETITORS: '/competitorAnalysis/find-competitors',
     COMPETITOR_ANALYSIS: '/competitorAnalysis',
     COMPETITOR_ANALYSIS_ASYNC: '/competitorAnalysis/async',
 
@@ -99,6 +100,7 @@ export const BUSSINESSENDPOINT = {
 
     CONNECTORS:{
         INSTAGRAM_LOGIN: '/connector/instagram/login',
+        LINKEDIN_LOGIN: '/connector/linkedin/login',
         LINKEDIN_LOGIN: '/connector/linkedin/login',
         SOCIAL_ACCOUNTS: '/social-accounts',
         SOCIAL_ACCOUNTS_CONNECT: (platform: string) => `/social-accounts/${platform}/connect`,

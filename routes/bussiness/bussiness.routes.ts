@@ -1069,6 +1069,60 @@ export const NewsApi = async (params?: NewsParams): Promise<NewsResponse> => {
 };
 
 
+const normalizeRun = (data: ProspectRun & { run_id?: string }): ProspectRun => ({
+  ...data,
+  id: data.id ?? data.run_id ?? "",
+});
+
+
+
+export const LinkedInScoreApi = async (): Promise<LinkedInScore> => {
+  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_GROWTH.SCORE);
+  return response.data;
+};
+
+
+/** 3–5 posts for next week around a goal. */
+export const ContentPlanApi = async (goal: ContentPlanGoal): Promise<ContentPlan> => {
+  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.CONTENT_PLAN, { goal });
+  return response.data;
+};
+
+/** Slides in your voice, rendered as images. */
+export const CarouselApi = async (body: CarouselRequest): Promise<Carousel> => {
+  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.CAROUSEL, body);
+  return response.data;
+};
+
+export const PublishCarouselApi = async (body: PublishCarouselRequest) => {
+  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.PUBLISH_CAROUSEL, body);
+  return response.data;
+};
+
+/** Your top post as a new angle and a follow-up, saved as drafts. */
+export const RepurposeApi = async (): Promise<RepurposeResponse> => {
+  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.REPURPOSE);
+  return { drafts: unwrapList<CoachDraft>(response.data, "drafts") };
+};
+
+/** Removes the AI-written feel, scores the first line and lints the post. */
+export const PostCheckApi = async (body: PostCheckRequest): Promise<PostCheckResponse> => {
+  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.POST_CHECK, body);
+  return response.data;
+};
+
+/** One post from a brief, saved as a draft. */
+export const WritePostApi = async (body: WritePostRequest): Promise<CoachDraft> => {
+  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.WRITE_POST, body);
+  return response.data;
+};
+
+export const HookFormulasApi = async (): Promise<HookFormula[]> => {
+  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_COACH.HOOK_FORMULAS);
+  return unwrapList<HookFormula>(response.data, "formulas");
+};
+
+
 export const FindCompetitorApi = async (company_id: string) => {
   const response = await api.post(BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_FIND_COMPETITORS, {
     company_id,
@@ -1076,12 +1130,7 @@ export const FindCompetitorApi = async (company_id: string) => {
   return response.data;
 }
 
-const normalizeRun = (data: ProspectRun & { run_id?: string }): ProspectRun => ({
-  ...data,
-  id: data.id ?? data.run_id ?? "",
-});
-
-const unwrapList = <T>(data: unknown, key: string): T[] => {
+const unwrapList =<T>(data: unknown, key: string): T[] => {
   if (Array.isArray(data)) return data;
   const wrapped = data as Record<string, T[] | undefined> | null;
   return wrapped?.[key] ?? wrapped?.items ?? wrapped?.data ?? [];
@@ -1281,52 +1330,9 @@ export const RunLinkedInScoreApi = async (): Promise<LinkedInScore> => {
   return response.data;
 };
 
-export const LinkedInScoreApi = async (): Promise<LinkedInScore> => {
-  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_GROWTH.SCORE);
-  return response.data;
-};
-
-
 export const LinkedInScoreHistoryApi = async (): Promise<LinkedInScore[]> => {
   const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_GROWTH.SCORE_HISTORY);
   return unwrapList<LinkedInScore>(response.data, "history");
-};
-
-
-export const ContentPlanApi = async (goal: ContentPlanGoal): Promise<ContentPlan> => {
-  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.CONTENT_PLAN, { goal });
-  return response.data;
-};
-
-export const CarouselApi = async (body: CarouselRequest): Promise<Carousel> => {
-  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.CAROUSEL, body);
-  return response.data;
-};
-
-export const PublishCarouselApi = async (body: PublishCarouselRequest) => {
-  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.PUBLISH_CAROUSEL, body);
-  return response.data;
-};
-
-
-export const RepurposeApi = async (): Promise<RepurposeResponse> => {
-  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.REPURPOSE);
-  return { drafts: unwrapList<CoachDraft>(response.data, "drafts") };
-};
-
-export const PostCheckApi = async (body: PostCheckRequest): Promise<PostCheckResponse> => {
-  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.POST_CHECK, body);
-  return response.data;
-};
-
-export const WritePostApi = async (body: WritePostRequest): Promise<CoachDraft> => {
-  const response = await api.post(BUSSINESSENDPOINT.LINKEDIN_COACH.WRITE_POST, body);
-  return response.data;
-};
-
-export const HookFormulasApi = async (): Promise<HookFormula[]> => {
-  const response = await api.get(BUSSINESSENDPOINT.LINKEDIN_COACH.HOOK_FORMULAS);
-  return unwrapList<HookFormula>(response.data, "formulas");
 };
 
 

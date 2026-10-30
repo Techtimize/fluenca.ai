@@ -137,6 +137,7 @@ export default function DashboardPage() {
               company={company}
               profile={mapped.profile}
               companyId={companyId}
+              companyId={companyId}
               onRefresh={handleAnalyzeCompany}
               isRefreshing={isPending}
               onCompetitorsFound={handleCompetitorsFound}

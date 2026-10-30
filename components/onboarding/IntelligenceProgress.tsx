@@ -145,10 +145,15 @@ export default function IntelligenceProgress({
 
       {/* Timeline beside the report once there is room for both; the spacer only appears when there is room to keep the report centred */}
       <div className="mt-10 grid items-start gap-6 lg:mt-12 @4xl:grid-cols-[14rem_minmax(0,1fr)] @4xl:gap-8 @7xl:grid-cols-[14rem_minmax(0,640px)_14rem] @7xl:justify-center @7xl:gap-10">
+      {/* Timeline beside the report once there is room for both; the spacer only appears when there is room to keep the report centred */}
+      <div className="mt-10 grid items-start gap-6 lg:mt-12 @4xl:grid-cols-[14rem_minmax(0,1fr)] @4xl:gap-8 @7xl:grid-cols-[14rem_minmax(0,640px)_14rem] @7xl:justify-center @7xl:gap-10">
         {/* Agents: vertical timeline beside the report, horizontal strip on smaller screens */}
         <ol className="relative mx-auto flex max-w-full gap-3 overflow-x-auto pb-2 @4xl:mx-0 @4xl:flex-col @4xl:gap-6 @4xl:justify-self-end @4xl:overflow-visible @4xl:pb-0 @4xl:pt-4">
           <span className="absolute bottom-8 left-8 top-12 hidden w-0.5 rounded-full bg-[#E3E5F0] @4xl:block" />
+        <ol className="relative mx-auto flex max-w-full gap-3 overflow-x-auto pb-2 @4xl:mx-0 @4xl:flex-col @4xl:gap-6 @4xl:justify-self-end @4xl:overflow-visible @4xl:pb-0 @4xl:pt-4">
+          <span className="absolute bottom-8 left-8 top-12 hidden w-0.5 rounded-full bg-[#E3E5F0] @4xl:block" />
           <span
+            className="absolute left-8 top-12 hidden w-0.5 rounded-full bg-linear-to-b from-[#22C55E] to-[#5452F6] transition-[height] duration-700 @4xl:block"
             className="absolute left-8 top-12 hidden w-0.5 rounded-full bg-linear-to-b from-[#22C55E] to-[#5452F6] transition-[height] duration-700 @4xl:block"
             style={{
               height: `calc((100% - 5rem) * ${Math.min(1, doneCount / Math.max(1, stepNames.length - 1))})`,
@@ -179,6 +184,7 @@ export default function IntelligenceProgress({
               <li
                 key={name}
                 className="relative flex w-24 shrink-0 flex-col items-center gap-2 @4xl:w-56 @4xl:flex-row @4xl:gap-3.5"
+                className="relative flex w-24 shrink-0 flex-col items-center gap-2 @4xl:w-56 @4xl:flex-row @4xl:gap-3.5"
               >
                 <span
                   className={`relative grid size-16 shrink-0 place-items-center rounded-full border-2 transition-all duration-500 ${ring}`}
@@ -207,6 +213,7 @@ export default function IntelligenceProgress({
                 </span>
                 <span
                   className={`text-center text-[11px] leading-tight @4xl:text-left @4xl:text-sm ${
+                  className={`text-center text-[11px] leading-tight @4xl:text-left @4xl:text-sm ${
                     s === "running"
                       ? "font-semibold text-[#5452F6]"
                       : s === "pending"
@@ -216,6 +223,7 @@ export default function IntelligenceProgress({
                 >
                   {humanize(name)}
                   <span
+                    className={`mt-1 hidden w-fit rounded-full px-2 py-0.5 text-[11px] font-medium @4xl:block ${
                     className={`mt-1 hidden w-fit rounded-full px-2 py-0.5 text-[11px] font-medium @4xl:block ${
                       s === "completed"
                         ? "bg-[#ECFDF3] text-[#16A34A]"
@@ -330,6 +338,7 @@ export default function IntelligenceProgress({
         </section>
 
         {/* Empty column that balances the timeline so the report stays centred */}
+        <div aria-hidden="true" className="hidden @7xl:block" />
         <div aria-hidden="true" className="hidden @7xl:block" />
       </div>
     </div>

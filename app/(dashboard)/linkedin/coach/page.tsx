@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import TodayTab from "@/components/dashboard/linkedin-coach/TodayTab";
 import ToolsTab from "@/components/dashboard/linkedin-coach/ToolsTab";
 import WeeklyTab from "@/components/dashboard/linkedin-coach/WeeklyTab";
 import { SocialNotConnected } from "@/components/dashboard/social/SocialNotConnected";
@@ -16,15 +17,16 @@ import {
 import { FOCUS_RING } from "@/utils/ui-classes";
 
 const TABS = [
+  { id: "today", label: "Today" },
   { id: "weekly", label: "This week" },
   { id: "tools", label: "Tools" },
 ] as const;
 
 type Tab = (typeof TABS)[number]["id"];
 
-/** LinkedIn coach: next week's plan and content, and writing tools. */
+/** LinkedIn coach: today's checklist, the weekly report and plan, and writing tools. */
 export default function LinkedInCoachPage() {
-  const [tab, setTab] = useState<Tab>("weekly");
+  const [tab, setTab] = useState<Tab>("today");
   const { data: accountsData, isLoading } = SocialAccountsQuery();
   const connected = isSocialAccountConnected(findSocialAccount(normalizeSocialAccounts(accountsData), "linkedin"));
 
@@ -40,7 +42,7 @@ export default function LinkedInCoachPage() {
         </Link>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight text-neutral-900">LinkedIn coach</h1>
         <p className="mt-2 max-w-2xl text-[14px] leading-6 text-neutral-600">
-          A content plan, carousel and repurposed posts every week, and tools to write better posts whenever you need
+          A short checklist every day, a report and plan every week, and tools to write better posts whenever you need
           them.
         </p>
 
@@ -69,6 +71,8 @@ export default function LinkedInCoachPage() {
         </div>
       ) : !connected ? (
         <SocialNotConnected platform="LinkedIn" accentClassName="bg-[#0A66C2] text-white" />
+      ) : tab === "today" ? (
+        <TodayTab />
       ) : tab === "weekly" ? (
         <WeeklyTab />
       ) : (

@@ -82,13 +82,19 @@ import type { ConfirmCompetitorRequest, SavedCompetitor } from "@/types/bussines
 import type { ProfileScoreRequest, ScheduleWeekPostRequest } from "@/types/bussiness/linkedin-growth-type";
 import {
   CarouselApi,
+  AddFollowUpApi,
+  CompleteCoachTaskApi,
+  CompleteFollowUpApi,
   ContentPlanApi,
   PostCheckApi,
   PublishCarouselApi,
   RepurposeApi,
+  UndoCoachTaskApi,
   WritePostApi,
 } from "./bussiness.routes";
+import { COACH_TODAY_KEY, FOLLOW_UPS_KEY } from "./Bussiness-Query";
 import type {
+  AddFollowUpRequest,
   CarouselRequest,
   ContentPlanGoal,
   PostCheckRequest,
@@ -1453,6 +1459,50 @@ export function RunLinkedInScoreMutation() {
 }
 
 // ---------- LinkedIn coach ----------
+
+/** Marks a task done (or undoes it); the response is the updated checklist with streak and points. */
+export function ToggleCoachTaskMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ task_id, done }: { task_id: string; done: boolean }) =>
+      done ? CompleteCoachTaskApi(task_id) : UndoCoachTaskApi(task_id),
+    onSuccess: (data) => {
+      if (data?.tasks) queryClient.setQueryData(COACH_TODAY_KEY, data);
+      else void queryClient.invalidateQueries({ queryKey: COACH_TODAY_KEY });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to update the task"));
+    },
+  });
+}
+
+export function AddFollowUpMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: AddFollowUpRequest) => AddFollowUpApi(body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: FOLLOW_UPS_KEY });
+      toast.success("Follow-up added with a draft reply");
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to add the follow-up"));
+    },
+  });
+}
+
+export function CompleteFollowUpMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (follow_up_id: string) => CompleteFollowUpApi(follow_up_id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: FOLLOW_UPS_KEY });
+      void queryClient.invalidateQueries({ queryKey: COACH_TODAY_KEY });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, "Failed to update the follow-up"));
+    },
+  });
+}
 
 /** The plan comes back on `data`. */
 export function ContentPlanMutation() {
