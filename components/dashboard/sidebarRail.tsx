@@ -259,7 +259,7 @@ export default function SidebarRail({
           </span>
         </div>
 
-        <ul className="mt-6 min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden scrollbar-none [&::-webkit-scrollbar]:hidden">
+        <ul className="mt-6 min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {items.map((item) => {
             const Icon = getIcon(item.icon);
             const active = isActivePath(pathname, item.href);

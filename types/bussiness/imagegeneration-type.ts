@@ -1,9 +1,54 @@
+export const VALID_IMAGE_GENERATION_PLATFORMS = [
+  "instagram",
+  "linkedin",
+  "facebook",
+  "tiktok",
+  "x",
+  "twitter",
+] as const;
+
+export type ValidImageGenerationPlatform =
+  (typeof VALID_IMAGE_GENERATION_PLATFORMS)[number];
+
 export type ImageGenerationPlatform =
-  | "instagram"
-  | "linkedin"
-  | "facebook"
-  | "tiktok"
+  | ValidImageGenerationPlatform
   | string;
+
+/**
+ * Normalizes user- or database-provided platform strings (which may be uppercase like "Instagram",
+ * "LINKEDIN", "X", etc.) into the exact lowercase literal strings expected by the backend:
+ * 'instagram' | 'linkedin' | 'facebook' | 'tiktok' | 'x' | 'twitter'.
+ */
+export function normalizeImageGenerationPlatform(
+  platform?: string | null,
+): ValidImageGenerationPlatform {
+  if (!platform) return "instagram";
+  const cleaned = platform.trim().toLowerCase().replace(/\s+/g, "");
+
+  if (cleaned.includes("instagram") || cleaned === "insta" || cleaned === "ig") {
+    return "instagram";
+  }
+  if (cleaned.includes("linkedin") || cleaned === "linked-in" || cleaned === "li") {
+    return "linkedin";
+  }
+  if (cleaned.includes("facebook") || cleaned === "fb") {
+    return "facebook";
+  }
+  if (cleaned.includes("tiktok") || cleaned === "tt") {
+    return "tiktok";
+  }
+  if (cleaned === "x") {
+    return "x";
+  }
+  if (cleaned.includes("twitter")) {
+    return "twitter";
+  }
+
+  const match = VALID_IMAGE_GENERATION_PLATFORMS.find((p) => p === cleaned);
+  if (match) return match;
+
+  return "instagram";
+}
 
 export type ImageGenerationPurpose =
   | "carousel"

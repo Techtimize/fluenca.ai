@@ -66,13 +66,14 @@ import {
   ScriptGenerationResultsParams,
   ScriptGenerationResultsResponse,
 } from "@/types/bussiness/script-type";
-import type {
-  CompanyImageGenerationResponse,
-  ImageGenerationRequest,
-  ImageGenerationResponse,
-  ImageGenerationScheduleRequest,
-  ImageGenerationScheduleResponse,
-  LatestGeneratedImageResponse,
+import {
+  normalizeImageGenerationPlatform,
+  type CompanyImageGenerationResponse,
+  type ImageGenerationRequest,
+  type ImageGenerationResponse,
+  type ImageGenerationScheduleRequest,
+  type ImageGenerationScheduleResponse,
+  type LatestGeneratedImageResponse,
 } from "@/types/bussiness/imagegeneration-type";
 import { IntelligenceJobResponse, IntelligenceRunRequest, IntelligenceRunResponse } from "@/types/bussiness/intelligence-type";
 import type { PlannerResultsResponse, PlannerVersionsResponse } from "@/types/bussiness/planner-type";
@@ -448,7 +449,11 @@ export const ScriptGenerationResultsApi = async (): Promise<ScriptGenerationResu
 export const ImageGenerationApi = async (
   data: ImageGenerationRequest,
 ): Promise<ImageGenerationResponse> => {
-    const response = await api.post(BUSSINESSENDPOINT.GENERATION.IMAGE_GENERATION, data);
+    const payload: ImageGenerationRequest = {
+      ...data,
+      platform: normalizeImageGenerationPlatform(data.platform),
+    };
+    const response = await api.post(BUSSINESSENDPOINT.GENERATION.IMAGE_GENERATION, payload);
     return response.data;
 }
 
@@ -467,7 +472,11 @@ export const DeleteImageApi = async (company_id: string, image_id: string) => {
 export const ScheduleImageGenerationApi = async (
   data: ImageGenerationScheduleRequest,
 ): Promise<ImageGenerationScheduleResponse> => {
-    const response = await api.post(BUSSINESSENDPOINT.GENERATION.IMAGE_GENERATION_SCHEDULE, data);
+    const payload: ImageGenerationScheduleRequest = {
+      ...data,
+      platform: normalizeImageGenerationPlatform(data.platform) as ImageGenerationScheduleRequest["platform"],
+    };
+    const response = await api.post(BUSSINESSENDPOINT.GENERATION.IMAGE_GENERATION_SCHEDULE, payload);
     return response.data;
 }
 

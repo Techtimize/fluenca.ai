@@ -30,7 +30,10 @@ import {
 } from "@/routes/bussiness/Bussiness-Mutation";
 import { CompanyTextPostsQuery } from "@/routes/bussiness/Bussiness-Query";
 import { isTextPostPosted, type TextPost } from "@/types/bussiness/text-post-type";
-import type { ImageGenerationRequest } from "@/types/bussiness/imagegeneration-type";
+import {
+  normalizeImageGenerationPlatform,
+  type ImageGenerationRequest,
+} from "@/types/bussiness/imagegeneration-type";
 import type { ScriptGenerationResponse } from "@/types/bussiness/script-type";
 import { FOCUS_RING } from "@/utils/ui-classes";
 import { MetaChip, PlatformChip } from "./primitives";
@@ -53,11 +56,15 @@ function toImageGenerationRequest(
     image_url: scene.image_url,
   }));
 
+  const rawPlatform =
+    item.project?.platform ||
+    (item as { platform?: string }).platform;
+
   return {
     company_id: companyId,
-    platform: item.project?.platform || "instagram",
+    platform: normalizeImageGenerationPlatform(rawPlatform),
     purpose: "post",
-    style: item.meta?.style || "default",
+    style: (item.meta?.style || "default").trim().toLowerCase(),
     project: {
       name: item.project?.name || script?.title || "Script",
       tone: item.project?.tone || "default",
