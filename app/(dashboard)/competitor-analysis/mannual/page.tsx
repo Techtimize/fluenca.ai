@@ -9,8 +9,14 @@ import {
   LATEST_VERSION_VALUE,
   normalizeCompetitorVersions,
 } from "@/components/dashboard/competitors/versionUtils";
-import Card from "@/components/shared/card";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { getApiErrorMessage, isApiNotFoundError } from "@/errors/error-utils";
 import { CompetitorAnalysisManualMutation } from "@/routes/bussiness/Bussiness-Mutation";
@@ -21,7 +27,7 @@ import {
 } from "@/routes/bussiness/Bussiness-Query";
 import useAuthStore from "@/store/AuthsStore";
 import { FOCUS_RING } from "@/utils/ui-classes";
-import ManualCompetitorResults from "@/components/dashboard/competitors/CompetitorResults";
+import CompetitiveBriefResults from "@/components/dashboard/competitors/CompetitiveBriefResults";
 
 type CompetitorRow = {
   id: string;
@@ -85,7 +91,6 @@ function collectCompetitorValues(rows: CompetitorRow[]) {
 
     for (const entry of entries) {
       if (!entry.value) continue;
-
       if (entry.kind === "linkedin" && !isLikelyLinkedIn(entry.value)) {
         return {
           values: [] as string[],
@@ -110,10 +115,94 @@ function collectCompetitorValues(rows: CompetitorRow[]) {
   return { values, error: null as string | null };
 }
 
+function CompetitorRowFields({
+  rows,
+  updateRow,
+  removeRow,
+  filledFieldCount,
+}: {
+  rows: CompetitorRow[];
+  updateRow: (
+    id: string,
+    field: "instagram" | "linkedin" | "website",
+    value: string,
+  ) => void;
+  removeRow: (id: string) => void;
+  filledFieldCount: number;
+}) {
+  return (
+    <div className="space-y-3">
+      {rows.map((row, index) => (
+        <div
+          key={row.id}
+          className="rounded-2xl border border-[#E6E8F5] bg-[#FBFBFF] p-3.5 sm:p-4"
+        >
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+              Competitor {String(index + 1).padStart(2, "0")}
+            </p>
+            <button
+              type="button"
+              aria-label={`Remove competitor ${index + 1}`}
+              onClick={() => removeRow(row.id)}
+              disabled={rows.length === 1 && filledFieldCount === 0}
+              className={`inline-flex size-8 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-white hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`}
+            >
+              <Trash2 className="size-3.5" />
+            </button>
+          </div>
+
+          <div className="grid gap-3 lg:grid-cols-3">
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
+                <AtSign className="size-4 text-[#5B57E6]" />
+                Instagram username
+              </label>
+              <Input
+                value={row.instagram}
+                onChange={(e) => updateRow(row.id, "instagram", e.target.value)}
+                placeholder="@username"
+                className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
+                <Link2 className="size-4 text-[#5B57E6]" />
+                LinkedIn URL
+              </label>
+              <Input
+                value={row.linkedin}
+                onChange={(e) => updateRow(row.id, "linkedin", e.target.value)}
+                placeholder="https://www.linkedin.com/company/…"
+                className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
+                <Globe className="size-4 text-[#5B57E6]" />
+                Website URL
+              </label>
+              <Input
+                value={row.website}
+                onChange={(e) => updateRow(row.id, "website", e.target.value)}
+                placeholder="https://www.example.com"
+                className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
+              />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function CompetitorAnalysisManualPage() {
   const companyId = useAuthStore((s) => s.company_id);
   const [selectedVersion, setSelectedVersion] = useState(LATEST_VERSION_VALUE);
   const [rows, setRows] = useState<CompetitorRow[]>(() => [createEmptyRow()]);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const {
     data: versionsData,
@@ -195,7 +284,6 @@ export default function CompetitorAnalysisManualPage() {
 
   const handleRun = () => {
     if (!companyId) return;
-
     const { values, error: validationError } = collectCompetitorValues(rows);
     if (validationError) {
       toast.error(validationError);
@@ -216,6 +304,8 @@ export default function CompetitorAnalysisManualPage() {
       {
         onSuccess: () => {
           setSelectedVersion(LATEST_VERSION_VALUE);
+          setIsAddDialogOpen(false);
+          setRows([createEmptyRow()]);
           void refetchVersions();
           void refetchLatest();
         },
@@ -241,143 +331,79 @@ export default function CompetitorAnalysisManualPage() {
           </p>
         </div>
 
-        <CompetitorVersionSelect
-          value={selectedVersion}
-          onChange={setSelectedVersion}
-          versions={versions}
-          isLoading={isVersionsLoading}
-          disabled={!companyId}
-        />
-      </div>
-
-      {!companyId ? (
-        <Card className="border-amber-200 bg-amber-50/80 p-5">
-          <p className="text-sm text-amber-800">
-            Company ID is missing. Complete company analysis first, then return here.
-          </p>
-        </Card>
-      ) : null}
-
-      <Card className="p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h3 className="text-[15px] font-semibold text-neutral-900">
-              Add competitors
-            </h3>
-            <p className="mt-1 text-[13px] text-neutral-500">
-              Each row is one competitor. Fill Instagram, LinkedIn, and/or website,
-              then use + to add another.
-            </p>
-          </div>
+        <div className="flex items-end gap-3">
           <Button
             type="button"
             variant="outline"
-            onClick={addRow}
-            className="h-10 shrink-0 gap-1.5 rounded-full px-4"
+            onClick={() => setIsAddDialogOpen(true)}
+            className="h-10 shrink-0 gap-1.5 rounded-full px-4 sm:h-10"
           >
             <Plus className="size-4" />
             Add competitor
           </Button>
-        </div>
 
-        <div className="mt-4 space-y-3">
-          {rows.map((row, index) => (
-            <div
-              key={row.id}
-              className="rounded-2xl border border-[#E6E8F5] bg-[#FBFBFF] p-3.5 sm:p-4"
+          <CompetitorVersionSelect
+            value={selectedVersion}
+            onChange={setSelectedVersion}
+            versions={versions}
+            isLoading={isVersionsLoading}
+            disabled={!companyId}
+          />
+        </div>
+      </div>
+
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent
+          showCloseButton
+          className="flex max-h-[min(92vh,760px)] w-full max-w-[calc(100%-1rem)] flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-2xl sm:rounded-3xl"
+        >
+          <DialogHeader className="shrink-0 border-b border-[#EEF0F8] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] px-4 py-4 pe-12 sm:px-6 sm:py-5">
+            <DialogTitle className="text-[16px] font-semibold tracking-tight text-neutral-900">
+              Add competitor
+            </DialogTitle>
+            <DialogDescription className="mt-1 text-[13px] leading-5 text-neutral-500">
+              Each row is one competitor. Fill Instagram, LinkedIn, and/or website,
+              then use + to add another.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6">
+            <CompetitorRowFields rows={rows} updateRow={updateRow} removeRow={removeRow} filledFieldCount={filledFieldCount} />
+          </div>
+
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-[#EEF0F8] px-4 py-4 sm:px-6">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={addRow}
+              className="h-10 gap-1.5 rounded-full px-3 text-[#5B57E6] hover:bg-[#ECEBFF] hover:text-[#4A46D0]"
             >
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
-                  Competitor {String(index + 1).padStart(2, "0")}
-                </p>
-                <button
-                  type="button"
-                  aria-label={`Remove competitor ${index + 1}`}
-                  onClick={() => removeRow(row.id)}
-                  disabled={rows.length === 1 && filledFieldCount === 0}
-                  className={`inline-flex size-8 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-white hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`}
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
-              </div>
+              <Plus className="size-4" />
+              Add another competitor
+            </Button>
 
-              <div className="grid gap-3 lg:grid-cols-3">
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
-                    <AtSign className="size-4 text-[#5B57E6]" />
-                    Instagram username
-                  </label>
-                  <Input
-                    value={row.instagram}
-                    onChange={(e) => updateRow(row.id, "instagram", e.target.value)}
-                    placeholder="@username"
-                    className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
-                  />
-                </div>
+            <Button
+              type="button"
+              onClick={handleRun}
+              disabled={!companyId || isPending || filledFieldCount === 0}
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Running…
+                </>
+              ) : (
+                <>
+                  <Users className="size-4" />
+                  Run manual analysis
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
-                    <Link2 className="size-4 text-[#5B57E6]" />
-                    LinkedIn URL
-                  </label>
-                  <Input
-                    value={row.linkedin}
-                    onChange={(e) => updateRow(row.id, "linkedin", e.target.value)}
-                    placeholder="https://www.linkedin.com/company/…"
-                    className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
-                    <Globe className="size-4 text-[#5B57E6]" />
-                    Website URL
-                  </label>
-                  <Input
-                    value={row.website}
-                    onChange={(e) => updateRow(row.id, "website", e.target.value)}
-                    placeholder="https://www.example.com"
-                    className="h-11 rounded-full border-[#E6E8F5] bg-white px-4"
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={addRow}
-            className="h-10 gap-1.5 rounded-full px-3 text-[#5B57E6] hover:bg-[#ECEBFF] hover:text-[#4A46D0]"
-          >
-            <Plus className="size-4" />
-            Add another competitor
-          </Button>
-
-          <Button
-            type="button"
-            onClick={handleRun}
-            disabled={!companyId || isPending || filledFieldCount === 0}
-            
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                Running…
-              </>
-            ) : (
-              <>
-                <Users className="size-4" />
-                Run manual analysis
-              </>
-            )}
-          </Button>
-        </div>
-      </Card>
-
-      <ManualCompetitorResults
+      <CompetitiveBriefResults
         data={competitorResults}
         isLoading={Boolean(companyId) && isLoading && !competitorResults}
         isError={isError && !notFound}

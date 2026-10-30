@@ -116,7 +116,6 @@ function toDisplayLabel(value: unknown): string {
   }
   if (typeof value === "object") {
     const record = value as Record<string, unknown>;
-    // API sometimes returns posting cadence as an object
     if (
       "posts_per_week" in record ||
       "avg_days_between_posts" in record ||
@@ -138,7 +137,6 @@ function toDisplayLabel(value: unknown): string {
       }
       if (parts.length) return parts.join(" · ");
     }
-    // API sometimes returns numeric ranges as { min, max }
     if ("min" in record || "max" in record) {
       const min = record.min;
       const max = record.max;
@@ -265,7 +263,7 @@ function KvGrid({
           <dt className="text-[11px] font-medium uppercase tracking-[0.04em] text-neutral-500">
             {item.label}
           </dt>
-          <dd className="mt-1 break-words text-[13px] font-medium text-neutral-900">
+          <dd className="mt-1 wrap-break-word text-[13px] font-medium text-neutral-900">
             {String(item.value)}
           </dd>
         </div>
@@ -1441,3 +1439,5 @@ export default function ManualCompetitorResults({
     </div>
   );
 }
+
+

@@ -32,7 +32,7 @@ export function CompetitorsTopTable({ competitors }: Props) {
 
       {competitors.length ? (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-[12px]">
+          <table className="w-full min-w-160 text-left text-[12px]">
             <thead>
               <tr className="border-b border-[#EEF0F8] text-neutral-400">
                 <th className="px-5 py-3 font-medium">#</th>

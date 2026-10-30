@@ -323,7 +323,7 @@ export default function CompetitorNinetyDayCalendar({ plan, startDate }: Props) 
                   key={key}
                   type="button"
                   onClick={() => setSelectedDate(day)}
-                  className={`min-h-[84px] rounded-2xl border p-1.5 text-left transition-colors sm:min-h-[96px] ${FOCUS_RING} ${
+                  className={`min-h-21 rounded-2xl border p-1.5 text-left transition-colors sm:min-h-24 ${FOCUS_RING} ${
                     selected
                       ? "border-[#5B57E6] bg-[#F6F7FD]"
                       : inPlan

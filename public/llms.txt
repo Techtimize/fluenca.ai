@@ -1,0 +1,16 @@
+# Fluenca.ai
+
+> Fluenca is an AI marketing platform: AI agents study your competitors and write your next win, turning a stated goal into ready-to-use insights, content, and campaigns.
+
+## Pages
+
+- [Home](https://fluenca.ai/): How Fluenca's AI agents research, plan, and create for your brand.
+- [Agents](https://fluenca.ai/agents): Meet the individual AI agents and what each one handles.
+- [Plans](https://fluenca.ai/plans): Simple pricing plans to grow a brand with AI.
+- [Book a Demo](https://fluenca.ai/demo): Request a personalized walkthrough of the platform.
+- [Contact Sales](https://fluenca.ai/sales): Get a custom plan recommendation from the sales team.
+- [Blog](https://fluenca.ai/blog): AI-researched and AI-written blog content.
+
+## Optional
+
+- [Sitemap](https://fluenca.ai/sitemap.xml): Full list of indexable URLs.

@@ -1,5 +1,6 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentExecutionAgentModeApi, ContentExecutionItemsApi, ContentExecutionRunsApi, ContentExecutionSettingsApi, ContentRecommendationResultApi, DnaApi, FacebookProfileContentApi, IntakeApi, IntelligenceJobApi, InstagramProfileIdApi, InstagramProfileInfoApi, LinkedInProfileContentApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi, InstagramProfileContentApi, InstagramProfileReachApi, InstagramProfileInteractionsApi, InstagramProfileDemographicsApi, InstagramProfileFollowsApi, InstagramProfileViewsApi, InstagramProfileActionsApi, InstagramProfileStoriesApi, InstagramLiveStreamApi, CompanyGoalsApi, GoalByIdApi, GoalProgressApi, GoalLessonsApi, GoalPlanApi, GoalsByCompanyApi } from "./bussiness.routes";
+import { CompanyImageGenerationResultsApi, CompetitorAnalysisAiLatestResponseApi, CompetitorAnalysisAiSpecificVersionsApi, CompetitorAnalysisAiVersionsApi, CompetitorAnalysisCompetitorApi, CompetitorAnalysisJobApi, CompetitorAnalysisManualLatestResponseApi, CompetitorAnalysisManualSpecificVersionsApi, CompetitorAnalysisManualVersionsApi, CompetitorAnalyticDashboardApi, ContentExecutionAgentModeApi, ContentExecutionItemsApi, ContentExecutionRunsApi, ContentExecutionSettingsApi, ContentRecommendationResultApi, DnaApi, FacebookProfileContentApi, IntakeApi, IntelligenceJobApi, InstagramProfileIdApi, InstagramProfileInfoApi, LinkedInProfileContentApi, OnboardingDetailsApi, PlannerResultsApi, PlannerSpecificVersionsApi, PlannerVersionsApi, ScriptGenerationResultsApi, ScriptGenerationResultsByCompanyIdApi, SocialAccountsApi, InstagramProfileContentApi, InstagramProfileReachApi, InstagramProfileInteractionsApi, InstagramProfileDemographicsApi, InstagramProfileFollowsApi, InstagramProfileViewsApi, InstagramProfileActionsApi, InstagramProfileStoriesApi, InstagramLiveStreamApi, CompanyGoalsApi, GoalByIdApi, GoalProgressApi, GoalLessonsApi, GoalPlanApi, GoalsByCompanyApi, GetCompanyCompetitorsApiById, TrackedCompetitorsApi } from "./bussiness.routes";
+import type { TrackedCompetitorsRequest } from "@/types/bussiness/dashboard-type";
 import {
     AnalyzeCompanyResultsApi,
   AnalyzeCompanyDashboardApi,
@@ -11,11 +12,43 @@ import {
   GoogleTrendTrendingApi,
 } from "./bussiness.routes";
 import type { GoogleTrendQueryParams } from "@/types/bussiness/google-trends-type";
-import { ChatHistoryApi } from "../chatbot/chatbot.routes";
 import { BlogPostDetailsApi, BlogPostsApi, BriefsApi, KeywordsApi } from "./bussiness.routes";
 import { ScheduledPostApi, ScheduledPostsApi } from "./bussiness.routes";
+import { ChatHistoryApi } from "../chatbot/chatbot.routes";
 import { CompanyTextPostsApi, NewsApi } from "./bussiness.routes";
 import type { NewsParams } from "@/types/bussiness/news-type";
+import {
+  ProspectApi,
+  ProspectIcpApi,
+  ProspectRunApi,
+  ProspectRunCandidatesApi,
+  OrganicTrafficApi,
+  SiteVisibilityApi,
+  ProspectRunsApi,
+  ProspectsApi,
+} from "./bussiness.routes";
+import {
+  isEnriching,
+  isRunFinished,
+  type ProspectCandidatesRequest,
+  type ProspectsParams,
+} from "@/types/bussiness/prospect-type";
+import type { OrganicTrafficRequest } from "@/types/bussiness/organic-traffic-type";
+import {
+  LinkedInScoreApi,
+  LinkedInScoreHistoryApi,
+  LinkedInVoiceApi,
+  ProfileScoreApi,
+  ProfileScoreHistoryApi,
+  WeekPostsApi,
+} from "./bussiness.routes";
+import {
+  CoachTodayApi,
+  FollowUpsApi,
+  HookFormulasApi,
+  WeeklyReportApi,
+  WeeklyReportHistoryApi,
+} from "./bussiness.routes";
 import type { ScheduledPost, ScheduledPostStatus } from "@/types/bussiness/scheduled-post-type";
 import {
   GoogleAnalyticsConnectionApi,
@@ -661,7 +694,6 @@ export const GoogleAnalyticsPropertiesQuery = (enabled: boolean) => {
   });
 };
 
-/** Runs once a property is chosen; the key includes it so switching property refetches. */
 export const GoogleAnalyticsOverviewQuery = (propertyId: string | null, days = 28) => {
   return useQuery({
     queryKey: [...GOOGLE_ANALYTICS_KEY, "overview", propertyId, days],
@@ -691,7 +723,6 @@ export const SearchConsoleSitesQuery = (enabled: boolean) => {
   });
 };
 
-/** Runs once a site is chosen; the key includes it so switching site refetches. */
 export const SearchConsoleOverviewQuery = (siteUrl: string | null, days = 28) => {
   return useQuery({
     queryKey: [...SEARCH_CONSOLE_KEY, "overview", siteUrl, days],
@@ -719,7 +750,6 @@ export const GoalPlanQuery = (goal_id?: string | null) => {
   });
 };
 
-/** All of a company's goals; keyed under GOALS_KEY so goal mutations refresh it too. */
 export const GoalsByCompanyQuery = (company_id?: string | null) => {
   return useQuery({
     queryKey: [...GOALS_KEY, "company", company_id],
@@ -733,12 +763,11 @@ export const SCHEDULED_POSTS_KEY = ["scheduled-posts"];
 export const scheduledPostKey = (post_id?: string | null) => [...SCHEDULED_POSTS_KEY, "detail", post_id];
 const SCHEDULED_POSTS_POLL_MS = 15000;
 
-/** A post is in flight while publishing, or when its time has passed but it hasn't moved on yet. */
 const isScheduledPostInFlight = (post: ScheduledPost) =>
   post.status === "publishing" ||
   (post.status === "scheduled" && new Date(post.scheduled_at).getTime() <= Date.now());
 
-/** Soonest first; polls while any post is going out so its status updates by itself. */
+
 export const ScheduledPostsQuery = (status?: ScheduledPostStatus) => {
   return useQuery({
     queryKey: [...SCHEDULED_POSTS_KEY, "list", status ?? "all"],
@@ -760,7 +789,6 @@ export const ScheduledPostQuery = (post_id?: string | null) => {
 
 export const TEXT_POSTS_KEY = ["text-posts"];
 
-/** LinkedIn text posts built from scripts, each with its publish_status. */
 export const CompanyTextPostsQuery = (company_id?: string | null) => {
   return useQuery({
     queryKey: [...TEXT_POSTS_KEY, company_id],
@@ -772,12 +800,264 @@ export const CompanyTextPostsQuery = (company_id?: string | null) => {
 
 const NEWS_STALE_MS = 10 * 60 * 1000;
 
-/** News for the company's niche, or for `topic` when given. */
+
 export const NewsQuery = (params?: NewsParams) => {
   return useQuery({
     queryKey: ["news", params?.topic?.trim() || null, params?.size ?? null],
     queryFn: () => NewsApi(params),
     staleTime: NEWS_STALE_MS,
     refetchOnWindowFocus: false,
+  });
+};
+
+// ---------- Prospect finder ----------
+
+export const PROSPECTS_KEY = ["prospects"];
+export const PROSPECT_ICP_KEY = [...PROSPECTS_KEY, "icp"];
+export const PROSPECT_RUNS_KEY = [...PROSPECTS_KEY, "runs"];
+export const prospectRunKey = (run_id?: string | null) => [...PROSPECT_RUNS_KEY, "detail", run_id];
+export const prospectKey = (prospect_id?: string | null) => [...PROSPECTS_KEY, "detail", prospect_id];
+const PROSPECT_POLL_MS = 3000;
+
+export const ProspectIcpQuery = () => {
+  return useQuery({
+    queryKey: PROSPECT_ICP_KEY,
+    queryFn: () => ProspectIcpApi(),
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+
+export const ProspectRunsQuery = () => {
+  return useQuery({
+    queryKey: PROSPECT_RUNS_KEY,
+    queryFn: () => ProspectRunsApi(),
+    refetchInterval: (query) =>
+      query.state.data?.some((run) => !isRunFinished(run.status)) ? PROSPECT_POLL_MS : false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const ProspectRunQuery = (run_id?: string | null) => {
+  return useQuery({
+    queryKey: prospectRunKey(run_id),
+    queryFn: () => ProspectRunApi(run_id as string),
+    enabled: Boolean(run_id),
+    refetchInterval: (query) => (isRunFinished(query.state.data?.status) ? false : PROSPECT_POLL_MS),
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const SITE_VISIBILITY_KEY = ["site-visibility"];
+
+/** SEO & AI visibility of the company website; a cheap read, so it refreshes hourly. */
+export const SiteVisibilityQuery = () => {
+  return useQuery({
+    queryKey: SITE_VISIBILITY_KEY,
+    queryFn: () => SiteVisibilityApi(),
+    staleTime: 60 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const ORGANIC_TRAFFIC_KEY = ["organic-traffic"];
+export const organicTrafficKey = (website?: string | null, country?: string | null) => [
+  ...ORGANIC_TRAFFIC_KEY,
+  website ?? "own",
+  country ?? "top",
+];
+
+/** The saved report (kept 7 days by the backend); a fresh check goes through RefreshOrganicTrafficMutation. */
+export const OrganicTrafficQuery = (params: Omit<OrganicTrafficRequest, "refresh"> = {}, enabled = true) => {
+  return useQuery({
+    queryKey: organicTrafficKey(params.website, params.country),
+    queryFn: () => OrganicTrafficApi(params),
+    enabled,
+    staleTime: 60 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+/** Every company a search found; polls while the search is still running. */
+export const ProspectRunCandidatesQuery = (run_id: string | null, params: ProspectCandidatesRequest = {}) => {
+  return useQuery({
+    queryKey: [...prospectRunKey(run_id), "candidates", params.outcome ?? "all"],
+    queryFn: () => ProspectRunCandidatesApi(run_id as string, params),
+    enabled: Boolean(run_id),
+    placeholderData: keepPreviousData,
+    refetchInterval: (query) => (isRunFinished(query.state.data?.run_status) ? false : PROSPECT_POLL_MS),
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const ProspectsQuery = (params: ProspectsParams, enabled = true) => {
+  return useQuery({
+    queryKey: [...PROSPECTS_KEY, "list", params.run_id ?? null, params.status ?? "all"],
+    queryFn: () => ProspectsApi(params),
+    enabled,
+    placeholderData: keepPreviousData,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const ProspectQuery = (prospect_id?: string | null) => {
+  return useQuery({
+    queryKey: prospectKey(prospect_id),
+    queryFn: () => ProspectApi(prospect_id as string),
+    enabled: Boolean(prospect_id),
+    refetchInterval: (query) => (isEnriching(query.state.data?.enrich_status) ? PROSPECT_POLL_MS : false),
+    refetchOnWindowFocus: false,
+  });
+};
+
+
+
+export const LINKEDIN_GROWTH_KEY = ["linkedin-growth"];
+export const PROFILE_SCORE_KEY = [...LINKEDIN_GROWTH_KEY, "profile-score"];
+export const LINKEDIN_VOICE_KEY = [...LINKEDIN_GROWTH_KEY, "voice"];
+export const WEEK_POSTS_KEY = [...LINKEDIN_GROWTH_KEY, "week-posts"];
+export const LINKEDIN_SCORE_KEY = [...LINKEDIN_GROWTH_KEY, "score"];
+
+export const ProfileScoreQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...PROFILE_SCORE_KEY, "latest"],
+    queryFn: () => ProfileScoreApi(),
+    enabled,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const ProfileScoreHistoryQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...PROFILE_SCORE_KEY, "history"],
+    queryFn: () => ProfileScoreHistoryApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const LinkedInVoiceQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: LINKEDIN_VOICE_KEY,
+    queryFn: () => LinkedInVoiceApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const WeekPostsQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: WEEK_POSTS_KEY,
+    queryFn: () => WeekPostsApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const LinkedInScoreQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...LINKEDIN_SCORE_KEY, "latest"],
+    queryFn: () => LinkedInScoreApi(),
+    enabled,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const LinkedInScoreHistoryQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...LINKEDIN_SCORE_KEY, "history"],
+    queryFn: () => LinkedInScoreHistoryApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+
+export const LINKEDIN_COACH_KEY = ["linkedin-coach"];
+export const COACH_TODAY_KEY = [...LINKEDIN_COACH_KEY, "today"];
+export const FOLLOW_UPS_KEY = [...LINKEDIN_COACH_KEY, "follow-ups"];
+export const WEEKLY_REPORT_KEY = [...LINKEDIN_COACH_KEY, "weekly-report"];
+const COACH_TODAY_STALE_MS = 5 * 60 * 1000;
+
+/** The first call of the day builds the checklist and can take up to a minute, so it's never retried. */
+export const CoachTodayQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: COACH_TODAY_KEY,
+    queryFn: () => CoachTodayApi(),
+    enabled,
+    retry: false,
+    staleTime: COACH_TODAY_STALE_MS,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const FollowUpsQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: FOLLOW_UPS_KEY,
+    queryFn: () => FollowUpsApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const WeeklyReportQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...WEEKLY_REPORT_KEY, "latest"],
+    queryFn: () => WeeklyReportApi(),
+    enabled,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const WeeklyReportHistoryQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...WEEKLY_REPORT_KEY, "history"],
+    queryFn: () => WeeklyReportHistoryApi(),
+    enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
+/** The 21 hook formulas never change during a session. */
+export const HookFormulasQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [...LINKEDIN_COACH_KEY, "hook-formulas"],
+    queryFn: () => HookFormulasApi(),
+    enabled,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+  });
+};
+
+
+export const TRACKED_COMPETITORS_KEY = ["tracked-competitors"];
+
+/** Which of the company's competitors have been compared; refetched after each comparison. */
+export const TrackedCompetitorsQuery = (params: TrackedCompetitorsRequest = {}, enabled = true) => {
+  return useQuery({
+    queryKey: [...TRACKED_COMPETITORS_KEY, params.compared ?? "all"],
+    queryFn: () => TrackedCompetitorsApi(params),
+    enabled,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const FIND_COMPETITORS_KEY = ["get-find-competitor"];
+
+export const GetFindCompetitorQuery = (company_id: string) => {
+  return useQuery({
+    queryKey: [...FIND_COMPETITORS_KEY, company_id],
+    queryFn: () => GetCompanyCompetitorsApiById(company_id),
+    enabled: Boolean(company_id),
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 };

@@ -209,10 +209,16 @@ function ImpactEffortMatrix({ data }: { data: AnalyticsCharts["actions"] }) {
   );
 }
 
-export default function AnalyticsChartsRow({ charts }: { charts: AnalyticsCharts }) {
+export default function AnalyticsChartsRow({
+  charts,
+  showStrengthsWeaknesses = true,
+}: {
+  charts: AnalyticsCharts;
+  showStrengthsWeaknesses?: boolean;
+}) {
   return (
     <>
-      <StrengthsWeaknessesChart data={charts.strengthsWeaknesses} />
+      {showStrengthsWeaknesses ? <StrengthsWeaknessesChart data={charts.strengthsWeaknesses} /> : null}
       <OpportunitiesChart data={charts.opportunitiesByPriority} items={charts.opportunities} />
       {charts.actions.length ? <ImpactEffortMatrix data={charts.actions} /> : null}
     </>

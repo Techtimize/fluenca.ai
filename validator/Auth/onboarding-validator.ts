@@ -13,7 +13,6 @@ export const OnboardingFormSchema = z.object({
       /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/\S*)?$/i,
       'Enter a valid website, e.g. www.example.com'
     ),
-  target_country: z.string().min(1, 'Country is required'),
   instagram_username: z.string().optional(),
   linkedin_url: z.string().optional(),
 });

@@ -238,11 +238,11 @@ export default function NewsPage() {
           </div>
         ) : null}
 
-        <form onSubmit={submit} role="search" className="mt-4 flex max-w-xl gap-2">
+        {/* <form onSubmit={submit} role="search" className="mt-4 flex max-w-xl gap-2">
           <label className="relative min-w-0 flex-1">
             <span className="sr-only">Search news by topic</span>
             <Search
-              className="pointer-events-none absolute start-3.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400"
+              className="pointer-events-none absolute inset-s-3.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400"
               aria-hidden="true"
             />
             <input
@@ -261,7 +261,7 @@ export default function NewsPage() {
             {news.isFetching && searching ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
             Search
           </button>
-        </form>
+        </form> */}
         {searching ? (
           <button
             type="button"

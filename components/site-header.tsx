@@ -116,7 +116,6 @@ export function SiteHeader({
                   }`}
                 >
                   {label}
-
                   {hasMenu && (
                     <ChevronDown
                       aria-hidden="true"

@@ -10,12 +10,16 @@ import DocumentationCard from "@/components/dashboard/documentationCard";
 import DocumentationSheet from "@/components/dashboard/documentation/documentationSheet";
 import CurrentGoalSummary from "@/components/dashboard/goals/CurrentGoalSummary";
 import GoalsDialog from "@/components/dashboard/goals/GoalsDialog";
-import { mapDashboard } from "@/lib/dashboard/map-dashboard";
+import { useComparedStatus } from "@/components/dashboard/competitors/useComparedStatus";
+import { PAGE_ROUTES } from "@/constant/page-routes";
+import { mapDashboard, mapSavedCompetitor } from "@/lib/dashboard/map-dashboard";
 import { hasOpenGoal } from "@/lib/goals/goal-form";
-import { AnalyzeCompanyDashboardQuery, CompanyGoalsQuery } from "@/routes/bussiness/Bussiness-Query";
+import { AnalyzeCompanyDashboardQuery, CompanyGoalsQuery, GetFindCompetitorQuery } from "@/routes/bussiness/Bussiness-Query";
 import { AnalyzeCompanyMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import useAuthStore from "@/store/AuthsStore";
 import type { Device, DocItem } from "@/types/dashboard";
+
+const MAX_COMPETITORS = 2;
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
@@ -71,6 +75,36 @@ export default function DashboardPage() {
     );
   };
 
+  const {
+    data: savedCompetitors,
+    isLoading: isLoadingCompetitors,
+    refetch: refetchCompetitors,
+  } = GetFindCompetitorQuery(companyId);
+
+  // Prefer the dashboard's competitors, fall back to ones already found; the card shows two.
+  const withComparedStatus = useComparedStatus();
+  const allCompetitors = useMemo(
+    () =>
+      withComparedStatus(
+        mapped?.company.competitors.length
+          ? mapped.company.competitors
+          : (savedCompetitors ?? []).map(mapSavedCompetitor),
+      ),
+    [mapped, savedCompetitors, withComparedStatus],
+  );
+  const company = useMemo(
+    () =>
+      mapped
+        ? { ...mapped.company, competitors: allCompetitors.slice(0, MAX_COMPETITORS) }
+        : null,
+    [mapped, allCompetitors],
+  );
+
+  const handleCompetitorsFound = () => {
+    void refetch();
+    void refetchCompetitors();
+  };
+
   const sources = mapped?.sources ?? [];
   const channels = mapped?.channels ?? {};
   const defaultSource = mapped?.defaultSource || sources[0]?.id || "";
@@ -93,17 +127,25 @@ export default function DashboardPage() {
 
         {isLoading ? <DashboardSkeleton compact={chatOpen} /> : null}
 
-        {!isLoading && mapped ? (
+        {!isLoading && mapped && company ? (
           <div
             className={`grid grid-cols-1 gap-3 sm:gap-4 ${
               chatOpen ? "" : "xl:grid-cols-[minmax(0,1.7fr)_minmax(260px,1fr)]"
             }`}
           >
             <CompanyCard
-              company={mapped.company}
+              company={company}
               profile={mapped.profile}
+              companyId={companyId}
               onRefresh={handleAnalyzeCompany}
               isRefreshing={isPending}
+              onCompetitorsFound={handleCompetitorsFound}
+              checkingCompetitors={isLoadingCompetitors}
+              seeAllHref={
+                allCompetitors.length > MAX_COMPETITORS
+                  ? PAGE_ROUTES.COMPETITOR_ANALYSIS_AI
+                  : undefined
+              }
               footer={<CurrentGoalSummary />}
             />
             {!chatOpen && mapped.docs.length ? (

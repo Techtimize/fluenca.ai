@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import {
   AlertTriangle,
   Briefcase,
@@ -38,7 +38,7 @@ import type {
 import Image from "next/image";
 import { FOCUS_RING } from "@/utils/ui-classes";
 
-function Chip({ children }: { children: string }) {
+export function Chip({ children }: { children: string }) {
   return (
     <span className="rounded-full border border-[#E6E8F5] bg-[#F6F7FD] px-2.5 py-1 text-[11px] font-medium text-neutral-700">
       {children}
@@ -46,7 +46,7 @@ function Chip({ children }: { children: string }) {
   );
 }
 
-function ChipList({ items }: { items?: string[] | null }) {
+export function ChipList({ items }: { items?: string[] | null }) {
   const labels = (items ?? []).filter(Boolean);
   if (!labels.length) return null;
   return (
@@ -68,7 +68,7 @@ function formatCompact(value?: number | null) {
   }).format(value);
 }
 
-function StatPill({ label, value }: { label: string; value?: number | null }) {
+export function StatPill({ label, value }: { label: string; value?: number | null }) {
   const formatted = formatCompact(value);
   if (!formatted) return null;
   return (
@@ -83,7 +83,9 @@ function StatPill({ label, value }: { label: string; value?: number | null }) {
   );
 }
 
-function Section({
+type SectionIcon = ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" | "false" }>;
+
+export function Section({
   title,
   description,
   icon: Icon,
@@ -92,7 +94,7 @@ function Section({
 }: {
   title: string;
   description?: string;
-  icon?: typeof Target;
+  icon?: SectionIcon;
   children: ReactNode;
   aside?: ReactNode;
 }) {
@@ -119,7 +121,7 @@ function Section({
   );
 }
 
-function PlatformIcon({
+export function PlatformIcon({
   src,
   alt,
 }: {
@@ -166,7 +168,7 @@ function positioningText(
   return value.primary_message || "";
 }
 
-function isBriefCompetitor(item: unknown): item is CompetitiveBriefCompetitor {
+export function isBriefCompetitor(item: unknown): item is CompetitiveBriefCompetitor {
   if (!item || typeof item !== "object") return false;
   const record = item as Record<string, unknown>;
   return (
@@ -179,6 +181,37 @@ function isBriefCompetitor(item: unknown): item is CompetitiveBriefCompetitor {
 
 function asGapList(value: unknown): CompetitiveBriefGapItem[] {
   return Array.isArray(value) ? (value as CompetitiveBriefGapItem[]) : [];
+}
+
+export function hasCompetitorAnalysis(data?: CompetitorsListResponse | null): boolean {
+  const brief = data?.result ?? data;
+  const company = brief?.company || data?.company;
+  const competitors = (brief?.competitors || data?.competitors || []).filter(isBriefCompetitor);
+  const customerProblem = brief?.customer_problem || data?.customer_problem;
+  const gaps = asGapList(brief?.competitive_gaps ?? data?.competitive_gaps);
+  const opportunities = brief?.opportunities || data?.opportunities || [];
+  const actions = brief?.recommended_actions || data?.recommended_actions || [];
+  const comparison = brief?.competitive_comparison || data?.competitive_comparison;
+  const websiteComparison = brief?.website_comparison || data?.website_comparison;
+  const linkedinComparison = brief?.linkedin_comparison || data?.linkedin_comparison;
+  const instagram = brief?.instagram_content || data?.instagram_content || [];
+  const competitorsInstagram = brief?.competitors_instagram || data?.competitors_instagram || [];
+  const userInstagram = brief?.user_instagram || data?.user_instagram || company?.instagram;
+
+  return Boolean(
+    company ||
+      competitors.length ||
+      customerProblem ||
+      gaps.length ||
+      opportunities.length ||
+      actions.length ||
+      comparison ||
+      websiteComparison ||
+      linkedinComparison ||
+      instagram.length ||
+      competitorsInstagram.length ||
+      userInstagram,
+  );
 }
 
 function CompetitorCards({
@@ -295,7 +328,7 @@ function CompetitorCards({
                 <Avatar name={item.name || "Competitor"} imageUrl={avatarUrl} size="lg" />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h4 className="max-w-full break-words text-[15px] font-semibold tracking-tight text-neutral-900 sm:truncate sm:text-[16px]">
+                    <h4 className="max-w-full wrap-break-word text-[15px] font-semibold tracking-tight text-neutral-900 sm:truncate sm:text-[16px]">
                       {item.name || "Competitor"}
                     </h4>
                     {handleLabel ? (
@@ -353,7 +386,7 @@ function CompetitorCards({
                     <StatPill label="Employees" value={linkedinEmployees} />
                     {linkedinCompanySize ? (
                       <div className="rounded-xl bg-white px-2.5 py-2 ring-1 ring-[#E6E8F5]">
-                        <p className="text-[10px] font-medium uppercase tracking-[0.05em] text-neutral-400">
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-400">
                           Size
                         </p>
                         <p className="mt-0.5 line-clamp-2 text-[12px] font-semibold text-neutral-900">
@@ -362,7 +395,7 @@ function CompetitorCards({
                       </div>
                     ) : website?.business_model ? (
                       <div className="rounded-xl bg-white px-2.5 py-2 ring-1 ring-[#E6E8F5]">
-                        <p className="text-[10px] font-medium uppercase tracking-[0.05em] text-neutral-400">
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-400">
                           Model
                         </p>
                         <p className="mt-0.5 truncate text-[12px] font-semibold text-neutral-900">
@@ -376,7 +409,7 @@ function CompetitorCards({
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   {website?.business_model ? (
                     <div className="rounded-xl bg-white px-2.5 py-2 ring-1 ring-[#E6E8F5]">
-                      <p className="text-[10px] font-medium uppercase tracking-[0.05em] text-neutral-400">
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-400">
                         Model
                       </p>
                       <p className="mt-0.5 truncate text-[12px] font-semibold text-neutral-900">
@@ -386,7 +419,7 @@ function CompetitorCards({
                   ) : null}
                   {website?.pricing_model ? (
                     <div className="rounded-xl bg-white px-2.5 py-2 ring-1 ring-[#E6E8F5]">
-                      <p className="text-[10px] font-medium uppercase tracking-[0.05em] text-neutral-400">
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-400">
                         Pricing
                       </p>
                       <p className="mt-0.5 line-clamp-2 text-[12px] font-semibold text-neutral-900">
@@ -485,14 +518,14 @@ function CompetitorCards({
                       {competitorPosts.length} post{competitorPosts.length === 1 ? "" : "s"}
                     </span>
                   </div>
-                  <div className="-mx-1 overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:thin]">
+                  <div className="-mx-1 overflow-x-auto overscroll-x-contain pb-1 scrollbar-thin">
                     <ul className="flex w-max gap-2 px-1">
                       {competitorPosts.map((post, postIndex) => {
                         const image = post.thumbnail_url || post.media_url;
                         return (
                           <li
                             key={`${post.permalink || post.id || postIndex}`}
-                            className="w-[112px] shrink-0 sm:w-[132px]"
+                            className="w-28 shrink-0 sm:w-33"
                           >
                             <article className="overflow-hidden rounded-xl border border-[#E6E8F5] bg-white">
                               <a
@@ -568,7 +601,7 @@ function RecommendedActionsPanel({
     <section className="min-w-0 overflow-hidden rounded-[20px] border border-[#E6E8F5] bg-white shadow-[0_1px_0_rgba(15,23,42,0.02)] sm:rounded-[24px]">
       <div className="relative border-b border-[#EEF0F8] bg-[radial-gradient(ellipse_at_top_left,#ECEBFF_0%,#FFFFFF_55%)] px-4 py-4 sm:px-6 sm:py-5">
         <span
-          className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#5B57E6] via-[#8B87F0] to-[#C4C2FF]"
+          className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-[#5B57E6] via-[#8B87F0] to-[#C4C2FF]"
           aria-hidden="true"
         />
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -614,8 +647,11 @@ function RecommendedActionsPanel({
               </div>
 
               <h4 className="mt-3 text-[14px] font-semibold leading-5 tracking-tight text-neutral-900">
-                {item.action}
+                Title:{item.action}
               </h4>
+                 <p className="mt-3 text-[14px] leading-5 tracking-tight text-neutral-700">
+                Action:{item.detail}
+              </p>
 
               <div className="mt-4 flex flex-1 flex-col gap-2.5">
                 {item.why ? (
@@ -825,7 +861,7 @@ function InsightsTrio({
             className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[20px] border border-[#E6E8F5] bg-white shadow-[0_1px_0_rgba(15,23,42,0.02)] sm:rounded-[22px]"
           >
             <div
-              className={`relative border-b border-[#EEF0F8] bg-gradient-to-br ${column.accent.header} px-3.5 py-3.5 sm:px-4 sm:py-4`}
+              className={`relative border-b border-[#EEF0F8] bg-linear-to-br ${column.accent.header} px-3.5 py-3.5 sm:px-4 sm:py-4`}
             >
               <span
                 className={`absolute inset-x-0 top-0 h-1 ${column.accent.bar}`}
@@ -852,7 +888,7 @@ function InsightsTrio({
                 </span>
               </div>
             </div>
-            <div className="max-h-[420px] flex-1 overflow-y-auto p-3.5 [scrollbar-width:thin]">
+            <div className="max-h-105 flex-1 overflow-y-auto p-3.5 scrollbar-thin">
               {column.body}
             </div>
           </article>
@@ -898,7 +934,7 @@ function EmployeeRow({ employee }: { employee: CompetitiveBriefEmployee }) {
   );
 }
 
-function WebsiteIntelCards({
+export function WebsiteIntelCards({
   profiles,
 }: {
   profiles: Array<CompetitiveBriefWebsiteProfile & { name?: string }>;
@@ -947,7 +983,7 @@ function WebsiteIntelCards({
   );
 }
 
-function LinkedInIntel({
+export function LinkedInIntel({
   comparison,
 }: {
   comparison: CompetitiveBriefLinkedInComparison;
@@ -1002,7 +1038,7 @@ function LinkedInIntel({
             />
             {side.linkedin_company_size ? (
               <div className="rounded-xl bg-white px-2.5 py-2 ring-1 ring-[#E6E8F5]">
-                <p className="text-[10px] font-medium uppercase tracking-[0.05em] text-neutral-400">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-400">
                   Size
                 </p>
                 <p className="mt-0.5 line-clamp-2 text-[12px] font-semibold text-neutral-900">
@@ -1031,7 +1067,7 @@ function LinkedInIntel({
   );
 }
 
-function InstagramProfileCard({
+export function InstagramProfileCard({
   title,
   profile,
 }: {
@@ -1176,7 +1212,7 @@ function ComparisonTable({
                         {column}
                       </span>
                     </dt>
-                    <dd className="mt-1.5 break-words text-[12px] leading-5 text-neutral-700">
+                    <dd className="mt-1.5 wrap-break-word text-[12px] leading-5 text-neutral-700">
                       {value}
                     </dd>
                   </div>
@@ -1188,8 +1224,8 @@ function ComparisonTable({
       </ul>
 
       {/* Desktop: horizontal table */}
-      <div className="-mx-1 hidden overflow-x-auto overscroll-x-contain rounded-2xl border border-[#E6E8F5] md:mx-0 md:block [scrollbar-width:thin]">
-        <table className="min-w-[640px] w-full border-collapse text-left">
+      <div className="-mx-1 hidden overflow-x-auto overscroll-x-contain rounded-2xl border border-[#E6E8F5] md:mx-0 md:block scrollbar-thin">
+        <table className="min-w-160 w-full border-collapse text-left">
           <thead>
             <tr className="bg-[#F8F9FF]">
               <th className="sticky left-0 z-10 bg-[#F8F9FF] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
@@ -1208,7 +1244,7 @@ function ComparisonTable({
                         imageUrl={avatar.imageUrl}
                         size="sm"
                       />
-                      <span className="max-w-[140px] truncate text-[12px] font-semibold text-neutral-700">
+                      <span className="max-w-35 truncate text-[12px] font-semibold text-neutral-700">
                         {column}
                       </span>
                     </span>
@@ -1297,28 +1333,14 @@ export default function CompetitiveBriefResults({
   const comparison = brief?.competitive_comparison || data?.competitive_comparison;
   const websiteComparison =
     brief?.website_comparison || data?.website_comparison;
-  const linkedinComparison =
-    brief?.linkedin_comparison || data?.linkedin_comparison;
+
   const instagram = brief?.instagram_content || data?.instagram_content || [];
   const competitorsInstagram =
     brief?.competitors_instagram || data?.competitors_instagram || [];
   const userInstagram = brief?.user_instagram || data?.user_instagram || company?.instagram;
   const summary = customerProblem?.summary || brief?.summary || data?.summary;
   const postCount = data?.post_count ?? brief?.post_count ?? instagram.length;
-  const hasAnalysis = Boolean(
-    company ||
-      competitors.length ||
-      customerProblem ||
-      gaps.length ||
-      opportunities.length ||
-      actions.length ||
-      comparison ||
-      websiteComparison ||
-      linkedinComparison ||
-      instagram.length ||
-      competitorsInstagram.length ||
-      userInstagram,
-  );
+  const hasAnalysis = hasCompetitorAnalysis(data);
 
   if (isLoading) {
     return (
@@ -1380,7 +1402,7 @@ export default function CompetitiveBriefResults({
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5B57E6]">
               Competitive brief
             </p>
-            <h2 className="mt-2 break-words text-xl font-semibold tracking-tight text-neutral-900 sm:text-[28px]">
+            <h2 className="mt-2 wrap-break-word text-xl font-semibold tracking-tight text-neutral-900 sm:text-[28px]">
               {company?.name || "Your company"}
             </h2>
             {summary ? (
@@ -1466,25 +1488,6 @@ export default function CompetitiveBriefResults({
         </Section>
       ) : null}
 
-      {linkedinComparison?.rows?.length || linkedinComparison?.competitors?.length ? (
-        <Section
-          title="LinkedIn comparison"
-          description="Leadership presence, hiring signals, and company reach."
-          icon={Briefcase}
-        >
-          <div className="space-y-5">
-            <LinkedInIntel comparison={linkedinComparison} />
-            {linkedinComparison.rows?.length ? (
-              <ComparisonTable
-                comparison={linkedinComparison}
-                competitors={competitors}
-                yourProfile={userInstagram}
-                yourName={company?.name}
-              />
-            ) : null}
-          </div>
-        </Section>
-      ) : null}
 
       {customerProblem?.problems?.length || gaps.length || opportunities.length ? (
         <InsightsTrio
