@@ -58,14 +58,17 @@ export interface ProfileRewrite {
 
 // ---------- LinkedIn voice (story bank) ----------
 
+/** GET /linkedin/growth/voice — learned by the story bank from the company's past LinkedIn posts. */
 export interface LinkedInVoice {
-  /** False until the story bank has posts. */
+  /** False until there are LinkedIn posts to learn from; `message` says why. */
   ready: boolean;
-  tone?: string[];
-  stories?: { title: string; summary: string }[];
-  hooks?: string[];
-  formats?: string[];
-  top_posts?: { text: string; url?: string | null; engagement?: number | null }[];
+  /** One-paragraph description of how the brand writes. */
+  voice: string | null;
+  stories: { title: string; summary: string; source_post_id?: string | null }[];
+  hooks_that_worked: { pattern: string; example?: string; evidence?: string }[];
+  formats: { format: string; times_typical: number; posts: number }[];
+  top_posts: { format: string; hook: string; result: string | null; times_typical: number | null }[];
+  message?: string | null;
 }
 
 // ---------- First week of posts ----------

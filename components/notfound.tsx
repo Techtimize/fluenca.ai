@@ -240,7 +240,7 @@ export default function ApiNotFoundCard({
         ) : null}
 
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-          {onRetry ? (
+          {/* {onRetry ? (
             <BrandButton
               type="button"
               variant="outline"
@@ -255,7 +255,7 @@ export default function ApiNotFoundCard({
               )}
               {isRetrying ? "Retrying…" : "Try again"}
             </BrandButton>
-          ) : null}
+          ) : null} */}
 
           {resolvedActionLabel && primaryIsButton ? (
             <BrandButton type="button" size="sm" onClick={onAction}>

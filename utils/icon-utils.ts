@@ -3,6 +3,7 @@ import type { LucideIcon, LucideProps } from "lucide-react";
 import {
   Activity,
   BadgeCheck,
+  BookOpen,
   BarChart,
   BarChart2,
   BarChart3,
@@ -42,6 +43,7 @@ const ICONS: Record<string, LucideIcon> = {
   file: FileText,
   megaphone: Megaphone,
   news: Newspaper,
+  book: BookOpen,
   layers: Layers,
   chart: BarChart3,
   "bar-chart": BarChart3,

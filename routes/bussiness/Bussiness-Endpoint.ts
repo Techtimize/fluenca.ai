@@ -189,6 +189,13 @@ export const BUSSINESSENDPOINT = {
         SCHEMA_MARKUP: '/site-visibility/schema-markup',
     },
 
+    STORY_BANK:{
+        GET: '/story-bank',
+        REFRESH: '/story-bank/refresh',
+        WEEKLY: '/story-bank/weekly',
+        WEEKLY_HISTORY: '/story-bank/weekly/history',
+    },
+
     ORGANIC_TRAFFIC:{
         CHECK: '/organic-traffic',
     },

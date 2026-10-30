@@ -48,6 +48,7 @@ export function proxy(request: NextRequest) {
             path.startsWith('/analytics') ||
             path.startsWith('/news') ||
             path.startsWith('/prospects') ||
+            path.startsWith('/story-bank') ||
             path.startsWith('/ai-visibility') ||
             path.startsWith('/googleanalytics') ||
             path.startsWith('/websitespeed') ||
@@ -85,6 +86,7 @@ export const config = {
         '/analytics/:path*',
         '/news/:path*',
         '/prospects/:path*',
+        '/story-bank/:path*',
         '/ai-visibility/:path*',
         '/googleanalytics/:path*',
         '/websitespeed/:path*',
