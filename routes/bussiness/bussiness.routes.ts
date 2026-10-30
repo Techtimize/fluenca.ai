@@ -47,6 +47,7 @@ import {
   CompetitorAnalysisJobResponse,
   CompetitorAnalysisManualRequest,
   CompetitorAnalysisRequest,
+  CompetitorAnalysisVersionRequest,
   CompetitorAnalysisVersionsResponse,
   CompetitorsListResponse,
 } from "@/types/bussiness/competitoranalysis-type";
@@ -301,6 +302,18 @@ export const CompetitorAnalysisManualVersionsApi = async (
     );
     return response.data;
 }
+
+/** One saved comparison by its mode ("ai" / "manual") and version. */
+export const CompetitorAnalysisVersionApi = async ({
+  mode,
+  company_id,
+  version,
+}: CompetitorAnalysisVersionRequest): Promise<CompetitorsListResponse> => {
+  const response = await api.get<CompetitorsListResponse>(
+    BUSSINESSENDPOINT.ANALYSIS.COMPETITOR_ANALYSIS_VERSION(mode, company_id, version),
+  );
+  return response.data;
+};
 
 export const CompetitorAnalysisManualSpecificVersionsApi = async (
   company_id: string,

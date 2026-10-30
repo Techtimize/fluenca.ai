@@ -29,6 +29,9 @@ export type Competitor = {
   /** From GET /competitorAnalysis/tracked: whether it has been compared, and when. */
   compared?: boolean;
   comparedAt?: string | null;
+  /** Where the saved comparison lives: GET /competitorAnalysis/{mode}/{company_id}/versions/{version}. */
+  comparisonMode?: string | null;
+  comparisonVersion?: number | null;
 };
 
 export type Company = {

@@ -1039,6 +1039,16 @@ export interface CompetitorAnalysisResult {
   competitor_vs_company_comparison?: CompetitorVsCompanyComparison;
 }
 
+/** GET /competitorAnalysis/{mode}/{company_id}/versions/{version} — one saved comparison. */
+export interface CompetitorAnalysisVersionRequest {
+  /** "ai" or "manual" — how the comparison was run (`comparison_mode` on a tracked competitor). */
+  mode: string;
+  company_id: string;
+  /** `comparison_version` on a tracked competitor. */
+  version: string | number;
+}
+
+/** Response of the version endpoint above (and the other competitor analysis reads). */
 export interface CompetitorsListResponse {
   success?: boolean;
   analysis_id?: string | null;

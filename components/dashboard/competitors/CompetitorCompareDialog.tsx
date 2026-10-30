@@ -16,6 +16,7 @@ import {
 import { PAGE_ROUTES } from "@/constant/page-routes";
 import { getApiErrorMessage } from "@/errors/error-utils";
 import { CompetitorAnalysisManualMutation } from "@/routes/bussiness/Bussiness-Mutation";
+import { CompetitorAnalysisVersionApi } from "@/routes/bussiness/bussiness.routes";
 import {
   CompetitorAnalysisJobQuery,
   CompetitorAnalysisManualLatestResponseQuery,
@@ -62,6 +63,7 @@ export function useCompetitorCompare() {
   const [open, setOpen] = useState(false);
   const [run, setRun] = useState<CompareRun | null>(null);
   const [result, setResult] = useState<CompetitorsListResponse | null>(null);
+  const [viewingId, setViewingId] = useState<string | null>(null);
 
   const job = CompetitorAnalysisJobQuery(run?.jobId ?? "");
   const jobStatus = String(job.data?.status ?? "").toLowerCase();
@@ -133,6 +135,37 @@ export function useCompetitorCompare() {
     );
   };
 
+  /** Opens an already-saved comparison (no new analysis is run). */
+  const view = async (competitor: Competitor) => {
+    if (!companyId || !competitor.comparisonMode || competitor.comparisonVersion == null) return;
+    const request = {
+      mode: competitor.comparisonMode,
+      company_id: companyId,
+      version: competitor.comparisonVersion,
+    };
+    setViewingId(competitor.id);
+    try {
+      const data = await queryClient.fetchQuery({
+        queryKey: ["competitor-analysis-version", request.mode, request.company_id, request.version],
+        queryFn: () => CompetitorAnalysisVersionApi(request),
+        staleTime: 5 * 60 * 1000,
+      });
+      const parsed = asCompetitorsListResponse(data);
+      if (!parsed) {
+        toast.error("This comparison has no data to show.");
+        return;
+      }
+      // Set together with `open` so the effect above doesn't treat it as a new run.
+      setRun({ id: competitor.id, names: [competitor.name], jobId: null, failed: false });
+      setResult(parsed);
+      setOpen(true);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to load the comparison"));
+    } finally {
+      setViewingId(null);
+    }
+  };
+
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
     if (!next) {
@@ -143,8 +176,10 @@ export function useCompetitorCompare() {
 
   return {
     start,
-    isBusy: Boolean(run) && !open,
+    view,
+    isBusy: (Boolean(run) && !open) || viewingId !== null,
     isComparing: (id: string) => Boolean(run && run.id === id && !open),
+    isViewing: (id: string) => viewingId === id,
     dialogProps: { open, onOpenChange: handleOpenChange, run, result },
   };
 }
