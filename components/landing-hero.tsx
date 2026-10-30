@@ -9,8 +9,6 @@ import { waitlistPlaceholders } from "@/constant/waitlist";
 import { PlaceholdersAndVanishInput } from "./ui/placeholders-and-vanish-input";
 import { WaitlistMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import heroAnimation from "@/animations/hero-diagram.json";
-
-// Lottie needs the browser, so skip server rendering
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 export interface HeroAction {
