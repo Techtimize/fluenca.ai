@@ -101,5 +101,7 @@ export function ideaToScriptRequest(
     duration_seconds: durationSeconds,
     style,
     user_request: userRequest,
+    // Lets the backend mark this exact idea as script_generated.
+    ...(item.idea_id ? { idea_id: item.idea_id } : {}),
   };
 }

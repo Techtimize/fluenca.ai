@@ -33,10 +33,9 @@ const TABS: { id: Tab; label: string; icon: typeof Target }[] = [
 ];
 
 const SWATCHES = ["#4F6BF6", "#3E9E1C", "#F5A70B", "#0E8F9B", "#E0457B", "#7C4FF0"];
-
 const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
 
-/** "User-provided competitor (user_provided_linkedin)" → "LinkedIn", to tell same-named rivals apart. */
+
 function sourceLabel(why?: string) {
   const match = why?.match(/user_provided_(\w+)/i);
   if (!match) return "";
@@ -82,7 +81,6 @@ function buildRivals(competitors: CompetitiveBriefCompetitor[]): Rival[] {
   });
 }
 
-// ---------- Root ----------
 
 export default function CompareResults({
   data,
@@ -252,7 +250,6 @@ function OverviewTab({
 
   return (
     <div className="space-y-6">
-      {/* Who you're up against */}
       <ul className="grid gap-2.5 sm:grid-cols-2">
         {rivals.map((rival) => (
           <li key={rival.key} className="flex items-center gap-3 rounded-2xl border border-[#E6E8F5] p-3">

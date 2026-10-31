@@ -410,6 +410,10 @@ export const ScriptGenerationMutation = () => {
       queryClient.invalidateQueries({
         queryKey: ["script-generation-results", variables.company_id],
       });
+      // The idea now has script_generated: true, so its "View script" button shows.
+      queryClient.invalidateQueries({
+        queryKey: ["content-recommendation-result", variables.company_id],
+      });
       router.push(PAGE_ROUTES.SCRIPT);
     },
     onError: (error) => {

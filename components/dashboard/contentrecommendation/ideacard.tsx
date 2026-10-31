@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import {
   FileText,
@@ -12,7 +13,9 @@ import { toast } from "sonner";
 import { ScriptGenerationMutation } from "@/routes/bussiness/Bussiness-Mutation";
 import { BrandButton } from "@/components/ui/brand-button";
 import type { ContentIdea } from "@/types/bussiness/content-recommendation-type";
+import { FOCUS_RING } from "@/utils/ui-classes";
 import { ideaToScriptRequest } from "./scriptPayload";
+import ViewScriptDialog from "./ViewScriptDialog";
 
 function PlatformBadge({ platform }: { platform: string }) {
   const lower = platform.toLowerCase();
@@ -70,6 +73,8 @@ export default function IdeaCard({
   companyId: string;
 }) {
   const { mutate: generateScript, isPending } = ScriptGenerationMutation();
+  const [scriptOpen, setScriptOpen] = useState(false);
+  const hasScript = item.script_generated === true;
 
   const title = ideaTitle(item, index);
   const platform = item.platform || item.channel || null;
@@ -218,20 +223,52 @@ export default function IdeaCard({
         </p>
       ) : null}
 
-      <BrandButton
-        type="button"
-        size="full"
-        className="mt-4"
-        onClick={handleGenerateScript}
-        disabled={isPending || !companyId}
-      >
-        {isPending ? (
-          <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-        ) : (
-          <Sparkles className="size-3.5" aria-hidden="true" />
-        )}
-        {isPending ? "Generating script…" : "Generate script"}
-      </BrandButton>
+      {hasScript ? (
+        <div className="mt-4 space-y-2">
+          <BrandButton type="button" size="full" onClick={() => setScriptOpen(true)} disabled={!companyId}>
+            <FileText className="size-3.5" aria-hidden="true" />
+            View script
+          </BrandButton>
+          <button
+            type="button"
+            onClick={handleGenerateScript}
+            disabled={isPending || !companyId}
+            className={`inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full border border-[#D9DCF7] bg-white text-[13px] font-medium text-[#5B57E6] transition-colors hover:bg-[#F0F1FF] disabled:opacity-55 ${FOCUS_RING}`}
+          >
+            {isPending ? (
+              <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+            ) : (
+              <Sparkles className="size-3.5" aria-hidden="true" />
+            )}
+            {isPending ? "Generating script…" : "Generate again"}
+          </button>
+        </div>
+      ) : (
+        <BrandButton
+          type="button"
+          size="full"
+          className="mt-4"
+          onClick={handleGenerateScript}
+          disabled={isPending || !companyId}
+        >
+          {isPending ? (
+            <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+          ) : (
+            <Sparkles className="size-3.5" aria-hidden="true" />
+          )}
+          {isPending ? "Generating script…" : "Generate script"}
+        </BrandButton>
+      )}
+
+      {hasScript ? (
+        <ViewScriptDialog
+          open={scriptOpen}
+          onOpenChange={setScriptOpen}
+          companyId={companyId}
+          scriptId={item.script_id}
+          ideaTitle={title}
+        />
+      ) : null}
     </li>
   );
 }
