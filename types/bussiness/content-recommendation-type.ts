@@ -85,6 +85,13 @@ export interface ProductionPack {
 }
 
 export interface ContentIdea {
+  /** e.g. "idea_3"; send it as `idea_id` when generating a script so the idea gets marked. */
+  idea_id?: string;
+  /** True once a script was written for this idea. */
+  script_generated?: boolean;
+  /** The saved script's id (matches `id` in GET /scriptGeneration/results/{company_id}). */
+  script_id?: string | null;
+  script_generated_at?: string | null;
   title?: string;
   name?: string;
   idea?: string;

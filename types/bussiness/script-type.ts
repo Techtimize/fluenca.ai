@@ -6,6 +6,8 @@ export interface ScriptGenerationRequest {
   duration_seconds: number;
   style: string;
   user_request: string;
+  /** The recommended idea this script is for ("idea_3"); it then shows `script_generated: true`. */
+  idea_id?: string;
 }
 
 export interface ContentSuggestion {
